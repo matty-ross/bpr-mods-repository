@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\Mod.h" />
+    <ClInclude Include="src\Pointer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Logger.cpp" />
