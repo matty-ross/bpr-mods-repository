@@ -41,7 +41,7 @@ namespace Core
         template <typename T>
         __forceinline T& as()
         {
-            return *(static_cast<T*>(m_Address);
+            return *(static_cast<T*>(m_Address));
         }
 
     private:
