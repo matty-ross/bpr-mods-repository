@@ -24,12 +24,18 @@
     <ClInclude Include="src\Pointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\DetourHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mod.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DetourHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
