@@ -10,7 +10,7 @@ namespace Core
     {
     public:
         Mod(HMODULE module);
-        virtual ~Mod();
+        ~Mod() = default;
 
         Mod(const Mod&) = delete;
         Mod(Mod&&) = delete;
@@ -20,18 +20,12 @@ namespace Core
     public:
         HMODULE GetModule() const;
 
-        void StartLoading() const;
-        void WaitTillLoaded(DWORD timeout = INFINITE) const;
-
-    private:
-        // To be defined in a derived class.
-        virtual void Load() = 0;
-
-    private:
-        static DWORD CALLBACK LoadThreadProc(LPVOID lpParameter);
-
+        virtual void OnProcessAttach() = 0;
+        virtual void OnProcessDetach() = 0;
+        virtual void OnThreadAttach() = 0;
+        virtual void OnThreadDetach() = 0;
+    
     private:
         HMODULE m_Module = nullptr;
-        HANDLE m_LoadThread = nullptr;
     };
 }
