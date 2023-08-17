@@ -23,7 +23,7 @@ namespace Core
         bool IsAttached() const;
 
     private:
-        Pointer m_HookAddress = nullptr;
+        void* m_HookAddress = nullptr;
         const void* m_DetourFunction = nullptr;
         Pointer m_Stub = nullptr;
         bool m_Attached = false;
