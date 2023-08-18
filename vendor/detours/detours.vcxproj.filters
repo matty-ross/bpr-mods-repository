@@ -38,5 +38,8 @@
     <ClInclude Include="src\detver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\detours\detours.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
