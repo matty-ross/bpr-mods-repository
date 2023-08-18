@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "vendor\imgui\imgui
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "detours", "vendor\detours\detours.vcxproj", "{95B474DE-77EF-4ECF-9198-451C15A1B392}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml-cpp", "vendor\yaml-cpp\yaml-cpp.vcxproj", "{072109B8-5077-45D6-B04E-018F284FB3E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -69,6 +71,14 @@ Global
 		{95B474DE-77EF-4ECF-9198-451C15A1B392}.Release|x64.Build.0 = Release|x64
 		{95B474DE-77EF-4ECF-9198-451C15A1B392}.Release|x86.ActiveCfg = Release|Win32
 		{95B474DE-77EF-4ECF-9198-451C15A1B392}.Release|x86.Build.0 = Release|Win32
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Debug|x64.ActiveCfg = Debug|x64
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Debug|x64.Build.0 = Debug|x64
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Debug|x86.ActiveCfg = Debug|Win32
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Debug|x86.Build.0 = Debug|Win32
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x64.ActiveCfg = Release|x64
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x64.Build.0 = Release|x64
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x86.ActiveCfg = Release|Win32
+		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -79,6 +89,7 @@ Global
 		{1C27C1FC-950B-453C-8596-69F0FBDC1B11} = {CC82C62A-19BC-4AF0-9285-341E28DE99DD}
 		{7DC3E603-4726-4242-8AFD-1DABAF9DFEA7} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
 		{95B474DE-77EF-4ECF-9198-451C15A1B392} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
+		{072109B8-5077-45D6-B04E-018F284FB3E1} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63053E1A-A653-4F57-8900-6B5CF4291722}
