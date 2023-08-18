@@ -163,7 +163,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\detours\detours.h" />
-    <ClInclude Include="src\detours.h" />
     <ClInclude Include="src\detver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

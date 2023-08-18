@@ -32,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\detours.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\detver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
