@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\ModManager.h">
+    <ClInclude Include="include\mod-manager\ModManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
