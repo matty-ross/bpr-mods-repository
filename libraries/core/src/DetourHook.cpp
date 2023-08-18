@@ -2,7 +2,7 @@
 
 #include <Windows.h>
 
-#include "vendor/detours/src/detours.h"
+#include "detours/detours.h"
 
 
 namespace Core

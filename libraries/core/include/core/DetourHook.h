@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "libraries/core/src/Pointer.h"
+#include "core/Pointer.h"
 
 
 namespace Core

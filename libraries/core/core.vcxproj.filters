@@ -15,16 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Mod.h">
+    <ClInclude Include="include\core\Mod.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Logger.h">
+    <ClInclude Include="include\core\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Pointer.h">
+    <ClInclude Include="include\core\Pointer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\DetourHook.h">
+    <ClInclude Include="include\core\DetourHook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
