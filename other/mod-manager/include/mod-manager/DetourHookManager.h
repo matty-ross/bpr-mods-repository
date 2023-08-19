@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <vector>
+#include <set>
 
 #include <Windows.h>
 
@@ -23,10 +23,11 @@ public:
     bool IsTransactionInProgress() const;
 
     void OnThreadAttached(HANDLE thread);
+    void OnThreadDetached(HANDLE thread);
 
 private:
     CRITICAL_SECTION m_TransactionCriticalSection = {};
     bool m_TransactionInProgress = false;
 
-    std::vector<HANDLE> m_Threads;
+    std::set<HANDLE> m_Threads;
 };

@@ -1,6 +1,9 @@
 #pragma once
 
 
+#include "mod-manager/DetourHookManager.h"
+
+
 class ModManager
 {
 public:
@@ -8,4 +11,7 @@ public:
     void OnProcessDetach();
     void OnThreadAttach();
     void OnThreadDetach();
+
+private:
+    DetourHookManager m_DetourHookManager;
 };
