@@ -26,8 +26,8 @@ void DetourHookManager::BeginTransaction()
 
 void DetourHookManager::EndTransaction()
 {
-    LeaveCriticalSection(&m_TransactionCriticalSection);
     m_TransactionInProgress = false;
+    LeaveCriticalSection(&m_TransactionCriticalSection);
 }
 
 bool DetourHookManager::IsTransactionInProgress() const
