@@ -7,6 +7,11 @@
 class ModManager
 {
 public:
+    static ModManager& Get();
+
+public:
+    DetourHookManager& GetDetourHookManager();
+
     void OnProcessAttach();
     void OnProcessDetach();
     void OnThreadAttach();

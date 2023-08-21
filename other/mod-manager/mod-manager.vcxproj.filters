@@ -21,6 +21,9 @@
     <ClInclude Include="include\mod-manager\DetourHookManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\mod-manager\DetourHook.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ModManager.cpp">
@@ -30,6 +33,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DetourHookManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DetourHook.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

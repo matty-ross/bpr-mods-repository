@@ -1,6 +1,19 @@
 #include "ModManager.h"
 
 
+extern ModManager* g_ModManager;
+
+
+ModManager& ModManager::Get()
+{
+    return *g_ModManager;
+}
+
+DetourHookManager& ModManager::GetDetourHookManager()
+{
+    return m_DetourHookManager;
+}
+
 void ModManager::OnProcessAttach()
 {
 }

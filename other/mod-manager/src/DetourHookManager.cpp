@@ -22,10 +22,14 @@ void DetourHookManager::BeginTransaction()
     {
         DetourUpdateThread(thread);
     }
+
+    DetourTransactionBegin();
 }
 
 void DetourHookManager::EndTransaction()
 {
+    DetourTransactionCommit();
+
     m_TransactionInProgress = false;
     LeaveCriticalSection(&m_TransactionCriticalSection);
 }
