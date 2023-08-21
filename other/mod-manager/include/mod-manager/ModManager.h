@@ -2,6 +2,7 @@
 
 
 #include "mod-manager/DetourHookManager.h"
+#include "mod-manager/ImGuiManager.h"
 
 
 class ModManager
@@ -11,6 +12,7 @@ public:
 
 public:
     DetourHookManager& GetDetourHookManager();
+    ImGuiManager& GetImGuiManager();
 
     void OnProcessAttach();
     void OnProcessDetach();
@@ -19,4 +21,5 @@ public:
 
 private:
     DetourHookManager m_DetourHookManager;
+    ImGuiManager m_ImGuiManager;
 };

@@ -14,6 +14,11 @@ DetourHookManager& ModManager::GetDetourHookManager()
     return m_DetourHookManager;
 }
 
+ImGuiManager& ModManager::GetImGuiManager()
+{
+    return m_ImGuiManager;
+}
+
 void ModManager::OnProcessAttach()
 {
 }
