@@ -18,5 +18,6 @@ Currently you must use Bo98's Mod Loader found [here](https://bpr.bo98.uk/).
 After installing it, you must copy the `.dll` files into a `mods` directory within the game's directory.
 
 ## Dependencies
-- Dear ImGui https://github.com/ocornut/imgui (docking branch)
-- Microsoft Research Detours Package https://github.com/microsoft/Detours
+- [Dear ImGui](https://github.com/ocornut/imgui) (docking branch)
+- [Microsoft Detours](https://github.com/microsoft/Detours)
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp)
