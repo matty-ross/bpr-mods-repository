@@ -35,6 +35,12 @@ public:
     void AddMenu(ImGuiMenu* menu);
     void AddOverlay(ImGuiOverlay* overlay);
 
+    void Initialize() const;
+    void Shutdown() const;
+
+    void OnRenderFrame();
+    bool OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
 private:
     std::vector<ImGuiMenu*> m_Menus;
     std::vector<ImGuiOverlay*> m_Overlays;

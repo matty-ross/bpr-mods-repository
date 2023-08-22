@@ -39,12 +39,12 @@ bool DetourHookManager::IsTransactionInProgress() const
     return m_TransactionInProgress;
 }
 
-void DetourHookManager::OnThreadAttached(HANDLE thread)
+void DetourHookManager::OnThreadAttach(HANDLE thread)
 {
     m_Threads.insert(thread);
 }
 
-void DetourHookManager::OnThreadDetached(HANDLE thread)
+void DetourHookManager::OnThreadDetach(HANDLE thread)
 {
     m_Threads.erase(thread);
 }

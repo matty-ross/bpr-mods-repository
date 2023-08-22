@@ -22,8 +22,8 @@ public:
     void EndTransaction();
     bool IsTransactionInProgress() const;
 
-    void OnThreadAttached(HANDLE thread);
-    void OnThreadDetached(HANDLE thread);
+    void OnThreadAttach(HANDLE thread);
+    void OnThreadDetach(HANDLE thread);
 
 private:
     CRITICAL_SECTION m_TransactionCriticalSection = {};
