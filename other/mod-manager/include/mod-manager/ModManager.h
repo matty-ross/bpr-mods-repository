@@ -5,12 +5,13 @@
 
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
+#include "mod-manager/DetourHook.h"
 
 
 class ModManager
 {
 public:
-    ModManager() = default;
+    ModManager();
     ~ModManager() = default;
 
     ModManager(const ModManager&) = delete;
@@ -32,10 +33,18 @@ public:
 
 private:
     void Load();
+    void Unload();
+    
+private:
+    static void DetourPresent();
+    static void DetourWindowProc();
 
 private:
     DetourHookManager m_DetourHookManager;
     ImGuiManager m_ImGuiManager;
+
+    DetourHook m_DetourPresent;
+    DetourHook m_DetourWindowProc;
 
     HANDLE m_LoadThread = nullptr;
 };

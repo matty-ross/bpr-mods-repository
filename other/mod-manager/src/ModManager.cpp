@@ -4,6 +4,13 @@
 extern ModManager* g_ModManager;
 
 
+ModManager::ModManager()
+    :
+    m_DetourPresent(0x00C89F90, &ModManager::DetourPresent),
+    m_DetourWindowProc(0x008FB9E2, &ModManager::DetourWindowProc)
+{
+}
+
 ModManager& ModManager::Get()
 {
     return *g_ModManager;
@@ -32,8 +39,9 @@ void ModManager::OnProcessAttach()
 void ModManager::OnProcessDetach()
 {
     WaitForSingleObject(m_LoadThread, 5000);
+    CloseHandle(m_LoadThread);
 
-    m_ImGuiManager.Shutdown();
+    Unload();
 }
 
 void ModManager::OnThreadAttach()
@@ -55,4 +63,31 @@ void ModManager::Load()
     // TODO: Wait till the game initializes globals.
     
     m_ImGuiManager.Initialize();
+
+    m_DetourPresent.Attach();
+    m_DetourWindowProc.Attach();
+}
+
+void ModManager::Unload()
+{
+    m_DetourWindowProc.Detach();
+    m_DetourPresent.Detach();
+    
+    m_ImGuiManager.Shutdown();
+}
+
+__declspec(naked) void ModManager::DetourPresent()
+{
+    __asm
+    {
+        ret
+    }
+}
+
+__declspec(naked) void ModManager::DetourWindowProc()
+{
+    __asm
+    {
+        ret
+    }
 }
