@@ -60,7 +60,21 @@ void ModManager::OnThreadDetach()
 
 void ModManager::Load()
 {
-    // TODO: Wait till the game initializes globals.
+    auto isAtOrPastStartScreenState = []() -> bool
+    {
+        Core::Pointer gameModule = 0x013FC8E0;
+        
+        return
+            gameModule.as<void*>() != nullptr &&
+            gameModule.deref().at(0xB6D4C8).as<int32_t>() >= 3
+        ;
+    };
+
+
+    while (!isAtOrPastStartScreenState())
+    {
+        Sleep(1000);
+    }
     
     m_ImGuiManager.Initialize();
 
@@ -78,6 +92,8 @@ void ModManager::Unload()
 
 __declspec(naked) void ModManager::DetourPresent()
 {
+    // TODO
+
     __asm
     {
         ret
@@ -86,6 +102,8 @@ __declspec(naked) void ModManager::DetourPresent()
 
 __declspec(naked) void ModManager::DetourWindowProc()
 {
+    // TODO
+    
     __asm
     {
         ret
