@@ -30,13 +30,15 @@ BOOL WINAPI DllMain(
 
     case DLL_THREAD_ATTACH:
         {
-            g_ModManager->OnThreadAttach();
+            HANDLE currentThread = GetCurrentThread();
+            g_ModManager->OnThreadAttach(currentThread);
         }
         break;
 
     case DLL_THREAD_DETACH:
         {
-            g_ModManager->OnThreadDetach();
+            HANDLE currentThread = GetCurrentThread();
+            g_ModManager->OnThreadDetach(currentThread);
         }
         break;
     }

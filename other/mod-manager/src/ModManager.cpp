@@ -44,18 +44,14 @@ void ModManager::OnProcessDetach()
     Unload();
 }
 
-void ModManager::OnThreadAttach()
+void ModManager::OnThreadAttach(HANDLE thread)
 {
-    HANDLE currentThread = GetCurrentThread();
-
-    m_DetourHookManager.OnThreadAttach(currentThread);
+    m_DetourHookManager.OnThreadAttach(thread);
 }
 
-void ModManager::OnThreadDetach()
+void ModManager::OnThreadDetach(HANDLE thread)
 {
-    HANDLE currentThread = GetCurrentThread();
-
-    m_DetourHookManager.OnThreadDetach(currentThread);
+    m_DetourHookManager.OnThreadDetach(thread);
 }
 
 void ModManager::Load()
