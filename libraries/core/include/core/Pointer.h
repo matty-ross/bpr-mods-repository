@@ -23,23 +23,23 @@ namespace Core
 
     public:
         template <typename T = void*>
-        __forceinline T GetAddress()
+        __forceinline T GetAddress() const
         {
             return static_cast<T>(m_Address);
         }
 
-        __forceinline Pointer deref()
+        __forceinline Pointer deref() const
         {
             return *(static_cast<void**>(m_Address));
         }
 
-        __forceinline Pointer at(ptrdiff_t offset)
+        __forceinline Pointer at(ptrdiff_t offset) const
         {
             return (reinterpret_cast<uintptr_t>(m_Address) + offset);
         }
 
         template <typename T>
-        __forceinline T& as()
+        __forceinline T& as() const
         {
             return *(static_cast<T*>(m_Address));
         }
