@@ -5,6 +5,7 @@
 #include "detours/detours.h"
 
 #include "ModManager.h"
+#include "DetourHookManager.h"
 
 
 static constexpr size_t k_StubSize = 12;

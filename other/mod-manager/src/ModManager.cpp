@@ -45,13 +45,11 @@ void ModManager::OnProcessDetach()
 }
 
 void ModManager::OnThreadAttach(HANDLE thread)
-{
-    m_DetourHookManager.OnThreadAttach(thread);
+{   
 }
 
 void ModManager::OnThreadDetach(HANDLE thread)
 {
-    m_DetourHookManager.OnThreadDetach(thread);
 }
 
 void ModManager::Load()

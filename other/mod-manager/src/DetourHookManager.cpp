@@ -18,11 +18,6 @@ void DetourHookManager::BeginTransaction()
     EnterCriticalSection(&m_TransactionCriticalSection);
     m_TransactionInProgress = true;
 
-    for (HANDLE thread : m_Threads)
-    {
-        DetourUpdateThread(thread);
-    }
-
     DetourTransactionBegin();
 }
 
@@ -37,14 +32,4 @@ void DetourHookManager::EndTransaction()
 bool DetourHookManager::IsTransactionInProgress() const
 {
     return m_TransactionInProgress;
-}
-
-void DetourHookManager::OnThreadAttach(HANDLE thread)
-{
-    m_Threads.insert(thread);
-}
-
-void DetourHookManager::OnThreadDetach(HANDLE thread)
-{
-    m_Threads.erase(thread);
 }

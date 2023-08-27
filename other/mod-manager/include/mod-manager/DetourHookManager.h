@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <set>
-
 #include <Windows.h>
 
 
@@ -22,12 +20,7 @@ public:
     void EndTransaction();
     bool IsTransactionInProgress() const;
 
-    void OnThreadAttach(HANDLE thread);
-    void OnThreadDetach(HANDLE thread);
-
 private:
     CRITICAL_SECTION m_TransactionCriticalSection = {};
     bool m_TransactionInProgress = false;
-
-    std::set<HANDLE> m_Threads;
 };
