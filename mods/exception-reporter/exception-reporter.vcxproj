@@ -169,8 +169,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\ExceptionInformation.h" />
     <ClInclude Include="src\ExceptionReporter.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="exception-reporter.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

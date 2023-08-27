@@ -1,0 +1,146 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Slovak (Slovakia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_SKY)
+LANGUAGE LANG_SLOVAK, SUBLANG_DEFAULT
+#pragma code_page(1250)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Slovak (Slovakia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_EXCEPTION_REPORT DIALOGEX 0, 0, 460, 275
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Exception Report"
+FONT 10, "Consolas", 400, 0, 0xEE
+BEGIN
+    GROUPBOX        "General Information",IDC_GROUP_GENERAL_INFORMATION,10,10,290,105
+    LTEXT           "Code",IDC_TEXT_CODE,20,25,45,10
+    LTEXT           "#",IDC_VALUE_CODE,65,25,225,10
+    LTEXT           "Flags",IDC_TEXT_FLAGS,20,45,45,60
+    LTEXT           "#",IDC_VALUE_FLAGS,65,45,225,60
+    LTEXT           "Address",IDC_TEXT_ADDRESS,20,35,45,10
+    LTEXT           "#",IDC_VALUE_ADDRESS,65,35,225,10
+    GROUPBOX        "Parameters",IDC_GROUP_PARAMETERS,10,125,140,140
+    LTEXT           "#",IDC_VALUE_PARAMETERS,20,140,120,115
+    GROUPBOX        "Registers",IDC_GROUP_REGISTERS,160,125,140,140
+    LTEXT           "#",IDC_VALUE_REGISTERS,170,140,120,115
+    GROUPBOX        "Stack Trace",IDC_GROUP_STACK_TRACE,310,10,140,255
+    LTEXT           "#",IDC_VALUE_STACK_TRACE,320,25,120,230
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG_EXCEPTION_REPORT, DIALOG
+    BEGIN
+        LEFTMARGIN, 10
+        RIGHTMARGIN, 450
+        VERTGUIDE, 20
+        VERTGUIDE, 65
+        VERTGUIDE, 140
+        VERTGUIDE, 150
+        VERTGUIDE, 160
+        VERTGUIDE, 170
+        VERTGUIDE, 290
+        VERTGUIDE, 300
+        VERTGUIDE, 310
+        VERTGUIDE, 320
+        VERTGUIDE, 440
+        TOPMARGIN, 10
+        BOTTOMMARGIN, 265
+        HORZGUIDE, 25
+        HORZGUIDE, 35
+        HORZGUIDE, 45
+        HORZGUIDE, 105
+        HORZGUIDE, 115
+        HORZGUIDE, 125
+        HORZGUIDE, 140
+        HORZGUIDE, 255
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DIALOG_EXCEPTION_REPORT AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
