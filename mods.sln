@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "detours", "vendor\detours\d
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml-cpp", "vendor\yaml-cpp\yaml-cpp.vcxproj", "{072109B8-5077-45D6-B04E-018F284FB3E1}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "exception-reporter", "mods\exception-reporter\exception-reporter.vcxproj", "{9245F051-3444-443E-A1BA-60BCCCEB884F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -79,6 +81,14 @@ Global
 		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x64.Build.0 = Release|x64
 		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x86.ActiveCfg = Release|Win32
 		{072109B8-5077-45D6-B04E-018F284FB3E1}.Release|x86.Build.0 = Release|Win32
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Debug|x64.ActiveCfg = Debug|x64
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Debug|x64.Build.0 = Debug|x64
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Debug|x86.ActiveCfg = Debug|Win32
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Debug|x86.Build.0 = Debug|Win32
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Release|x64.ActiveCfg = Release|x64
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Release|x64.Build.0 = Release|x64
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Release|x86.ActiveCfg = Release|Win32
+		{9245F051-3444-443E-A1BA-60BCCCEB884F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -90,6 +100,7 @@ Global
 		{7DC3E603-4726-4242-8AFD-1DABAF9DFEA7} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
 		{95B474DE-77EF-4ECF-9198-451C15A1B392} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
 		{072109B8-5077-45D6-B04E-018F284FB3E1} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
+		{9245F051-3444-443E-A1BA-60BCCCEB884F} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63053E1A-A653-4F57-8900-6B5CF4291722}
