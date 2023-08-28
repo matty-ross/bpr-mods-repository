@@ -41,32 +41,6 @@ void ExceptionReporter::OnThreadDetach(HANDLE thread)
 {
 }
 
-void ExceptionReporter::Load()
-{
-    auto hasEnteredWinMain = []() -> bool
-    {
-        HANDLE mutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
-        return mutex != nullptr;
-    };
-
-
-    while (!hasEnteredWinMain())
-    {
-        Sleep(1000);
-    }
-
-    PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
-    {
-        return g_Mod->OnException(ExceptionInfo);
-    };
-    m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
-}
-
-void ExceptionReporter::Unload()
-{
-    SetUnhandledExceptionFilter(m_PreviousTopLevelExceptionFilter);
-}
-
 LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
 {
     DLGPROC dialogProc = [](HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) -> INT_PTR
@@ -108,4 +82,30 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
     );
 
     return m_PreviousTopLevelExceptionFilter != nullptr ? m_PreviousTopLevelExceptionFilter(ExceptionInfo) : EXCEPTION_CONTINUE_SEARCH;
+}
+
+void ExceptionReporter::Load()
+{
+    auto hasEnteredWinMain = []() -> bool
+    {
+        HANDLE mutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
+        return mutex != nullptr;
+    };
+
+
+    while (!hasEnteredWinMain())
+    {
+        Sleep(100);
+    }
+
+    PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
+    {
+        return g_Mod->OnException(ExceptionInfo);
+    };
+    m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
+}
+
+void ExceptionReporter::Unload()
+{
+    SetUnhandledExceptionFilter(m_PreviousTopLevelExceptionFilter);
 }
