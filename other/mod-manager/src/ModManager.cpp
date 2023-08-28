@@ -86,20 +86,54 @@ void ModManager::Unload()
 
 __declspec(naked) void ModManager::DetourPresent()
 {
-    // TODO
-
     __asm
     {
+        pushfd
+        pushad
+
+        call ModManager::Get
+        mov ecx, eax
+        call ModManager::GetImGuiManager
+        mov ecx, eax
+        call ImGuiManager::OnRenderFrame
+
+        popad
+        popfd
         ret
     }
 }
 
 __declspec(naked) void ModManager::DetourWindowProc()
 {
-    // TODO
-    
     __asm
     {
+        pushfd
+        pushad
+
+        push dword ptr [ebp + 0x14]
+        push dword ptr [ebp + 0x10]
+        push dword ptr [ebp + 0xC]
+        push dword ptr [ebp + 0x8]
+
+        call ModManager::Get
+        mov ecx, eax
+        call ModManager::GetImGuiManager
+        mov ecx, eax
+        call ImGuiManager::OnWindowMessage
+
+        test al, al
+        jz _continue
+
+        // Break from the switch statement.
+        popad
+        popfd
+        add esp, 0x4
+        mov eax, 0x008FBC01
+        jmp eax
+
+    _continue:
+        popad
+        popfd
         ret
     }
 }
