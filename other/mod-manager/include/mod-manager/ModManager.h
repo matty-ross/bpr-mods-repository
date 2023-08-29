@@ -28,8 +28,8 @@ public:
 
     void OnProcessAttach();
     void OnProcessDetach();
-    void OnThreadAttach(HANDLE thread);
-    void OnThreadDetach(HANDLE thread);
+    void OnThreadAttach();
+    void OnThreadDetach();
 
 private:
     void Load();

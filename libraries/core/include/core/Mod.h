@@ -22,8 +22,8 @@ namespace Core
 
         virtual void OnProcessAttach() = 0;
         virtual void OnProcessDetach() = 0;
-        virtual void OnThreadAttach(HANDLE thread) = 0;
-        virtual void OnThreadDetach(HANDLE thread) = 0;
+        virtual void OnThreadAttach() = 0;
+        virtual void OnThreadDetach() = 0;
     
     private:
         HMODULE m_Module = nullptr;

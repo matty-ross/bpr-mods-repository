@@ -17,9 +17,9 @@ ExceptionReporter::ExceptionReporter(HMODULE module)
 
 void ExceptionReporter::OnProcessAttach()
 {
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpParameter) -> DWORD
+    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
     {
-        static_cast<ExceptionReporter*>(lpParameter)->Load();
+        static_cast<ExceptionReporter*>(lpThreadParameter)->Load();
         return 0;
     };
     m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
@@ -33,11 +33,11 @@ void ExceptionReporter::OnProcessDetach()
     Unload();
 }
 
-void ExceptionReporter::OnThreadAttach(HANDLE thread)
+void ExceptionReporter::OnThreadAttach()
 {
 }
 
-void ExceptionReporter::OnThreadDetach(HANDLE thread)
+void ExceptionReporter::OnThreadDetach()
 {
 }
 

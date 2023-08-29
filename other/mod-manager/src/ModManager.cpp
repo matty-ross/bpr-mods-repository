@@ -28,9 +28,9 @@ ImGuiManager& ModManager::GetImGuiManager()
 
 void ModManager::OnProcessAttach()
 {
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpParameter) -> DWORD
+    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
     {
-        static_cast<ModManager*>(lpParameter)->Load();
+        static_cast<ModManager*>(lpThreadParameter)->Load();
         return 0;
     };
     m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
@@ -44,11 +44,11 @@ void ModManager::OnProcessDetach()
     Unload();
 }
 
-void ModManager::OnThreadAttach(HANDLE thread)
+void ModManager::OnThreadAttach()
 {   
 }
 
-void ModManager::OnThreadDetach(HANDLE thread)
+void ModManager::OnThreadDetach()
 {
 }
 

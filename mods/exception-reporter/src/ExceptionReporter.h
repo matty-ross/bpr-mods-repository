@@ -14,8 +14,8 @@ public:
 public:
     void OnProcessAttach() override;
     void OnProcessDetach() override;
-    void OnThreadAttach(HANDLE thread) override;
-    void OnThreadDetach(HANDLE thread) override;
+    void OnThreadAttach() override;
+    void OnThreadDetach() override;
 
     LONG OnException(EXCEPTION_POINTERS* ExceptionInfo) const;
 
