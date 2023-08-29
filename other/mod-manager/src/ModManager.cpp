@@ -9,7 +9,8 @@ extern ModManager* g_ModManager;
 ModManager::ModManager()
     :
     m_DetourPresent(Core::Pointer(0x00C89F90).GetAddress(), &ModManager::DetourPresent),
-    m_DetourWindowProc(Core::Pointer(0x008FB9E2).GetAddress(), &ModManager::DetourWindowProc)
+    m_DetourWindowProc(Core::Pointer(0x008FB9E2).GetAddress(), &ModManager::DetourWindowProc),
+    m_DetourUpdateKeyboardState(Core::Pointer(0x0664BB29).GetAddress(), &ModManager::DetourUpdateKeyboardState)
 {
 }
 
@@ -132,6 +133,37 @@ __declspec(naked) void ModManager::DetourWindowProc()
         add esp, 0x4
         mov eax, 0x008FBC01
         jmp eax
+
+    _continue:
+        popad
+        popfd
+        ret
+    }
+}
+
+__declspec(naked) void ModManager::DetourUpdateKeyboardState()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        call ModManager::Get
+        mov ecx, eax
+        call ModManager::GetImGuiManager
+        mov ecx, eax
+        call ImGuiManager::WantCaptureKeyboard
+
+        test al, al
+        jz _continue
+
+        // Clear all keys.
+        push 0x100
+        push 0x0
+        lea eax, [ebp - 0x100]
+        push eax
+        call memset
+        add esp, 0xC
 
     _continue:
         popad

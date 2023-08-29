@@ -39,6 +39,7 @@ private:
 private:
     static void DetourPresent();
     static void DetourWindowProc();
+    static void DetourUpdateKeyboardState();
 
 private:
     DetourHookManager m_DetourHookManager;
@@ -46,6 +47,7 @@ private:
 
     DetourHook m_DetourPresent;
     DetourHook m_DetourWindowProc;
+    DetourHook m_DetourUpdateKeyboardState;
 
     HANDLE m_LoadThread = nullptr;
 };

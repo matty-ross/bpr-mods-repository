@@ -37,6 +37,9 @@ public:
     MOD_MANAGER_API void AddMenu(ImGuiMenu* menu);
     MOD_MANAGER_API void AddOverlay(ImGuiOverlay* overlay);
 
+    MOD_MANAGER_API bool WantCaptureMouse() const;
+    MOD_MANAGER_API bool WantCaptureKeyboard() const;
+
     void Initialize() const;
     void Shutdown() const;
 

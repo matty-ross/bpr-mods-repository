@@ -41,6 +41,16 @@ void ImGuiManager::AddOverlay(ImGuiOverlay* overlay)
     LeaveCriticalSection(&m_CriticalSection);
 }
 
+bool ImGuiManager::WantCaptureMouse() const
+{
+    return ImGui::GetIO().WantCaptureMouse;
+}
+
+bool ImGuiManager::WantCaptureKeyboard() const
+{
+    return ImGui::GetIO().WantCaptureKeyboard;
+}
+
 void ImGuiManager::Initialize() const
 {
     IMGUI_CHECKVERSION();
