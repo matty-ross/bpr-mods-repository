@@ -1,13 +1,15 @@
 #include "ModManager.h"
 
+#include "core/Pointer.h"
+
 
 extern ModManager* g_ModManager;
 
 
 ModManager::ModManager()
     :
-    m_DetourPresent(0x00C89F90, &ModManager::DetourPresent),
-    m_DetourWindowProc(0x008FB9E2, &ModManager::DetourWindowProc)
+    m_DetourPresent(Core::Pointer(0x00C89F90).GetAddress(), &ModManager::DetourPresent),
+    m_DetourWindowProc(Core::Pointer(0x008FB9E2).GetAddress(), &ModManager::DetourWindowProc)
 {
 }
 
