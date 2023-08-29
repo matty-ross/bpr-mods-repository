@@ -6,6 +6,8 @@
 
 #include <Windows.h>
 
+#include "mod-manager/ModManagerApi.h"
+
 
 struct ImGuiMenu
 {
@@ -32,8 +34,8 @@ public:
     ImGuiManager& operator =(ImGuiManager&&) = delete;
 
 public:
-    void AddMenu(ImGuiMenu* menu);
-    void AddOverlay(ImGuiOverlay* overlay);
+    MOD_MANAGER_API void AddMenu(ImGuiMenu* menu);
+    MOD_MANAGER_API void AddOverlay(ImGuiOverlay* overlay);
 
     void Initialize() const;
     void Shutdown() const;

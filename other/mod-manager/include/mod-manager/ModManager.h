@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
+#include "mod-manager/ModManagerApi.h"
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
 #include "mod-manager/DetourHook.h"
@@ -20,11 +21,11 @@ public:
     ModManager& operator =(ModManager&&) = delete;
 
 public:
-    static ModManager& Get();
+    MOD_MANAGER_API static ModManager& Get();
 
 public:
-    DetourHookManager& GetDetourHookManager();
-    ImGuiManager& GetImGuiManager();
+    MOD_MANAGER_API DetourHookManager& GetDetourHookManager();
+    MOD_MANAGER_API ImGuiManager& GetImGuiManager();
 
     void OnProcessAttach();
     void OnProcessDetach();

@@ -3,8 +3,10 @@
 
 #include "core/Pointer.h"
 
+#include "mod-manager/ModManagerApi.h"
 
-class DetourHook
+
+class MOD_MANAGER_API DetourHook
 {
 public:
     DetourHook(Core::Pointer hookAddress, const void* detourFunction);
