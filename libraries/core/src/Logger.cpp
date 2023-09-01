@@ -1,60 +1,59 @@
 #include "Logger.h"
 
+#include <cstdio>
+#include <cstdarg>
+
 #include <Windows.h>
 
 
 namespace Core
 {
-    static constexpr size_t k_BufferSize = 1024;
+    static constexpr size_t k_MessageSize = 1024;
 
 
-    Logger::Logger(const char* fileName)
+    Logger::Logger(const char* name)
+        :
+        m_Name(name)
     {
-        fopen_s(&m_LogFile, fileName, "a");
-    }
-
-    Logger::~Logger()
-    {
-        fclose(m_LogFile);
     }
 
     void Logger::Info(const char* format, ...) const
     {
-        char buffer[k_BufferSize] = {};
+        char message[k_MessageSize] = {};
         {
             va_list args = nullptr;
             va_start(args, format);
-            vsprintf_s(buffer, format, args);
+            vsprintf_s(message, format, args);
             va_end(args);
         }
         
-        Log("INFO", buffer);
+        Log("INFO", message);
     }
 
     void Logger::Warning(const char* format, ...) const
     {
-        char buffer[k_BufferSize] = {};
+        char message[k_MessageSize] = {};
         {
             va_list args = nullptr;
             va_start(args, format);
-            vsprintf_s(buffer, format, args);
+            vsprintf_s(message, format, args);
             va_end(args);
         }
         
-        Log("WARNING", buffer);
+        Log("WARNING", message);
     }
 
     void Logger::Error(const char* format, ...) const
     {
-        char buffer[k_BufferSize] = {};
+        char message[k_MessageSize] = {};
         {
             va_list args = nullptr;
             va_start(args, format);
-            vsprintf_s(buffer, format, args);
+            vsprintf_s(message, format, args);
             va_end(args);
         }
         
-        Log("ERROR", buffer);
+        Log("ERROR", message);
     }
 
     void Logger::Log(const char* logLevel, const char* message) const
@@ -62,9 +61,8 @@ namespace Core
         SYSTEMTIME systemTime = {};
         GetLocalTime(&systemTime);
 
-        fprintf_s(
-            m_LogFile,
-            "[%04d-%02d-%02d %02d:%02d:%02d.%04d] %8s -- : %s\n",
+        printf_s(
+            "[%04d-%02d-%02d %02d:%02d:%02d.%04d] [%s] %8s -- : %s\n",
             systemTime.wYear,
             systemTime.wMonth,
             systemTime.wDay,
@@ -72,10 +70,9 @@ namespace Core
             systemTime.wMinute,
             systemTime.wSecond,
             systemTime.wMilliseconds,
+            m_Name,
             logLevel,
             message
         );
-
-        fflush(m_LogFile);
     }
 }

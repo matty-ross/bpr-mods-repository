@@ -1,17 +1,12 @@
 #pragma once
 
 
-#include <cstdio>
-
-
 namespace Core
 {
     class Logger
     {
     public:
-        Logger() = default;
-        Logger(const char* fileName);
-        ~Logger();
+        Logger(const char* name);
 
         Logger(const Logger&) = delete;
         Logger(Logger&&) = delete;
@@ -27,6 +22,6 @@ namespace Core
         void Log(const char* logLevel, const char* message) const;
 
     private:
-        FILE* m_LogFile = nullptr;
+        const char* m_Name = nullptr;
     };
 }
