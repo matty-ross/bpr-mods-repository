@@ -21,9 +21,15 @@
     <ClCompile Include="src\FreeCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\GameplayExternalCamera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\FreeCamera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameplayExternalCamera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
