@@ -6,19 +6,15 @@
 
 #include "core/Pointer.h"
 
-#include "ModManager.h"
-#include "DetourHookManager.h"
-
-
-static constexpr size_t k_StubSize = 12;
-
 
 DetourHook::DetourHook(void* hookAddress, const void* detourFunction)
     :
     m_HookAddress(hookAddress),
     m_DetourFunction(detourFunction)
 {
-    Core::Pointer stub = VirtualAlloc(nullptr, k_StubSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+    static constexpr size_t stubSize = 12;
+    
+    Core::Pointer stub = VirtualAlloc(nullptr, stubSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     {
         // call dword ptr ds:[m_DetourFunction]
         stub.at(0x0).as<uint8_t>() = 0xFF;
@@ -33,7 +29,7 @@ DetourHook::DetourHook(void* hookAddress, const void* detourFunction)
     m_Stub = stub.GetAddress();
 
     DWORD oldProtection = 0;
-    VirtualProtect(m_Stub, k_StubSize, PAGE_EXECUTE_READ, &oldProtection);
+    VirtualProtect(m_Stub, stubSize, PAGE_EXECUTE_READ, &oldProtection);
 }
 
 DetourHook::~DetourHook()
@@ -43,23 +39,13 @@ DetourHook::~DetourHook()
 
 void DetourHook::Attach()
 {
-    DetourHookManager& manager = ModManager::Get().GetDetourHookManager();
-
-    manager.BeginTransaction();
-    DetourAttach(&m_HookAddress, m_Stub);
-    manager.EndTransaction();
-    
+    DetourAttach(&m_HookAddress, m_Stub);   
     m_Attached = true;
 }
 
 void DetourHook::Detach()
 {
-    DetourHookManager& manager = ModManager::Get().GetDetourHookManager();
-    
-    manager.BeginTransaction();
     DetourDetach(&m_HookAddress, m_Stub);
-    manager.EndTransaction();
-
     m_Attached = false;
 }
 

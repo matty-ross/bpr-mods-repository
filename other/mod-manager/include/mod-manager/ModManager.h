@@ -3,6 +3,8 @@
 
 #include <Windows.h>
 
+#include "core/Logger.h"
+
 #include "mod-manager/ModManagerApi.h"
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
@@ -44,6 +46,8 @@ private:
 private:
     DetourHookManager m_DetourHookManager;
     ImGuiManager m_ImGuiManager;
+
+    Core::Logger m_Logger;
 
     DetourHook m_DetourPresent;
     DetourHook m_DetourWindowProc;

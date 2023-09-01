@@ -43,12 +43,14 @@ void ImGuiManager::AddOverlay(ImGuiOverlay* overlay)
 
 bool ImGuiManager::WantCaptureMouse() const
 {
-    return ImGui::GetIO().WantCaptureMouse;
+    ImGuiIO& io = ImGui::GetIO();
+    return io.WantCaptureMouse;
 }
 
 bool ImGuiManager::WantCaptureKeyboard() const
 {
-    return ImGui::GetIO().WantCaptureKeyboard;
+    ImGuiIO& io = ImGui::GetIO();
+    return io.WantCaptureKeyboard;
 }
 
 void ImGuiManager::Initialize() const

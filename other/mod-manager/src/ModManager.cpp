@@ -8,6 +8,7 @@ extern ModManager* g_ModManager;
 
 ModManager::ModManager()
     :
+    m_Logger("Mod Manager"),
     m_DetourPresent(Core::Pointer(0x00C89F90).GetAddress(), &ModManager::DetourPresent),
     m_DetourWindowProc(Core::Pointer(0x008FB9E2).GetAddress(), &ModManager::DetourWindowProc),
     m_DetourUpdateKeyboardState(Core::Pointer(0x0664BB29).GetAddress(), &ModManager::DetourUpdateKeyboardState)
@@ -41,9 +42,7 @@ void ModManager::OnProcessAttach()
 
 void ModManager::OnProcessDetach()
 {
-    WaitForSingleObject(m_LoadThread, 5000);
     CloseHandle(m_LoadThread);
-
     Unload();
 }
 
@@ -57,10 +56,10 @@ void ModManager::OnThreadDetach()
 
 void ModManager::Load()
 {
-    auto isAtOrPastStartScreenState = []() -> bool
+    Core::Pointer gameModule = 0x013FC8E0;
+    
+    auto isAtOrPastStartScreenState = [=]() -> bool
     {
-        Core::Pointer gameModule = 0x013FC8E0;
-        
         return
             gameModule.as<void*>() != nullptr &&
             gameModule.deref().at(0xB6D4C8).as<int32_t>() >= 3
@@ -68,23 +67,104 @@ void ModManager::Load()
     };
 
 
-    while (!isAtOrPastStartScreenState())
+    try
     {
-        Sleep(1000);
-    }
-    
-    m_ImGuiManager.Initialize();
+        m_Logger.Info("Loading...");
 
-    m_DetourPresent.Attach();
-    m_DetourWindowProc.Attach();
+        // Wait to be at or past Start Screen. 
+        {
+            m_Logger.Info("Waiting to be at or past Start Screen...");
+            while (!isAtOrPastStartScreenState())
+            {
+                Sleep(1000);
+            }
+            m_Logger.Info("At or past Start Screen. (Current state: %d).", gameModule.deref().at(0xB6D4C8).as<int32_t>());
+        }
+
+        // Initialize ImGui manager.
+        {
+            m_Logger.Info("Initializing ImGui manager...");
+            m_ImGuiManager.Initialize();
+            m_Logger.Info("Initialized ImGui manager.");
+        }
+
+        // Attach Present detour.
+        {
+            m_Logger.Info("Attaching Present detour...");
+            m_DetourHookManager.BeginTransaction();
+            m_DetourPresent.Attach();
+            m_DetourHookManager.EndTransaction();
+            m_Logger.Info("Attached Present detour.");
+        }
+
+        // Attach WindowProc detour.
+        {
+            m_Logger.Info("Attaching WindowProc detour...");
+            m_DetourHookManager.BeginTransaction();
+            m_DetourWindowProc.Attach();
+            m_DetourHookManager.EndTransaction();
+            m_Logger.Info("Attached WindowProc detour.");
+        }
+
+        // Attach UpdateKeyboardState detour.
+        {
+            m_Logger.Info("Attaching UpdateKeyboardState detour...");
+            m_DetourHookManager.BeginTransaction();
+            m_DetourUpdateKeyboardState.Attach();
+            m_DetourHookManager.EndTransaction();
+            m_Logger.Info("Attached UpdateKeyboardState detour.");
+        }
+
+        m_Logger.Info("Loaded.");
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error(e.what());
+    }
 }
 
 void ModManager::Unload()
 {
-    m_DetourWindowProc.Detach();
-    m_DetourPresent.Detach();
-    
-    m_ImGuiManager.Shutdown();
+    try
+    {
+        // Detach UpdateKeyboardState detour.
+        {
+            m_Logger.Info("Detaching UpdateKeyboardState detour...");
+            m_DetourHookManager.BeginTransaction();
+            m_DetourUpdateKeyboardState.Detach();
+            m_DetourHookManager.EndTransaction();
+            m_Logger.Info("Detached UpdateKeyboardState detour.");
+        }
+
+        // Detach WindowProc detour.
+        {
+            m_Logger.Info("Detaching WindowProc detour...");
+            m_DetourHookManager.BeginTransaction();
+            m_DetourWindowProc.Detach();
+            m_DetourHookManager.EndTransaction();
+            m_Logger.Info("Detached WindowProc detour.");
+        }
+
+        // Detach Present detour.
+        {
+            m_Logger.Info("Detaching Present detour...");
+            m_DetourHookManager.BeginTransaction();
+            m_DetourPresent.Detach();
+            m_DetourHookManager.EndTransaction();
+            m_Logger.Info("Detached Present detour.");
+        }
+
+        // Shutdown ImGui manager.
+        {
+            m_Logger.Info("Shutting down ImGui manager...");
+            m_ImGuiManager.Shutdown();
+            m_Logger.Info("Shut down ImGui manager.");
+        }
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error(e.what());
+    }
 }
 
 __declspec(naked) void ModManager::DetourPresent()
