@@ -44,7 +44,6 @@ std::string ExceptionInformation::GetCode() const
         return "???";
     };
 
-
     char codeBuffer[64] = {};
     sprintf_s(codeBuffer, "0x%08X  [%s]", m_ExceptionRecord->ExceptionCode, getCodeName(m_ExceptionRecord->ExceptionCode));
     
@@ -61,7 +60,6 @@ std::string ExceptionInformation::GetAddress() const
         std::string tmp = fileName;
         return tmp.substr(tmp.find_last_of("/\\") + 1); // Extract the file name without the path.
     };
-
 
     HMODULE module = nullptr;
     GetModuleHandleExA(
@@ -101,7 +99,6 @@ std::string ExceptionInformation::GetFlags() const
         }
         return "???";
     };
-
 
     char flagsBuffer[16] = {};
     sprintf_s(flagsBuffer, "0x%08X", m_ExceptionRecord->ExceptionFlags);

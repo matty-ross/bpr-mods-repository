@@ -15,7 +15,6 @@ class ModManager
 {
 public:
     ModManager();
-    ~ModManager() = default;
 
     ModManager(const ModManager&) = delete;
     ModManager(ModManager&&) = delete;

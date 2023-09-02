@@ -8,10 +8,13 @@
 
 class DetourHookManager
 {
-public:
+    friend class ModManager;
+
+private:
     DetourHookManager();
     ~DetourHookManager();
 
+public:
     DetourHookManager(const DetourHookManager&) = delete;
     DetourHookManager(DetourHookManager&&) = delete;
     DetourHookManager& operator =(const DetourHookManager&) = delete;

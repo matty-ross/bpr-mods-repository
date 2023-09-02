@@ -24,10 +24,13 @@ struct ImGuiOverlay
 
 class ImGuiManager
 {
-public:
+    friend class ModManager;
+
+private:
     ImGuiManager();
     ~ImGuiManager();
 
+public:
     ImGuiManager(const ImGuiManager&) = delete;
     ImGuiManager(ImGuiManager&&) = delete;
     ImGuiManager& operator =(const ImGuiManager&) = delete;
@@ -40,6 +43,7 @@ public:
     MOD_MANAGER_API bool WantCaptureMouse() const;
     MOD_MANAGER_API bool WantCaptureKeyboard() const;
 
+private:
     void Initialize() const;
     void Shutdown() const;
 

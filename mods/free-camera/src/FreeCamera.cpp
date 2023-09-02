@@ -1,10 +1,10 @@
 #include "FreeCamera.h"
 
+#include "imgui/imgui.h"
+
 #include "core/Pointer.h"
 
 #include "mod-manager/ModManager.h"
-
-#include "imgui/imgui.h"
 
 
 static constexpr char k_ModName[]      = "Free Camera";
@@ -41,9 +41,7 @@ void FreeCamera::OnProcessAttach()
 
 void FreeCamera::OnProcessDetach()
 {
-    WaitForSingleObject(m_LoadThread, 5000);
     CloseHandle(m_LoadThread);
-
     Unload();
 }
 
@@ -57,17 +55,6 @@ void FreeCamera::OnThreadDetach()
 
 void FreeCamera::Load()
 {
-    auto isInGameState = []() -> bool
-    {
-        Core::Pointer gameModule = 0x013FC8E0;
-
-        return
-            gameModule.as<void*>() != nullptr &&
-            gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
-        ;
-    };
-
-
     try
     {
         m_Logger.Info("Loading...");
@@ -75,26 +62,42 @@ void FreeCamera::Load()
         // Wait to be in game
         {
             m_Logger.Info("Waiting to be in game...");
+            
+            auto isInGameState = []() -> bool
+            {
+                Core::Pointer gameModule = 0x013FC8E0;
+
+                return
+                    gameModule.as<void*>() != nullptr &&
+                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
+                ;
+            };
+            
             while (!isInGameState())
             {
                 Sleep(1000);
             }
+ 
             m_Logger.Info("In game.");
         }
 
         // Attach ArbitratorUpdate detour.
         {
             m_Logger.Info("Attaching ArbitratorUpdate detour...");
+            
             ModManager::Get().GetDetourHookManager().BeginTransaction();
             m_DetourArbitratorUpdate.Attach();
             ModManager::Get().GetDetourHookManager().EndTransaction();
+            
             m_Logger.Info("Attached ArbitratorUpdate detour.");
         }
 
         // Add menu
         {
             m_Logger.Info("Adding menu...");
+            
             ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
+            
             m_Logger.Info("Added menu.");
         }
 
@@ -103,6 +106,7 @@ void FreeCamera::Load()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
+        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
@@ -110,18 +114,25 @@ void FreeCamera::Unload()
 {
     try
     {
+        m_Logger.Info("Unloading...");
+
         // Detach ArbitratorUpdate detour.
         {
             m_Logger.Info("Detaching ArbitratorUpdate detour...");
+            
             ModManager::Get().GetDetourHookManager().BeginTransaction();
             m_DetourArbitratorUpdate.Detach();
             ModManager::Get().GetDetourHookManager().EndTransaction();
+            
             m_Logger.Info("Detached ArbitratorUpdate detour.");
         }
+        
+        m_Logger.Info("Unloaded.");
     }
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
+        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 

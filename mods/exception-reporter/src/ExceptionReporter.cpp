@@ -1,7 +1,5 @@
 #include "ExceptionReporter.h"
 
-#include "core/Pointer.h"
-
 #include "../resource.h"
 #include "ExceptionInformation.h"
 
@@ -31,9 +29,7 @@ void ExceptionReporter::OnProcessAttach()
 
 void ExceptionReporter::OnProcessDetach()
 {
-    WaitForSingleObject(m_LoadThread, 5000);
     CloseHandle(m_LoadThread);
-
     Unload();
 }
 
@@ -73,14 +69,12 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
         return FALSE;
     };
 
-
     ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
 
-    HWND parentWindowHandle = Core::Pointer(0x0139815C).as<HWND>();
     DialogBoxParamA(
         GetModule(),
         MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
-        parentWindowHandle,
+        nullptr,
         dialogProc,
         reinterpret_cast<LPARAM>(&exceptionInformation)
     );
@@ -90,13 +84,6 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
 
 void ExceptionReporter::Load()
 {
-    auto hasEnteredWinMain = []() -> bool
-    {
-        HANDLE mutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
-        return mutex != nullptr;
-    };
-
-
     try
     {
         m_Logger.Info("Loading...");
@@ -104,27 +91,40 @@ void ExceptionReporter::Load()
         // Wait to enter WinMain.
         {
             m_Logger.Info("Waiting to enter WinMain...");
+            
+            auto hasEnteredWinMain = []() -> bool
+            {
+                HANDLE mutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
+                return mutex != nullptr;
+            };
+
             while (!hasEnteredWinMain())
             {
                 Sleep(100);
             }
+
             m_Logger.Info("Entered WinMain.");
         }
 
         // Set top level exception filter.
         {
             m_Logger.Info("Setting top level exception filter...");
+            
             PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
             {
                 return g_Mod->OnException(ExceptionInfo);
             };
             m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
+            
             m_Logger.Info("Set top level exception filter. Previous filter: 0x%p.", m_PreviousTopLevelExceptionFilter);
         }
+
+        m_Logger.Info("Loaded.");
     }
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
+        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
@@ -132,15 +132,22 @@ void ExceptionReporter::Unload()
 {
     try
     {
+        m_Logger.Info("Unloading...");
+
         // Set previous top level exception filter.
         {
             m_Logger.Info("Setting previous top level exception filter...");
+            
             SetUnhandledExceptionFilter(m_PreviousTopLevelExceptionFilter);
+            
             m_Logger.Info("Set previous top level exception filter.");
         }
+
+        m_Logger.Info("Unloaded.");
     }
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
+        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
     }
 }
