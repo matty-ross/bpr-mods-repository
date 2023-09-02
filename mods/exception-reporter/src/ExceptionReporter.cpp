@@ -9,9 +9,13 @@
 extern ExceptionReporter* g_Mod;
 
 
+static constexpr char k_ModName[] = "Exception Reporter";
+
+
 ExceptionReporter::ExceptionReporter(HMODULE module)
     :
-    Mod(module)
+    Mod(module),
+    m_Logger(k_ModName)
 {
 }
 
@@ -93,19 +97,50 @@ void ExceptionReporter::Load()
     };
 
 
-    while (!hasEnteredWinMain())
+    try
     {
-        Sleep(100);
-    }
+        m_Logger.Info("Loading...");
 
-    PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
+        // Wait to enter WinMain.
+        {
+            m_Logger.Info("Waiting to enter WinMain...");
+            while (!hasEnteredWinMain())
+            {
+                Sleep(100);
+            }
+            m_Logger.Info("Entered WinMain.");
+        }
+
+        // Set top level exception filter.
+        {
+            m_Logger.Info("Setting top level exception filter...");
+            PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
+            {
+                return g_Mod->OnException(ExceptionInfo);
+            };
+            m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
+            m_Logger.Info("Set top level exception filter. Previous filter: 0x%p.", m_PreviousTopLevelExceptionFilter);
+        }
+    }
+    catch (const std::exception& e)
     {
-        return g_Mod->OnException(ExceptionInfo);
-    };
-    m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
+        m_Logger.Error("%s", e.what());
+    }
 }
 
 void ExceptionReporter::Unload()
 {
-    SetUnhandledExceptionFilter(m_PreviousTopLevelExceptionFilter);
+    try
+    {
+        // Set previous top level exception filter.
+        {
+            m_Logger.Info("Setting previous top level exception filter...");
+            SetUnhandledExceptionFilter(m_PreviousTopLevelExceptionFilter);
+            m_Logger.Info("Set previous top level exception filter.");
+        }
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error("%s", e.what());
+    }
 }

@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #include "core/Mod.h"
+#include "core/Logger.h"
 
 
 class ExceptionReporter : public Core::Mod
@@ -24,6 +25,8 @@ private:
     void Unload();
 
 private:
+    Core::Logger m_Logger;
+
     HANDLE m_LoadThread = nullptr;
 
     PTOP_LEVEL_EXCEPTION_FILTER m_PreviousTopLevelExceptionFilter = nullptr;
