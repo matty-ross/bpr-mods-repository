@@ -19,6 +19,7 @@ extern FreeCamera* g_Mod;
 FreeCamera::FreeCamera(HMODULE module)
     :
     Mod(module),
+    m_Logger(k_ModName),
     m_DetourArbitratorUpdate(Core::Pointer(0x009645E0).GetAddress(), &FreeCamera::DetourArbitratorUpdate),
     m_Menu
     {
@@ -67,18 +68,61 @@ void FreeCamera::Load()
     };
 
 
-    while (!isInGameState())
+    try
     {
-        Sleep(1000);
-    }
+        m_Logger.Info("Loading...");
 
-    m_DetourArbitratorUpdate.Attach();
-    ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
+        // Wait to be in game
+        {
+            m_Logger.Info("Waiting to be in game...");
+            while (!isInGameState())
+            {
+                Sleep(1000);
+            }
+            m_Logger.Info("In game.");
+        }
+
+        // Attach ArbitratorUpdate detour.
+        {
+            m_Logger.Info("Attaching ArbitratorUpdate detour...");
+            ModManager::Get().GetDetourHookManager().BeginTransaction();
+            m_DetourArbitratorUpdate.Attach();
+            ModManager::Get().GetDetourHookManager().EndTransaction();
+            m_Logger.Info("Attached ArbitratorUpdate detour.");
+        }
+
+        // Add menu
+        {
+            m_Logger.Info("Adding menu...");
+            ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
+            m_Logger.Info("Added menu.");
+        }
+
+        m_Logger.Info("Loaded.");
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error("%s", e.what());
+    }
 }
 
 void FreeCamera::Unload()
 {
-    m_DetourArbitratorUpdate.Detach();
+    try
+    {
+        // Detach ArbitratorUpdate detour.
+        {
+            m_Logger.Info("Detaching ArbitratorUpdate detour...");
+            ModManager::Get().GetDetourHookManager().BeginTransaction();
+            m_DetourArbitratorUpdate.Detach();
+            ModManager::Get().GetDetourHookManager().EndTransaction();
+            m_Logger.Info("Detached ArbitratorUpdate detour.");
+        }
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error("%s", e.what());
+    }
 }
 
 void FreeCamera::OnUpdate(void* camera, void* sharedInfo)

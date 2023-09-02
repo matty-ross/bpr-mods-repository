@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #include "core/Mod.h"
+#include "core/Logger.h"
 
 #include "mod-manager/DetourHook.h"
 #include "mod-manager/ImGuiManager.h"
@@ -33,10 +34,12 @@ private:
     static void DetourArbitratorUpdate();
 
 private:
-    HANDLE m_LoadThread = nullptr;
+    GameplayExternalCamera m_GameplayExternalCamera;
+    
+    Core::Logger m_Logger;
 
     DetourHook m_DetourArbitratorUpdate;
     ImGuiMenu m_Menu;
 
-    GameplayExternalCamera m_GameplayExternalCamera;
+    HANDLE m_LoadThread = nullptr;
 };
