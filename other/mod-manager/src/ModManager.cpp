@@ -119,7 +119,7 @@ void ModManager::Load()
     }
     catch (const std::exception& e)
     {
-        m_Logger.Error(e.what());
+        m_Logger.Error("%s", e.what());
     }
 }
 
@@ -163,7 +163,7 @@ void ModManager::Unload()
     }
     catch (const std::exception& e)
     {
-        m_Logger.Error(e.what());
+        m_Logger.Error("%s", e.what());
     }
 }
 
