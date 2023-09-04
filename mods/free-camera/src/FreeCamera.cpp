@@ -8,9 +8,9 @@
 
 
 static constexpr char k_ModName[]      = "Free Camera";
-static constexpr char k_ModDirectory[] = ".\\mods\\free-camera\\";
+static constexpr char k_ModVersion[]   = "1.0.0";
 static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
-static constexpr char k_ModVersion[]   = "3.0.0";
+static constexpr char k_ModDirectory[] = ".\\mods\\free-camera\\";
 
 
 extern FreeCamera* g_Mod;
@@ -145,13 +145,16 @@ void FreeCamera::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName))
     {
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+        
         ImGuiIO& io = ImGui::GetIO();
-
-        ImGui::Text("Author      %s", k_ModAuthor);
         ImGui::Text("Version     %s", k_ModVersion);
+        ImGui::Text("Author      %s", k_ModAuthor);
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
         m_GameplayExternalCamera.OnRenderMenu();
+
+        ImGui::PopItemWidth();
     }
     ImGui::End();
 }
