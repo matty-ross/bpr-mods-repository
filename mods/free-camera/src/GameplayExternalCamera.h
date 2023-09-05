@@ -28,10 +28,7 @@ private:
         }
     };
 
-private:
-    uint64_t m_PreviousAttribKey = 0x0000000000000000;
-
-    struct
+    struct Parameters
     {
         Parameter PitchSpring;
         Parameter YawSpring;
@@ -45,6 +42,11 @@ private:
         Parameter BoostFOVZoomCompensation;
         Parameter DownAngle;
         Parameter DropFactor;
-    } m_Parameters;
+    };
+
+private:
+    uint64_t m_PreviousAttribKey = 0x0000000000000000;
+
+    Parameters m_Parameters;
     bool m_ResetAllParameters = false;
 };

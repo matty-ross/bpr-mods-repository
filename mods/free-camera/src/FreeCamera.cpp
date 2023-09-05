@@ -139,6 +139,7 @@ void FreeCamera::Unload()
 void FreeCamera::OnUpdate(void* camera, void* sharedInfo)
 {
     m_GameplayExternalCamera.OnUpdate(camera, sharedInfo);
+    m_Behaviors.OnUpdate(camera, sharedInfo);
 }
 
 void FreeCamera::OnRenderMenu()
@@ -153,6 +154,7 @@ void FreeCamera::OnRenderMenu()
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
         m_GameplayExternalCamera.OnRenderMenu();
+        m_Behaviors.OnRenderMenu();
 
         ImGui::PopItemWidth();
     }

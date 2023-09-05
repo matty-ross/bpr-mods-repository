@@ -10,6 +10,7 @@
 #include "mod-manager/ImGuiManager.h"
 
 #include "GameplayExternalCamera.h"
+#include "Behaviors.h"
 
 
 class FreeCamera : public Core::Mod
@@ -35,6 +36,7 @@ private:
 
 private:
     GameplayExternalCamera m_GameplayExternalCamera;
+    Behaviors m_Behaviors;
     
     Core::Logger m_Logger;
 
