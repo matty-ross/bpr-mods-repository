@@ -9,6 +9,7 @@
 #include "mod-manager/DetourHook.h"
 #include "mod-manager/ImGuiManager.h"
 
+#include "CurrentCamera.h"
 #include "GameplayExternalCamera.h"
 #include "Behaviors.h"
 
@@ -35,6 +36,7 @@ private:
     static void DetourArbitratorUpdate();
 
 private:
+    CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
     

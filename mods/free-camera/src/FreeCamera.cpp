@@ -139,6 +139,7 @@ void FreeCamera::Unload()
 
 void FreeCamera::OnUpdate(void* camera, void* sharedInfo)
 {
+    m_CurrentCamera.OnUpdate(camera, sharedInfo);
     m_GameplayExternalCamera.OnUpdate(camera, sharedInfo);
     m_Behaviors.OnUpdate(camera, sharedInfo);
 }
@@ -154,6 +155,7 @@ void FreeCamera::OnRenderMenu()
         ImGui::Text("Author      %s", k_ModAuthor);
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
+        m_CurrentCamera.OnRenderMenu();
         m_GameplayExternalCamera.OnRenderMenu();
         m_Behaviors.OnRenderMenu();
 

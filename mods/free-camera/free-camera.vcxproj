@@ -166,12 +166,14 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CurrentCamera.cpp" />
     <ClCompile Include="src\Behaviors.cpp" />
     <ClCompile Include="src\GameplayExternalCamera.cpp" />
     <ClCompile Include="src\FreeCamera.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CurrentCamera.h" />
     <ClInclude Include="src\Behaviors.h" />
     <ClInclude Include="src\GameplayExternalCamera.h" />
     <ClInclude Include="src\FreeCamera.h" />
