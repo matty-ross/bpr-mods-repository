@@ -13,10 +13,6 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-static constexpr int k_MenuToggleHotkey = VK_F7;
-static constexpr int k_OverlayToggleHotkey = VK_F8;
-
-
 ImGuiManager::ImGuiManager()
 {
     InitializeCriticalSection(&m_CriticalSection);   
@@ -123,21 +119,19 @@ bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
             if (!repeat)
             {
                 EnterCriticalSection(&m_CriticalSection);
-                switch (wParam)
+                for (ImGuiMenu* menu : m_Menus)
                 {
-                case k_MenuToggleHotkey:
-                    for (ImGuiMenu* menu : m_Menus)
+                    if (wParam == menu->ToggleVisibilityHotkey)
                     {
                         menu->Visible = !(menu->Visible);
                     }
-                    break;
-
-                case k_OverlayToggleHotkey:
-                    for (ImGuiOverlay* overlay : m_Overlays)
+                }
+                for (ImGuiOverlay* overlay : m_Overlays)
+                {
+                    if (wParam == overlay->ToggleVisibilityHotkey)
                     {
                         overlay->Visible = !(overlay->Visible);
                     }
-                    break;
                 }
                 LeaveCriticalSection(&m_CriticalSection);
             }

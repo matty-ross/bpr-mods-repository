@@ -13,12 +13,14 @@ struct ImGuiMenu
 {
     std::function<void()> OnRenderMenuFunction;
     bool Visible;
+    int ToggleVisibilityHotkey;
 };
 
 struct ImGuiOverlay
 {
     std::function<void()> OnRenderOverlayFunction;
     bool Visible;
+    int ToggleVisibilityHotkey;
 };
 
 
