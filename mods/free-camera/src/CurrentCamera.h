@@ -46,8 +46,17 @@ private:
         Property<float> World;
     };
 
+    struct BackgroundEffect
+    {
+        const char* HookName = nullptr;
+        float BlendAmount = 0.0f;
+        bool Active = false;
+        bool Stop = false;
+    };
+
 private:
     Misc m_Misc;
     Effects m_Effects;
     MotionBlur m_MotionBlur;
+    BackgroundEffect m_BackgroundEffect;
 };

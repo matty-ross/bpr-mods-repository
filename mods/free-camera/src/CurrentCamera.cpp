@@ -55,6 +55,26 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
         updateProperty(m_MotionBlur.Vehicle);
         updateProperty(m_MotionBlur.World);
     }
+
+    {
+        Core::Pointer backgroundEffectRequest = camera.at(0xB4);
+        
+        if (m_BackgroundEffect.Active)
+        {
+            strcpy_s(backgroundEffectRequest.at(0x0).GetAddress<char*>(), 32, m_BackgroundEffect.HookName);
+            backgroundEffectRequest.at(0x24).as<float>() = m_BackgroundEffect.BlendAmount;
+            backgroundEffectRequest.at(0x28).as<bool>() = true;
+        }
+        
+        if (m_BackgroundEffect.Stop)
+        {
+            backgroundEffectRequest.at(0x29).as<bool>() = true;
+            m_BackgroundEffect.HookName = nullptr;
+            m_BackgroundEffect.BlendAmount = 0.0f;
+            m_BackgroundEffect.Active = false;
+            m_BackgroundEffect.Stop = false;
+        }
+    }
 }
 
 void CurrentCamera::OnRenderMenu()
@@ -89,5 +109,34 @@ void CurrentCamera::OnRenderMenu()
         ImGui::SeparatorText("Motion Blur");
         renderProperty(m_MotionBlur.Vehicle, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Vehicle", &address.as<float>(), 0.0f, 1.0f); });
         renderProperty(m_MotionBlur.World,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("World", &address.as<float>(), 0.0f, 1.0f); });
+
+        ImGui::SeparatorText("Background Effect");
+        if (ImGui::BeginListBox("Hook Name", ImVec2(-FLT_MIN, 0.0f)))
+        {
+            Core::Pointer effectInterface = Core::Pointer(0x013FC8E0).deref().at(0x7179D0);
+
+            uint32_t hookNamesCount = effectInterface.at(0xCE4).as<uint32_t>();
+            for (uint32_t i = 0; i < hookNamesCount; ++i)
+            {
+                const char* hookName = effectInterface.at(0x0 + i * 0x21).GetAddress<const char*>();
+                if (ImGui::Selectable(hookName, m_BackgroundEffect.HookName == hookName))
+                {
+                    if (!m_BackgroundEffect.Active)
+                    {
+                        m_BackgroundEffect.HookName = hookName;
+                        m_BackgroundEffect.Active = true;
+                    }
+                }
+            }
+            ImGui::EndListBox();
+        }
+        ImGui::SliderFloat("Blend Amount", &m_BackgroundEffect.BlendAmount, 0.0f, 1.0f);
+        if (ImGui::Button("Stop"))
+        {
+            if (m_BackgroundEffect.Active)
+            {
+                m_BackgroundEffect.Stop = true;
+            }
+        }
     }
 }
