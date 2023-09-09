@@ -38,7 +38,7 @@ private:
         enum class State
         {
             Inactive,
-            Perpare,
+            Prepare,
             Update,
             Release
         };

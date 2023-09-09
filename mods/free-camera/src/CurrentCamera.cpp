@@ -102,7 +102,7 @@ void CurrentCamera::OnRenderMenu()
         renderProperty(m_Misc.Blurriness, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Blurriness", &address.as<float>(), 0.0f, 1.0f); });
         
         ImGui::SeparatorText("Effects");
-        renderProperty(m_Effects.SimulationTimeScale, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Simulation Time Scale", &address.as<float>(), 0.1f, 2.0f); });
+        renderProperty(m_Effects.SimulationTimeScale, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Simulation Time Scale", &address.as<float>(), 0.0f, 2.0f); });
         renderProperty(m_Effects.CameraLag,           [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Camera Lag", &address.as<float>(), 0.0f, 1.0f); });
         renderProperty(m_Effects.BlackBarAmount,      [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Black Bar Amount", &address.as<float>(), 0.0f, 0.5f); });
 
@@ -124,10 +124,12 @@ void CurrentCamera::OnRenderMenu()
                     if (!m_BackgroundEffect.Active)
                     {
                         m_BackgroundEffect.HookName = hookName;
+                        m_BackgroundEffect.BlendAmount = 0.75f;
                         m_BackgroundEffect.Active = true;
                     }
                 }
             }
+            
             ImGui::EndListBox();
         }
         ImGui::SliderFloat("Blend Amount", &m_BackgroundEffect.BlendAmount, 0.0f, 1.0f);

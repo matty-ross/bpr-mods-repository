@@ -257,7 +257,7 @@ void Behaviors::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
         }
         break;
 
-    case Testbed::State::Perpare:
+    case Testbed::State::Prepare:
         {
             m_Testbed.OnPrepare(sharedInfo);
             m_Testbed.m_State = Testbed::State::Update;
@@ -287,7 +287,7 @@ void Behaviors::OnRenderMenu()
         {
             if (m_Selected)
             {
-                m_Testbed.m_State = Testbed::State::Perpare;
+                m_Testbed.m_State = Testbed::State::Prepare;
 
                 m_Selected = false;
                 m_Activated = true;
@@ -334,6 +334,7 @@ void Behaviors::OnRenderMenu()
                     }
                     ImGui::PopID();
                 }
+                
                 ImGui::EndListBox();
             }
             ImGui::PopID();

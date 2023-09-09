@@ -24,8 +24,8 @@ FreeCamera::FreeCamera(HMODULE module)
     m_Menu
     {
         .OnRenderMenuFunction = [this]() { OnRenderMenu(); },
-        .Visible = true,
         .ToggleVisibilityHotkey = VK_F7,
+        .Visible = true,
     }
 {
 }
