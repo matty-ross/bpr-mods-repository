@@ -1,10 +1,15 @@
 #include "GameplayExternalCamera.h"
 
+#include <Windows.h>
+
 #include "imgui/imgui.h"
 
+#include "yaml-cpp/yaml.h"
 
-GameplayExternalCamera::GameplayExternalCamera()
+
+GameplayExternalCamera::GameplayExternalCamera(Core::Logger& logger, const std::string& customParametersFilePath)
     :
+    m_Logger(logger),
     m_Parameters
     {
         .PitchSpring              = 0x3C,
@@ -19,7 +24,8 @@ GameplayExternalCamera::GameplayExternalCamera()
         .BoostFOVZoomCompensation = 0x90,
         .DownAngle                = 0x94,
         .DropFactor               = 0xA8,
-    }
+    },
+    m_CustomParametersFilePath(customParametersFilePath)
 {
 }
 
@@ -150,5 +156,131 @@ void GameplayExternalCamera::OnRenderMenu()
             
             ImGui::EndTabBar();
         }
+    }
+}
+
+void GameplayExternalCamera::LoadCustomParameters()
+{
+    try
+    {
+        auto readCustomParametersFile = [this]() -> std::string
+        {
+            HANDLE file = CreateFileA(
+                m_CustomParametersFilePath.c_str(),
+                GENERIC_READ,
+                FILE_SHARE_READ,
+                nullptr,
+                OPEN_ALWAYS,
+                0,
+                nullptr
+            );
+            if (file == INVALID_HANDLE_VALUE)
+            {
+                m_Logger.Warning("Cannot open '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
+                return std::string();
+            }
+
+            size_t size = GetFileSize(file, nullptr);
+            std::string content(size, ' ');        
+            
+            DWORD bytesRead = 0;
+            if (ReadFile(file, content.data(), content.size(), &bytesRead, nullptr) == FALSE)
+            {
+                m_Logger.Warning("Cannot read '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
+                content.clear();
+            }
+
+            CloseHandle(file);
+
+            return content;
+        };
+        
+        YAML::Node yaml = YAML::Load(readCustomParametersFile());
+    
+        m_CustomParameters.clear();
+        for (const YAML::Node& customParametersNode : yaml)
+        {
+            CustomParameters customParameters =
+            {
+                .Name                     = customParametersNode["Name"].as<std::string>(),
+                .PitchSpring              = customParametersNode["PitchSpring"].as<float>(),
+                .YawSpring                = customParametersNode["YawSpring"].as<float>(),
+                .PivotY                   = customParametersNode["PivotY"].as<float>(),
+                .PivotZ                   = customParametersNode["PivotZ"].as<float>(),
+                .PivotZOffset             = customParametersNode["PivotZOffset"].as<float>(),
+                .FOV                      = customParametersNode["FOV"].as<float>(),
+                .InFrontFOVMax            = customParametersNode["InFrontFOVMax"].as<float>(),
+                .FrontInAmount            = customParametersNode["FrontInAmount"].as<float>(),
+                .DriftYawSpring           = customParametersNode["DriftYawSpring"].as<float>(),
+                .BoostFOVZoomCompensation = customParametersNode["BoostFOVZoomCompensation"].as<float>(),
+                .DownAngle                = customParametersNode["DownAngle"].as<float>(),
+                .DropFactor               = customParametersNode["DropFactor"].as<float>()
+            };
+            m_CustomParameters.push_back(customParameters);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Warning("Failed to load '%s'. %s.", m_CustomParametersFilePath.c_str(), e.what());
+    }
+}
+
+void GameplayExternalCamera::SaveCustomParameters()
+{
+    try
+    {
+        auto writeCustomParametersFile = [this](const std::string& content) -> void
+        {
+            HANDLE file = CreateFileA(
+                m_CustomParametersFilePath.c_str(),
+                GENERIC_WRITE,
+                FILE_SHARE_READ,
+                nullptr,
+                CREATE_ALWAYS,
+                0,
+                nullptr
+            );
+            if (file == INVALID_HANDLE_VALUE)
+            {
+                m_Logger.Warning("Cannot open '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
+                return;
+            }
+
+            DWORD bytesWritten = 0;
+            if (WriteFile(file, content.data(), content.size(), &bytesWritten, nullptr) == FALSE)
+            {
+                m_Logger.Warning("Cannot write '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
+            }
+
+            CloseHandle(file);
+        };
+        
+        YAML::Node yaml;
+        for (const CustomParameters& customParameters : m_CustomParameters)
+        {
+            YAML::Node customParametersNode;
+            {
+                customParametersNode["Name"]                     = customParameters.Name;
+                customParametersNode["PitchSpring"]              = customParameters.PitchSpring;
+                customParametersNode["YawSpring"]                = customParameters.YawSpring;
+                customParametersNode["PivotY"]                   = customParameters.PivotY;
+                customParametersNode["PivotZ"]                   = customParameters.PivotZ;
+                customParametersNode["PivotZOffset"]             = customParameters.PivotZOffset;
+                customParametersNode["FOV"]                      = customParameters.FOV;
+                customParametersNode["InFrontFOVMax"]            = customParameters.InFrontFOVMax;
+                customParametersNode["FrontInAmount"]            = customParameters.FrontInAmount;
+                customParametersNode["DriftYawSpring"]           = customParameters.DriftYawSpring;
+                customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
+                customParametersNode["DownAngle"]                = customParameters.DownAngle;
+                customParametersNode["DropFactor"]               = customParameters.DropFactor;
+            }
+            yaml.push_back(customParametersNode);
+        }
+
+        writeCustomParametersFile(YAML::Dump(yaml));
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Warning("Failed to save '%s'. %s", m_CustomParametersFilePath.c_str(), e.what());
     }
 }

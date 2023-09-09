@@ -7,6 +7,9 @@
 #include "mod-manager/ModManager.h"
 
 
+using namespace std::string_literals;
+
+
 static constexpr char k_ModName[]      = "Free Camera";
 static constexpr char k_ModVersion[]   = "1.0.0";
 static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
@@ -19,6 +22,7 @@ extern FreeCamera* g_Mod;
 FreeCamera::FreeCamera(HMODULE module)
     :
     Mod(module),
+    m_GameplayExternalCamera(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
     m_Logger(k_ModName),
     m_DetourArbitratorUpdate(Core::Pointer(0x009645E0).GetAddress(), &FreeCamera::DetourArbitratorUpdate),
     m_Menu
@@ -60,7 +64,12 @@ void FreeCamera::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Wait to be in game
+        // Create mod directory.
+        {
+            CreateDirectoryA(k_ModDirectory, nullptr);
+        }
+
+        // Wait to be in game.
         {
             m_Logger.Info("Waiting to be in game...");
             
@@ -93,13 +102,18 @@ void FreeCamera::Load()
             m_Logger.Info("Attached ArbitratorUpdate detour.");
         }
 
-        // Add menu
+        // Add menu.
         {
             m_Logger.Info("Adding menu...");
             
             ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
             
             m_Logger.Info("Added menu.");
+        }
+
+        // Load custom parameters.
+        {
+            m_GameplayExternalCamera.LoadCustomParameters();
         }
 
         m_Logger.Info("Loaded.");
@@ -116,6 +130,11 @@ void FreeCamera::Unload()
     try
     {
         m_Logger.Info("Unloading...");
+
+        // Save custom parameters.
+        {
+            m_GameplayExternalCamera.SaveCustomParameters();
+        }
 
         // Detach ArbitratorUpdate detour.
         {
