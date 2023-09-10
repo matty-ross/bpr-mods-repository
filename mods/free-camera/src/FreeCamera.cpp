@@ -66,7 +66,11 @@ void FreeCamera::Load()
 
         // Create mod directory.
         {
+            m_Logger.Info("Creating mod directory...");
+            
             CreateDirectoryA(k_ModDirectory, nullptr);
+
+            m_Logger.Info("Created mod directory: '%s'.", k_ModDirectory);
         }
 
         // Wait to be in game.

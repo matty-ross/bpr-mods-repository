@@ -67,6 +67,10 @@ private:
     };
 
 private:
+    void SetCurrentParametersFromCustomParameters(const CustomParameters& customParameters);
+    void AddCurrentParametersIntoCustomParameters(const char* name);
+
+private:
     Core::Logger& m_Logger;
 
     uint64_t m_PreviousAttribKey = 0x0000000000000000;
@@ -75,6 +79,5 @@ private:
     bool m_ResetAllParameters = false;
 
     std::vector<CustomParameters> m_CustomParameters;
-    CustomParameters* m_SelectedCustomParameters = nullptr;
     std::string m_CustomParametersFilePath;
 };

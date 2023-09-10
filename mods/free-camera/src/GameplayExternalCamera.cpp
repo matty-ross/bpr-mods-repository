@@ -138,6 +138,7 @@ void GameplayExternalCamera::OnRenderMenu()
                     m_ResetAllParameters = true;
                 }
 
+                ImGui::SeparatorText("Current Parameters");
                 renderParameter(m_Parameters.PitchSpring,              [](Core::Pointer address) { ImGui::SliderFloat("Pitch Spring", &address.as<float>(), 0.0f, 1.0f); });
                 renderParameter(m_Parameters.YawSpring,                [](Core::Pointer address) { ImGui::SliderFloat("Yaw Spring", &address.as<float>(), 0.0f, 1.0f); });
                 renderParameter(m_Parameters.DriftYawSpring,           [](Core::Pointer address) { ImGui::SliderFloat("Drift Yaw Spring", &address.as<float>(), 0.0f, 1.0f); });
@@ -150,6 +151,42 @@ void GameplayExternalCamera::OnRenderMenu()
                 renderParameter(m_Parameters.BoostFOVZoomCompensation, [](Core::Pointer address) { ImGui::SliderFloat("Boost FOV Zoom Compensation", &address.as<float>(), -5.0f, 5.0f); });
                 renderParameter(m_Parameters.DownAngle,                [](Core::Pointer address) { ImGui::SliderFloat("Down Angle", &address.as<float>(), 0.0f, 90.0f); });
                 renderParameter(m_Parameters.DropFactor,               [](Core::Pointer address) { ImGui::SliderFloat("Drop Factor", &address.as<float>(), 0.0f, 1.0f); });
+
+                ImGui::SeparatorText("Custom Parameters");
+                static char name[64] = {};
+                if (ImGui::Button("Add Current Parameters"))
+                {
+                    if (name[0] != '\0')
+                    {
+                        AddCurrentParametersIntoCustomParameters(name);
+                        name[0] = '\0';
+                    }
+                }
+                ImGui::SameLine();
+                ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
+                if (ImGui::BeginListBox("Custom Parameters", ImVec2(-FLT_MIN, 0.0f)))
+                {
+                    for (const CustomParameters& customParameters : m_CustomParameters)
+                    {
+                        ImGui::PushID(&customParameters);
+                        if (ImGui::Selectable(customParameters.Name.c_str()))
+                        {
+                            SetCurrentParametersFromCustomParameters(customParameters);
+                        }
+                        ImGui::PopID();
+                    }
+
+                    ImGui::EndListBox();
+                }
+                if (ImGui::Button("Save"))
+                {
+                    SaveCustomParameters();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Load"))
+                {
+                    LoadCustomParameters();
+                }
                 
                 ImGui::EndTabItem();
             }
@@ -194,6 +231,8 @@ void GameplayExternalCamera::LoadCustomParameters()
 
             return content;
         };
+
+        m_Logger.Info("Loading custom parameters from file '%s' ...", m_CustomParametersFilePath.c_str());
         
         YAML::Node yaml = YAML::Load(readCustomParametersFile());
     
@@ -218,6 +257,8 @@ void GameplayExternalCamera::LoadCustomParameters()
             };
             m_CustomParameters.push_back(customParameters);
         }
+
+        m_Logger.Info("Loaded custom parameters.");
     }
     catch (const std::exception& e)
     {
@@ -254,6 +295,8 @@ void GameplayExternalCamera::SaveCustomParameters()
 
             CloseHandle(file);
         };
+
+        m_Logger.Info("Saving custom parameters into file '%s' ...", m_CustomParametersFilePath.c_str());
         
         YAML::Node yaml;
         for (const CustomParameters& customParameters : m_CustomParameters)
@@ -278,9 +321,52 @@ void GameplayExternalCamera::SaveCustomParameters()
         }
 
         writeCustomParametersFile(YAML::Dump(yaml));
+
+        m_Logger.Info("Saved custom parameters.");
     }
     catch (const std::exception& e)
     {
         m_Logger.Warning("Failed to save '%s'. %s", m_CustomParametersFilePath.c_str(), e.what());
     }
+}
+
+void GameplayExternalCamera::SetCurrentParametersFromCustomParameters(const CustomParameters& customParameters)
+{
+    Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
+
+    parameters.at(0x3C).as<float>() = customParameters.PitchSpring;
+    parameters.at(0x40).as<float>() = customParameters.YawSpring;
+    parameters.at(0x4C).as<float>() = customParameters.PivotY;
+    parameters.at(0x50).as<float>() = customParameters.PivotZ;
+    parameters.at(0x54).as<float>() = customParameters.PivotZOffset;
+    parameters.at(0x6C).as<float>() = customParameters.FOV;
+    parameters.at(0x70).as<float>() = customParameters.InFrontFOVMax;
+    parameters.at(0x74).as<float>() = customParameters.FrontInAmount;
+    parameters.at(0x8C).as<float>() = customParameters.DriftYawSpring;
+    parameters.at(0x90).as<float>() = customParameters.BoostFOVZoomCompensation;
+    parameters.at(0x94).as<float>() = customParameters.DownAngle;
+    parameters.at(0xA8).as<float>() = customParameters.DropFactor;
+}
+
+void GameplayExternalCamera::AddCurrentParametersIntoCustomParameters(const char* name)
+{
+    Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
+    
+    CustomParameters customParameters =
+    {
+        .Name                     = name,
+        .PitchSpring              = parameters.at(0x3C).as<float>(),
+        .YawSpring                = parameters.at(0x40).as<float>(),
+        .PivotY                   = parameters.at(0x4C).as<float>(),
+        .PivotZ                   = parameters.at(0x50).as<float>(),
+        .PivotZOffset             = parameters.at(0x54).as<float>(),
+        .FOV                      = parameters.at(0x6C).as<float>(),
+        .InFrontFOVMax            = parameters.at(0x70).as<float>(),
+        .FrontInAmount            = parameters.at(0x74).as<float>(),
+        .DriftYawSpring           = parameters.at(0x8C).as<float>(),
+        .BoostFOVZoomCompensation = parameters.at(0x90).as<float>(),
+        .DownAngle                = parameters.at(0x94).as<float>(),
+        .DropFactor               = parameters.at(0xA8).as<float>(),
+    };
+    m_CustomParameters.push_back(customParameters);
 }
