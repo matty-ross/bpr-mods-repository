@@ -111,7 +111,14 @@ void CurrentCamera::OnRenderMenu()
         renderProperty(m_MotionBlur.World,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("World", &address.as<float>(), 0.0f, 1.0f); });
 
         ImGui::SeparatorText("Background Effect");
-        if (ImGui::BeginListBox("Hook Name", ImVec2(-FLT_MIN, 0.0f)))
+        if (ImGui::Button("Stop"))
+        {
+            if (m_BackgroundEffect.Active)
+            {
+                m_BackgroundEffect.Stop = true;
+            }
+        }
+        if (ImGui::BeginListBox("##hook-names", ImVec2(-FLT_MIN, 0.0f)))
         {
             Core::Pointer effectInterface = Core::Pointer(0x013FC8E0).deref().at(0x7179D0);
 
@@ -133,12 +140,5 @@ void CurrentCamera::OnRenderMenu()
             ImGui::EndListBox();
         }
         ImGui::SliderFloat("Blend Amount", &m_BackgroundEffect.BlendAmount, 0.0f, 1.0f);
-        if (ImGui::Button("Stop"))
-        {
-            if (m_BackgroundEffect.Active)
-            {
-                m_BackgroundEffect.Stop = true;
-            }
-        }
     }
 }
