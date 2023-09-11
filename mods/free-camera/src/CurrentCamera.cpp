@@ -118,7 +118,7 @@ void CurrentCamera::OnRenderMenu()
                 m_BackgroundEffect.Stop = true;
             }
         }
-        if (ImGui::BeginListBox("##hook-names", ImVec2(-FLT_MIN, 0.0f)))
+        if (ImGui::BeginListBox("##hook-names-list", ImVec2(-FLT_MIN, 0.0f)))
         {
             Core::Pointer effectInterface = Core::Pointer(0x013FC8E0).deref().at(0x7179D0);
 

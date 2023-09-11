@@ -24,12 +24,17 @@ FreeCamera::FreeCamera(HMODULE module)
     Mod(module),
     m_GameplayExternalCamera(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
     m_Logger(k_ModName),
-    m_DetourArbitratorUpdate(Core::Pointer(0x009645E0).GetAddress(), &FreeCamera::DetourArbitratorUpdate),
+    m_DetourArbitratorUpdate
+    {
+        .HookAddress    = Core::Pointer(0x009645E0).GetAddress(),
+        .DetourFunction = &FreeCamera::DetourArbitratorUpdate,
+        .StubFunction   = nullptr,
+    },
     m_Menu
     {
-        .OnRenderMenuFunction = [this]() { OnRenderMenu(); },
+        .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
         .ToggleVisibilityHotkey = VK_F7,
-        .Visible = true,
+        .Visible                = true,
     }
 {
 }
@@ -99,9 +104,7 @@ void FreeCamera::Load()
         {
             m_Logger.Info("Attaching ArbitratorUpdate detour...");
             
-            ModManager::Get().GetDetourHookManager().BeginTransaction();
-            m_DetourArbitratorUpdate.Attach();
-            ModManager::Get().GetDetourHookManager().EndTransaction();
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourArbitratorUpdate);
             
             m_Logger.Info("Attached ArbitratorUpdate detour.");
         }
@@ -144,9 +147,7 @@ void FreeCamera::Unload()
         {
             m_Logger.Info("Detaching ArbitratorUpdate detour...");
             
-            ModManager::Get().GetDetourHookManager().BeginTransaction();
-            m_DetourArbitratorUpdate.Detach();
-            ModManager::Get().GetDetourHookManager().EndTransaction();
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourArbitratorUpdate);
             
             m_Logger.Info("Detached ArbitratorUpdate detour.");
         }

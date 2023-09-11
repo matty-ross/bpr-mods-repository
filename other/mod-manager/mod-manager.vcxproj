@@ -156,14 +156,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\mod-manager\ImGuiManager.h" />
-    <ClInclude Include="include\mod-manager\DetourHook.h" />
     <ClInclude Include="include\mod-manager\DetourHookManager.h" />
     <ClInclude Include="include\mod-manager\ModManager.h" />
     <ClInclude Include="include\mod-manager\ModManagerApi.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ImGuiManager.cpp" />
-    <ClCompile Include="src\DetourHook.cpp" />
     <ClCompile Include="src\DetourHookManager.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\ModManager.cpp" />

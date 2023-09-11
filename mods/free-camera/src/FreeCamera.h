@@ -6,7 +6,7 @@
 #include "core/Mod.h"
 #include "core/Logger.h"
 
-#include "mod-manager/DetourHook.h"
+#include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
 
 #include "CurrentCamera.h"

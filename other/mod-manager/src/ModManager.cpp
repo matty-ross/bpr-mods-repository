@@ -12,9 +12,24 @@ static constexpr char k_Name[] = "Mod Manager";
 ModManager::ModManager()
     :
     m_Logger(k_Name),
-    m_DetourPresent(Core::Pointer(0x00C89F90).GetAddress(), &ModManager::DetourPresent),
-    m_DetourWindowProc(Core::Pointer(0x008FB9E2).GetAddress(), &ModManager::DetourWindowProc),
-    m_DetourUpdateKeyboardState(Core::Pointer(0x0664BB29).GetAddress(), &ModManager::DetourUpdateKeyboardState)
+    m_DetourPresent
+    {
+        .HookAddress    = Core::Pointer(0x00C89F90).GetAddress(),
+        .DetourFunction = &ModManager::DetourPresent,
+        .StubFunction   = nullptr,
+    },
+    m_DetourWindowProc
+    {
+        .HookAddress    = Core::Pointer(0x008FB9E2).GetAddress(),
+        .DetourFunction = &ModManager::DetourWindowProc,
+        .StubFunction   = nullptr,
+    },
+    m_DetourUpdateKeyboardState
+    {
+        .HookAddress    = Core::Pointer(0x0664BB29).GetAddress(),
+        .DetourFunction = &ModManager::DetourUpdateKeyboardState,
+        .StubFunction   = nullptr,
+    }
 {
 }
 
@@ -67,7 +82,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Waiting to be at or past Start Screen...");
             
-            auto isAtOrPastStartScreenState = [=]() -> bool
+            auto isAtOrPastStartScreenState = []() -> bool
             {
                 Core::Pointer gameModule = 0x013FC8E0;
 
@@ -98,9 +113,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Attaching Present detour...");
             
-            m_DetourHookManager.BeginTransaction();
-            m_DetourPresent.Attach();
-            m_DetourHookManager.EndTransaction();
+            m_DetourHookManager.AttachDetourHook(m_DetourPresent);
             
             m_Logger.Info("Attached Present detour.");
         }
@@ -109,9 +122,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Attaching WindowProc detour...");
             
-            m_DetourHookManager.BeginTransaction();
-            m_DetourWindowProc.Attach();
-            m_DetourHookManager.EndTransaction();
+            m_DetourHookManager.AttachDetourHook(m_DetourWindowProc);
             
             m_Logger.Info("Attached WindowProc detour.");
         }
@@ -120,9 +131,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Attaching UpdateKeyboardState detour...");
             
-            m_DetourHookManager.BeginTransaction();
-            m_DetourUpdateKeyboardState.Attach();
-            m_DetourHookManager.EndTransaction();
+            m_DetourHookManager.AttachDetourHook(m_DetourUpdateKeyboardState);
             
             m_Logger.Info("Attached UpdateKeyboardState detour.");
         }
@@ -146,9 +155,7 @@ void ModManager::Unload()
         {
             m_Logger.Info("Detaching UpdateKeyboardState detour...");
             
-            m_DetourHookManager.BeginTransaction();
-            m_DetourUpdateKeyboardState.Detach();
-            m_DetourHookManager.EndTransaction();
+            m_DetourHookManager.DetachDetourHook(m_DetourUpdateKeyboardState);
             
             m_Logger.Info("Detached UpdateKeyboardState detour.");
         }
@@ -157,9 +164,7 @@ void ModManager::Unload()
         {
             m_Logger.Info("Detaching WindowProc detour...");
             
-            m_DetourHookManager.BeginTransaction();
-            m_DetourWindowProc.Detach();
-            m_DetourHookManager.EndTransaction();
+            m_DetourHookManager.DetachDetourHook(m_DetourWindowProc);
             
             m_Logger.Info("Detached WindowProc detour.");
         }
@@ -168,9 +173,7 @@ void ModManager::Unload()
         {
             m_Logger.Info("Detaching Present detour...");
             
-            m_DetourHookManager.BeginTransaction();
-            m_DetourPresent.Detach();
-            m_DetourHookManager.EndTransaction();
+            m_DetourHookManager.DetachDetourHook(m_DetourPresent);
             
             m_Logger.Info("Detached Present detour.");
         }

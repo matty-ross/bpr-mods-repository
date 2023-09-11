@@ -6,6 +6,14 @@
 #include "mod-manager/ModManagerApi.h"
 
 
+struct DetourHook
+{
+    void* HookAddress;
+    const void* DetourFunction;
+    void* StubFunction;
+};
+
+
 class DetourHookManager
 {
     friend class ModManager;
@@ -21,6 +29,9 @@ public:
     DetourHookManager& operator =(DetourHookManager&&) = delete;
 
 public:
+    MOD_MANAGER_API void AttachDetourHook(DetourHook& detourHook, bool createStubFunction = true);
+    MOD_MANAGER_API void DetachDetourHook(DetourHook& detourHook, bool destroyStubFunction = true);
+
     MOD_MANAGER_API void BeginTransaction();
     MOD_MANAGER_API void EndTransaction();
     MOD_MANAGER_API bool IsTransactionInProgress() const;

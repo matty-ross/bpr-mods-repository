@@ -8,7 +8,6 @@
 #include "mod-manager/ModManagerApi.h"
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
-#include "mod-manager/DetourHook.h"
 
 
 class ModManager

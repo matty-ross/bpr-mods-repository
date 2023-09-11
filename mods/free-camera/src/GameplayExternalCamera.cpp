@@ -164,7 +164,7 @@ void GameplayExternalCamera::OnRenderMenu()
                 }
                 ImGui::SameLine();
                 ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
-                if (ImGui::BeginListBox("Custom Parameters", ImVec2(-FLT_MIN, 0.0f)))
+                if (ImGui::BeginListBox("##custom-parameters-list", ImVec2(-FLT_MIN, 0.0f)))
                 {
                     for (const CustomParameters& customParameters : m_CustomParameters)
                     {
