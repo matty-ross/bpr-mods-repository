@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "exception-reporter", "mods\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "free-camera", "mods\free-camera\free-camera.vcxproj", "{D81726EB-7550-4901-AEA7-27DFECFBFCFD}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bully-repellent", "mods\bully-repellent\bully-repellent.vcxproj", "{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -99,6 +101,14 @@ Global
 		{D81726EB-7550-4901-AEA7-27DFECFBFCFD}.Release|x64.Build.0 = Release|x64
 		{D81726EB-7550-4901-AEA7-27DFECFBFCFD}.Release|x86.ActiveCfg = Release|Win32
 		{D81726EB-7550-4901-AEA7-27DFECFBFCFD}.Release|x86.Build.0 = Release|Win32
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Debug|x64.ActiveCfg = Debug|x64
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Debug|x64.Build.0 = Debug|x64
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Debug|x86.ActiveCfg = Debug|Win32
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Debug|x86.Build.0 = Debug|Win32
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Release|x64.ActiveCfg = Release|x64
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Release|x64.Build.0 = Release|x64
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Release|x86.ActiveCfg = Release|Win32
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +122,7 @@ Global
 		{072109B8-5077-45D6-B04E-018F284FB3E1} = {DE346130-6D0E-4DA8-B567-AC1410E41B21}
 		{9245F051-3444-443E-A1BA-60BCCCEB884F} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 		{D81726EB-7550-4901-AEA7-27DFECFBFCFD} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
+		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63053E1A-A653-4F57-8900-6B5CF4291722}
