@@ -25,8 +25,12 @@ private:
     void Load();
     void Unload();
 
+    void OnRenderMenu();
+
 private:
     Core::Logger m_Logger;
+
+    ImGuiMenu m_Menu;
 
     HANDLE m_LoadThread = nullptr;
 };
