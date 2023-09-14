@@ -20,12 +20,18 @@ namespace Core
     public:
         HMODULE GetModule() const;
 
-        virtual void OnProcessAttach() = 0;
-        virtual void OnProcessDetach() = 0;
-        virtual void OnThreadAttach() = 0;
-        virtual void OnThreadDetach() = 0;
+        virtual void OnProcessAttach();
+        virtual void OnProcessDetach();
+        virtual void OnThreadAttach();
+        virtual void OnThreadDetach();
+
+    private:
+        virtual void Load() = 0;    // To be implemented in a derived class.
+        virtual void Unload() = 0;  // To be implemented in a derived class.
     
     private:
         HMODULE m_Module = nullptr;
+
+        HANDLE m_LoadThread = nullptr;
     };
 }

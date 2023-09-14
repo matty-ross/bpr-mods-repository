@@ -19,15 +19,9 @@ class FreeCamera : public Core::Mod
 public:
     FreeCamera(HMODULE module);
 
-public:
-    void OnProcessAttach() override;
-    void OnProcessDetach() override;
-    void OnThreadAttach() override;
-    void OnThreadDetach() override;
-
 private:
-    void Load();
-    void Unload();
+    void Load() override;
+    void Unload() override;
 
     void OnUpdate(void* camera, void* sharedInfo);
     void OnRenderMenu();
@@ -44,6 +38,4 @@ private:
 
     DetourHook m_DetourArbitratorUpdate;
     ImGuiMenu m_Menu;
-
-    HANDLE m_LoadThread = nullptr;
 };

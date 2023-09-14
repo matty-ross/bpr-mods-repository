@@ -13,21 +13,14 @@ public:
     ExceptionReporter(HMODULE module);
 
 public:
-    void OnProcessAttach() override;
-    void OnProcessDetach() override;
-    void OnThreadAttach() override;
-    void OnThreadDetach() override;
-
     LONG OnException(EXCEPTION_POINTERS* ExceptionInfo) const;
 
 private:
-    void Load();
-    void Unload();
+    void Load() override;
+    void Unload() override;
 
 private:
     Core::Logger m_Logger;
-
-    HANDLE m_LoadThread = nullptr;
 
     PTOP_LEVEL_EXCEPTION_FILTER m_PreviousTopLevelExceptionFilter = nullptr;
 };

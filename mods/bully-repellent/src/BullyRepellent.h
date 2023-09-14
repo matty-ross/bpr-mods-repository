@@ -15,15 +15,9 @@ class BullyRepellent : public Core::Mod
 public:
     BullyRepellent(HMODULE module);
 
-public:
-    void OnProcessAttach() override;
-    void OnProcessDetach() override;
-    void OnThreadAttach() override;
-    void OnThreadDetach() override;
-
 private:
-    void Load();
-    void Unload();
+    void Load() override;
+    void Unload() override;
 
     void OnRenderMenu();
 
@@ -31,6 +25,4 @@ private:
     Core::Logger m_Logger;
 
     ImGuiMenu m_Menu;
-
-    HANDLE m_LoadThread = nullptr;
 };

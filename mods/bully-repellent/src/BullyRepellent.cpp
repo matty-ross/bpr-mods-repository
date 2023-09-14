@@ -26,30 +26,6 @@ BullyRepellent::BullyRepellent(HMODULE module)
 {
 }
 
-void BullyRepellent::OnProcessAttach()
-{
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        static_cast<BullyRepellent*>(lpThreadParameter)->Load();
-        return 0;
-    };
-    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
-}
-
-void BullyRepellent::OnProcessDetach()
-{
-    CloseHandle(m_LoadThread);
-    Unload();
-}
-
-void BullyRepellent::OnThreadAttach()
-{
-}
-
-void BullyRepellent::OnThreadDetach()
-{   
-}
-
 void BullyRepellent::Load()
 {
     try

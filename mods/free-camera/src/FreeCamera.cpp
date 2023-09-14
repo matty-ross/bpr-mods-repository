@@ -39,30 +39,6 @@ FreeCamera::FreeCamera(HMODULE module)
 {
 }
 
-void FreeCamera::OnProcessAttach()
-{
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        static_cast<FreeCamera*>(lpThreadParameter)->Load();
-        return 0;
-    };
-    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
-}
-
-void FreeCamera::OnProcessDetach()
-{
-    CloseHandle(m_LoadThread);
-    Unload();
-}
-
-void FreeCamera::OnThreadAttach()
-{
-}
-
-void FreeCamera::OnThreadDetach()
-{
-}
-
 void FreeCamera::Load()
 {
     try

@@ -17,30 +17,6 @@ ExceptionReporter::ExceptionReporter(HMODULE module)
 {
 }
 
-void ExceptionReporter::OnProcessAttach()
-{
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        static_cast<ExceptionReporter*>(lpThreadParameter)->Load();
-        return 0;
-    };
-    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
-}
-
-void ExceptionReporter::OnProcessDetach()
-{
-    CloseHandle(m_LoadThread);
-    Unload();
-}
-
-void ExceptionReporter::OnThreadAttach()
-{
-}
-
-void ExceptionReporter::OnThreadDetach()
-{
-}
-
 LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
 {
     DLGPROC dialogProc = [](HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) -> INT_PTR

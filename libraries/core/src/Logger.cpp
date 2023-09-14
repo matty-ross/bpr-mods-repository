@@ -62,7 +62,7 @@ namespace Core
         GetLocalTime(&systemTime);
 
         printf_s(
-            "[%04d-%02d-%02d %02d:%02d:%02d.%04d] [%s] %8s -- : %s\n",
+            "[%04d-%02d-%02d %02d:%02d:%02d.%04d]  %-20s %8s -- : %s\n",
             systemTime.wYear,
             systemTime.wMonth,
             systemTime.wDay,
