@@ -14,8 +14,8 @@ This is a repository of my mods for the PC version of Burnout Paradise Remastere
 4. Hit `Build Solution`
 
 ## Usage
-Currently you must use Bo98's Mod Loader found [here](https://bpr.bo98.uk/).  
-After installing it, you must copy the `.dll` files into a `mods` directory within the game's directory.
+Currently, you must use Bo98's Mod Loader found [here](https://bpr.bo98.uk/).  
+After installing it, run the [install.ps1](https://github.com/matty-ross/bpr-mods-repository/blob/master/install.ps1) script to copy the built DLL files into correct directories.
 
 ## Dependencies
 - [Dear ImGui](https://github.com/ocornut/imgui) (docking branch)
