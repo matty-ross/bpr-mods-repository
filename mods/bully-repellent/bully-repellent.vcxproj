@@ -155,10 +155,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CurrentLobby.cpp" />
     <ClCompile Include="src\BullyRepellent.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CurrentLobby.h" />
     <ClInclude Include="src\BullyRepellent.h" />
   </ItemGroup>
   <ItemGroup>

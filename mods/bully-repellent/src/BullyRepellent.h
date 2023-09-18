@@ -9,6 +9,8 @@
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
 
+#include "CurrentLobby.h"
+
 
 class BullyRepellent : public Core::Mod
 {
@@ -22,6 +24,8 @@ private:
     void OnRenderMenu();
 
 private:
+    CurrentLobby m_CurrentLobby;
+
     Core::Logger m_Logger;
 
     ImGuiMenu m_Menu;

@@ -76,7 +76,9 @@ void BullyRepellent::OnRenderMenu()
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Version     %s", k_ModVersion);
         ImGui::Text("Author      %s", k_ModAuthor);
-        ImGui::Text("Framerate   %.3f", io.Framerate);        
+        ImGui::Text("Framerate   %.3f", io.Framerate);
+
+        m_CurrentLobby.OnRenderMenu();
 
         ImGui::PopItemWidth();
     }
