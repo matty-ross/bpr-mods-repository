@@ -32,6 +32,28 @@ void BullyRepellent::Load()
     {
         m_Logger.Info("Loading...");
 
+        // Wait to be in game.
+        {
+            m_Logger.Info("Waiting to be in game...");
+            
+            auto isInGameState = []() -> bool
+            {
+                Core::Pointer gameModule = 0x013FC8E0;
+
+                return
+                    gameModule.as<void*>() != nullptr &&
+                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
+                ;
+            };
+            
+            while (!isInGameState())
+            {
+                Sleep(1000);
+            }
+ 
+            m_Logger.Info("In game.");
+        }
+
         // Add menu.
         {
             m_Logger.Info("Adding menu...");
