@@ -20,8 +20,8 @@ void CurrentLobby::OnRenderMenu()
     {
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
-        ImGui::Text("Lobby Name: %s", guiCache.at(0xEA00).as<char[65]>());
-        ImGui::Checkbox("Local Player Host", &guiCache.at(0xEA59).as<bool>());
+        ImGui::Text("Lobby Name             %s", guiCache.at(0xEA00).as<char[65]>());
+        ImGui::Text("Local Player is Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
 
         ImGui::SeparatorText("Current Players");
         if (ImGui::BeginTable("##player-info-table", 3))
@@ -46,7 +46,7 @@ void CurrentLobby::OnRenderMenu()
                 ImGui::TextUnformatted(playerStatus.at(0xF0).as<char[25]>());
 
                 ImGui::TableSetColumnIndex(1);
-                ImGui::Checkbox("##is-host-checkbox", &playerStatus.at(0x12C).as<bool>());
+                ImGui::TextUnformatted(playerStatus.at(0x12C).as<bool>() ? "Yes" : "No");
 
                 ImGui::TableSetColumnIndex(2);
                 if (ImGui::Button("Add"))
