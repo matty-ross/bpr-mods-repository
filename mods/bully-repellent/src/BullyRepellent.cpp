@@ -16,11 +16,20 @@ static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
 static constexpr char k_ModDirectory[] = ".\\mods\\bully-repellent\\";
 
 
+extern BullyRepellent* g_Mod;
+
+
 BullyRepellent::BullyRepellent(HMODULE module)
     :
     Mod(module),
     m_CurrentLobby(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s), // TODO: reorder the m_Logger so we are referencing a constructed object
     m_Logger(k_ModName),
+    m_DetourUpatePlayerStatus
+    {
+        .HookAddress    = Core::Pointer(0x0092BF4D).GetAddress(),
+        .DetourFunction = &BullyRepellent::DetourUpatePlayerStatus,
+        .StubFunction   = nullptr,
+    },
     m_Menu
     {
         .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
@@ -67,6 +76,15 @@ void BullyRepellent::Load()
             m_Logger.Info("In game.");
         }
 
+        // Attach UpatePlayerStatus detour.
+        {
+            m_Logger.Info("Attaching UpatePlayerStatus detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourUpatePlayerStatus);
+
+            m_Logger.Info("Attached UpatePlayerStatus detour.");
+        }
+
         // Add menu.
         {
             m_Logger.Info("Adding menu...");
@@ -101,6 +119,15 @@ void BullyRepellent::Unload()
             m_CurrentLobby.SaveBlacklistedPlayers();
         }
 
+        // Detach UpatePlayerStatus detour.
+        {
+            m_Logger.Info("Detaching UpatePlayerStatus detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourUpatePlayerStatus);
+
+            m_Logger.Info("Detached UpatePlayerStatus detour.");
+        }
+
         m_Logger.Info("Unloaded.");
     }
     catch (const std::exception& e)
@@ -108,6 +135,11 @@ void BullyRepellent::Unload()
         m_Logger.Error("%s", e.what());
         MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
     }
+}
+
+void BullyRepellent::OnUpdate(void* guiCache)
+{
+    m_CurrentLobby.OnUpdate(guiCache);
 }
 
 void BullyRepellent::OnRenderMenu()
@@ -126,4 +158,21 @@ void BullyRepellent::OnRenderMenu()
         ImGui::PopItemWidth();
     }
     ImGui::End();
+}
+
+__declspec(naked) void BullyRepellent::DetourUpatePlayerStatus()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        push ebx // GuiCache*
+        mov ecx, dword ptr [g_Mod]
+        call BullyRepellent::OnUpdate
+
+        popad
+        popfd
+        ret
+    }
 }

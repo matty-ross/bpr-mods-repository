@@ -14,7 +14,7 @@ public:
     CurrentLobby(Core::Logger& logger, const std::string& blacklistedPlayersFilePath);
 
 public:
-    //void OnUpdate();
+    void OnUpdate(Core::Pointer guiCache);
     void OnRenderMenu();
     
     void LoadBlacklistedPlayers();

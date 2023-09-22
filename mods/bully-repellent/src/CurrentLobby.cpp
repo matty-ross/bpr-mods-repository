@@ -7,11 +7,81 @@
 #include "yaml-cpp/yaml.h"
 
 
+namespace BPR
+{
+    enum PlayerOption
+    {
+        Kick = 2,
+        Mute = 3,
+    };
+    
+    struct SelectedPlayerOption
+    {
+        uint64_t NetworkPlayerID;
+        PlayerOption PlayerOption;
+    };
+    
+    void AddSelectedPlayerOption(const SelectedPlayerOption* selectedPlayerOption)
+    {
+        __asm
+        {
+            push dword ptr [selectedPlayerOption]
+            mov ecx, dword ptr ds:[0x013FC8E0]
+            add ecx, 0x7FABDC
+            
+            mov eax, 0x004FB4C0
+            call eax
+        }
+    }
+}
+
+
 CurrentLobby::CurrentLobby(Core::Logger& logger, const std::string& blacklistedPlayersFilePath)
     :
     m_Logger(logger),
     m_BlacklistedPlayersFilePath(blacklistedPlayersFilePath)
 {
+}
+
+void CurrentLobby::OnUpdate(Core::Pointer guiCache)
+{
+    Core::Pointer playerInfo = guiCache.at(0xDE38);
+    
+    int32_t onlinePlayersCount = guiCache.at(0xDE2C).as<int32_t>();
+    for (int32_t i = 0; i < onlinePlayersCount; ++i)
+    {
+        Core::Pointer playerStatus = playerInfo.at(i * 0x138);
+
+        auto it = std::find_if(m_BlacklistedPlayers.begin(), m_BlacklistedPlayers.end(), [playerStatus](const BlacklistedPlayer& blacklistedPlayer)
+            {
+                return blacklistedPlayer.ID == playerStatus.at(0x110).as<uint64_t>();
+            }
+        );
+        if (it == m_BlacklistedPlayers.end())
+        {
+            continue;
+        }
+
+        BlacklistedPlayer& blacklistedPlayer = *it;
+        if (blacklistedPlayer.Autokick)
+        {
+            BPR::SelectedPlayerOption selectedPlayerOption =
+            {
+                .NetworkPlayerID = playerStatus.at(0x110).as<uint64_t>(),
+                .PlayerOption    = BPR::PlayerOption::Kick,
+            };
+            BPR::AddSelectedPlayerOption(&selectedPlayerOption);
+        }
+        if (blacklistedPlayer.Automute)
+        {
+            BPR::SelectedPlayerOption selectedPlayerOption =
+            {
+                .NetworkPlayerID = playerStatus.at(0x110).as<uint64_t>(),
+                .PlayerOption = BPR::PlayerOption::Mute,
+            };
+            BPR::AddSelectedPlayerOption(&selectedPlayerOption);
+        }
+    }
 }
 
 void CurrentLobby::OnRenderMenu()
