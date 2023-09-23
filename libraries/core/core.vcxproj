@@ -155,11 +155,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\core\File.h" />
     <ClInclude Include="include\core\Logger.h" />
     <ClInclude Include="include\core\Mod.h" />
     <ClInclude Include="include\core\Pointer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\File.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Mod.cpp" />
   </ItemGroup>
