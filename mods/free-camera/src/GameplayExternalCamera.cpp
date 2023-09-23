@@ -6,6 +6,8 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include "core/File.h"
+
 
 GameplayExternalCamera::GameplayExternalCamera(Core::Logger& logger, const std::string& customParametersFilePath)
     :
@@ -200,41 +202,24 @@ void GameplayExternalCamera::LoadCustomParameters()
 {
     try
     {
-        auto readCustomParametersFile = [this]() -> std::string
-        {
-            HANDLE file = CreateFileA(
-                m_CustomParametersFilePath.c_str(),
-                GENERIC_READ,
-                FILE_SHARE_READ,
-                nullptr,
-                OPEN_ALWAYS,
-                0,
-                nullptr
-            );
-            if (file == INVALID_HANDLE_VALUE)
-            {
-                m_Logger.Warning("Cannot open '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
-                return std::string();
-            }
-
-            size_t size = GetFileSize(file, nullptr);
-            std::string content(size, ' ');        
-            
-            DWORD bytesRead = 0;
-            if (ReadFile(file, content.data(), content.size(), &bytesRead, nullptr) == FALSE)
-            {
-                m_Logger.Warning("Cannot read '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
-                content.clear();
-            }
-
-            CloseHandle(file);
-
-            return content;
-        };
-
         m_Logger.Info("Loading custom parameters from file '%s' ...", m_CustomParametersFilePath.c_str());
         
-        YAML::Node yaml = YAML::Load(readCustomParametersFile());
+        auto readFile = [this]() -> std::string
+        {
+            try
+            {
+                Core::File file(m_CustomParametersFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+                return file.Read();
+            }
+            catch (const std::runtime_error& e)
+            {
+                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
+            }
+        
+            return std::string();
+        };
+        
+        YAML::Node yaml = YAML::Load(readFile());
     
         m_CustomParameters.clear();
         for (const YAML::Node& customParametersNode : yaml)
@@ -262,7 +247,7 @@ void GameplayExternalCamera::LoadCustomParameters()
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load '%s'. %s.", m_CustomParametersFilePath.c_str(), e.what());
+        m_Logger.Warning("Failed to load custom parameters. %s", e.what());
     }
 }
 
@@ -270,33 +255,20 @@ void GameplayExternalCamera::SaveCustomParameters()
 {
     try
     {
-        auto writeCustomParametersFile = [this](const std::string& content) -> void
+        m_Logger.Info("Saving custom parameters to file '%s' ...", m_CustomParametersFilePath.c_str());
+
+        auto writeFile = [this](const std::string& content) -> void
         {
-            HANDLE file = CreateFileA(
-                m_CustomParametersFilePath.c_str(),
-                GENERIC_WRITE,
-                FILE_SHARE_READ,
-                nullptr,
-                CREATE_ALWAYS,
-                0,
-                nullptr
-            );
-            if (file == INVALID_HANDLE_VALUE)
+            try
             {
-                m_Logger.Warning("Cannot open '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
-                return;
+                Core::File file(m_CustomParametersFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+                file.Write(content);
             }
-
-            DWORD bytesWritten = 0;
-            if (WriteFile(file, content.data(), content.size(), &bytesWritten, nullptr) == FALSE)
+            catch (const std::runtime_error& e)
             {
-                m_Logger.Warning("Cannot write '%s'. Last error: 0x%08X.", m_CustomParametersFilePath.c_str(), GetLastError());
+                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
             }
-
-            CloseHandle(file);
         };
-
-        m_Logger.Info("Saving custom parameters into file '%s' ...", m_CustomParametersFilePath.c_str());
         
         YAML::Node yaml;
         for (const CustomParameters& customParameters : m_CustomParameters)
@@ -320,13 +292,13 @@ void GameplayExternalCamera::SaveCustomParameters()
             yaml.push_back(customParametersNode);
         }
 
-        writeCustomParametersFile(YAML::Dump(yaml));
+        writeFile(YAML::Dump(yaml));
 
         m_Logger.Info("Saved custom parameters.");
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save '%s'. %s", m_CustomParametersFilePath.c_str(), e.what());
+        m_Logger.Warning("Failed to save custom parameters. %s", e.what());
     }
 }
 
