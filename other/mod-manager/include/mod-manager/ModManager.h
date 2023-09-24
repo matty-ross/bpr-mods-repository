@@ -42,10 +42,10 @@ private:
     static void DetourUpdateKeyboardState();
 
 private:
+    Core::Logger m_Logger;
+    
     DetourHookManager m_DetourHookManager;
     ImGuiManager m_ImGuiManager;
-
-    Core::Logger m_Logger;
 
     DetourHook m_DetourPresent;
     DetourHook m_DetourWindowProc;

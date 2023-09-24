@@ -30,11 +30,11 @@ private:
     static void DetourArbitratorUpdate();
 
 private:
+    Core::Logger m_Logger;
+    
     CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
-    
-    Core::Logger m_Logger;
 
     DetourHook m_DetourArbitratorUpdate;
     ImGuiMenu m_Menu;

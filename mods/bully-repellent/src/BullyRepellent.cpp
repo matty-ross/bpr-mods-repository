@@ -22,8 +22,8 @@ extern BullyRepellent* g_Mod;
 BullyRepellent::BullyRepellent(HMODULE module)
     :
     Mod(module),
-    m_CurrentLobby(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s), // TODO: reorder the m_Logger so we are referencing a constructed object
     m_Logger(k_ModName),
+    m_CurrentLobby(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s),
     m_DetourUpatePlayerStatus
     {
         .HookAddress    = Core::Pointer(0x0092BF4D).GetAddress(),
@@ -47,11 +47,11 @@ void BullyRepellent::Load()
 
         // Create mod directory.
         {
-            m_Logger.Info("Creating mod directory...");
+            m_Logger.Info("Creating mod directory '%s' ...", k_ModDirectory);
 
             CreateDirectoryA(k_ModDirectory, nullptr);
 
-            m_Logger.Info("Created mod directory: '%s'.", k_ModDirectory);
+            m_Logger.Info("Created mod directory.");
         }
 
         // Wait to be in game.

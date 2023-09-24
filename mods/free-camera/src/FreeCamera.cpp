@@ -22,8 +22,8 @@ extern FreeCamera* g_Mod;
 FreeCamera::FreeCamera(HMODULE module)
     :
     Mod(module),
-    m_GameplayExternalCamera(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
     m_Logger(k_ModName),
+    m_GameplayExternalCamera(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
     m_DetourArbitratorUpdate
     {
         .HookAddress    = Core::Pointer(0x009645E0).GetAddress(),
@@ -47,11 +47,11 @@ void FreeCamera::Load()
 
         // Create mod directory.
         {
-            m_Logger.Info("Creating mod directory...");
+            m_Logger.Info("Creating mod directory '%s' ...", k_ModDirectory);
             
             CreateDirectoryA(k_ModDirectory, nullptr);
 
-            m_Logger.Info("Created mod directory: '%s'.", k_ModDirectory);
+            m_Logger.Info("Created mod directory.");
         }
 
         // Wait to be in game.

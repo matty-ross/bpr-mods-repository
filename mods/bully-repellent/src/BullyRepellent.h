@@ -28,9 +28,9 @@ private:
     static void DetourUpatePlayerStatus();
 
 private:
-    CurrentLobby m_CurrentLobby;
-
     Core::Logger m_Logger;
+    
+    CurrentLobby m_CurrentLobby;
 
     DetourHook m_DetourUpatePlayerStatus;
     ImGuiMenu m_Menu;
