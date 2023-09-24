@@ -6,6 +6,8 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include "core/File.h"
+
 
 namespace BPR
 {
@@ -174,41 +176,24 @@ void CurrentLobby::LoadBlacklistedPlayers()
 {
     try
     {
-        auto readBlacklistedPlayersFile = [this]() -> std::string
-        {
-            HANDLE file = CreateFileA(
-                m_BlacklistedPlayersFilePath.c_str(),
-                GENERIC_READ,
-                FILE_SHARE_READ,
-                nullptr,
-                OPEN_ALWAYS,
-                0,
-                nullptr
-            );
-            if (file == INVALID_HANDLE_VALUE)
-            {
-                m_Logger.Warning("Cannot open '%s'. Last error: 0x%08X.", m_BlacklistedPlayersFilePath.c_str(), GetLastError());
-                return std::string();
-            }
-
-            size_t size = GetFileSize(file, nullptr);
-            std::string content(size, ' ');
-
-            DWORD bytesRead = 0;
-            if (ReadFile(file, content.data(), content.size(), &bytesRead, nullptr) == FALSE)
-            {
-                m_Logger.Warning("Cannot read '%s'. Last error: 0x%08X.", m_BlacklistedPlayersFilePath.c_str(), GetLastError());
-                content.clear();
-            }
-
-            CloseHandle(file);
-
-            return content;
-        };
-
         m_Logger.Info("Loading blacklisted players from file '%s' ...", m_BlacklistedPlayersFilePath.c_str());
 
-        YAML::Node yaml = YAML::Load(readBlacklistedPlayersFile());
+        auto readFile = [this]() -> std::string
+        {
+            try
+            {
+                Core::File file(m_BlacklistedPlayersFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+                return file.Read();
+            }
+            catch (const std::runtime_error& e)
+            {
+                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
+            }
+
+            return std::string();
+        };
+
+        YAML::Node yaml = YAML::Load(readFile());
 
         m_BlacklistedPlayers.clear();
         for (const YAML::Node& blacklistedPlayerNode : yaml)
@@ -227,7 +212,7 @@ void CurrentLobby::LoadBlacklistedPlayers()
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load '%s'. %s.", m_BlacklistedPlayersFilePath.c_str(), e.what());
+        m_Logger.Warning("Failed to load blacklisted players. %s", e.what());
     }
 }
 
@@ -235,33 +220,20 @@ void CurrentLobby::SaveBlacklistedPlayers()
 {
     try
     {
-        auto writeBlacklistedPlayersFile = [this](const std::string& content) -> void
+        m_Logger.Info("Saving blacklisted players to file '%s' ...", m_BlacklistedPlayersFilePath.c_str());
+
+        auto writeFile = [this](const std::string& content) -> void
         {
-            HANDLE file = CreateFileA(
-                m_BlacklistedPlayersFilePath.c_str(),
-                GENERIC_WRITE,
-                FILE_SHARE_READ,
-                nullptr,
-                CREATE_ALWAYS,
-                0,
-                nullptr
-            );
-            if (file == INVALID_HANDLE_VALUE)
+            try
             {
-                m_Logger.Warning("Cannot open '%s'. Last error: 0x%08X.", m_BlacklistedPlayersFilePath.c_str(), GetLastError());
-                return;
+                Core::File file(m_BlacklistedPlayersFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+                file.Write(content);
             }
-
-            DWORD bytesWritten = 0;
-            if (WriteFile(file, content.data(), content.size(), &bytesWritten, nullptr) == FALSE)
+            catch (const std::runtime_error& e)
             {
-                m_Logger.Warning("Cannot write '%s'. Last error: 0x%08X.", m_BlacklistedPlayersFilePath.c_str(), GetLastError());
+                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
             }
-
-            CloseHandle(file);
         };
-
-        m_Logger.Info("Saving blacklisted players into file '%s' ...", m_BlacklistedPlayersFilePath.c_str());
 
         YAML::Node yaml;
         for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
@@ -276,13 +248,13 @@ void CurrentLobby::SaveBlacklistedPlayers()
             yaml.push_back(blacklistedPlayerNode);
         }
 
-        writeBlacklistedPlayersFile(YAML::Dump(yaml));
+        writeFile(YAML::Dump(yaml));
 
         m_Logger.Info("Saved blacklisted players.");
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save '%s'. %s", m_BlacklistedPlayersFilePath.c_str(), e.what());
+        m_Logger.Warning("Failed to save blacklisted players. %s", e.what());
     }
 }
 
