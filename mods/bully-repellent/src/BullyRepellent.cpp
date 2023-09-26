@@ -24,10 +24,10 @@ BullyRepellent::BullyRepellent(HMODULE module)
     Mod(module),
     m_Logger(k_ModName),
     m_CurrentLobby(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s),
-    m_DetourUpatePlayerStatus
+    m_DetourOnGuiEventNetworkPlayerStatus
     {
-        .HookAddress    = Core::Pointer(0x0092BF4D).GetAddress(),
-        .DetourFunction = &BullyRepellent::DetourUpatePlayerStatus,
+        .HookAddress    = Core::Pointer(0x0092BEC8).GetAddress(),
+        .DetourFunction = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
         .StubFunction   = nullptr,
     },
     m_Menu
@@ -80,7 +80,7 @@ void BullyRepellent::Load()
         {
             m_Logger.Info("Attaching UpatePlayerStatus detour...");
 
-            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourUpatePlayerStatus);
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourOnGuiEventNetworkPlayerStatus);
 
             m_Logger.Info("Attached UpatePlayerStatus detour.");
         }
@@ -123,7 +123,7 @@ void BullyRepellent::Unload()
         {
             m_Logger.Info("Detaching UpatePlayerStatus detour...");
 
-            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourUpatePlayerStatus);
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourOnGuiEventNetworkPlayerStatus);
 
             m_Logger.Info("Detached UpatePlayerStatus detour.");
         }
@@ -137,9 +137,9 @@ void BullyRepellent::Unload()
     }
 }
 
-void BullyRepellent::OnUpdate(void* guiCache)
+void BullyRepellent::OnUpdate(void* guiEventNetworkPlayerStatus)
 {
-    m_CurrentLobby.OnUpdate(guiCache);
+    m_CurrentLobby.OnUpdate(guiEventNetworkPlayerStatus);
 }
 
 void BullyRepellent::OnRenderMenu()
@@ -160,14 +160,14 @@ void BullyRepellent::OnRenderMenu()
     ImGui::End();
 }
 
-__declspec(naked) void BullyRepellent::DetourUpatePlayerStatus()
+__declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
 {
     __asm
     {
         pushfd
         pushad
 
-        push ebx // GuiCache*
+        push dword ptr [ebp + 0x8]    // BrnGui::GuiEventNetworkPlayerStatus*
         mov ecx, dword ptr [g_Mod]
         call BullyRepellent::OnUpdate
 

@@ -14,7 +14,7 @@ public:
     CurrentLobby(Core::Logger& logger, const std::string& blacklistedPlayersFilePath);
 
 public:
-    void OnUpdate(Core::Pointer guiCache);
+    void OnUpdate(Core::Pointer guiEventNetworkPlayerStatus);
     void OnRenderMenu();
     
     void LoadBlacklistedPlayers();
@@ -30,11 +30,11 @@ private:
     };
 
 private:
-    void AddPlayerIntoBlacklistedPlayers(Core::Pointer playerStatus);
+    void AddPlayerIntoBlacklistedPlayers(Core::Pointer playerStatusData);
 
 private:
     Core::Logger& m_Logger;
 
-    std::vector<BlacklistedPlayer> m_BlacklistedPlayers;
+    std::vector<BlacklistedPlayer> m_BlacklistedPlayers; // TODO: Perhaps change this to a `std::map<uint64_t, BlacklistedPlayer>`.
     std::string m_BlacklistedPlayersFilePath;
 };

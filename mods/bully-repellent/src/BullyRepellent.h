@@ -21,17 +21,17 @@ private:
     void Load() override;
     void Unload() override;
 
-    void OnUpdate(void* guiCache);
+    void OnUpdate(void* guiEventNetworkPlayerStatus);
     void OnRenderMenu();
 
 private:
-    static void DetourUpatePlayerStatus();
+    static void DetourOnGuiEventNetworkPlayerStatus();
 
 private:
     Core::Logger m_Logger;
     
     CurrentLobby m_CurrentLobby;
 
-    DetourHook m_DetourUpatePlayerStatus;
+    DetourHook m_DetourOnGuiEventNetworkPlayerStatus;
     ImGuiMenu m_Menu;
 };
