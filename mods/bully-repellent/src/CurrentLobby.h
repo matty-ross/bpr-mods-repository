@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "core/Logger.h"
 #include "core/Pointer.h"
@@ -23,10 +24,9 @@ public:
 private:
     struct BlacklistedPlayer
     {
-        uint64_t ID;
         std::string Name;
-        bool Autokick;
-        bool Automute;
+        bool Autokick = false;
+        bool Automute = false;
     };
 
 private:
@@ -35,6 +35,8 @@ private:
 private:
     Core::Logger& m_Logger;
 
-    std::vector<BlacklistedPlayer> m_BlacklistedPlayers; // TODO: Perhaps change this to a `std::map<uint64_t, BlacklistedPlayer>`.
+    std::map<uint64_t, BlacklistedPlayer> m_BlacklistedPlayers;
+    std::vector<uint64_t> m_BlacklistedPlayerIDs;
     std::string m_BlacklistedPlayersFilePath;
+    bool m_BlacklistEnabled = true;
 };

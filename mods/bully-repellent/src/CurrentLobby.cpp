@@ -47,10 +47,18 @@ CurrentLobby::CurrentLobby(Core::Logger& logger, const std::string& blacklistedP
 
 void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
 {
+    if (!m_BlacklistEnabled)
+    {
+        return;
+    }
+
+    // TODO: Don't perform blacklist actions if we aren't in '15' or '16' game mode.
+    
     int32_t playersCount = guiEventNetworkPlayerStatus.at(0x9C0).as<int32_t>();
     for (int32_t i = 0; i < playersCount; ++i)
     {
         Core::Pointer playerStatusData = guiEventNetworkPlayerStatus.at(0x0 + i * 0x138);
+        uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
 
         bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
         if (isLocalPlayer)
@@ -58,19 +66,14 @@ void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
             continue;
         }
 
-        uint64_t playerId = playerStatusData.at(0x110).as<uint64_t>();
-
-        auto it = std::find_if(m_BlacklistedPlayers.begin(), m_BlacklistedPlayers.end(), [=](const BlacklistedPlayer& blacklistedPlayer)
-            {
-                return blacklistedPlayer.ID == playerId;
-            }
-        );
+        auto it = m_BlacklistedPlayers.find(playerID);
         if (it == m_BlacklistedPlayers.end())
         {
             continue;
         }
-
-        BlacklistedPlayer& blacklistedPlayer = *it;
+        
+        const BlacklistedPlayer& blacklistedPlayer = it->second;
+        
         if (blacklistedPlayer.Autokick)
         {
             bool isLocalPlayerHost = guiEventNetworkPlayerStatus.at(0xA05).as<bool>();
@@ -79,7 +82,7 @@ void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
                 BPR::SelectedPlayerOptionEvent selectedPlayerOptionEvent =
                 {
                     .PlayerOption    = BPR::PlayerOption::Kick,
-                    .NetworkPlayerID = playerId,
+                    .NetworkPlayerID = playerID,
                 };
                 BPR::AddSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
@@ -92,7 +95,7 @@ void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
                 BPR::SelectedPlayerOptionEvent selectedPlayerOptionEvent =
                 {
                     .PlayerOption    = BPR::PlayerOption::Mute,
-                    .NetworkPlayerID = playerId,
+                    .NetworkPlayerID = playerID,
                 };
                 BPR::AddSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
@@ -106,47 +109,70 @@ void CurrentLobby::OnRenderMenu()
     {
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
-        ImGui::Text("Lobby Name             %s", guiCache.at(0xEA00).as<char[65]>());
-        ImGui::Text("Local Player is Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
+        // TODO: Use TabBar to split 'Current Lobby' and 'Blacklisted Players'.
 
-        ImGui::SeparatorText("Current Players");
-        if (ImGui::BeginTable("##player-info-table", 3))
+        bool isOnline = guiCache.at(0x7B00).as<bool>();
+        if (isOnline)
         {
-            Core::Pointer playerInfo = guiCache.at(0xDE38);
+            ImGui::Text("Lobby Name             %s", guiCache.at(0xEA00).as<char[65]>());
+            ImGui::Text("Local Player is Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
 
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Is Host");
-            ImGui::TableSetupColumn("Blacklist");
-            ImGui::TableHeadersRow();
-
-            int32_t onlinePlayersCount = guiCache.at(0xDE2C).as<int32_t>();
-            for (int32_t i = 0; i < onlinePlayersCount; ++i)
+            ImGui::SeparatorText("Current Players");
+            if (ImGui::BeginTable("##player-info-table", 3))
             {
-                Core::Pointer playerStatusData = playerInfo.at(i * 0x138);
+                Core::Pointer playerInfo = guiCache.at(0xDE38);
 
-                ImGui::PushID(playerStatusData.GetAddress());
-                
-                ImGui::TableNextRow();
-                
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
+                ImGui::TableSetupColumn("Name");
+                ImGui::TableSetupColumn("Is Host");
+                ImGui::TableSetupColumn("Blacklist");
+                ImGui::TableHeadersRow();
 
-                ImGui::TableSetColumnIndex(1);
-                ImGui::TextUnformatted(playerStatusData.at(0x12C).as<bool>() ? "Yes" : "No");
-
-                ImGui::TableSetColumnIndex(2);
-                if (ImGui::Button("Add"))
+                int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
+                for (int32_t i = 0; i < playersCount; ++i)
                 {
-                    AddPlayerIntoBlacklistedPlayers(playerStatusData);
+                    Core::Pointer playerStatusData = playerInfo.at(i * 0x138);
+                    uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
+
+                    ImGui::PushID(playerStatusData.GetAddress());
+                
+                    ImGui::TableNextRow();
+                
+                    ImGui::TableSetColumnIndex(0);
+                    ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
+
+                    ImGui::TableSetColumnIndex(1);
+                    ImGui::TextUnformatted(playerStatusData.at(0x12C).as<bool>() ? "Yes" : "No");
+
+                    ImGui::TableSetColumnIndex(2);
+                    bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
+                    bool alreadyOnBlacklist = m_BlacklistedPlayers.contains(playerID);
+                    if (!isLocalPlayer && !alreadyOnBlacklist) // TODO: Disable the button instead.
+                    {
+                        if (ImGui::Button("Add"))
+                        {
+                            AddPlayerIntoBlacklistedPlayers(playerStatusData);
+                        }
+                    }
+
+                    ImGui::PopID();
                 }
 
-                ImGui::PopID();
+                ImGui::EndTable();
             }
-
-            ImGui::EndTable();
         }
 
         ImGui::SeparatorText("Blacklisted Players");
+        if (ImGui::Button("Save"))
+        {
+            SaveBlacklistedPlayers();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load"))
+        {
+            LoadBlacklistedPlayers();
+        }
+        ImGui::SameLine();
+        ImGui::Checkbox("Enable Blacklist", &m_BlacklistEnabled);
         if (ImGui::BeginTable("##blacklisted-players-table", 3))
         {
             ImGui::TableSetupColumn("Name");
@@ -154,8 +180,10 @@ void CurrentLobby::OnRenderMenu()
             ImGui::TableSetupColumn("Automute");
             ImGui::TableHeadersRow();
 
-            for (BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
+            for (uint64_t blacklistedPlayerID : m_BlacklistedPlayerIDs)
             {
+                BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayers.at(blacklistedPlayerID);
+
                 ImGui::PushID(&blacklistedPlayer);
 
                 ImGui::TableNextRow();
@@ -173,15 +201,6 @@ void CurrentLobby::OnRenderMenu()
             }
             
             ImGui::EndTable();
-        }
-        if (ImGui::Button("Save"))
-        {
-            SaveBlacklistedPlayers();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load"))
-        {
-            LoadBlacklistedPlayers();
         }
     }
 }
@@ -210,16 +229,20 @@ void CurrentLobby::LoadBlacklistedPlayers()
         YAML::Node yaml = YAML::Load(readFile());
 
         m_BlacklistedPlayers.clear();
+        m_BlacklistedPlayerIDs.clear();
+
         for (const YAML::Node& blacklistedPlayerNode : yaml)
         {
+            uint64_t blacklistedPlayerID = blacklistedPlayerNode["ID"].as<uint64_t>();
             BlacklistedPlayer blacklistedPlayer =
             {
-                .ID       = blacklistedPlayerNode["ID"].as<uint64_t>(),
                 .Name     = blacklistedPlayerNode["Name"].as<std::string>(),
                 .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(),
                 .Automute = blacklistedPlayerNode["Automute"].as<bool>(),
             };
-            m_BlacklistedPlayers.push_back(blacklistedPlayer);
+            
+            m_BlacklistedPlayers[blacklistedPlayerID] = blacklistedPlayer;
+            m_BlacklistedPlayerIDs.push_back(blacklistedPlayerID);
         }
 
         m_Logger.Info("Loaded blacklisted players.");
@@ -250,15 +273,19 @@ void CurrentLobby::SaveBlacklistedPlayers()
         };
 
         YAML::Node yaml;
-        for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
+        
+        for (uint64_t blacklistedPlayerID : m_BlacklistedPlayerIDs)
         {
+            const BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayers.at(blacklistedPlayerID);
+
             YAML::Node blacklistedPlayerNode;
             {
-                blacklistedPlayerNode["ID"]       = blacklistedPlayer.ID;
+                blacklistedPlayerNode["ID"]       = blacklistedPlayerID;
                 blacklistedPlayerNode["Name"]     = blacklistedPlayer.Name;
                 blacklistedPlayerNode["Autokick"] = blacklistedPlayer.Autokick;
                 blacklistedPlayerNode["Automute"] = blacklistedPlayer.Automute;   
             }
+            
             yaml.push_back(blacklistedPlayerNode);
         }
 
@@ -274,12 +301,14 @@ void CurrentLobby::SaveBlacklistedPlayers()
 
 void CurrentLobby::AddPlayerIntoBlacklistedPlayers(Core::Pointer playerStatusData)
 {
+    uint64_t blacklistedPlayerID = playerStatusData.at(0x110).as<uint64_t>();
     BlacklistedPlayer blacklistedPlayer =
     {
-        .ID       = playerStatusData.at(0x110).as<uint64_t>(),
         .Name     = playerStatusData.at(0xF0).as<char[25]>(),
         .Autokick = false,
         .Automute = false,
     };
-    m_BlacklistedPlayers.push_back(blacklistedPlayer);
+    
+    m_BlacklistedPlayers[blacklistedPlayerID] = blacklistedPlayer;
+    m_BlacklistedPlayerIDs.push_back(blacklistedPlayerID);
 }
