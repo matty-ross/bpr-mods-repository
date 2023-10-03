@@ -109,98 +109,114 @@ void CurrentLobby::OnRenderMenu()
     {
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
-        // TODO: Use TabBar to split 'Current Lobby' and 'Blacklisted Players'.
-
-        bool isOnline = guiCache.at(0x7B00).as<bool>();
-        if (isOnline)
+        if (ImGui::BeginTabBar("##current-lobby"))
         {
-            ImGui::Text("Lobby Name             %s", guiCache.at(0xEA00).as<char[65]>());
-            ImGui::Text("Local Player is Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
-
-            ImGui::SeparatorText("Current Players");
-            if (ImGui::BeginTable("##player-info-table", 3))
+            if (ImGui::BeginTabItem("Current Players"))
             {
-                Core::Pointer playerInfo = guiCache.at(0xDE38);
-
-                ImGui::TableSetupColumn("Name");
-                ImGui::TableSetupColumn("Is Host");
-                ImGui::TableSetupColumn("Blacklist");
-                ImGui::TableHeadersRow();
-
-                int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
-                for (int32_t i = 0; i < playersCount; ++i)
+                bool isOnline = guiCache.at(0x7B00).as<bool>();
+                if (isOnline)
                 {
-                    Core::Pointer playerStatusData = playerInfo.at(i * 0x138);
-                    uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
+                    ImGui::Text("Lobby Name             %s", guiCache.at(0xEA00).as<char[65]>());
+                    ImGui::Text("Local Player is Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
 
-                    ImGui::PushID(playerStatusData.GetAddress());
-                
-                    ImGui::TableNextRow();
-                
-                    ImGui::TableSetColumnIndex(0);
-                    ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
-
-                    ImGui::TableSetColumnIndex(1);
-                    ImGui::TextUnformatted(playerStatusData.at(0x12C).as<bool>() ? "Yes" : "No");
-
-                    ImGui::TableSetColumnIndex(2);
-                    bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
-                    bool alreadyOnBlacklist = m_BlacklistedPlayers.contains(playerID);
-                    if (!isLocalPlayer && !alreadyOnBlacklist) // TODO: Disable the button instead.
+                    if (ImGui::BeginTable("##player-info-table", 3))
                     {
-                        if (ImGui::Button("Add"))
-                        {
-                            AddPlayerIntoBlacklistedPlayers(playerStatusData);
-                        }
-                    }
+                        Core::Pointer playerInfo = guiCache.at(0xDE38);
 
-                    ImGui::PopID();
+                        ImGui::TableSetupColumn("Name");
+                        ImGui::TableSetupColumn("Is Host");
+                        ImGui::TableSetupColumn("Blacklist");
+                        ImGui::TableHeadersRow();
+
+                        int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
+                        for (int32_t i = 0; i < playersCount; ++i)
+                        {
+                            Core::Pointer playerStatusData = playerInfo.at(i * 0x138);
+                            uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
+
+                            ImGui::PushID(playerStatusData.GetAddress());
+                
+                            ImGui::TableNextRow();
+                
+                            ImGui::TableSetColumnIndex(0);
+                            ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
+
+                            ImGui::TableSetColumnIndex(1);
+                            ImGui::TextUnformatted(playerStatusData.at(0x12C).as<bool>() ? "Yes" : "No");
+
+                            ImGui::TableSetColumnIndex(2);
+                            bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
+                            bool alreadyOnBlacklist = m_BlacklistedPlayers.contains(playerID);
+                            if (isLocalPlayer || alreadyOnBlacklist)
+                            {
+                                ImGui::BeginDisabled();
+                            }
+                            if (ImGui::Button("Add"))
+                            {
+                                AddPlayerIntoBlacklistedPlayers(playerStatusData);
+                            }
+                            if (isLocalPlayer || alreadyOnBlacklist)
+                            {
+                                ImGui::EndDisabled();
+                            }
+
+                            ImGui::PopID();
+                        }
+
+                        ImGui::EndTable();
+                    }
                 }
 
-                ImGui::EndTable();
+                ImGui::EndTabItem();
             }
-        }
 
-        ImGui::SeparatorText("Blacklisted Players");
-        if (ImGui::Button("Save"))
-        {
-            SaveBlacklistedPlayers();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load"))
-        {
-            LoadBlacklistedPlayers();
-        }
-        ImGui::SameLine();
-        ImGui::Checkbox("Enable Blacklist", &m_BlacklistEnabled);
-        if (ImGui::BeginTable("##blacklisted-players-table", 3))
-        {
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Autokick");
-            ImGui::TableSetupColumn("Automute");
-            ImGui::TableHeadersRow();
-
-            for (uint64_t blacklistedPlayerID : m_BlacklistedPlayerIDs)
+            if (ImGui::BeginTabItem("Blacklisted Players"))
             {
-                BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayers.at(blacklistedPlayerID);
+                if (ImGui::Button("Save"))
+                {
+                    SaveBlacklistedPlayers();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Load"))
+                {
+                    LoadBlacklistedPlayers();
+                }
+                ImGui::SameLine();
+                ImGui::Checkbox("Enable Blacklist", &m_BlacklistEnabled);
+                if (ImGui::BeginTable("##blacklisted-players-table", 3))
+                {
+                    ImGui::TableSetupColumn("Name");
+                    ImGui::TableSetupColumn("Autokick");
+                    ImGui::TableSetupColumn("Automute");
+                    ImGui::TableHeadersRow();
 
-                ImGui::PushID(&blacklistedPlayer);
+                    for (uint64_t blacklistedPlayerID : m_BlacklistedPlayerIDs)
+                    {
+                        BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayers.at(blacklistedPlayerID);
 
-                ImGui::TableNextRow();
+                        ImGui::PushID(&blacklistedPlayer);
 
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
+                        ImGui::TableNextRow();
 
-                ImGui::TableSetColumnIndex(1);
-                ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
+                        ImGui::TableSetColumnIndex(0);
+                        ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
 
-                ImGui::TableSetColumnIndex(2);
-                ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
+                        ImGui::TableSetColumnIndex(1);
+                        ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
 
-                ImGui::PopID();
+                        ImGui::TableSetColumnIndex(2);
+                        ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
+
+                        ImGui::PopID();
+                    }
+            
+                    ImGui::EndTable();
+                }
+
+                ImGui::EndTabItem();
             }
             
-            ImGui::EndTable();
+            ImGui::EndTabBar();
         }
     }
 }
