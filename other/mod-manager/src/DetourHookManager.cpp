@@ -10,7 +10,7 @@
 
 static void CreateStubFunction(DetourHook& detourHook)
 {
-    static constexpr size_t stubSize = 12;
+    constexpr size_t stubSize = 12;
 
     Core::Pointer stub = VirtualAlloc(nullptr, stubSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
     {

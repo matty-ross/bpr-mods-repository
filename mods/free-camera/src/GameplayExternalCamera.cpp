@@ -208,7 +208,7 @@ void GameplayExternalCamera::LoadCustomParameters()
         {
             try
             {
-                Core::File file(m_CustomParametersFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+                Core::File file(m_CustomParametersFilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
                 return file.Read();
             }
             catch (const std::runtime_error& e)
@@ -222,6 +222,7 @@ void GameplayExternalCamera::LoadCustomParameters()
         YAML::Node yaml = YAML::Load(readFile());
     
         m_CustomParameters.clear();
+        
         for (const YAML::Node& customParametersNode : yaml)
         {
             CustomParameters customParameters =
@@ -240,6 +241,7 @@ void GameplayExternalCamera::LoadCustomParameters()
                 .DownAngle                = customParametersNode["DownAngle"].as<float>(),
                 .DropFactor               = customParametersNode["DropFactor"].as<float>()
             };
+            
             m_CustomParameters.push_back(customParameters);
         }
 
@@ -261,7 +263,7 @@ void GameplayExternalCamera::SaveCustomParameters()
         {
             try
             {
-                Core::File file(m_CustomParametersFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+                Core::File file(m_CustomParametersFilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
                 file.Write(content);
             }
             catch (const std::runtime_error& e)
@@ -271,6 +273,7 @@ void GameplayExternalCamera::SaveCustomParameters()
         };
         
         YAML::Node yaml;
+        
         for (const CustomParameters& customParameters : m_CustomParameters)
         {
             YAML::Node customParametersNode;
@@ -289,6 +292,7 @@ void GameplayExternalCamera::SaveCustomParameters()
                 customParametersNode["DownAngle"]                = customParameters.DownAngle;
                 customParametersNode["DropFactor"]               = customParameters.DropFactor;
             }
+            
             yaml.push_back(customParametersNode);
         }
 
@@ -340,5 +344,6 @@ void GameplayExternalCamera::AddCurrentParametersIntoCustomParameters(const char
         .DownAngle                = parameters.at(0x94).as<float>(),
         .DropFactor               = parameters.at(0xA8).as<float>(),
     };
+    
     m_CustomParameters.push_back(customParameters);
 }

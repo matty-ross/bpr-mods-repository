@@ -30,10 +30,32 @@ void ImGuiManager::AddMenu(ImGuiMenu* menu)
     LeaveCriticalSection(&m_CriticalSection);
 }
 
+void ImGuiManager::RemoveMenu(ImGuiMenu* menu)
+{
+    EnterCriticalSection(&m_CriticalSection);
+    auto it = std::find(m_Menus.begin(), m_Menus.end(), menu);
+    if (it != m_Menus.end())
+    {
+        m_Menus.erase(it);
+    }
+    LeaveCriticalSection(&m_CriticalSection);
+}
+
 void ImGuiManager::AddOverlay(ImGuiOverlay* overlay)
 {
     EnterCriticalSection(&m_CriticalSection);
     m_Overlays.push_back(overlay);
+    LeaveCriticalSection(&m_CriticalSection);
+}
+
+void ImGuiManager::RemoveOverlay(ImGuiOverlay* overlay)
+{
+    EnterCriticalSection(&m_CriticalSection);
+    auto it = std::find(m_Overlays.begin(), m_Overlays.end(), overlay);
+    if (it != m_Overlays.end())
+    {
+        m_Overlays.erase(it);
+    }
     LeaveCriticalSection(&m_CriticalSection);
 }
 

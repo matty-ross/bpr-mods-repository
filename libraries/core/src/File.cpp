@@ -5,9 +5,9 @@
 
 namespace Core
 {
-    File::File(const char* filePath, uint32_t desiredAccess, uint32_t shareMode, uint32_t creationDisposition)
+    File::File(const std::string& filePath, uint32_t desiredAccess, uint32_t shareMode, uint32_t creationDisposition)
     {
-        m_FileHandle = CreateFileA(filePath, desiredAccess, shareMode, nullptr, creationDisposition, 0, nullptr);
+        m_FileHandle = CreateFileA(filePath.c_str(), desiredAccess, shareMode, nullptr, creationDisposition, 0, nullptr);
         if (m_FileHandle == INVALID_HANDLE_VALUE)
         {
             throw std::runtime_error("Cannot open/create file.");

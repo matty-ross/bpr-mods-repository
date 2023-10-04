@@ -11,7 +11,7 @@ namespace Core
     class File
     {
     public:
-        File(const char* filePath, uint32_t desiredAccess, uint32_t shareMode, uint32_t creationDisposition);
+        File(const std::string& filePath, uint32_t desiredAccess, uint32_t shareMode, uint32_t creationDisposition);
         ~File();
 
         File(const File&) = delete;

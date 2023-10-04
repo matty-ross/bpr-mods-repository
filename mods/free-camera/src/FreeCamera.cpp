@@ -119,6 +119,15 @@ void FreeCamera::Unload()
             m_GameplayExternalCamera.SaveCustomParameters();
         }
 
+        // Remove menu.
+        {
+            m_Logger.Info("Removing menu...");
+
+            ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
+
+            m_Logger.Info("Removed menu.");
+        }
+
         // Detach ArbitratorUpdate detour.
         {
             m_Logger.Info("Detaching ArbitratorUpdate detour...");

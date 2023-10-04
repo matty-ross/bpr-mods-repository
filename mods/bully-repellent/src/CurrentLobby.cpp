@@ -231,7 +231,7 @@ void CurrentLobby::LoadBlacklistedPlayers()
         {
             try
             {
-                Core::File file(m_BlacklistedPlayersFilePath.c_str(), GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+                Core::File file(m_BlacklistedPlayersFilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
                 return file.Read();
             }
             catch (const std::runtime_error& e)
@@ -279,7 +279,7 @@ void CurrentLobby::SaveBlacklistedPlayers()
         {
             try
             {
-                Core::File file(m_BlacklistedPlayersFilePath.c_str(), GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+                Core::File file(m_BlacklistedPlayersFilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
                 file.Write(content);
             }
             catch (const std::runtime_error& e)

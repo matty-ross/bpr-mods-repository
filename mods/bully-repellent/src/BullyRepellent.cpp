@@ -119,6 +119,15 @@ void BullyRepellent::Unload()
             m_CurrentLobby.SaveBlacklistedPlayers();
         }
 
+        // Remove menu.
+        {
+            m_Logger.Info("Removing menu...");
+
+            ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
+
+            m_Logger.Info("Removed menu.");
+        }
+
         // Detach UpatePlayerStatus detour.
         {
             m_Logger.Info("Detaching UpatePlayerStatus detour...");
