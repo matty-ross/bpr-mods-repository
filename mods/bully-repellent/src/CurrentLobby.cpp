@@ -52,7 +52,11 @@ void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
         return;
     }
 
-    // TODO: Don't perform blacklist actions if we aren't in '15' or '16' game mode.
+    int32_t currentGameMode = Core::Pointer(0x013FC8E0).deref().at(0x8F5368).as<int32_t>();
+    if (!(currentGameMode == 15 || currentGameMode == 16))
+    {
+        return;
+    }
     
     int32_t playersCount = guiEventNetworkPlayerStatus.at(0x9C0).as<int32_t>();
     for (int32_t i = 0; i < playersCount; ++i)
@@ -116,8 +120,23 @@ void CurrentLobby::OnRenderMenu()
                 bool isOnline = guiCache.at(0x7B00).as<bool>();
                 if (isOnline)
                 {
+                    auto getGameModeName = [](int32_t gameMode) -> const char*
+                    {
+                        switch (gameMode)
+                        {
+                        case 10: return "Race";
+                        case 12: return "Stunt Run";
+                        case 14: return "Stunt Run Free-for-all";
+                        case 15: return "Freeburn";
+                        case 16: return "Showtime";
+                        case 17: return "Stunt Run Co-op";
+                        }
+                        return "???";
+                    };
+                    
                     ImGui::Text("Lobby Name             %s", guiCache.at(0xEA00).as<char[65]>());
                     ImGui::Text("Local Player is Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
+                    ImGui::Text("Game Mode              %s", getGameModeName(guiCache.at(0xCF38).as<int32_t>()));
 
                     if (ImGui::BeginTable("##player-info-table", 3))
                     {
