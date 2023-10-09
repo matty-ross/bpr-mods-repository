@@ -24,12 +24,18 @@
     <ClCompile Include="src\CurrentLobby.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\BlacklistedPlayersFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BullyRepellent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\CurrentLobby.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BlacklistedPlayersFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

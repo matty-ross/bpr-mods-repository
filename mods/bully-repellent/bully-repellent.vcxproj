@@ -155,11 +155,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BlacklistedPlayersFile.cpp" />
     <ClCompile Include="src\CurrentLobby.cpp" />
     <ClCompile Include="src\BullyRepellent.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BlacklistedPlayersFile.h" />
     <ClInclude Include="src\CurrentLobby.h" />
     <ClInclude Include="src\BullyRepellent.h" />
   </ItemGroup>

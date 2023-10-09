@@ -23,7 +23,8 @@ BullyRepellent::BullyRepellent(HMODULE module)
     :
     Mod(module),
     m_Logger(k_ModName),
-    m_CurrentLobby(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s),
+    m_BlacklistedPlayersFile(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s),
+    m_CurrentLobby(m_BlacklistedPlayersFile),
     m_DetourOnGuiEventNetworkPlayerStatus
     {
         .HookAddress    = Core::Pointer(0x0092BEC8).GetAddress(),
@@ -96,7 +97,7 @@ void BullyRepellent::Load()
 
         // Load blacklisted players.
         {
-            m_CurrentLobby.LoadBlacklistedPlayers();
+            m_BlacklistedPlayersFile.Load();
         }
 
         m_Logger.Info("Loaded.");
@@ -116,7 +117,7 @@ void BullyRepellent::Unload()
 
         // Save blacklisted players.
         {
-            m_CurrentLobby.SaveBlacklistedPlayers();
+            m_BlacklistedPlayersFile.Save();
         }
 
         // Remove menu.
@@ -163,6 +164,7 @@ void BullyRepellent::OnRenderMenu()
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
         m_CurrentLobby.OnRenderMenu();
+        m_BlacklistedPlayersFile.OnRenderMenu();
 
         ImGui::PopItemWidth();
     }

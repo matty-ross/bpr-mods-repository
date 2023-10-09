@@ -9,6 +9,7 @@
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
 
+#include "BlacklistedPlayersFile.h"
 #include "CurrentLobby.h"
 
 
@@ -30,8 +31,10 @@ private:
 private:
     Core::Logger m_Logger;
     
+    BlacklistedPlayersFile m_BlacklistedPlayersFile;
     CurrentLobby m_CurrentLobby;
 
     DetourHook m_DetourOnGuiEventNetworkPlayerStatus;
+    
     ImGuiMenu m_Menu;
 };
