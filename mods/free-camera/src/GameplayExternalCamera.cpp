@@ -1,17 +1,10 @@
 #include "GameplayExternalCamera.h"
 
-#include <Windows.h>
-
 #include "imgui/imgui.h"
 
-#include "yaml-cpp/yaml.h"
 
-#include "core/File.h"
-
-
-GameplayExternalCamera::GameplayExternalCamera(Core::Logger& logger, const std::string& customParametersFilePath)
+GameplayExternalCamera::GameplayExternalCamera(CustomParametersFile& customParametersFile)
     :
-    m_Logger(logger),
     m_Parameters
     {
         .PitchSpring              = 0x3C,
@@ -27,7 +20,7 @@ GameplayExternalCamera::GameplayExternalCamera(Core::Logger& logger, const std::
         .DownAngle                = 0x94,
         .DropFactor               = 0xA8,
     },
-    m_CustomParametersFilePath(customParametersFilePath)
+    m_CustomParametersFile(customParametersFile)
 {
 }
 
@@ -155,6 +148,15 @@ void GameplayExternalCamera::OnRenderMenu()
                 renderParameter(m_Parameters.DropFactor,               [](Core::Pointer address) { ImGui::SliderFloat("Drop Factor", &address.as<float>(), 0.0f, 1.0f); });
 
                 ImGui::SeparatorText("Custom Parameters");
+                if (ImGui::Button("Save"))
+                {
+                    m_CustomParametersFile.Save();
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Load"))
+                {
+                    m_CustomParametersFile.Load();
+                }
                 static char name[64] = {};
                 if (ImGui::Button("Add Current Parameters"))
                 {
@@ -168,7 +170,7 @@ void GameplayExternalCamera::OnRenderMenu()
                 ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
                 if (ImGui::BeginListBox("##custom-parameters-list", ImVec2(-FLT_MIN, 0.0f)))
                 {
-                    for (const CustomParameters& customParameters : m_CustomParameters)
+                    for (const CustomParameters& customParameters : m_CustomParametersFile.GetCustomParameters())
                     {
                         ImGui::PushID(&customParameters);
                         if (ImGui::Selectable(customParameters.Name.c_str()))
@@ -180,129 +182,13 @@ void GameplayExternalCamera::OnRenderMenu()
 
                     ImGui::EndListBox();
                 }
-                if (ImGui::Button("Save"))
-                {
-                    SaveCustomParameters();
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Load"))
-                {
-                    LoadCustomParameters();
-                }
+                
                 
                 ImGui::EndTabItem();
             }
             
             ImGui::EndTabBar();
         }
-    }
-}
-
-void GameplayExternalCamera::LoadCustomParameters()
-{
-    try
-    {
-        m_Logger.Info("Loading custom parameters from file '%s' ...", m_CustomParametersFilePath.c_str());
-        
-        auto readFile = [this]() -> std::string
-        {
-            try
-            {
-                Core::File file(m_CustomParametersFilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
-                return file.Read();
-            }
-            catch (const std::runtime_error& e)
-            {
-                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-            }
-        
-            return std::string();
-        };
-        
-        YAML::Node yaml = YAML::Load(readFile());
-    
-        m_CustomParameters.clear();
-        
-        for (const YAML::Node& customParametersNode : yaml)
-        {
-            CustomParameters customParameters =
-            {
-                .Name                     = customParametersNode["Name"].as<std::string>(),
-                .PitchSpring              = customParametersNode["PitchSpring"].as<float>(),
-                .YawSpring                = customParametersNode["YawSpring"].as<float>(),
-                .PivotY                   = customParametersNode["PivotY"].as<float>(),
-                .PivotZ                   = customParametersNode["PivotZ"].as<float>(),
-                .PivotZOffset             = customParametersNode["PivotZOffset"].as<float>(),
-                .FOV                      = customParametersNode["FOV"].as<float>(),
-                .InFrontFOVMax            = customParametersNode["InFrontFOVMax"].as<float>(),
-                .FrontInAmount            = customParametersNode["FrontInAmount"].as<float>(),
-                .DriftYawSpring           = customParametersNode["DriftYawSpring"].as<float>(),
-                .BoostFOVZoomCompensation = customParametersNode["BoostFOVZoomCompensation"].as<float>(),
-                .DownAngle                = customParametersNode["DownAngle"].as<float>(),
-                .DropFactor               = customParametersNode["DropFactor"].as<float>()
-            };
-            
-            m_CustomParameters.push_back(customParameters);
-        }
-
-        m_Logger.Info("Loaded custom parameters.");
-    }
-    catch (const std::exception& e)
-    {
-        m_Logger.Warning("Failed to load custom parameters. %s", e.what());
-    }
-}
-
-void GameplayExternalCamera::SaveCustomParameters()
-{
-    try
-    {
-        m_Logger.Info("Saving custom parameters to file '%s' ...", m_CustomParametersFilePath.c_str());
-
-        auto writeFile = [this](const std::string& content) -> void
-        {
-            try
-            {
-                Core::File file(m_CustomParametersFilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
-                file.Write(content);
-            }
-            catch (const std::runtime_error& e)
-            {
-                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-            }
-        };
-        
-        YAML::Node yaml;
-        
-        for (const CustomParameters& customParameters : m_CustomParameters)
-        {
-            YAML::Node customParametersNode;
-            {
-                customParametersNode["Name"]                     = customParameters.Name;
-                customParametersNode["PitchSpring"]              = customParameters.PitchSpring;
-                customParametersNode["YawSpring"]                = customParameters.YawSpring;
-                customParametersNode["PivotY"]                   = customParameters.PivotY;
-                customParametersNode["PivotZ"]                   = customParameters.PivotZ;
-                customParametersNode["PivotZOffset"]             = customParameters.PivotZOffset;
-                customParametersNode["FOV"]                      = customParameters.FOV;
-                customParametersNode["InFrontFOVMax"]            = customParameters.InFrontFOVMax;
-                customParametersNode["FrontInAmount"]            = customParameters.FrontInAmount;
-                customParametersNode["DriftYawSpring"]           = customParameters.DriftYawSpring;
-                customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
-                customParametersNode["DownAngle"]                = customParameters.DownAngle;
-                customParametersNode["DropFactor"]               = customParameters.DropFactor;
-            }
-            
-            yaml.push_back(customParametersNode);
-        }
-
-        writeFile(YAML::Dump(yaml));
-
-        m_Logger.Info("Saved custom parameters.");
-    }
-    catch (const std::exception& e)
-    {
-        m_Logger.Warning("Failed to save custom parameters. %s", e.what());
     }
 }
 
@@ -345,5 +231,5 @@ void GameplayExternalCamera::AddCurrentParametersIntoCustomParameters(const char
         .DropFactor               = parameters.at(0xA8).as<float>(),
     };
     
-    m_CustomParameters.push_back(customParameters);
+    m_CustomParametersFile.AddCustomParameters(customParameters);
 }

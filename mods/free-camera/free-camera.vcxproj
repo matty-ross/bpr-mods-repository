@@ -169,6 +169,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\CustomParametersFile.cpp" />
     <ClCompile Include="src\CurrentCamera.cpp" />
     <ClCompile Include="src\Behaviors.cpp" />
     <ClCompile Include="src\GameplayExternalCamera.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CustomParametersFile.h" />
     <ClInclude Include="src\CurrentCamera.h" />
     <ClInclude Include="src\Behaviors.h" />
     <ClInclude Include="src\GameplayExternalCamera.h" />

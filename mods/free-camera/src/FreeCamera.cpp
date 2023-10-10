@@ -23,7 +23,8 @@ FreeCamera::FreeCamera(HMODULE module)
     :
     Mod(module),
     m_Logger(k_ModName),
-    m_GameplayExternalCamera(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
+    m_CustomParamtersFile(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
+    m_GameplayExternalCamera(m_CustomParamtersFile),
     m_DetourArbitratorUpdate
     {
         .HookAddress    = Core::Pointer(0x009645E0).GetAddress(),
@@ -96,7 +97,7 @@ void FreeCamera::Load()
 
         // Load custom parameters.
         {
-            m_GameplayExternalCamera.LoadCustomParameters();
+            m_CustomParamtersFile.Load();
         }
 
         m_Logger.Info("Loaded.");
@@ -116,7 +117,7 @@ void FreeCamera::Unload()
 
         // Save custom parameters.
         {
-            m_GameplayExternalCamera.SaveCustomParameters();
+            m_CustomParamtersFile.Save();
         }
 
         // Remove menu.

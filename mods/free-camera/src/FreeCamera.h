@@ -10,6 +10,7 @@
 #include "mod-manager/ImGuiManager.h"
 
 #include "CurrentCamera.h"
+#include "CustomParametersFile.h"
 #include "GameplayExternalCamera.h"
 #include "Behaviors.h"
 
@@ -32,10 +33,13 @@ private:
 private:
     Core::Logger m_Logger;
     
+    CustomParametersFile m_CustomParamtersFile;
+    
     CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
 
     DetourHook m_DetourArbitratorUpdate;
+    
     ImGuiMenu m_Menu;
 };
