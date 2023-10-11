@@ -2,8 +2,6 @@
 
 #include <Windows.h>
 
-#include "imgui/imgui.h"
-
 #include "yaml-cpp/yaml.h"
 
 #include "core/File.h"
@@ -14,54 +12,6 @@ BlacklistedPlayersFile::BlacklistedPlayersFile(const Core::Logger& logger, const
     m_Logger(logger),
     m_FilePath(filePath)
 {
-}
-
-void BlacklistedPlayersFile::OnRenderMenu()
-{
-    if (ImGui::CollapsingHeader("Blacklisted Players"))
-    {
-        if (ImGui::Button("Save"))
-        {
-            Save();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load"))
-        {
-            Load();
-        }
-        ImGui::SameLine();
-        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
-        
-        if (ImGui::BeginTable("##blacklisted-players-table", 3))
-        {
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Autokick");
-            ImGui::TableSetupColumn("Automute");
-            ImGui::TableHeadersRow();
-
-            for (uint64_t blacklistedPlayerID : m_BlacklistedPlayerIDs)
-            {
-                BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayers.at(blacklistedPlayerID);
-
-                ImGui::PushID(&blacklistedPlayer);
-
-                ImGui::TableNextRow();
-
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
-
-                ImGui::TableSetColumnIndex(1);
-                ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
-
-                ImGui::TableSetColumnIndex(2);
-                ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
-
-                ImGui::PopID();
-            }
-
-            ImGui::EndTable();
-        }
-    }
 }
 
 void BlacklistedPlayersFile::Load()
@@ -157,18 +107,18 @@ void BlacklistedPlayersFile::Save()
     }
 }
 
-const std::map<uint64_t, BlacklistedPlayer>& BlacklistedPlayersFile::GetBlacklistedPlayers() const
+std::map<uint64_t, BlacklistedPlayer>& BlacklistedPlayersFile::GetBlacklistedPlayers()
 {
     return m_BlacklistedPlayers;
+}
+
+const std::vector<uint64_t>& BlacklistedPlayersFile::GetBlacklistedPlayerIDs() const
+{
+    return m_BlacklistedPlayerIDs;
 }
 
 void BlacklistedPlayersFile::AddBlacklistedPlayer(uint64_t blacklistedPlayerID, const BlacklistedPlayer& blacklistedPlayer)
 {
     m_BlacklistedPlayers[blacklistedPlayerID] = blacklistedPlayer;
     m_BlacklistedPlayerIDs.push_back(blacklistedPlayerID);
-}
-
-bool BlacklistedPlayersFile::IsBlacklistEnabled() const
-{
-    return m_BlacklistEnabled;
 }

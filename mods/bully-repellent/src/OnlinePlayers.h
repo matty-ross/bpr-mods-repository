@@ -6,10 +6,10 @@
 #include "BlacklistedPlayersFile.h"
 
 
-class CurrentLobby
+class OnlinePlayers
 {
 public:
-    CurrentLobby(BlacklistedPlayersFile& blacklistedPlayersFile);
+    OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile);
 
 public:
     void OnUpdate(Core::Pointer guiEventNetworkPlayerStatus);
@@ -17,4 +17,6 @@ public:
     
 private:
     BlacklistedPlayersFile& m_BlacklistedPlayersFile;
+
+    bool m_BlacklistEnabled = true;
 };

@@ -10,7 +10,7 @@
 #include "mod-manager/ImGuiManager.h"
 
 #include "BlacklistedPlayersFile.h"
-#include "CurrentLobby.h"
+#include "OnlinePlayers.h"
 
 
 class BullyRepellent : public Core::Mod
@@ -32,7 +32,8 @@ private:
     Core::Logger m_Logger;
     
     BlacklistedPlayersFile m_BlacklistedPlayersFile;
-    CurrentLobby m_CurrentLobby;
+    
+    OnlinePlayers m_OnlinePlayers;
 
     DetourHook m_DetourOnGuiEventNetworkPlayerStatus;
     

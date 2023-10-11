@@ -1,4 +1,4 @@
-#include "CurrentLobby.h"
+#include "OnlinePlayers.h"
 
 #include "imgui/imgui.h"
 
@@ -32,15 +32,15 @@ namespace BPR
 }
 
 
-CurrentLobby::CurrentLobby(BlacklistedPlayersFile& blacklistedPlayersFile)
+OnlinePlayers::OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile)
     :
     m_BlacklistedPlayersFile(blacklistedPlayersFile)
 {
 }
 
-void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
+void OnlinePlayers::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
 {
-    if (!m_BlacklistedPlayersFile.IsBlacklistEnabled())
+    if (!m_BlacklistEnabled)
     {
         return;
     }
@@ -100,12 +100,15 @@ void CurrentLobby::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
     }
 }
 
-void CurrentLobby::OnRenderMenu()
+void OnlinePlayers::OnRenderMenu()
 {
-    if (ImGui::CollapsingHeader("Current Lobby"))
+    if (ImGui::CollapsingHeader("Online Players"))
     {
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
+        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
+
+        ImGui::SeparatorText("Current Players");
         bool isOnline = guiCache.at(0x7B00).as<bool>();
         if (isOnline)
         {
@@ -180,6 +183,50 @@ void CurrentLobby::OnRenderMenu()
 
                 ImGui::EndTable();
             }
+        }
+        else
+        {
+            ImGui::TextUnformatted("Currently Offline");
+        }
+
+        ImGui::SeparatorText("Blacklisted Players");
+        if (ImGui::Button("Save"))
+        {
+            m_BlacklistedPlayersFile.Save();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Load"))
+        {
+            m_BlacklistedPlayersFile.Load();
+        }
+        if (ImGui::BeginTable("##blacklisted-players-table", 3))
+        {
+            ImGui::TableSetupColumn("Name");
+            ImGui::TableSetupColumn("Autokick");
+            ImGui::TableSetupColumn("Automute");
+            ImGui::TableHeadersRow();
+
+            for (uint64_t blacklistedPlayerID : m_BlacklistedPlayersFile.GetBlacklistedPlayerIDs())
+            {
+                BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayersFile.GetBlacklistedPlayers().at(blacklistedPlayerID);
+
+                ImGui::PushID(&blacklistedPlayer);
+
+                ImGui::TableNextRow();
+
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
+
+                ImGui::TableSetColumnIndex(1);
+                ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
+
+                ImGui::TableSetColumnIndex(2);
+                ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
+
+                ImGui::PopID();
+            }
+
+            ImGui::EndTable();
         }
     }
 }
