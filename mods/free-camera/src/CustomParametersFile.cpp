@@ -2,8 +2,6 @@
 
 #include <Windows.h>
 
-#include "imgui/imgui.h"
-
 #include "yaml-cpp/yaml.h"
 
 #include "core/File.h"

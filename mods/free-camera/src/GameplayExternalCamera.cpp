@@ -183,7 +183,6 @@ void GameplayExternalCamera::OnRenderMenu()
                     ImGui::EndListBox();
                 }
                 
-                
                 ImGui::EndTabItem();
             }
             
