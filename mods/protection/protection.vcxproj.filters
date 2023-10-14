@@ -18,12 +18,18 @@
     <ClInclude Include="src\Protection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\VehiclesFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Protection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VehiclesFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
