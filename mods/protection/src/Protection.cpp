@@ -2,6 +2,10 @@
 
 #include "imgui/imgui.h"
 
+#include "core/Pointer.h"
+
+#include "mod-manager/ModManager.h"
+
 
 using namespace std::string_literals;
 
@@ -29,10 +33,91 @@ Protection::Protection(HMODULE module)
 
 void Protection::Load()
 {
+    try
+    {
+        m_Logger.Info("Loading...");
+
+        // Create mod directory.
+        {
+            m_Logger.Info("Creating mod directory '%s' ...", k_ModDirectory);
+
+            CreateDirectoryA(k_ModDirectory, nullptr);
+
+            m_Logger.Info("Created mod directory.");
+        }
+
+        // Wait to be in game.
+        {
+            m_Logger.Info("Waiting to be in game...");
+
+            auto isInGameState = []() -> bool
+            {
+                Core::Pointer gameModule = 0x013FC8E0;
+
+                return
+                    gameModule.as<void*>() != nullptr &&
+                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
+                ;
+            };
+
+            while (!isInGameState())
+            {
+                Sleep(1000);
+            }
+
+            m_Logger.Info("In game.");
+        }
+
+        // Add menu.
+        {
+            m_Logger.Info("Adding menu...");
+
+            ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
+
+            m_Logger.Info("Added menu.");
+        }
+
+        // Load vehicles.
+        {
+            m_VehiclesFile.Load();
+        }
+
+        m_Logger.Info("Loaded.");
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error("%s", e.what());
+        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+    }
 }
 
 void Protection::Unload()
 {
+    try
+    {
+        m_Logger.Info("Unloading...");
+
+        // Save vehicles.
+        {
+            m_VehiclesFile.Save();
+        }
+
+        // Remove menu.
+        {
+            m_Logger.Info("Removing menu...");
+
+            ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
+
+            m_Logger.Info("Removed menu.");
+        }
+
+        m_Logger.Info("Unloaded.");
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Error("%s", e.what());
+        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+    }
 }
 
 void Protection::OnRenderMenu()

@@ -24,6 +24,9 @@
     <ClInclude Include="src\VehicleProtection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\OriginalVehicles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Protection.cpp">
