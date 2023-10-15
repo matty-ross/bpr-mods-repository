@@ -157,11 +157,13 @@
   <ItemGroup>
     <ClInclude Include="src\Protection.h" />
     <ClInclude Include="src\VehiclesFile.h" />
+    <ClInclude Include="src\VehicleProtection.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Protection.cpp" />
     <ClCompile Include="src\VehiclesFile.cpp" />
+    <ClCompile Include="src\VehicleProtection.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
