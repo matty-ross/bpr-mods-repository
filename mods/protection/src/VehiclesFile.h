@@ -7,6 +7,15 @@
 
 #include "core/Logger.h"
 
+#include "Vehicles.h"
+
+
+struct Vehicle
+{
+    VehicleID NewID;
+    const VehicleID* ReplacementID;
+};
+
 
 class VehiclesFile
 {
@@ -17,20 +26,15 @@ public:
     void Load();
     void Save();
 
-    uint64_t GetFallbackVehicleID() const;
-    void SetFallbackVehicleID(uint64_t fallbackVehicleID);
-
-    std::map<uint64_t, uint64_t>& GetVehicles();
+    std::map<uint64_t, Vehicle>& GetVehicles();
     const std::vector<uint64_t>& GetVehicleIDs() const;
-    void AddVehicle(uint64_t vehicleID, uint64_t vehicleReplacementID);
+    void AddVehicle(const Vehicle& vehicle);
 
 private:
     const Core::Logger& m_Logger;
 
     std::string m_FilePath;
-    
-    uint64_t m_FallbackVehicleID = 0x0000000000000000;
 
-    std::map<uint64_t, uint64_t> m_Vehicles;
+    std::map<uint64_t, Vehicle> m_Vehicles;
     std::vector<uint64_t> m_VehicleIDs;
 };

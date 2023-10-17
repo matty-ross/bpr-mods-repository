@@ -24,7 +24,7 @@
     <ClInclude Include="src\VehicleProtection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OriginalVehicles.h">
+    <ClInclude Include="src\Vehicles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

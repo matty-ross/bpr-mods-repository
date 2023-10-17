@@ -155,7 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\OriginalVehicles.h" />
+    <ClInclude Include="src\Vehicles.h" />
     <ClInclude Include="src\Protection.h" />
     <ClInclude Include="src\VehiclesFile.h" />
     <ClInclude Include="src\VehicleProtection.h" />

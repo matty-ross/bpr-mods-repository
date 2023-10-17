@@ -11,7 +11,14 @@ struct VehicleID
 };
 
 
-inline constexpr std::array<VehicleID, 496> k_OriginalVehicleIDs =
+inline constexpr VehicleID k_FallbackVehicleID =
+{
+    .Compressed   = 0xA7E60F1A3A360000,
+    .Uncompressed = "PUSMC01"
+};
+
+
+inline constexpr std::array<VehicleID, 496> k_VanillaVehicleIDs =
 {
     VehicleID{ .Compressed = 0xA7E60F1A3A360000, .Uncompressed = "PUSMC01"    },
     VehicleID{ .Compressed = 0xD676FB5119E20000, .Uncompressed = "XUSM1B1"    },

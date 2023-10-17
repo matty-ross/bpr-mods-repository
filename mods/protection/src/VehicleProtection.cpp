@@ -2,7 +2,7 @@
 
 #include "imgui/imgui.h"
 
-#include "OriginalVehicles.h"
+#include "Vehicles.h"
 
 
 VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
@@ -17,24 +17,6 @@ void VehicleProtection::OnRenderMenu()
     {
         ImGui::Checkbox("Vehicle Protection Enabled", &m_VehicleProtectionEnabled);
 
-        if (ImGui::BeginCombo("Fallback Vehicle", nullptr))
-        {
-            for (const VehicleID& originalVehicleID : k_OriginalVehicleIDs)
-            {
-                bool selected = originalVehicleID.Compressed == m_VehiclesFile.GetFallbackVehicleID();
-                if (ImGui::Selectable(originalVehicleID.Uncompressed, selected))
-                {
-                    m_VehiclesFile.SetFallbackVehicleID(originalVehicleID.Compressed);
-                }
-                if (selected)
-                {
-                    ImGui::SetItemDefaultFocus();
-                }
-            }
-
-            ImGui::EndCombo();
-        }
-
         if (ImGui::Button("Save"))
         {
             m_VehiclesFile.Save();
@@ -44,11 +26,43 @@ void VehicleProtection::OnRenderMenu()
         {
             m_VehiclesFile.Load();
         }
-        if (ImGui::BeginTable("##replacement-vehicles-table", 2))
+        if (ImGui::BeginTable("##vehicles-table", 2))
         {
             ImGui::TableSetupColumn("New Vehicle");
             ImGui::TableSetupColumn("Replacement Vehicle");
             ImGui::TableHeadersRow();
+
+            for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
+            {
+                Vehicle& vehicle = m_VehiclesFile.GetVehicles().at(vehicleID);
+
+                ImGui::PushID(&vehicle);
+
+                ImGui::TableNextRow();
+
+                ImGui::TableSetColumnIndex(0);
+                ImGui::TextUnformatted(vehicle.NewID.Uncompressed);
+
+                ImGui::TableSetColumnIndex(1);
+                if (ImGui::BeginCombo("##replacement-vehicle-combo", vehicle.ReplacementID->Uncompressed))
+                {
+                    for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
+                    {
+                        bool selected = vehicle.ReplacementID->Compressed == vanillaVehicleID.Compressed;
+                        if (ImGui::Selectable(vanillaVehicleID.Uncompressed, selected))
+                        {
+                            vehicle.ReplacementID = &vanillaVehicleID;
+                        }
+                        if (selected)
+                        {
+                            ImGui::SetItemDefaultFocus();
+                        }
+                    }
+                    ImGui::EndCombo();
+                }
+
+                ImGui::PopID();
+            }
 
             ImGui::EndTable();
         }

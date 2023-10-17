@@ -37,20 +37,18 @@ void VehiclesFile::Save()
             }
         };
 
-        // TODO: use the uncompressed vehicle IDss
-
         YAML::Node yaml;
-        {
-            yaml["FallbackVehicleID"] = m_FallbackVehicleID;
-        }
 
         for (uint64_t vehicleID : m_VehicleIDs)
         {
-            uint64_t replacementVehicleID = m_Vehicles.at(vehicleID);
+            const Vehicle& vehicle = m_Vehicles.at(vehicleID);
+            YAML::Node vehicleNode;
+            {
+                vehicleNode["NewID"]         = vehicle.NewID.Uncompressed;
+                vehicleNode["ReplacementID"] = vehicle.ReplacementID->Uncompressed;
+            }
             
-            char key[32] = {};
-            sprintf_s(key, "%llu", replacementVehicleID);
-            yaml["Vehicles"][key] = replacementVehicleID;
+            yaml.push_back(vehicleNode);
         }
 
         writeFile(YAML::Dump(yaml));
@@ -63,17 +61,7 @@ void VehiclesFile::Save()
     }
 }
 
-uint64_t VehiclesFile::GetFallbackVehicleID() const
-{
-    return m_FallbackVehicleID;
-}
-
-void VehiclesFile::SetFallbackVehicleID(uint64_t fallbackVehicleID)
-{
-    m_FallbackVehicleID = fallbackVehicleID;
-}
-
-std::map<uint64_t, uint64_t>& VehiclesFile::GetVehicles()
+std::map<uint64_t, Vehicle>& VehiclesFile::GetVehicles()
 {
     return m_Vehicles;
 }
@@ -83,8 +71,9 @@ const std::vector<uint64_t>& VehiclesFile::GetVehicleIDs() const
     return m_VehicleIDs;
 }
 
-void VehiclesFile::AddVehicle(uint64_t vehicleID, uint64_t vehicleReplacementID)
+void VehiclesFile::AddVehicle(const Vehicle& vehicle)
 {
-    m_Vehicles[vehicleID] = vehicleReplacementID;
+    uint64_t vehicleID = vehicle.NewID.Compressed;
+    m_Vehicles[vehicleID] = vehicle;
     m_VehicleIDs.push_back(vehicleID);
 }
