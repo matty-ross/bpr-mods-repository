@@ -2,7 +2,7 @@
 
 #include "imgui/imgui.h"
 
-#include "Vehicles.h"
+#include "core/Pointer.h"
 
 
 VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
@@ -67,4 +67,35 @@ void VehicleProtection::OnRenderMenu()
             ImGui::EndTable();
         }
     }
+}
+
+void VehicleProtection::InitNonVanillaVehicleIDs()
+{
+    Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350);
+
+    m_NonVanillaVehicleIDs.clear();
+
+    int32_t vehiclesCount = vehicleList.at(0x3400).as<int32_t>();
+    for (int32_t i = 0; i < vehiclesCount; ++i)
+    {
+        Core::Pointer vehicleSlot = vehicleList.at(0x400 + i * 0xC);
+        Core::Pointer list = vehicleList.at(0x0 + vehicleSlot.at(0x4).as<int32_t>() * 0x20).as<void*>();
+        Core::Pointer entry = list.at(0x4).deref().at(vehicleSlot.at(0x8).as<int32_t>() * 0x108);
+
+        uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
+        if (!IsVanillaVehicleID(vehicleID))
+        {
+            m_NonVanillaVehicleIDs.push_back(
+                {
+                    .Compressed = vehicleID,
+                    .Uncompressed = "", // TODO
+                }
+            );
+        }
+    }
+}
+
+const std::vector<VehicleID>& VehicleProtection::GetNonVanillaVehicleIDs() const
+{
+    return m_NonVanillaVehicleIDs;
 }
