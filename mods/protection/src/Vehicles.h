@@ -519,14 +519,15 @@ inline constexpr std::array<VehicleID, 496> k_VanillaVehicleIDs =
 };
 
 
-inline bool IsVanillaVehicleID(uint64_t vehicleID)
+inline const VehicleID* GetVanillaVehicleID(uint64_t vehicleID)
 {
-    auto it = std::find_if(k_VanillaVehicleIDs.begin(), k_VanillaVehicleIDs.end(),
-        [vehicleID](const VehicleID& vanillaVehicleID) -> bool
+    for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
+    {
+        if (vanillaVehicleID.Compressed == vehicleID)
         {
-            return vehicleID == vanillaVehicleID.Compressed;
+            return &vanillaVehicleID;
         }
-    );
+    }
 
-    return it != k_VanillaVehicleIDs.end();
+    return nullptr;    
 }

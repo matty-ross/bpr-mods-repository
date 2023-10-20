@@ -6,6 +6,8 @@
 
 #include "core/File.h"
 
+#include "bpr/CgsID.h"
+
 
 VehiclesFile::VehiclesFile(const Core::Logger& logger, const std::string& filePath)
     :
@@ -16,6 +18,50 @@ VehiclesFile::VehiclesFile(const Core::Logger& logger, const std::string& filePa
 
 void VehiclesFile::Load()
 {
+    try
+    {
+        m_Logger.Info("Loading vehicles from file '%s' ...", m_FilePath.c_str());
+
+        auto readFile = [this]() -> std::string
+        {
+            try
+            {
+                Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+                return file.Read();
+            }
+            catch (const std::runtime_error& e)
+            {
+                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
+            }
+
+            return std::string();
+        };
+
+        YAML::Node yaml = YAML::Load(readFile());
+
+        m_Vehicles.clear();
+        m_VehicleIDs.clear();
+
+        for (const YAML::Node& vehicleNode : yaml)
+        {
+            std::string newVehicleID = vehicleNode["NewID"].as<std::string>();
+            std::string replacementVehicleID = vehicleNode["ReplacementID"].as<std::string>();
+
+            Vehicle vehicle = {};
+            vehicle.NewID.Compressed = BPR::CgsID_Compress(newVehicleID.c_str());
+            strcpy_s(vehicle.NewID.Uncompressed, newVehicleID.c_str());
+            vehicle.ReplacementID = GetVanillaVehicleID(BPR::CgsID_Compress(replacementVehicleID.c_str()));
+            
+            m_Vehicles[vehicle.NewID.Compressed] = vehicle;
+            m_VehicleIDs.push_back(vehicle.NewID.Compressed);
+        }
+
+        m_Logger.Info("Loaded vehicles.");
+    }
+    catch (const std::exception& e)
+    {
+        m_Logger.Warning("Failed to load vehicles. %s", e.what());
+    }
 }
 
 void VehiclesFile::Save()

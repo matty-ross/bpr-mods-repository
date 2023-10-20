@@ -4,6 +4,8 @@
 
 #include "core/Pointer.h"
 
+#include "bpr/CgsID.h"
+
 
 VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
     :
@@ -69,11 +71,9 @@ void VehicleProtection::OnRenderMenu()
     }
 }
 
-void VehicleProtection::InitNonVanillaVehicleIDs()
+void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
 {
     Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350);
-
-    m_NonVanillaVehicleIDs.clear();
 
     int32_t vehiclesCount = vehicleList.at(0x3400).as<int32_t>();
     for (int32_t i = 0; i < vehiclesCount; ++i)
@@ -83,19 +83,31 @@ void VehicleProtection::InitNonVanillaVehicleIDs()
         Core::Pointer entry = list.at(0x4).deref().at(vehicleSlot.at(0x8).as<int32_t>() * 0x108);
 
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
-        if (!IsVanillaVehicleID(vehicleID))
+        if (GetVanillaVehicleID(vehicleID) == nullptr)
         {
-            m_NonVanillaVehicleIDs.push_back(
+            VehicleID nonVanillaVehicleID = {};
+            nonVanillaVehicleID.Compressed = vehicleID;
+            BPR::CgsID_Uncompress(vehicleID, nonVanillaVehicleID.Uncompressed);
+            
+            m_VehiclesFile.AddVehicle(
                 {
-                    .Compressed = vehicleID,
-                    .Uncompressed = "", // TODO
+                    .NewID = nonVanillaVehicleID,
+                    .ReplacementID = &k_FallbackVehicleID,
                 }
             );
         }
     }
 }
 
-const std::vector<VehicleID>& VehicleProtection::GetNonVanillaVehicleIDs() const
+void VehicleProtection::ValidateReplacementVehicles()
 {
-    return m_NonVanillaVehicleIDs;
+    for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
+    {
+        Vehicle& vehicle = m_VehiclesFile.GetVehicles().at(vehicleID);
+
+        if (vehicle.ReplacementID == nullptr)
+        {
+            vehicle.ReplacementID = &k_FallbackVehicleID;
+        }
+    }
 }
