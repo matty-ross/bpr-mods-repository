@@ -82,6 +82,16 @@ void Protection::Load()
             m_VehiclesFile.Load();
         }
 
+        // Add non-vanilla vehicles and validate them.
+        {
+            m_Logger.Info("Adding non-vanilla vehicles and validating them...");
+
+            m_VehicleProtection.AddNonVanillaVehicleIDsToVehiclesFile();
+            m_VehicleProtection.ValidateReplacementVehicles(); // TODO: move the validation elsewhere.
+
+            m_Logger.Info("Added non-vanilla vehicles and validated them.");
+        }
+
         m_Logger.Info("Loaded.");
     }
     catch (const std::exception& e)

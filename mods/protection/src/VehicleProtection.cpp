@@ -87,7 +87,7 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
         {
             VehicleID nonVanillaVehicleID = {};
             nonVanillaVehicleID.Compressed = vehicleID;
-            BPR::CgsID_Uncompress(vehicleID, nonVanillaVehicleID.Uncompressed);
+            BPR::CgsID_ConvertToString(vehicleID, nonVanillaVehicleID.Uncompressed);
             
             m_VehiclesFile.AddVehicle(
                 {

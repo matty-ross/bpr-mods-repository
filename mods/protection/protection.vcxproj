@@ -167,9 +167,6 @@
     <ClCompile Include="src\VehicleProtection.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\libraries\bpr\bpr.vcxproj">
-      <Project>{a245079c-fe1e-4964-8aff-62bff8dc6039}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
       <Project>{faa3b443-7ff9-4c2c-a140-1a0600e97539}</Project>
     </ProjectReference>

@@ -14,7 +14,7 @@ struct VehicleID
 inline constexpr VehicleID k_FallbackVehicleID =
 {
     .Compressed   = 0xA7E60F1A3A360000,
-    .Uncompressed = "PUSMC01"
+    .Uncompressed = "PUSMC01",
 };
 
 
