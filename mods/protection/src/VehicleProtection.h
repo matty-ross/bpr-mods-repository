@@ -15,6 +15,7 @@ public:
 public:
     void OnRenderMenu();
 
+    uint64_t HandleVehicleID(uint64_t vehicleID);
     void AddNonVanillaVehicleIDsToVehiclesFile();
     void ValidateReplacementVehicles();
 

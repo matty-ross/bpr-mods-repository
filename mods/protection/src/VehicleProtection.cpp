@@ -71,6 +71,23 @@ void VehicleProtection::OnRenderMenu()
     }
 }
 
+uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
+{
+    bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
+    if (isVanilla)
+    {
+        return vehicleID;
+    }
+
+    auto it = m_VehiclesFile.GetVehicles().find(vehicleID);
+    if (it == m_VehiclesFile.GetVehicles().end())
+    {
+        return k_FallbackVehicleID.Compressed;
+    }
+
+    return it->second.ReplacementID->Compressed;
+}
+
 void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
 {
     Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350);
@@ -79,11 +96,16 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
     for (int32_t i = 0; i < vehiclesCount; ++i)
     {
         Core::Pointer vehicleSlot = vehicleList.at(0x400 + i * 0xC);
-        Core::Pointer list = vehicleList.at(0x0 + vehicleSlot.at(0x4).as<int32_t>() * 0x20).as<void*>();
-        Core::Pointer entry = list.at(0x4).deref().at(vehicleSlot.at(0x8).as<int32_t>() * 0x108);
+        int32_t listIndex = vehicleSlot.at(0x4).as<int32_t>();
+        int32_t entryIndex = vehicleSlot.at(0x8).as<int32_t>();
+
+        Core::Pointer list = vehicleList.at(0x0 + listIndex * 0x20).as<void*>();
+        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0x108);
 
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
-        if (GetVanillaVehicleID(vehicleID) == nullptr)
+        bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
+        bool isInFile = m_VehiclesFile.GetVehicles().contains(vehicleID);
+        if (!isVanilla && !isInFile)
         {
             VehicleID nonVanillaVehicleID = {};
             nonVanillaVehicleID.Compressed = vehicleID;
