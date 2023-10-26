@@ -15,7 +15,11 @@ public:
 public:
     void OnRenderMenu();
 
+    void OnPlayerParamsSerialize(void* playerParams);
+    void OnPlayerParamsDeserialize(void* playerParams);
+
     uint64_t HandleVehicleID(uint64_t vehicleID);
+    
     void AddNonVanillaVehicleIDsToVehiclesFile();
     void ValidateReplacementVehicles();
 

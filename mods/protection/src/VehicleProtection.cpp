@@ -7,6 +7,26 @@
 #include "bpr/CgsID.h"
 
 
+namespace BPR
+{
+    void GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
+    {
+        __asm
+        {
+
+        }
+    }
+
+    void SetFreeburnVehicleID(void* playerParams, uint64_t vehicleID)
+    {
+        __asm
+        {
+
+        }
+    }
+}
+
+
 VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
     :
     m_VehiclesFile(vehiclesFile)
@@ -69,6 +89,19 @@ void VehicleProtection::OnRenderMenu()
             ImGui::EndTable();
         }
     }
+}
+
+void VehicleProtection::OnPlayerParamsSerialize(void* playerParams)
+{
+    uint64_t vehicleID = 0x0000000000000000;
+ 
+    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
+    vehicleID = HandleVehicleID(vehicleID);
+    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
+}
+
+void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
+{
 }
 
 uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
