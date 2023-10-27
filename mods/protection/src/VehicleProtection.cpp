@@ -13,7 +13,11 @@ namespace BPR
     {
         __asm
         {
+            push dword ptr [vehicleID]
+            mov ecx, dword ptr [playerParams]
 
+            mov eax, 0x004FF0D0
+            call eax
         }
     }
 
@@ -21,7 +25,12 @@ namespace BPR
     {
         __asm
         {
+            push dword ptr [vehicleID + 0x4]
+            push dword ptr [vehicleID + 0x0]
+            mov ecx, dword ptr [playerParams]
 
+            mov eax, 0x004FF090
+            call eax
         }
     }
 }
@@ -102,23 +111,13 @@ void VehicleProtection::OnPlayerParamsSerialize(void* playerParams)
 
 void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
 {
-}
+    // TODO: skip self
 
-uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
-{
-    bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
-    if (isVanilla)
-    {
-        return vehicleID;
-    }
-
-    auto it = m_VehiclesFile.GetVehicles().find(vehicleID);
-    if (it == m_VehiclesFile.GetVehicles().end())
-    {
-        return k_FallbackVehicleID.Compressed;
-    }
-
-    return it->second.ReplacementID->Compressed;
+    uint64_t vehicleID = 0x0000000000000000;
+    
+    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
+    vehicleID = HandleVehicleID(vehicleID);
+    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
 }
 
 void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
@@ -154,15 +153,19 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
     }
 }
 
-void VehicleProtection::ValidateReplacementVehicles()
+uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
 {
-    for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
+    bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
+    if (isVanilla)
     {
-        Vehicle& vehicle = m_VehiclesFile.GetVehicles().at(vehicleID);
-
-        if (vehicle.ReplacementID == nullptr)
-        {
-            vehicle.ReplacementID = &k_FallbackVehicleID;
-        }
+        return vehicleID;
     }
+
+    auto it = m_VehiclesFile.GetVehicles().find(vehicleID);
+    if (it == m_VehiclesFile.GetVehicles().end())
+    {
+        return k_FallbackVehicleID.Compressed;
+    }
+
+    return it->second.ReplacementID->Compressed;
 }

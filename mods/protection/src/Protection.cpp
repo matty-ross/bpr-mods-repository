@@ -82,14 +82,13 @@ void Protection::Load()
             m_VehiclesFile.Load();
         }
 
-        // Add non-vanilla vehicles and validate them.
+        // Add non-vanilla vehicles.
         {
-            m_Logger.Info("Adding non-vanilla vehicles and validating them...");
+            m_Logger.Info("Adding non-vanilla vehicles...");
 
             m_VehicleProtection.AddNonVanillaVehicleIDsToVehiclesFile();
-            m_VehicleProtection.ValidateReplacementVehicles(); // TODO: move the validation elsewhere.
 
-            m_Logger.Info("Added non-vanilla vehicles and validated them.");
+            m_Logger.Info("Added non-vanilla vehicles.");
         }
 
         m_Logger.Info("Loaded.");

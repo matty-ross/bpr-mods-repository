@@ -44,13 +44,15 @@ void VehiclesFile::Load()
 
         for (const YAML::Node& vehicleNode : yaml)
         {
-            std::string newVehicleID = vehicleNode["NewID"].as<std::string>();
-            std::string replacementVehicleID = vehicleNode["ReplacementID"].as<std::string>();
+            std::string newID = vehicleNode["NewID"].as<std::string>();
+            std::string replacementID = vehicleNode["ReplacementID"].as<std::string>();
+            
+            const VehicleID* replacementVehicleID = GetVanillaVehicleID(BPR::CgsID_Compress(replacementID.c_str()));
 
             Vehicle vehicle = {};
-            vehicle.NewID.Compressed = BPR::CgsID_Compress(newVehicleID.c_str());
-            strcpy_s(vehicle.NewID.Uncompressed, newVehicleID.c_str());
-            vehicle.ReplacementID = GetVanillaVehicleID(BPR::CgsID_Compress(replacementVehicleID.c_str()));
+            vehicle.NewID.Compressed = BPR::CgsID_Compress(newID.c_str());
+            strcpy_s(vehicle.NewID.Uncompressed, newID.c_str());
+            vehicle.ReplacementID = replacementVehicleID != nullptr ? replacementVehicleID : &k_FallbackVehicleID;
             
             m_Vehicles[vehicle.NewID.Compressed] = vehicle;
             m_VehicleIDs.push_back(vehicle.NewID.Compressed);

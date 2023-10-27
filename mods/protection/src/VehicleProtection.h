@@ -18,10 +18,10 @@ public:
     void OnPlayerParamsSerialize(void* playerParams);
     void OnPlayerParamsDeserialize(void* playerParams);
 
-    uint64_t HandleVehicleID(uint64_t vehicleID);
-    
     void AddNonVanillaVehicleIDsToVehiclesFile();
-    void ValidateReplacementVehicles();
+    
+private:
+    uint64_t HandleVehicleID(uint64_t vehicleID);
 
 private:
     VehiclesFile& m_VehiclesFile;
