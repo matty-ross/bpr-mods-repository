@@ -16,12 +16,21 @@ static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
 static constexpr char k_ModDirectory[] = ".\\mods\\protection\\";
 
 
+extern Protection* g_Mod;
+
+
 Protection::Protection(HMODULE module)
     :
     Mod(module),
     m_Logger(k_ModName),
     m_VehiclesFile(m_Logger, k_ModDirectory + "vehicles.yaml"s),
     m_VehicleProtection(m_VehiclesFile),
+    m_DetourPlayerParamsSerialize
+    {
+        .HookAddress    = Core::Pointer(0x00B7218A).GetAddress(),
+        .DetourFunction = &Protection::DetourPlayerParamsSerialize,
+        .StubFunction   = nullptr,
+    },
     m_Menu
     {
         .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
@@ -145,4 +154,26 @@ void Protection::OnRenderMenu()
         ImGui::PopItemWidth();
     }
     ImGui::End();
+}
+
+void Protection::OnPlayerParamsSerialize(void* playerParams)
+{
+    m_VehicleProtection.OnPlayerParamsSerialize(playerParams);
+}
+
+__declspec(naked) void Protection::DetourPlayerParamsSerialize()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        push edi
+        mov ecx, dword ptr [g_Mod]
+        call Protection::OnPlayerParamsSerialize
+
+        popad
+        popfd    
+        ret
+    }
 }
