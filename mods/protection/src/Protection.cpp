@@ -31,6 +31,12 @@ Protection::Protection(HMODULE module)
         .DetourFunction = &Protection::DetourPlayerParamsSerialize,
         .StubFunction   = nullptr,
     },
+    m_DetourPlayerParamsDeserialize
+    {
+        .HookAddress    = Core::Pointer(0x00B72958).GetAddress(),
+        .DetourFunction = &Protection::DetourPlayerParamsDeserialize,
+        .StubFunction   = nullptr,
+    },
     m_Menu
     {
         .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
@@ -75,6 +81,24 @@ void Protection::Load()
             }
 
             m_Logger.Info("In game.");
+        }
+
+        // Attach PlayerParamsSerialize detour.
+        {
+            m_Logger.Info("Attaching PlayerParamsSerialize detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourPlayerParamsSerialize);
+
+            m_Logger.Info("Attached PlayerParamsSerialize detour.");
+        }
+
+        // Attach PlayerParamsDeserialize detour.
+        {
+            m_Logger.Info("Attaching PlayerParamsDeserialize detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourPlayerParamsDeserialize);
+
+            m_Logger.Info("Attached PlayerParamsDeserialize detour.");
         }
 
         // Add menu.
@@ -129,6 +153,24 @@ void Protection::Unload()
             m_Logger.Info("Removed menu.");
         }
 
+        // Detach PlayerParamsDeserialize detour.
+        {
+            m_Logger.Info("Detaching PlayerParamsDeserialize detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourPlayerParamsDeserialize);
+
+            m_Logger.Info("Detached PlayerParamsDeserialize detour.");
+        }
+
+        // Detach PlayerParamsSerialize detour.
+        {
+            m_Logger.Info("Detaching PlayerParamsSerialize detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourPlayerParamsSerialize);
+
+            m_Logger.Info("Detached PlayerParamsSerialize detour.");
+        }
+
         m_Logger.Info("Unloaded.");
     }
     catch (const std::exception& e)
@@ -156,9 +198,9 @@ void Protection::OnRenderMenu()
     ImGui::End();
 }
 
-void Protection::OnPlayerParamsSerialize(void* playerParams)
+VehicleProtection& Protection::GetVehicleProtection()
 {
-    m_VehicleProtection.OnPlayerParamsSerialize(playerParams);
+    return m_VehicleProtection;
 }
 
 __declspec(naked) void Protection::DetourPlayerParamsSerialize()
@@ -169,8 +211,31 @@ __declspec(naked) void Protection::DetourPlayerParamsSerialize()
         pushad
 
         push edi
+        
         mov ecx, dword ptr [g_Mod]
-        call Protection::OnPlayerParamsSerialize
+        call Protection::GetVehicleProtection
+        mov ecx, eax
+        call VehicleProtection::OnPlayerParamsSerialize
+
+        popad
+        popfd    
+        ret
+    }
+}
+
+__declspec(naked) void Protection::DetourPlayerParamsDeserialize()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        push edi
+        
+        mov ecx, dword ptr [g_Mod]
+        call Protection::GetVehicleProtection
+        mov ecx, eax
+        call VehicleProtection::OnPlayerParamsDeserialize
 
         popad
         popfd    

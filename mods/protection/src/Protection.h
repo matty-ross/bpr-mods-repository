@@ -24,10 +24,11 @@ private:
 
     void OnRenderMenu();
 
-    void OnPlayerParamsSerialize(void* playerParams);
+    VehicleProtection& GetVehicleProtection();
 
 private:
     static void DetourPlayerParamsSerialize();
+    static void DetourPlayerParamsDeserialize();
 
 private:
     Core::Logger m_Logger;
@@ -37,6 +38,7 @@ private:
     VehicleProtection m_VehicleProtection;
 
     DetourHook m_DetourPlayerParamsSerialize;
+    DetourHook m_DetourPlayerParamsDeserialize;
 
     ImGuiMenu m_Menu;
 };
