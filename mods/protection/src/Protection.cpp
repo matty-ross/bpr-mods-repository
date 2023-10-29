@@ -180,6 +180,21 @@ void Protection::Unload()
     }
 }
 
+void Protection::OnVehicleSelectMessage(void* vehicleSelectMessage)
+{
+    int32_t action = Core::Pointer(vehicleSelectMessage).at(0x4).as<int32_t>();
+    switch (action)
+    {
+    case 0: // E_PACK_INTO_BITSTREAM
+        m_VehicleProtection.OnVehicleSelectMessagePack(vehicleSelectMessage);
+        break;
+
+    case 1: // E_UNPACK_FROM_BITSTREAM
+        m_VehicleProtection.OnVehicleSelectMessageUnpack(vehicleSelectMessage);
+        break;
+    }
+}
+
 void Protection::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName))

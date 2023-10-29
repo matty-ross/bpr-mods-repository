@@ -42,6 +42,58 @@ VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
 {
 }
 
+void VehicleProtection::OnPlayerParamsSerialize(void* playerParams)
+{
+    if (!m_VehicleProtectionEnabled)
+    {
+        return;
+    }
+
+    uint64_t vehicleID = 0x0000000000000000;
+ 
+    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
+    vehicleID = HandleVehicleID(vehicleID);
+    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
+}
+
+void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
+{
+    if (!m_VehicleProtectionEnabled)
+    {
+        return;
+    }
+    
+    // TODO: Skip self to avoid respawn upon joining a room.
+
+    uint64_t vehicleID = 0x0000000000000000;
+    
+    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
+    vehicleID = HandleVehicleID(vehicleID);
+    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
+}
+
+void VehicleProtection::OnVehicleSelectMessagePack(void* vehicleSelectMessage)
+{
+    if (!m_VehicleProtectionEnabled)
+    {
+        return;
+    }
+
+    uint64_t& vehicleID = Core::Pointer(vehicleSelectMessage).at(0x38).as<uint64_t>();
+    vehicleID = HandleVehicleID(vehicleID);
+}
+
+void VehicleProtection::OnVehicleSelectMessageUnpack(void* vehicleSelectMessage)
+{
+    if (!m_VehicleProtectionEnabled)
+    {
+        return;
+    }
+    
+    uint64_t& vehicleID = Core::Pointer(vehicleSelectMessage).at(0x38).as<uint64_t>();
+    vehicleID = HandleVehicleID(vehicleID);
+}
+
 void VehicleProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Vehicle Protection"))
@@ -98,26 +150,6 @@ void VehicleProtection::OnRenderMenu()
             ImGui::EndTable();
         }
     }
-}
-
-void VehicleProtection::OnPlayerParamsSerialize(void* playerParams)
-{
-    uint64_t vehicleID = 0x0000000000000000;
- 
-    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
-    vehicleID = HandleVehicleID(vehicleID);
-    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
-}
-
-void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
-{
-    // TODO: skip self
-
-    uint64_t vehicleID = 0x0000000000000000;
-    
-    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
-    vehicleID = HandleVehicleID(vehicleID);
-    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
 }
 
 void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()

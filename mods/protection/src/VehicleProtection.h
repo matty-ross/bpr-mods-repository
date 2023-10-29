@@ -1,9 +1,6 @@
 #pragma once
 
 
-#include <vector>
-
-#include "Vehicles.h"
 #include "VehiclesFile.h"
 
 
@@ -13,10 +10,11 @@ public:
     VehicleProtection(VehiclesFile& vehiclesFile);
 
 public:
-    void OnRenderMenu();
-
     void OnPlayerParamsSerialize(void* playerParams);
     void OnPlayerParamsDeserialize(void* playerParams);
+    void OnVehicleSelectMessagePack(void* vehicleSelectMessage);
+    void OnVehicleSelectMessageUnpack(void* vehicleSelectMessage);
+    void OnRenderMenu();
 
     void AddNonVanillaVehicleIDsToVehiclesFile();
     

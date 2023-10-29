@@ -22,6 +22,7 @@ private:
     void Load() override;
     void Unload() override;
 
+    void OnVehicleSelectMessage(void* vehicleSelectMessage);
     void OnRenderMenu();
 
     VehicleProtection& GetVehicleProtection();
