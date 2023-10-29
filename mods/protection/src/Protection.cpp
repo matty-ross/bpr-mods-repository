@@ -113,6 +113,24 @@ void Protection::Load()
             m_Logger.Info("Attached PlayerParamsDeserialize detour.");
         }
 
+        // Attach VehicleSelectMessagePack detour.
+        {
+            m_Logger.Info("Attaching VehicleSelectMessagePack detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourVehicleSelectMessagePack);
+
+            m_Logger.Info("Attached VehicleSelectMessagePack detour.");
+        }
+
+        // Attach VehicleSelectMessageUnpack detour.
+        {
+            m_Logger.Info("Attaching VehicleSelectMessageUnpack detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourVehicleSelectMessageUnpack);
+
+            m_Logger.Info("Attached VehicleSelectMessageUnpack detour.");
+        }
+
         // Add menu.
         {
             m_Logger.Info("Adding menu...");
@@ -163,6 +181,24 @@ void Protection::Unload()
             ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
 
             m_Logger.Info("Removed menu.");
+        }
+
+        // Detach VehicleSelectMessageUnpack detour.
+        {
+            m_Logger.Info("Detaching VehicleSelectMessageUnpack detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourVehicleSelectMessageUnpack);
+
+            m_Logger.Info("Detached VehicleSelectMessageUnpack detour.");
+        }
+
+        // Detach VehicleSelectMessagePack detour.
+        {
+            m_Logger.Info("Detaching VehicleSelectMessagePack detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourVehicleSelectMessagePack);
+
+            m_Logger.Info("Detached VehicleSelectMessagePack detour.");
         }
 
         // Detach PlayerParamsDeserialize detour.
