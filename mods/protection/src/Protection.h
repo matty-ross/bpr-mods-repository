@@ -22,7 +22,6 @@ private:
     void Load() override;
     void Unload() override;
 
-    void OnVehicleSelectMessage(void* vehicleSelectMessage);
     void OnRenderMenu();
 
     VehicleProtection& GetVehicleProtection();
@@ -30,6 +29,8 @@ private:
 private:
     static void DetourPlayerParamsSerialize();
     static void DetourPlayerParamsDeserialize();
+    static void DetourVehicleSelectMessagePack();
+    static void DetourVehicleSelectMessageUnpack();
 
 private:
     Core::Logger m_Logger;
@@ -40,6 +41,8 @@ private:
 
     DetourHook m_DetourPlayerParamsSerialize;
     DetourHook m_DetourPlayerParamsDeserialize;
+    DetourHook m_DetourVehicleSelectMessagePack;
+    DetourHook m_DetourVehicleSelectMessageUnpack;
 
     ImGuiMenu m_Menu;
 };

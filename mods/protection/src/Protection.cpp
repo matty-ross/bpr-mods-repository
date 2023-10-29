@@ -37,6 +37,18 @@ Protection::Protection(HMODULE module)
         .DetourFunction = &Protection::DetourPlayerParamsDeserialize,
         .StubFunction   = nullptr,
     },
+    m_DetourVehicleSelectMessagePack
+    {
+        .HookAddress    = Core::Pointer(0x00B62095).GetAddress(),
+        .DetourFunction = &Protection::DetourVehicleSelectMessagePack,
+        .StubFunction   = nullptr,
+    },
+    m_DetourVehicleSelectMessageUnpack
+    {
+        .HookAddress    = Core::Pointer(0x00B6209F).GetAddress(),
+        .DetourFunction = &Protection::DetourVehicleSelectMessageUnpack,
+        .StubFunction   = nullptr,
+    },
     m_Menu
     {
         .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
@@ -180,21 +192,6 @@ void Protection::Unload()
     }
 }
 
-void Protection::OnVehicleSelectMessage(void* vehicleSelectMessage)
-{
-    int32_t action = Core::Pointer(vehicleSelectMessage).at(0x4).as<int32_t>();
-    switch (action)
-    {
-    case 0: // E_PACK_INTO_BITSTREAM
-        m_VehicleProtection.OnVehicleSelectMessagePack(vehicleSelectMessage);
-        break;
-
-    case 1: // E_UNPACK_FROM_BITSTREAM
-        m_VehicleProtection.OnVehicleSelectMessageUnpack(vehicleSelectMessage);
-        break;
-    }
-}
-
 void Protection::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName))
@@ -225,7 +222,7 @@ __declspec(naked) void Protection::DetourPlayerParamsSerialize()
         pushfd
         pushad
 
-        push edi
+        push edi // BrnNetwork::PlayerParams*
         
         mov ecx, dword ptr [g_Mod]
         call Protection::GetVehicleProtection
@@ -245,7 +242,7 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
         pushfd
         pushad
 
-        push edi
+        push edi // BrnNetwork::PlayerParams*
         
         mov ecx, dword ptr [g_Mod]
         call Protection::GetVehicleProtection
@@ -254,6 +251,54 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
 
         popad
         popfd    
+        ret
+    }
+}
+
+__declspec(naked) void Protection::DetourVehicleSelectMessagePack()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::E_PACK_INTO_BITSTREAM
+        jne _continue
+
+        push esi // BrnNetwork::CarSelectMessage*
+        
+        mov ecx, dword ptr [g_Mod]
+        call Protection::GetVehicleProtection
+        mov ecx, eax
+        call VehicleProtection::OnVehicleSelectMessagePack
+
+    _continue:
+        popad
+        popfd
+        ret
+    }
+}
+
+__declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::E_UNPACK_FROM_BITSTREAM
+        jne _continue
+
+        push esi // BrnNetwork::CarSelectMessage*
+        
+        mov ecx, dword ptr [g_Mod]
+        call Protection::GetVehicleProtection
+        mov ecx, eax
+        call VehicleProtection::OnVehicleSelectMessageUnpack
+        
+    _continue:
+        popad
+        popfd
         ret
     }
 }
