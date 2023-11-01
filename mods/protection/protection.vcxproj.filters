@@ -27,6 +27,12 @@
     <ClInclude Include="src\Vehicles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Challenges.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ChallengesFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Protection.cpp">
@@ -39,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\VehicleProtection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChallengesFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

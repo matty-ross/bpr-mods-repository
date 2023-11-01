@@ -155,12 +155,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\ChallengesFile.h" />
+    <ClInclude Include="src\Challenges.h" />
     <ClInclude Include="src\Vehicles.h" />
     <ClInclude Include="src\Protection.h" />
     <ClInclude Include="src\VehiclesFile.h" />
     <ClInclude Include="src\VehicleProtection.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ChallengesFile.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Protection.cpp" />
     <ClCompile Include="src\VehiclesFile.cpp" />

@@ -10,6 +10,7 @@
 #include "mod-manager/ImGuiManager.h"
 
 #include "VehiclesFile.h"
+#include "ChallengesFile.h"
 #include "VehicleProtection.h"
 
 
@@ -36,6 +37,7 @@ private:
     Core::Logger m_Logger;
 
     VehiclesFile m_VehiclesFile;
+    ChallengesFile m_ChallengesFile;
 
     VehicleProtection m_VehicleProtection;
 

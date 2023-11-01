@@ -24,6 +24,7 @@ Protection::Protection(HMODULE module)
     Mod(module),
     m_Logger(k_ModName),
     m_VehiclesFile(m_Logger, k_ModDirectory + "vehicles.yaml"s),
+    m_ChallengesFile(m_Logger, k_ModDirectory + "challenges.yaml"s),
     m_VehicleProtection(m_VehiclesFile),
     m_DetourPlayerParamsSerialize
     {
@@ -145,6 +146,11 @@ void Protection::Load()
             m_VehiclesFile.Load();
         }
 
+        // Load challenges.
+        {
+            m_ChallengesFile.Load();
+        }
+
         // Add non-vanilla vehicles.
         {
             m_Logger.Info("Adding non-vanilla vehicles...");
@@ -168,6 +174,11 @@ void Protection::Unload()
     try
     {
         m_Logger.Info("Unloading...");
+
+        // Save challenges.
+        {
+            m_ChallengesFile.Save();
+        }
 
         // Save vehicles.
         {
