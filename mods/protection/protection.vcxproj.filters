@@ -33,6 +33,9 @@
     <ClInclude Include="src\ChallengesFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\ChallengeProtection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Protection.cpp">
@@ -48,6 +51,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ChallengesFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChallengeProtection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

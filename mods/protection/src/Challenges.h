@@ -7,7 +7,7 @@
 struct ChallengeID
 {
     uint64_t Number;
-    char String[11];
+    char String[24];
 };
 
 

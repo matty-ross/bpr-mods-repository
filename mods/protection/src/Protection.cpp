@@ -26,6 +26,7 @@ Protection::Protection(HMODULE module)
     m_VehiclesFile(m_Logger, k_ModDirectory + "vehicles.yaml"s),
     m_ChallengesFile(m_Logger, k_ModDirectory + "challenges.yaml"s),
     m_VehicleProtection(m_VehiclesFile),
+    m_ChallengeProtection(m_ChallengesFile),
     m_DetourPlayerParamsSerialize
     {
         .HookAddress    = Core::Pointer(0x00B7218A).GetAddress(),
@@ -146,11 +147,6 @@ void Protection::Load()
             m_VehiclesFile.Load();
         }
 
-        // Load challenges.
-        {
-            m_ChallengesFile.Load();
-        }
-
         // Add non-vanilla vehicles.
         {
             m_Logger.Info("Adding non-vanilla vehicles...");
@@ -158,6 +154,20 @@ void Protection::Load()
             m_VehicleProtection.AddNonVanillaVehicleIDsToVehiclesFile();
 
             m_Logger.Info("Added non-vanilla vehicles.");
+        }
+
+        // Load challenges.
+        {
+            m_ChallengesFile.Load();
+        }
+
+        // Add non-vanilla challenges.
+        {
+            m_Logger.Info("Adding non-vanilla challenges...");
+
+            m_ChallengeProtection.AddNonVanillaChallengeIDsToChallengesFile();
+
+            m_Logger.Info("Added non-vanilla challenges.");
         }
 
         m_Logger.Info("Loaded.");
@@ -251,6 +261,7 @@ void Protection::OnRenderMenu()
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
         m_VehicleProtection.OnRenderMenu();
+        m_ChallengeProtection.OnRenderMenu();
 
         ImGui::PopItemWidth();
     }
@@ -260,6 +271,11 @@ void Protection::OnRenderMenu()
 VehicleProtection& Protection::GetVehicleProtection()
 {
     return m_VehicleProtection;
+}
+
+ChallengeProtection& Protection::GetChallengeProtection()
+{
+    return m_ChallengeProtection;
 }
 
 __declspec(naked) void Protection::DetourPlayerParamsSerialize()

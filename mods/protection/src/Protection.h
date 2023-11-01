@@ -12,6 +12,7 @@
 #include "VehiclesFile.h"
 #include "ChallengesFile.h"
 #include "VehicleProtection.h"
+#include "ChallengeProtection.h"
 
 
 class Protection : public Core::Mod
@@ -26,6 +27,7 @@ private:
     void OnRenderMenu();
 
     VehicleProtection& GetVehicleProtection();
+    ChallengeProtection& GetChallengeProtection();
 
 private:
     static void DetourPlayerParamsSerialize();
@@ -40,6 +42,7 @@ private:
     ChallengesFile m_ChallengesFile;
 
     VehicleProtection m_VehicleProtection;
+    ChallengeProtection m_ChallengeProtection;
 
     DetourHook m_DetourPlayerParamsSerialize;
     DetourHook m_DetourPlayerParamsDeserialize;
