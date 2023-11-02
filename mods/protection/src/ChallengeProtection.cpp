@@ -11,6 +11,28 @@ ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
 {
 }
 
+void ChallengeProtection::OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage)
+{
+    if (!m_ChallengeProtectionEnabled)
+    {
+        return;
+    }
+
+    uint64_t& challengeID = Core::Pointer(freeburnChallengeMessage).at(0x38).as<uint64_t>();
+    challengeID = HandleChallengeID(challengeID);
+}
+
+void ChallengeProtection::OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage)
+{
+    if (!m_ChallengeProtectionEnabled)
+    {
+        return;
+    }
+
+    uint64_t& challengeID = Core::Pointer(freeburnChallengeMessage).at(0x38).as<uint64_t>();
+    challengeID = HandleChallengeID(challengeID);
+}
+
 void ChallengeProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Challenge Protection"))

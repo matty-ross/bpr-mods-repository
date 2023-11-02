@@ -34,6 +34,8 @@ private:
     static void DetourPlayerParamsDeserialize();
     static void DetourVehicleSelectMessagePack();
     static void DetourVehicleSelectMessageUnpack();
+    static void DetourFreeburnChallengeMessagePack();
+    static void DetourFreeburnChallengeMessageUnpack();
 
 private:
     Core::Logger m_Logger;
@@ -48,6 +50,8 @@ private:
     DetourHook m_DetourPlayerParamsDeserialize;
     DetourHook m_DetourVehicleSelectMessagePack;
     DetourHook m_DetourVehicleSelectMessageUnpack;
+    DetourHook m_DetourFreeburnChallengeMessagePack;
+    DetourHook m_DetourFreeburnChallengeMessageUnpack;
 
     ImGuiMenu m_Menu;
 };

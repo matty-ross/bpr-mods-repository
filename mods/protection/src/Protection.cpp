@@ -51,6 +51,18 @@ Protection::Protection(HMODULE module)
         .DetourFunction = &Protection::DetourVehicleSelectMessageUnpack,
         .StubFunction   = nullptr,
     },
+    m_DetourFreeburnChallengeMessagePack
+    {
+        .HookAddress    = Core::Pointer(0x0790A490).GetAddress(),
+        .DetourFunction = &Protection::DetourFreeburnChallengeMessagePack,
+        .StubFunction   = nullptr,
+    },
+    m_DetourFreeburnChallengeMessageUnpack
+    {
+        .HookAddress    = Core::Pointer(0x0790A49A).GetAddress(),
+        .DetourFunction = &Protection::DetourFreeburnChallengeMessageUnpack,
+        .StubFunction   = nullptr,
+    },
     m_Menu
     {
         .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
@@ -133,6 +145,24 @@ void Protection::Load()
             m_Logger.Info("Attached VehicleSelectMessageUnpack detour.");
         }
 
+        // Attach FreeburnChallengeMessagePack detour.
+        {
+            m_Logger.Info("Attaching FreeburnChallengeMessagePack detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourFreeburnChallengeMessagePack);
+
+            m_Logger.Info("Attached FreeburnChallengeMessagePack detour.");
+        }
+
+        // Attach FreeburnChallengeMessageUnpack detour.
+        {
+            m_Logger.Info("Attaching FreeburnChallengeMessageUnpack detour...");
+
+            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourFreeburnChallengeMessageUnpack);
+
+            m_Logger.Info("Attached FreeburnChallengeMessageUnpack detour.");
+        }
+
         // Add menu.
         {
             m_Logger.Info("Adding menu...");
@@ -202,6 +232,24 @@ void Protection::Unload()
             ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
 
             m_Logger.Info("Removed menu.");
+        }
+
+        // Detach FreeburnChallengeMessageUnpack detour.
+        {
+            m_Logger.Info("Detaching FreeburnChallengeMessageUnpack detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourFreeburnChallengeMessageUnpack);
+
+            m_Logger.Info("Detached FreeburnChallengeMessageUnpack detour.");
+        }
+
+        // Detach FreeburnChallengeMessagePack detour.
+        {
+            m_Logger.Info("Detaching FreeburnChallengeMessagePack detour...");
+
+            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourFreeburnChallengeMessagePack);
+
+            m_Logger.Info("Detached FreeburnChallengeMessagePack detour.");
         }
 
         // Detach VehicleSelectMessageUnpack detour.
@@ -358,6 +406,54 @@ __declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
         call Protection::GetVehicleProtection
         mov ecx, eax
         call VehicleProtection::OnVehicleSelectMessageUnpack
+        
+    _continue:
+        popad
+        popfd
+        ret
+    }
+}
+
+__declspec(naked) void Protection::DetourFreeburnChallengeMessagePack()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::E_PACK_INTO_BITSTREAM
+        jne _continue
+
+        push esi // BrnNetwork::FreeburnChallengeMessage*
+        
+        mov ecx, dword ptr [g_Mod]
+        call Protection::GetChallengeProtection
+        mov ecx, eax
+        call ChallengeProtection::OnFreeburnChallengeMessagePack
+
+    _continue:
+        popad
+        popfd
+        ret
+    }
+}
+
+__declspec(naked) void Protection::DetourFreeburnChallengeMessageUnpack()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::E_UNPACK_FROM_BITSTREAM
+        jne _continue
+
+        push esi // BrnNetwork::FreeburnChallengeMessage*
+        
+        mov ecx, dword ptr [g_Mod]
+        call Protection::GetChallengeProtection
+        mov ecx, eax
+        call ChallengeProtection::OnFreeburnChallengeMessageUnpack
         
     _continue:
         popad

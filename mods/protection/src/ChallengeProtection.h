@@ -10,6 +10,8 @@ public:
     ChallengeProtection(ChallengesFile& challengesFile);
 
 public:
+    void OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage);
+    void OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage);
     void OnRenderMenu();
 
     void AddNonVanillaChallengeIDsToChallengesFile();
