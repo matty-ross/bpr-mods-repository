@@ -63,7 +63,18 @@ void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
         return;
     }
     
-    // TODO: Skip self to avoid respawn upon joining a room.
+    /*
+        Overwrite the received vehicle ID by the current vehicle ID for ourselves.
+        Fixes spawing the replacement vehicle upon joining a freeburn lobby or ending a freeburn event.
+    */
+    uint64_t currentNetworkPlayerID = Core::Pointer(0x013FC8E0).deref().at(0x6DC7D0).as<uint64_t>();
+    uint64_t networkPlayerID = Core::Pointer(playerParams).at(0x208).as<uint64_t>();
+    if (networkPlayerID == currentNetworkPlayerID)
+    {
+        uint64_t currentVehicleID = Core::Pointer(0x013FC8E0).deref().at(0x6E3CF8).as<uint64_t>();
+        BPR::SetFreeburnVehicleID(playerParams, currentVehicleID);
+        return;
+    }
 
     uint64_t vehicleID = 0x0000000000000000;
     
