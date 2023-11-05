@@ -11,13 +11,6 @@ struct ChallengeID
 };
 
 
-inline constexpr ChallengeID k_FallbackChallengeID =
-{
-    .Number = 0x000000000008DACC,
-    .String = "580300",
-};
-
-
 inline constexpr std::array<ChallengeID, 500> k_VanillaChallengeIDs =
 {
     ChallengeID{ .Number = 0x000000000009262A, .String = "599594" },
@@ -521,6 +514,9 @@ inline constexpr std::array<ChallengeID, 500> k_VanillaChallengeIDs =
     ChallengeID{ .Number = 0x00000000000BA04F, .String = "761935" },
     ChallengeID{ .Number = 0x00000000000BA056, .String = "761942" },
 };
+
+
+inline constexpr const ChallengeID* k_LastResortFallbackChallengeID = &k_VanillaChallengeIDs[419]; // 813448 - Crane in the Neck
 
 
 inline const ChallengeID* GetVanillaChallengeID(uint64_t challengeID)

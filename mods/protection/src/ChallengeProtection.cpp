@@ -48,6 +48,24 @@ void ChallengeProtection::OnRenderMenu()
         {
             m_ChallengesFile.Load();
         }
+        
+        if (ImGui::BeginCombo("Fallback Challenge", m_ChallengesFile.GetFallbackChallengeID()->String))
+        {
+            for (const ChallengeID& vanillaChallengeID : k_VanillaChallengeIDs)
+            {
+                bool selected = m_ChallengesFile.GetFallbackChallengeID()->Number == vanillaChallengeID.Number;
+                if (ImGui::Selectable(vanillaChallengeID.String, selected))
+                {
+                    m_ChallengesFile.SetFallbackChallengeID(&vanillaChallengeID);
+                }
+                if (selected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+
         if (ImGui::BeginTable("##challenges-table", 2))
         {
             ImGui::TableSetupColumn("New Challenge");
@@ -56,7 +74,7 @@ void ChallengeProtection::OnRenderMenu()
 
             for (uint64_t challengeID : m_ChallengesFile.GetChallengeIDs())
             {
-                Challenge& challenge = m_ChallengesFile.GetChallenges().at(challengeID);
+                Challenge& challenge = *(m_ChallengesFile.GetChallenge(challengeID));
 
                 ImGui::PushID(&challenge);
 
@@ -107,7 +125,7 @@ void ChallengeProtection::AddNonVanillaChallengeIDsToChallengesFile()
 
         uint64_t challengeID = entry.at(0xC0).as<uint64_t>();
         bool isVanilla = GetVanillaChallengeID(challengeID) != nullptr;
-        bool isInFile = m_ChallengesFile.GetChallenges().contains(challengeID);
+        bool isInFile = m_ChallengesFile.GetChallenge(challengeID) != nullptr;
         if (!isVanilla && !isInFile)
         {
             ChallengeID nonVanillaChallengeID = {};
@@ -117,7 +135,7 @@ void ChallengeProtection::AddNonVanillaChallengeIDsToChallengesFile()
             m_ChallengesFile.AddChallenge(
                 {
                     .NewID = nonVanillaChallengeID,
-                    .ReplacementID = &k_FallbackChallengeID,
+                    .ReplacementID = m_ChallengesFile.GetFallbackChallengeID(),
                 }
             );
         }
@@ -132,11 +150,11 @@ uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID)
         return challengeID;
     }
 
-    auto it = m_ChallengesFile.GetChallenges().find(challengeID);
-    if (it == m_ChallengesFile.GetChallenges().end())
+    Challenge* challenge = m_ChallengesFile.GetChallenge(challengeID);
+    if (challenge == nullptr)
     {
-        return k_FallbackChallengeID.Number;
+        return m_ChallengesFile.GetFallbackChallengeID()->Number;
     }
 
-    return it->second.ReplacementID->Number;
+    return challenge->ReplacementID->Number;
 }

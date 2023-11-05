@@ -26,9 +26,13 @@ public:
     void Load();
     void Save();
 
-    std::map<uint64_t, Challenge>& GetChallenges();
+    //std::map<uint64_t, Challenge>& GetChallenges();
     const std::vector<uint64_t>& GetChallengeIDs() const;
+    Challenge* GetChallenge(uint64_t challengeID);
     void AddChallenge(const Challenge& challenge);
+
+    const ChallengeID* GetFallbackChallengeID() const;
+    void SetFallbackChallengeID(const ChallengeID* fallbackChallengeID);
 
 private:
     const Core::Logger& m_Logger;
@@ -37,4 +41,6 @@ private:
 
     std::map<uint64_t, Challenge> m_Challenges;
     std::vector<uint64_t> m_ChallengeIDs;
+
+    const ChallengeID* m_FallbackChallengeID = k_LastResortFallbackChallengeID;
 };
