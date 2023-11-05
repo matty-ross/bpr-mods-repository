@@ -2,19 +2,13 @@
 
 
 #include <array>
+#include <string_view>
 
 
 struct VehicleID
 {
     uint64_t Compressed;
     char Uncompressed[13];
-};
-
-
-inline constexpr VehicleID k_FallbackVehicleID =
-{
-    .Compressed   = 0xA7E60F1A3A360000,
-    .Uncompressed = "PUSMC01",
 };
 
 
@@ -519,6 +513,9 @@ inline constexpr std::array<VehicleID, 496> k_VanillaVehicleIDs =
 };
 
 
+inline constexpr const VehicleID* k_LastResortFallbackVehicleID = &k_VanillaVehicleIDs[0]; // PUSMC01
+
+
 inline const VehicleID* GetVanillaVehicleID(uint64_t vehicleID)
 {
     for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
@@ -529,5 +526,18 @@ inline const VehicleID* GetVanillaVehicleID(uint64_t vehicleID)
         }
     }
 
-    return nullptr;    
+    return nullptr;
+}
+
+inline const VehicleID* GetVanillaVehicleID(std::string_view vehicleID)
+{
+    for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
+    {
+        if (std::string_view(vanillaVehicleID.Uncompressed) == vehicleID)
+        {
+            return &vanillaVehicleID;
+        }
+    }
+
+    return nullptr;
 }

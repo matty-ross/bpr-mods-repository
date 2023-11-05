@@ -107,6 +107,24 @@ void VehicleProtection::OnRenderMenu()
         {
             m_VehiclesFile.Load();
         }
+
+        if (ImGui::BeginCombo("Fallback Vehicle", m_VehiclesFile.GetFallbackVehicleID()->Uncompressed))
+        {
+            for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
+            {
+                bool selected = m_VehiclesFile.GetFallbackVehicleID()->Compressed == vanillaVehicleID.Compressed;
+                if (ImGui::Selectable(vanillaVehicleID.Uncompressed, selected))
+                {
+                    m_VehiclesFile.SetFallbackVehicleID(&vanillaVehicleID);
+                }
+                if (selected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+        }
+
         if (ImGui::BeginTable("##vehicles-table", 2))
         {
             ImGui::TableSetupColumn("New Vehicle");
@@ -115,7 +133,7 @@ void VehicleProtection::OnRenderMenu()
 
             for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
             {
-                Vehicle& vehicle = m_VehiclesFile.GetVehicles().at(vehicleID);
+                Vehicle& vehicle = *(m_VehiclesFile.GetVehicle(vehicleID));
 
                 ImGui::PushID(&vehicle);
 
@@ -166,7 +184,7 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
 
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
         bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
-        bool isInFile = m_VehiclesFile.GetVehicles().contains(vehicleID);
+        bool isInFile = m_VehiclesFile.GetVehicle(vehicleID) != nullptr;
         if (!isVanilla && !isInFile)
         {
             VehicleID nonVanillaVehicleID = {};
@@ -176,7 +194,7 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
             m_VehiclesFile.AddVehicle(
                 {
                     .NewID = nonVanillaVehicleID,
-                    .ReplacementID = &k_FallbackVehicleID,
+                    .ReplacementID = m_VehiclesFile.GetFallbackVehicleID(),
                 }
             );
         }
@@ -191,11 +209,11 @@ uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
         return vehicleID;
     }
 
-    auto it = m_VehiclesFile.GetVehicles().find(vehicleID);
-    if (it == m_VehiclesFile.GetVehicles().end())
+    Vehicle* vehicle = m_VehiclesFile.GetVehicle(vehicleID);
+    if (vehicle == nullptr)
     {
-        return k_FallbackVehicleID.Compressed;
+        return m_VehiclesFile.GetFallbackVehicleID()->Compressed;
     }
 
-    return it->second.ReplacementID->Compressed;
+    return vehicle->ReplacementID->Compressed;
 }

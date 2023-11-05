@@ -26,9 +26,12 @@ public:
     void Load();
     void Save();
 
-    std::map<uint64_t, Vehicle>& GetVehicles();
     const std::vector<uint64_t>& GetVehicleIDs() const;
+    Vehicle* GetVehicle(uint64_t vehicleID);
     void AddVehicle(const Vehicle& vehicle);
+
+    const VehicleID* GetFallbackVehicleID() const;
+    void SetFallbackVehicleID(const VehicleID* fallbackVehicleID);
 
 private:
     const Core::Logger& m_Logger;
@@ -37,4 +40,6 @@ private:
 
     std::map<uint64_t, Vehicle> m_Vehicles;
     std::vector<uint64_t> m_VehicleIDs;
+    
+    const VehicleID* m_FallbackVehicleID = k_LastResortFallbackVehicleID;
 };
