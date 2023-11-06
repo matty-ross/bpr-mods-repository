@@ -1,5 +1,7 @@
 #include "CurrentCamera.h"
 
+#include <DirectXMath.h>
+
 #include "imgui/imgui.h"
 
 
@@ -39,6 +41,27 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
             property.Value = address.as<T>();
         }
     };
+
+    {
+        float* r = m_Transformation.Rotation;
+        float* t = m_Transformation.Translation;
+        DirectX::XMFLOAT4X4& transform = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
+        
+        if (m_Transformation.Active)
+        {
+            DirectX::XMStoreFloat4x4(
+                &transform,
+                DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMVectorSet(r[0], r[1], r[2], 0.0f)) *
+                DirectX::XMMatrixTranslationFromVector(DirectX::XMVectorSet(t[0], t[1], t[2], 0.0f))
+            );
+        }
+        else
+        {
+            t[0] = transform(3, 0);
+            t[1] = transform(3, 1);
+            t[2] = transform(3, 2);
+        }
+    }
     
     {
         updateProperty(m_Misc.Fov);
@@ -96,6 +119,13 @@ void CurrentCamera::OnRenderMenu()
             }
             ImGui::PopID();
         };
+
+        ImGui::SeparatorText("Transformation");
+        ImGui::Checkbox("Override", &m_Transformation.Active);
+        ImGui::SliderAngle("Rotation X", &m_Transformation.Rotation[0]);
+        ImGui::SliderAngle("Rotation Y", &m_Transformation.Rotation[1]);
+        ImGui::SliderAngle("Rotation Z", &m_Transformation.Rotation[2]);
+        ImGui::DragFloat3("Translation", m_Transformation.Translation);
 
         ImGui::SeparatorText("Misc");
         renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });

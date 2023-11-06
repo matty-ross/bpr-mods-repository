@@ -27,6 +27,13 @@ private:
         }
     };
 
+    struct Transformation
+    {
+        float Rotation[3] = { 0.0f, 0.0f, 0.0f };
+        float Translation[3] = { 0.0f, 0.0f, 0.0f };
+        bool Active = false;
+    };
+
     struct Misc
     {
         Property<float> Fov;
@@ -55,6 +62,7 @@ private:
     };
 
 private:
+    Transformation m_Transformation;
     Misc m_Misc;
     Effects m_Effects;
     MotionBlur m_MotionBlur;
