@@ -16,30 +16,29 @@ CustomParametersFile::CustomParametersFile(const Core::Logger& logger, const std
 
 void CustomParametersFile::Load()
 {
+    auto readFile = [this]() -> std::string
+    {
+        try
+        {
+            Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+            return file.Read();
+        }
+        catch (const std::runtime_error& e)
+        {
+            m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
+        }
+
+        return std::string();
+    };
+
     try
     {
         m_Logger.Info("Loading custom parameters from file '%s' ...", m_FilePath.c_str());
 
-        auto readFile = [this]() -> std::string
-        {
-            try
-            {
-                Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
-                return file.Read();
-            }
-            catch (const std::runtime_error& e)
-            {
-                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-            }
-
-            return std::string();
-        };
-
-        YAML::Node yaml = YAML::Load(readFile());
-
         m_CustomParameters.clear();
 
-        for (const YAML::Node& customParametersNode : yaml)
+        YAML::Node yaml = YAML::Load(readFile());
+        for (const YAML::Node& customParametersNode : yaml["CustomParameters"])
         {
             CustomParameters customParameters =
             {
@@ -57,8 +56,7 @@ void CustomParametersFile::Load()
                 .DownAngle                = customParametersNode["DownAngle"].as<float>(),
                 .DropFactor               = customParametersNode["DropFactor"].as<float>()
             };
-
-            m_CustomParameters.push_back(customParameters);
+            AddCustomParameters(customParameters);
         }
 
         m_Logger.Info("Loaded custom parameters.");
@@ -71,47 +69,43 @@ void CustomParametersFile::Load()
 
 void CustomParametersFile::Save()
 {
+    auto writeFile = [this](const std::string& content) -> void
+    {
+        try
+        {
+            Core::File file(m_FilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+            file.Write(content);
+        }
+        catch (const std::runtime_error& e)
+        {
+            m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
+        }
+    };
+
     try
     {
         m_Logger.Info("Saving custom parameters to file '%s' ...", m_FilePath.c_str());
 
-        auto writeFile = [this](const std::string& content) -> void
-        {
-            try
-            {
-                Core::File file(m_FilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
-                file.Write(content);
-            }
-            catch (const std::runtime_error& e)
-            {
-                m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-            }
-        };
-
         YAML::Node yaml;
-
         for (const CustomParameters& customParameters : m_CustomParameters)
         {
             YAML::Node customParametersNode;
-            {
-                customParametersNode["Name"]                     = customParameters.Name;
-                customParametersNode["PitchSpring"]              = customParameters.PitchSpring;
-                customParametersNode["YawSpring"]                = customParameters.YawSpring;
-                customParametersNode["PivotY"]                   = customParameters.PivotY;
-                customParametersNode["PivotZ"]                   = customParameters.PivotZ;
-                customParametersNode["PivotZOffset"]             = customParameters.PivotZOffset;
-                customParametersNode["FOV"]                      = customParameters.FOV;
-                customParametersNode["InFrontFOVMax"]            = customParameters.InFrontFOVMax;
-                customParametersNode["FrontInAmount"]            = customParameters.FrontInAmount;
-                customParametersNode["DriftYawSpring"]           = customParameters.DriftYawSpring;
-                customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
-                customParametersNode["DownAngle"]                = customParameters.DownAngle;
-                customParametersNode["DropFactor"]               = customParameters.DropFactor;
-            }
+            customParametersNode["Name"]                     = customParameters.Name;
+            customParametersNode["PitchSpring"]              = customParameters.PitchSpring;
+            customParametersNode["YawSpring"]                = customParameters.YawSpring;
+            customParametersNode["PivotY"]                   = customParameters.PivotY;
+            customParametersNode["PivotZ"]                   = customParameters.PivotZ;
+            customParametersNode["PivotZOffset"]             = customParameters.PivotZOffset;
+            customParametersNode["FOV"]                      = customParameters.FOV;
+            customParametersNode["InFrontFOVMax"]            = customParameters.InFrontFOVMax;
+            customParametersNode["FrontInAmount"]            = customParameters.FrontInAmount;
+            customParametersNode["DriftYawSpring"]           = customParameters.DriftYawSpring;
+            customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
+            customParametersNode["DownAngle"]                = customParameters.DownAngle;
+            customParametersNode["DropFactor"]               = customParameters.DropFactor;
 
-            yaml.push_back(customParametersNode);
+            yaml["CustomParameters"].push_back(customParametersNode);
         }
-
         writeFile(YAML::Dump(yaml));
 
         m_Logger.Info("Saved custom parameters.");
