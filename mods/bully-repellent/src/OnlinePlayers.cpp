@@ -63,15 +63,13 @@ void OnlinePlayers::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
             continue;
         }
 
-        auto it = m_BlacklistedPlayersFile.GetBlacklistedPlayers().find(playerID);
-        if (it == m_BlacklistedPlayersFile.GetBlacklistedPlayers().end())
+        const BlacklistedPlayer* blacklistedPlayer = m_BlacklistedPlayersFile.GetBlacklistedPlayer(playerID);
+        if (blacklistedPlayer == nullptr)
         {
             continue;
         }
         
-        const BlacklistedPlayer& blacklistedPlayer = it->second;
-        
-        if (blacklistedPlayer.Autokick)
+        if (blacklistedPlayer->Autokick)
         {
             bool isLocalPlayerHost = guiEventNetworkPlayerStatus.at(0xA05).as<bool>();
             if (isLocalPlayerHost)
@@ -84,7 +82,7 @@ void OnlinePlayers::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
                 BPR::AddSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
         }
-        if (blacklistedPlayer.Automute)
+        if (blacklistedPlayer->Automute)
         {
             bool isMuted = playerStatusData.at(0x130).as<bool>();
             if (!isMuted)
@@ -157,7 +155,7 @@ void OnlinePlayers::OnRenderMenu()
 
                     ImGui::TableSetColumnIndex(2);
                     bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
-                    bool alreadyOnBlacklist = m_BlacklistedPlayersFile.GetBlacklistedPlayers().contains(playerID);
+                    bool alreadyOnBlacklist = m_BlacklistedPlayersFile.GetBlacklistedPlayer(playerID) != nullptr;
                     if (isLocalPlayer || alreadyOnBlacklist)
                     {
                         ImGui::BeginDisabled();
@@ -208,7 +206,7 @@ void OnlinePlayers::OnRenderMenu()
 
             for (uint64_t blacklistedPlayerID : m_BlacklistedPlayersFile.GetBlacklistedPlayerIDs())
             {
-                BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayersFile.GetBlacklistedPlayers().at(blacklistedPlayerID);
+                BlacklistedPlayer& blacklistedPlayer = *(m_BlacklistedPlayersFile.GetBlacklistedPlayer(blacklistedPlayerID));
 
                 ImGui::PushID(&blacklistedPlayer);
 

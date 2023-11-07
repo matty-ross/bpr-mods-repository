@@ -25,8 +25,8 @@ public:
     void Load();
     void Save();
     
-    std::map<uint64_t, BlacklistedPlayer>& GetBlacklistedPlayers();
     const std::vector<uint64_t>& GetBlacklistedPlayerIDs() const;
+    BlacklistedPlayer* GetBlacklistedPlayer(uint64_t blacklistedPlayerID);
     void AddBlacklistedPlayer(uint64_t blacklistedPlayerID, const BlacklistedPlayer& blacklistedPlayer);
 
 private:
