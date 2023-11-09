@@ -267,12 +267,10 @@ __declspec(naked) void ModManager::DetourUpdateKeyboardState()
         jz _continue
 
         // Clear all keys.
-        push 0x100
-        push 0x0
-        lea eax, [ebp - 0x100]
-        push eax
-        call memset
-        add esp, 0xC
+        mov ecx, 0x100
+        mov al, 0x0
+        lea edi, [ebp - 0x100]
+        rep stosb
 
     _continue:
         popad
