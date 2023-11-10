@@ -18,5 +18,8 @@
     <ClInclude Include="include\bpr\CgsID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\bpr\Gui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
