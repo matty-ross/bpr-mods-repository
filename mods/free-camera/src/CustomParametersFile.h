@@ -32,7 +32,7 @@ public:
 
 public:
     void Load();
-    void Save();
+    void Save() const;
 
     const std::vector<CustomParameters>& GetCustomParameters() const;
     void AddCustomParameters(const CustomParameters& customParameters);
@@ -43,4 +43,6 @@ private:
     std::string m_FilePath;
 
     std::vector<CustomParameters> m_CustomParameters;
+
+    bool m_Valid = false;
 };

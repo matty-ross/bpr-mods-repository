@@ -31,6 +31,8 @@ void CustomParametersFile::Load()
         return std::string();
     };
 
+    m_Valid = false;
+
     try
     {
         m_Logger.Info("Loading custom parameters from file '%s' ...", m_FilePath.c_str());
@@ -65,9 +67,11 @@ void CustomParametersFile::Load()
     {
         m_Logger.Warning("Failed to load custom parameters. %s", e.what());
     }
+
+    m_Valid = true;
 }
 
-void CustomParametersFile::Save()
+void CustomParametersFile::Save() const
 {
     auto writeFile = [this](const std::string& content) -> void
     {
@@ -81,6 +85,11 @@ void CustomParametersFile::Save()
             m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
         }
     };
+
+    if (!m_Valid)
+    {
+        return;
+    }
 
     try
     {
