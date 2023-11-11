@@ -31,6 +31,8 @@ void BlacklistedPlayersFile::Load()
         return std::string();
     };
 
+    m_Valid = false;
+
     try
     {
         m_Logger.Info("Loading blacklisted players from file '%s' ...", m_FilePath.c_str());
@@ -57,9 +59,11 @@ void BlacklistedPlayersFile::Load()
     {
         m_Logger.Warning("Failed to load blacklisted players. %s", e.what());
     }
+
+    m_Valid = true;
 }
 
-void BlacklistedPlayersFile::Save()
+void BlacklistedPlayersFile::Save() const
 {
     auto writeFile = [this](const std::string& content) -> void
     {
@@ -73,6 +77,11 @@ void BlacklistedPlayersFile::Save()
             m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
         }
     };
+
+    if (!m_Valid)
+    {
+        return;
+    }
 
     try
     {
