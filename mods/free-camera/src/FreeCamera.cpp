@@ -55,6 +55,11 @@ void FreeCamera::Load()
             m_Logger.Info("Created mod directory.");
         }
 
+        // Load custom parameters.
+        {
+            m_CustomParamtersFile.Load();
+        }
+
         // Wait to be in game.
         {
             m_Logger.Info("Waiting to be in game...");
@@ -93,11 +98,6 @@ void FreeCamera::Load()
             ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
             
             m_Logger.Info("Added menu.");
-        }
-
-        // Load custom parameters.
-        {
-            m_CustomParamtersFile.Load();
         }
 
         m_Logger.Info("Loaded.");
