@@ -31,6 +31,8 @@ void ChallengesFile::Load()
         return std::string();
     };
 
+    m_Valid = false;
+
     try
     {
         m_Logger.Info("Loading challenges from file '%s' ...", m_FilePath.c_str());
@@ -67,9 +69,11 @@ void ChallengesFile::Load()
     {
         m_Logger.Warning("Failed to load challenges. %s", e.what());
     }
+    
+    m_Valid = true;
 }
 
-void ChallengesFile::Save()
+void ChallengesFile::Save() const
 {
     auto writeFile = [this](const std::string& content) -> void
     {
@@ -83,6 +87,11 @@ void ChallengesFile::Save()
             m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
         }
     };
+
+    if (!m_Valid)
+    {
+        return;
+    }
 
     try
     {
@@ -111,11 +120,6 @@ void ChallengesFile::Save()
         m_Logger.Warning("Failed to save challenges. %s", e.what());
     }
 }
-
-//std::map<uint64_t, Challenge>& ChallengesFile::GetChallenges()
-//{
-//    return m_Challenges;
-//}
 
 const std::vector<uint64_t>& ChallengesFile::GetChallengeIDs() const
 {

@@ -33,6 +33,8 @@ void VehiclesFile::Load()
         return std::string();
     };
 
+    m_Valid = false;
+    
     try
     {
         m_Logger.Info("Loading vehicles from file '%s' ...", m_FilePath.c_str());
@@ -69,9 +71,11 @@ void VehiclesFile::Load()
     {
         m_Logger.Warning("Failed to load vehicles. %s", e.what());
     }
+    
+    m_Valid = true;
 }
 
-void VehiclesFile::Save()
+void VehiclesFile::Save() const
 {
     auto writeFile = [this](const std::string& content) -> void
     {
@@ -86,6 +90,11 @@ void VehiclesFile::Save()
         }
     };
 
+    if (!m_Valid)
+    {
+        return;
+    }
+    
     try
     {
         m_Logger.Info("Saving vehicles to file '%s' ...", m_FilePath.c_str());

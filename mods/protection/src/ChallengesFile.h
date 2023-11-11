@@ -24,9 +24,8 @@ public:
 
 public:
     void Load();
-    void Save();
+    void Save() const;
 
-    //std::map<uint64_t, Challenge>& GetChallenges();
     const std::vector<uint64_t>& GetChallengeIDs() const;
     Challenge* GetChallenge(uint64_t challengeID);
     void AddChallenge(const Challenge& challenge);
@@ -43,4 +42,6 @@ private:
     std::vector<uint64_t> m_ChallengeIDs;
 
     const ChallengeID* m_FallbackChallengeID = k_LastResortFallbackChallengeID;
+
+    bool m_Valid = false;
 };

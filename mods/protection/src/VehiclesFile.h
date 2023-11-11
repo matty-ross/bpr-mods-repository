@@ -24,7 +24,7 @@ public:
 
 public:
     void Load();
-    void Save();
+    void Save() const;
 
     const std::vector<uint64_t>& GetVehicleIDs() const;
     Vehicle* GetVehicle(uint64_t vehicleID);
@@ -42,4 +42,6 @@ private:
     std::vector<uint64_t> m_VehicleIDs;
     
     const VehicleID* m_FallbackVehicleID = k_LastResortFallbackVehicleID;
+
+    bool m_Valid = false;
 };
