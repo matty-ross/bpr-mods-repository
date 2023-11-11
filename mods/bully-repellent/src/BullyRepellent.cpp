@@ -55,6 +55,11 @@ void BullyRepellent::Load()
             m_Logger.Info("Created mod directory.");
         }
 
+        // Load blacklisted players.
+        {
+            m_BlacklistedPlayersFile.Load();
+        }
+
         // Wait to be in game.
         {
             m_Logger.Info("Waiting to be in game...");
@@ -93,11 +98,6 @@ void BullyRepellent::Load()
             ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
 
             m_Logger.Info("Added menu.");
-        }
-
-        // Load blacklisted players.
-        {
-            m_BlacklistedPlayersFile.Load();
         }
 
         m_Logger.Info("Loaded.");
