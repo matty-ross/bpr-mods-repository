@@ -87,6 +87,16 @@ void Protection::Load()
             m_Logger.Info("Created mod directory.");
         }
 
+        // Load vehicles.
+        {
+            m_VehiclesFile.Load();
+        }
+
+        // Load challenges.
+        {
+            m_ChallengesFile.Load();
+        }
+
         // Wait to be in game.
         {
             m_Logger.Info("Waiting to be in game...");
@@ -107,6 +117,24 @@ void Protection::Load()
             }
 
             m_Logger.Info("In game.");
+        }
+
+        // Add non-vanilla vehicles.
+        {
+            m_Logger.Info("Adding non-vanilla vehicles...");
+
+            m_VehicleProtection.AddNonVanillaVehicleIDsToVehiclesFile();
+
+            m_Logger.Info("Added non-vanilla vehicles.");
+        }
+
+        // Add non-vanilla challenges.
+        {
+            m_Logger.Info("Adding non-vanilla challenges...");
+
+            m_ChallengeProtection.AddNonVanillaChallengeIDsToChallengesFile();
+
+            m_Logger.Info("Added non-vanilla challenges.");
         }
 
         // Attach PlayerParamsSerialize detour.
@@ -172,34 +200,6 @@ void Protection::Load()
             m_Logger.Info("Added menu.");
         }
 
-        // Load vehicles.
-        {
-            m_VehiclesFile.Load();
-        }
-
-        // Add non-vanilla vehicles.
-        {
-            m_Logger.Info("Adding non-vanilla vehicles...");
-
-            m_VehicleProtection.AddNonVanillaVehicleIDsToVehiclesFile();
-
-            m_Logger.Info("Added non-vanilla vehicles.");
-        }
-
-        // Load challenges.
-        {
-            m_ChallengesFile.Load();
-        }
-
-        // Add non-vanilla challenges.
-        {
-            m_Logger.Info("Adding non-vanilla challenges...");
-
-            m_ChallengeProtection.AddNonVanillaChallengeIDsToChallengesFile();
-
-            m_Logger.Info("Added non-vanilla challenges.");
-        }
-
         m_Logger.Info("Loaded.");
     }
     catch (const std::exception& e)
@@ -215,14 +215,14 @@ void Protection::Unload()
     {
         m_Logger.Info("Unloading...");
 
-        // Save challenges.
-        {
-            m_ChallengesFile.Save();
-        }
-
         // Save vehicles.
         {
             m_VehiclesFile.Save();
+        }
+
+        // Save challenges.
+        {
+            m_ChallengesFile.Save();
         }
 
         // Remove menu.
