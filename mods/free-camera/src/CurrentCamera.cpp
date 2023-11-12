@@ -122,6 +122,13 @@ void CurrentCamera::OnRenderMenu()
 
         ImGui::SeparatorText("Transformation");
         ImGui::Checkbox("Override", &m_Transformation.Active);
+        ImGui::SameLine();
+        if (ImGui::Button("Reset Rotation"))
+        {
+            m_Transformation.Rotation[0] = 0.0f;
+            m_Transformation.Rotation[1] = 0.0f;
+            m_Transformation.Rotation[2] = 0.0f;
+        }
         ImGui::SliderAngle("Rotation X", &m_Transformation.Rotation[0]);
         ImGui::SliderAngle("Rotation Y", &m_Transformation.Rotation[1]);
         ImGui::SliderAngle("Rotation Z", &m_Transformation.Rotation[2]);
