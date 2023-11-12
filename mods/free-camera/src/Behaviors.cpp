@@ -283,31 +283,15 @@ void Behaviors::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Behaviors"))
     {
-        if (ImGui::Button("Activate"))
-        {
-            if (m_Selected)
-            {
-                m_Testbed.m_State = Testbed::State::Prepare;
-
-                m_Selected = false;
-                m_Activated = true;
-            }
-        }
-        ImGui::SameLine();
         if (ImGui::Button("Deactivate"))
         {
-            if (m_Activated)
+            if (m_Testbed.m_State == Testbed::State::Update)
             {
                 m_Testbed.m_State = Testbed::State::Release;
-
                 m_SelectedBehavior = nullptr;
                 m_SelectedBehaviorParameters = nullptr;
-
-                m_Selected = false;
-                m_Activated = false;
             }
         }
-
         for (const BehaviorData& behaviorData : k_BehaviorData)
         {
             ImGui::SeparatorText(behaviorData.Name);
@@ -324,12 +308,11 @@ void Behaviors::OnRenderMenu()
                     ImGui::PushID(&behaviorParametersData);
                     if (ImGui::Selectable(behaviorParametersData.Name, m_SelectedBehaviorParameters == &behaviorParametersData))
                     {
-                        if (!m_Activated)
+                        if (m_Testbed.m_State == Testbed::State::Inactive)
                         {
+                            m_Testbed.m_State = Testbed::State::Prepare;
                             m_SelectedBehavior = &behaviorData;
                             m_SelectedBehaviorParameters = &behaviorParametersData;
-
-                            m_Selected = true;
                         }
                     }
                     ImGui::PopID();

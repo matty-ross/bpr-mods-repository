@@ -60,6 +60,4 @@ private:
     
     const BehaviorData* m_SelectedBehavior = nullptr;
     const BehaviorParametersData* m_SelectedBehaviorParameters = nullptr;
-    bool m_Selected = false;
-    bool m_Activated = false;
 };
