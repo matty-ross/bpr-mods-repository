@@ -9,8 +9,9 @@
 #include "mod-manager/DetourHookManager.h"
 #include "mod-manager/ImGuiManager.h"
 
-#include "CurrentCamera.h"
 #include "CustomParametersFile.h"
+#include "Misc.h"
+#include "CurrentCamera.h"
 #include "GameplayExternalCamera.h"
 #include "Behaviors.h"
 
@@ -35,6 +36,7 @@ private:
     
     CustomParametersFile m_CustomParamtersFile;
     
+    Misc m_Misc;
     CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;

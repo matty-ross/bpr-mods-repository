@@ -165,6 +165,7 @@ void FreeCamera::OnRenderMenu()
         ImGui::Text("Author      %s", k_ModAuthor);
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
+        m_Misc.OnRenderMenu();
         m_CurrentCamera.OnRenderMenu();
         m_GameplayExternalCamera.OnRenderMenu();
         m_Behaviors.OnRenderMenu();
