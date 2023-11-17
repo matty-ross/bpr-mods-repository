@@ -7,10 +7,10 @@
 #include "core/File.h"
 
 
-ChallengesFile::ChallengesFile(const Core::Logger& logger, const std::string& filePath)
+ChallengesFile::ChallengesFile(const std::string& filePath, const Core::Logger& logger)
     :
-    m_Logger(logger),
-    m_FilePath(filePath)
+    m_FilePath(filePath),
+    m_Logger(logger)
 {
 }
 
@@ -39,28 +39,24 @@ void ChallengesFile::Load()
 
         m_Challenges.clear();
         m_ChallengeIDs.clear();
-        m_FallbackChallengeID = k_LastResortFallbackChallengeID;
         
         YAML::Node yaml = YAML::Load(readFile());
         {
-            uint64_t fallbackID = yaml["FallbackID"].as<uint64_t>();
-            const ChallengeID* fallbackChallengeID = GetVanillaChallengeID(fallbackID);
-            if (fallbackChallengeID != nullptr)
-            {
-                m_FallbackChallengeID = fallbackChallengeID;
-            }
+            uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>();
+            m_FallbackChallenge = GetVanillaChallenge(fallbackChallengeID);
         }
         for (const YAML::Node& challengeNode : yaml["Challenges"])
         {
-            uint64_t newID = challengeNode["NewID"].as<uint64_t>();
-            uint64_t replacementID = challengeNode["ReplacementID"].as<uint64_t>();
-            const ChallengeID* replacementChallengeID = GetVanillaChallengeID(newID);
-
-            Challenge challenge = {};
-            challenge.NewID.Number = newID;
-            sprintf_s(challenge.NewID.String, "%llu", newID);
-            challenge.ReplacementID = replacementChallengeID != nullptr ? replacementChallengeID : m_FallbackChallengeID;
-            AddChallenge(challenge);
+            uint64_t challengeID = challengeNode["ID"].as<uint64_t>();
+            uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
+            Challenge challenge =
+            {
+                .Title       = challengeNode["Title"].as<std::string>(),
+                .Replacement = GetVanillaChallenge(replacementChallengeID),
+            };
+            
+            m_Challenges[challengeID] = challenge;
+            m_ChallengeIDs.push_back(challengeID);
         }
 
         m_Logger.Info("Loaded challenges.");
@@ -99,15 +95,16 @@ void ChallengesFile::Save() const
 
         YAML::Node yaml;
         {
-            yaml["FallbackID"] = m_FallbackChallengeID->Number;
+            yaml["FallbackID"] = m_FallbackChallenge->ID;
         }
         for (uint64_t challengeID : m_ChallengeIDs)
         {
             const Challenge& challenge = m_Challenges.at(challengeID);
             
             YAML::Node challengeNode;
-            challengeNode["NewID"]         = challenge.NewID.Number;
-            challengeNode["ReplacementID"] = challenge.ReplacementID->Number;
+            challengeNode["ID"]            = challengeID;
+            challengeNode["Title"]         = challenge.Title;
+            challengeNode["ReplacementID"] = challenge.Replacement->ID;
 
             yaml["Challenges"].push_back(challengeNode);
         }
@@ -129,27 +126,21 @@ const std::vector<uint64_t>& ChallengesFile::GetChallengeIDs() const
 Challenge* ChallengesFile::GetChallenge(uint64_t challengeID)
 {
     auto it = m_Challenges.find(challengeID);
-    if (it != m_Challenges.end())
-    {
-        return &it->second;
-    }
-
-    return nullptr;
+    return it != m_Challenges.end() ? &(it->second) : nullptr;
 }
 
-void ChallengesFile::AddChallenge(const Challenge& challenge)
+void ChallengesFile::AddChallenge(uint64_t challengeID, const Challenge& challenge)
 {
-    uint64_t challengeID = challenge.NewID.Number;
     m_Challenges[challengeID] = challenge;
     m_ChallengeIDs.push_back(challengeID);
 }
 
-const ChallengeID* ChallengesFile::GetFallbackChallengeID() const
+const VanillaChallenge& ChallengesFile::GetFallbackChallenge() const
 {
-    return m_FallbackChallengeID;
+    return *m_FallbackChallenge;
 }
 
-void ChallengesFile::SetFallbackChallengeID(const ChallengeID* fallbackChallengeID)
+void ChallengesFile::SetFallbackChallenge(const VanillaChallenge& fallbackChallenge)
 {
-    m_FallbackChallengeID = fallbackChallengeID;
+    m_FallbackChallenge = &fallbackChallenge;
 }

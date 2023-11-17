@@ -14,10 +14,11 @@ public:
     void OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage);
     void OnRenderMenu();
 
-    void AddNonVanillaChallengeIDsToChallengesFile();
+    void ValidateChallengesFile();
+    void AddNonVanillaChallengesToChallengesFile();
 
 private:
-    uint64_t HandleChallengeID(uint64_t challengeID);
+    uint64_t HandleChallengeID(uint64_t challengeID) const;
 
 private:
     ChallengesFile& m_ChallengesFile;

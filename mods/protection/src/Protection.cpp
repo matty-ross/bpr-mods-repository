@@ -24,7 +24,7 @@ Protection::Protection(HMODULE module)
     Mod(module),
     m_Logger(k_ModName),
     m_VehiclesFile(m_Logger, k_ModDirectory + "vehicles.yaml"s),
-    m_ChallengesFile(m_Logger, k_ModDirectory + "challenges.yaml"s),
+    m_ChallengesFile(k_ModDirectory + "challenges.yaml"s, m_Logger),
     m_VehicleProtection(m_VehiclesFile),
     m_ChallengeProtection(m_ChallengesFile),
     m_DetourPlayerParamsSerialize
@@ -132,7 +132,7 @@ void Protection::Load()
         {
             m_Logger.Info("Adding non-vanilla challenges...");
 
-            m_ChallengeProtection.AddNonVanillaChallengeIDsToChallengesFile();
+            m_ChallengeProtection.AddNonVanillaChallengesToChallengesFile();
 
             m_Logger.Info("Added non-vanilla challenges.");
         }

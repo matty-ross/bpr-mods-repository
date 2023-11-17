@@ -12,15 +12,15 @@
 
 struct Challenge
 {
-    ChallengeID NewID;
-    const ChallengeID* ReplacementID;
+    std::string Title;
+    const VanillaChallenge* Replacement = nullptr;
 };
 
 
 class ChallengesFile
 {
 public:
-    ChallengesFile(const Core::Logger& logger, const std::string& filePath);
+    ChallengesFile(const std::string& filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -28,20 +28,19 @@ public:
 
     const std::vector<uint64_t>& GetChallengeIDs() const;
     Challenge* GetChallenge(uint64_t challengeID);
-    void AddChallenge(const Challenge& challenge);
+    void AddChallenge(uint64_t challengeID, const Challenge& challenge);
 
-    const ChallengeID* GetFallbackChallengeID() const;
-    void SetFallbackChallengeID(const ChallengeID* fallbackChallengeID);
+    const VanillaChallenge& GetFallbackChallenge() const;
+    void SetFallbackChallenge(const VanillaChallenge& fallbackChallenge);
 
 private:
-    const Core::Logger& m_Logger;
-
     std::string m_FilePath;
+    const Core::Logger& m_Logger;
 
     std::map<uint64_t, Challenge> m_Challenges;
     std::vector<uint64_t> m_ChallengeIDs;
-
-    const ChallengeID* m_FallbackChallengeID = k_LastResortFallbackChallengeID;
+    
+    const VanillaChallenge* m_FallbackChallenge = &k_LastResortFallbackChallenge;
 
     bool m_Valid = false;
 };

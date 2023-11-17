@@ -49,14 +49,14 @@ void ChallengeProtection::OnRenderMenu()
             m_ChallengesFile.Load();
         }
         
-        if (ImGui::BeginCombo("Fallback Challenge", m_ChallengesFile.GetFallbackChallengeID()->String))
+        if (ImGui::BeginCombo("Fallback Challenge", m_ChallengesFile.GetFallbackChallenge().Title))
         {
-            for (const ChallengeID& vanillaChallengeID : k_VanillaChallengeIDs)
+            for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
             {
-                bool selected = m_ChallengesFile.GetFallbackChallengeID()->Number == vanillaChallengeID.Number;
-                if (ImGui::Selectable(vanillaChallengeID.String, selected))
+                bool selected = m_ChallengesFile.GetFallbackChallenge().ID == vanillaChallenge.ID;
+                if (ImGui::Selectable(vanillaChallenge.Title, selected))
                 {
-                    m_ChallengesFile.SetFallbackChallengeID(&vanillaChallengeID);
+                    m_ChallengesFile.SetFallbackChallenge(vanillaChallenge);
                 }
                 if (selected)
                 {
@@ -68,7 +68,7 @@ void ChallengeProtection::OnRenderMenu()
 
         if (ImGui::BeginTable("##challenges-table", 2))
         {
-            ImGui::TableSetupColumn("New Challenge");
+            ImGui::TableSetupColumn("Challenge");
             ImGui::TableSetupColumn("Replacement Challenge");
             ImGui::TableHeadersRow();
 
@@ -81,17 +81,17 @@ void ChallengeProtection::OnRenderMenu()
                 ImGui::TableNextRow();
 
                 ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(challenge.NewID.String);
+                ImGui::TextUnformatted(challenge.Title.c_str());
 
                 ImGui::TableSetColumnIndex(1);
-                if (ImGui::BeginCombo("##replacement-challenge-combo", challenge.ReplacementID->String))
+                if (ImGui::BeginCombo("##replacement-challenge-combo", challenge.Replacement->Title))
                 {
-                    for (const ChallengeID& vanillaChallengeID : k_VanillaChallengeIDs)
+                    for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
                     {
-                        bool selected = challenge.ReplacementID->Number == vanillaChallengeID.Number;
-                        if (ImGui::Selectable(vanillaChallengeID.String, selected))
+                        bool selected = challenge.Replacement->ID == vanillaChallenge.ID;
+                        if (ImGui::Selectable(vanillaChallenge.Title, selected))
                         {
-                            challenge.ReplacementID = &vanillaChallengeID;
+                            challenge.Replacement = &vanillaChallenge;
                         }
                         if (selected)
                         {
@@ -109,8 +109,16 @@ void ChallengeProtection::OnRenderMenu()
     }
 }
 
-void ChallengeProtection::AddNonVanillaChallengeIDsToChallengesFile()
+void ChallengeProtection::ValidateChallengesFile()
 {
+    // TODO
+}
+
+void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
+{
+    // TODO
+
+    /*
     Core::Pointer challengeList = Core::Pointer(0x013FC8E0).deref().at(0x690B70);
 
     int32_t challengesCount = challengeList.at(0x32E0).as<int32_t>();
@@ -140,21 +148,22 @@ void ChallengeProtection::AddNonVanillaChallengeIDsToChallengesFile()
             );
         }
     }
+    */
 }
 
-uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID)
+uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID) const
 {
-    bool isVanilla = GetVanillaChallengeID(challengeID) != nullptr;
+    bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;
     if (isVanilla)
     {
         return challengeID;
     }
 
     Challenge* challenge = m_ChallengesFile.GetChallenge(challengeID);
-    if (challenge == nullptr)
+    if (challenge != nullptr)
     {
-        return m_ChallengesFile.GetFallbackChallengeID()->Number;
+        return challenge->Replacement->ID;
     }
 
-    return challenge->ReplacementID->Number;
+    return m_ChallengesFile.GetFallbackChallenge().ID;
 }
