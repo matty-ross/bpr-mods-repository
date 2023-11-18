@@ -517,9 +517,6 @@ inline constexpr std::array<VanillaChallenge, 500> k_VanillaChallenges =
 };
 
 
-inline constexpr const VanillaChallenge& k_LastResortFallbackChallenge = k_VanillaChallenges[419]; // 813448 - Crane in the Neck
-
-
 inline const VanillaChallenge* GetVanillaChallenge(uint64_t challengeID)
 {
     auto it = std::find_if(k_VanillaChallenges.begin(), k_VanillaChallenges.end(),
@@ -527,7 +524,6 @@ inline const VanillaChallenge* GetVanillaChallenge(uint64_t challengeID)
         {
             return vanillaChallenge.ID == challengeID;
         }
-    );    
-    
+    );
     return it != k_VanillaChallenges.end() ? &(*it) : nullptr;
 }

@@ -53,6 +53,7 @@ void ChallengesFile::Load()
             {
                 .Title       = challengeNode["Title"].as<std::string>(),
                 .Replacement = GetVanillaChallenge(replacementChallengeID),
+                .Protect     = challengeNode["Protect"].as<bool>(),
             };
             
             m_Challenges[challengeID] = challenge;
@@ -105,6 +106,7 @@ void ChallengesFile::Save() const
             challengeNode["ID"]            = challengeID;
             challengeNode["Title"]         = challenge.Title;
             challengeNode["ReplacementID"] = challenge.Replacement->ID;
+            challengeNode["Protect"]       = challenge.Protect;
 
             yaml["Challenges"].push_back(challengeNode);
         }
@@ -135,12 +137,12 @@ void ChallengesFile::AddChallenge(uint64_t challengeID, const Challenge& challen
     m_ChallengeIDs.push_back(challengeID);
 }
 
-const VanillaChallenge& ChallengesFile::GetFallbackChallenge() const
+const VanillaChallenge* ChallengesFile::GetFallbackChallenge() const
 {
-    return *m_FallbackChallenge;
+    return m_FallbackChallenge;
 }
 
-void ChallengesFile::SetFallbackChallenge(const VanillaChallenge& fallbackChallenge)
+void ChallengesFile::SetFallbackChallenge(const VanillaChallenge* fallbackChallenge)
 {
-    m_FallbackChallenge = &fallbackChallenge;
+    m_FallbackChallenge = fallbackChallenge;
 }

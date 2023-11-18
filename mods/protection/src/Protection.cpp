@@ -95,6 +95,7 @@ void Protection::Load()
         // Load challenges.
         {
             m_ChallengesFile.Load();
+            m_ChallengeProtection.ValidateChallengesFile();
         }
 
         // Wait to be in game.
