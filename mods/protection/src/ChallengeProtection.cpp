@@ -39,6 +39,9 @@ void ChallengeProtection::OnRenderMenu()
     {
         ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
 
+        static ImGuiTextFilter challengeTitleComboFilter;
+        challengeTitleComboFilter.Draw();
+
         if (ImGui::Button("Save"))
         {
             m_ChallengesFile.Save();
@@ -53,20 +56,23 @@ void ChallengeProtection::OnRenderMenu()
         {
             for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
             {
-                bool selected = m_ChallengesFile.GetFallbackChallenge().ID == vanillaChallenge.ID;
-                if (ImGui::Selectable(vanillaChallenge.Title, selected))
+                if (challengeTitleComboFilter.PassFilter(vanillaChallenge.Title))
                 {
-                    m_ChallengesFile.SetFallbackChallenge(vanillaChallenge);
-                }
-                if (selected)
-                {
-                    ImGui::SetItemDefaultFocus();
+                    bool selected = m_ChallengesFile.GetFallbackChallenge().ID == vanillaChallenge.ID;
+                    if (ImGui::Selectable(vanillaChallenge.Title, selected))
+                    {
+                        m_ChallengesFile.SetFallbackChallenge(vanillaChallenge);
+                    }
+                    if (selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
                 }
             }
             ImGui::EndCombo();
         }
 
-        if (ImGui::BeginTable("##challenges-table", 2))
+        if (ImGui::BeginTable("##challenges-table", 2, ImGuiTableFlags_SizingStretchProp))
         {
             ImGui::TableSetupColumn("Challenge");
             ImGui::TableSetupColumn("Replacement Challenge");
@@ -88,14 +94,17 @@ void ChallengeProtection::OnRenderMenu()
                 {
                     for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
                     {
-                        bool selected = challenge.Replacement->ID == vanillaChallenge.ID;
-                        if (ImGui::Selectable(vanillaChallenge.Title, selected))
+                        if (challengeTitleComboFilter.PassFilter(vanillaChallenge.Title))
                         {
-                            challenge.Replacement = &vanillaChallenge;
-                        }
-                        if (selected)
-                        {
-                            ImGui::SetItemDefaultFocus();
+                            bool selected = challenge.Replacement->ID == vanillaChallenge.ID;
+                            if (ImGui::Selectable(vanillaChallenge.Title, selected))
+                            {
+                                challenge.Replacement = &vanillaChallenge;
+                            }
+                            if (selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
+                            }
                         }
                     }
                     ImGui::EndCombo();
@@ -116,9 +125,6 @@ void ChallengeProtection::ValidateChallengesFile()
 
 void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
 {
-    // TODO
-
-    /*
     Core::Pointer challengeList = Core::Pointer(0x013FC8E0).deref().at(0x690B70);
 
     int32_t challengesCount = challengeList.at(0x32E0).as<int32_t>();
@@ -132,23 +138,19 @@ void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
         Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0xD8);
 
         uint64_t challengeID = entry.at(0xC0).as<uint64_t>();
-        bool isVanilla = GetVanillaChallengeID(challengeID) != nullptr;
+        bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;
         bool isInFile = m_ChallengesFile.GetChallenge(challengeID) != nullptr;
         if (!isVanilla && !isInFile)
         {
-            ChallengeID nonVanillaChallengeID = {};
-            nonVanillaChallengeID.Number = challengeID;
-            sprintf_s(nonVanillaChallengeID.String, "%llu", challengeID);
-
             m_ChallengesFile.AddChallenge(
+                challengeID,
                 {
-                    .NewID = nonVanillaChallengeID,
-                    .ReplacementID = m_ChallengesFile.GetFallbackChallengeID(),
+                    .Title       = entry.at(0xB0).as<char[16]>(),
+                    .Replacement = &m_ChallengesFile.GetFallbackChallenge(),
                 }
             );
         }
     }
-    */
 }
 
 uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID) const
