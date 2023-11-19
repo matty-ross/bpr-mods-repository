@@ -5,9 +5,6 @@
 #include "core/Pointer.h"
 
 
-static constexpr const VanillaChallenge& k_LastResortFallbackChallenge = k_VanillaChallenges[419]; // 813448 - Crane in the Neck
-
-
 ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
     :
     m_ChallengesFile(challengesFile)
@@ -43,7 +40,7 @@ void ChallengeProtection::OnRenderMenu()
         ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
 
         static ImGuiTextFilter challengeTitleComboFilter;
-        challengeTitleComboFilter.Draw();
+        challengeTitleComboFilter.Draw("Challenge Combo Filter");
 
         if (ImGui::Button("Save"))
         {
@@ -53,7 +50,6 @@ void ChallengeProtection::OnRenderMenu()
         if (ImGui::Button("Load"))
         {
             m_ChallengesFile.Load();
-            ValidateChallengesFile();
         }
         
         if (ImGui::BeginCombo("Fallback Challenge", m_ChallengesFile.GetFallbackChallenge()->Title))
@@ -76,11 +72,10 @@ void ChallengeProtection::OnRenderMenu()
             ImGui::EndCombo();
         }
 
-        if (ImGui::BeginTable("##challenges-table", 3))
+        if (ImGui::BeginTable("##challenges-table", 2))
         {
-            ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.25f);
-            ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.55f);
-            ImGui::TableSetupColumn("Protect", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+            ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.4f);
+            ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.6f);
             ImGui::TableHeadersRow();
             for (uint64_t challengeID : m_ChallengesFile.GetChallengeIDs())
             {
@@ -93,7 +88,7 @@ void ChallengeProtection::OnRenderMenu()
                 }
                 {
                     ImGui::TableNextColumn();
-                    ImGui::SetNextItemWidth(-1.0f);
+                    ImGui::SetNextItemWidth(-35.0f);
                     if (ImGui::BeginCombo("##replacement-challenge-combo", challenge.Replacement->Title))
                     {
                         for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
@@ -114,30 +109,9 @@ void ChallengeProtection::OnRenderMenu()
                         ImGui::EndCombo();
                     }
                 }
-                {
-                    ImGui::TableNextColumn();
-                    ImGui::Checkbox("##protect-checkbox", &challenge.Protect);
-                }
                 ImGui::PopID();
             }
             ImGui::EndTable();
-        }
-    }
-}
-
-void ChallengeProtection::ValidateChallengesFile()
-{
-    if (m_ChallengesFile.GetFallbackChallenge() == nullptr)
-    {
-        m_ChallengesFile.SetFallbackChallenge(&k_LastResortFallbackChallenge);
-    }
-
-    for (uint64_t challengeID : m_ChallengesFile.GetChallengeIDs())
-    {
-        Challenge& challenge = *(m_ChallengesFile.GetChallenge(challengeID));
-        if (challenge.Replacement == nullptr)
-        {
-            challenge.Replacement = m_ChallengesFile.GetFallbackChallenge();
         }
     }
 }
@@ -166,7 +140,6 @@ void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
                 {
                     .Title       = entry.at(0xB0).as<char[16]>(),
                     .Replacement = m_ChallengesFile.GetFallbackChallenge(),
-                    .Protect     = true,
                 }
             );
         }
@@ -184,7 +157,7 @@ uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID) const
     Challenge* challenge = m_ChallengesFile.GetChallenge(challengeID);
     if (challenge != nullptr)
     {
-        return challenge->Protect ? challenge->Replacement->ID : challengeID;
+        return challenge->Replacement->ID;
     }
 
     return m_ChallengesFile.GetFallbackChallenge()->ID;

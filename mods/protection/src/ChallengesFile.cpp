@@ -43,17 +43,18 @@ void ChallengesFile::Load()
         YAML::Node yaml = YAML::Load(readFile());
         {
             uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>();
-            m_FallbackChallenge = GetVanillaChallenge(fallbackChallengeID);
+            const VanillaChallenge* fallbackChallenge = GetVanillaChallenge(fallbackChallengeID);
+            m_FallbackChallenge = fallbackChallenge != nullptr ? fallbackChallenge : k_LastResortFallbackChallenge;
         }
         for (const YAML::Node& challengeNode : yaml["Challenges"])
         {
             uint64_t challengeID = challengeNode["ID"].as<uint64_t>();
             uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
+            const VanillaChallenge* replacementChallenge = GetVanillaChallenge(replacementChallengeID);
             Challenge challenge =
             {
                 .Title       = challengeNode["Title"].as<std::string>(),
-                .Replacement = GetVanillaChallenge(replacementChallengeID),
-                .Protect     = challengeNode["Protect"].as<bool>(),
+                .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
             };
             
             m_Challenges[challengeID] = challenge;
@@ -106,7 +107,6 @@ void ChallengesFile::Save() const
             challengeNode["ID"]            = challengeID;
             challengeNode["Title"]         = challenge.Title;
             challengeNode["ReplacementID"] = challenge.Replacement->ID;
-            challengeNode["Protect"]       = challenge.Protect;
 
             yaml["Challenges"].push_back(challengeNode);
         }

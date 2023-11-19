@@ -14,7 +14,6 @@ struct Challenge
 {
     std::string Title;
     const VanillaChallenge* Replacement = nullptr;
-    bool Protect = true;
 };
 
 
@@ -41,7 +40,7 @@ private:
     std::map<uint64_t, Challenge> m_Challenges;
     std::vector<uint64_t> m_ChallengeIDs;
     
-    const VanillaChallenge* m_FallbackChallenge = nullptr;
+    const VanillaChallenge* m_FallbackChallenge = k_LastResortFallbackChallenge;
 
     bool m_Valid = false;
 };

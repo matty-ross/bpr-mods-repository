@@ -14,7 +14,6 @@ public:
     void OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage);
     void OnRenderMenu();
 
-    void ValidateChallengesFile();
     void AddNonVanillaChallengesToChallengesFile();
 
 private:
