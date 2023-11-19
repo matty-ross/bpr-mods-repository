@@ -93,6 +93,7 @@ void ChallengeProtection::OnRenderMenu()
                 }
                 {
                     ImGui::TableNextColumn();
+                    ImGui::SetNextItemWidth(-1.0f);
                     if (ImGui::BeginCombo("##replacement-challenge-combo", challenge.Replacement->Title))
                     {
                         for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
