@@ -6,13 +6,11 @@
 
 #include "core/File.h"
 
-#include "bpr/CgsID.h"
 
-
-VehiclesFile::VehiclesFile(const Core::Logger& logger, const std::string& filePath)
+VehiclesFile::VehiclesFile(const std::string& filePath, const Core::Logger& logger)
     :
-    m_Logger(logger),
-    m_FilePath(filePath)
+    m_FilePath(filePath),
+    m_Logger(logger)
 {
 }
 
@@ -41,28 +39,26 @@ void VehiclesFile::Load()
 
         m_Vehicles.clear();
         m_VehicleIDs.clear();
-        m_FallbackVehicleID = k_LastResortFallbackVehicleID;
         
         YAML::Node yaml = YAML::Load(readFile());
         {
-            std::string fallbackID = yaml["FallbackID"].as<std::string>();
-            const VehicleID* fallbackVehicleID = GetVanillaVehicleID(fallbackID);
-            if (fallbackVehicleID != nullptr)
-            {
-                m_FallbackVehicleID = fallbackVehicleID;
-            }
+            uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>();
+            const VanillaVehicle* fallbackVehicle = GetVanillaVehicle(fallbackVehicleID);
+            m_FallbackVehicle = fallbackVehicle != nullptr ? fallbackVehicle : k_LastResortFallbackVehicle;
         }
         for (const YAML::Node& vehicleNode : yaml["Vehicles"])
         {
-            std::string newID = vehicleNode["NewID"].as<std::string>();
-            std::string replacementID = vehicleNode["ReplacementID"].as<std::string>();
-            const VehicleID* replacementVehicleID = GetVanillaVehicleID(replacementID);
+            uint64_t vehicleID = vehicleNode["ID"].as<uint64_t>();
+            uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>();
+            const VanillaVehicle* replacementVehicle = GetVanillaVehicle(replacementVehicleID);
+            Vehicle vehicle =
+            {
+                .Name        = vehicleNode["Name"].as<std::string>(),
+                .Replacement = replacementVehicle != nullptr ? replacementVehicle : m_FallbackVehicle,
+            };
 
-            Vehicle vehicle = {};
-            vehicle.NewID.Compressed = BPR::CgsID_Compress(newID.c_str());
-            strcpy_s(vehicle.NewID.Uncompressed, newID.c_str());
-            vehicle.ReplacementID = replacementVehicleID != nullptr ? replacementVehicleID : m_FallbackVehicleID;
-            AddVehicle(vehicle);
+            m_Vehicles[vehicleID] = vehicle;
+            m_VehicleIDs.push_back(vehicleID);
         }
 
         m_Logger.Info("Loaded vehicles.");
@@ -101,15 +97,16 @@ void VehiclesFile::Save() const
 
         YAML::Node yaml;
         {
-            yaml["FallbackID"] = m_FallbackVehicleID->Uncompressed;
+            yaml["FallbackID"] = m_FallbackVehicle->ID;
         }
         for (uint64_t vehicleID : m_VehicleIDs)
         {
             const Vehicle& vehicle = m_Vehicles.at(vehicleID);
             
             YAML::Node vehicleNode;
-            vehicleNode["NewID"]         = vehicle.NewID.Uncompressed;
-            vehicleNode["ReplacementID"] = vehicle.ReplacementID->Uncompressed;
+            vehicleNode["ID"]            = vehicleID;
+            vehicleNode["Name"]          = vehicle.Name;
+            vehicleNode["ReplacementID"] = vehicle.Replacement->ID;
             
             yaml["Vehicles"].push_back(vehicleNode);
         }
@@ -131,27 +128,21 @@ const std::vector<uint64_t>& VehiclesFile::GetVehicleIDs() const
 Vehicle* VehiclesFile::GetVehicle(uint64_t vehicleID)
 {
     auto it = m_Vehicles.find(vehicleID);
-    if (it != m_Vehicles.end())
-    {
-        return &it->second;
-    }
-    
-    return nullptr;
+    return it != m_Vehicles.end() ? &(it->second) : nullptr;
 }
 
-void VehiclesFile::AddVehicle(const Vehicle& vehicle)
+void VehiclesFile::AddVehicle(uint64_t vehicleID, const Vehicle& vehicle)
 {
-    uint64_t vehicleID = vehicle.NewID.Compressed;
     m_Vehicles[vehicleID] = vehicle;
     m_VehicleIDs.push_back(vehicleID);
 }
 
-const VehicleID* VehiclesFile::GetFallbackVehicleID() const
+const VanillaVehicle* VehiclesFile::GetFallbackVehicle() const
 {
-    return m_FallbackVehicleID;
+    return m_FallbackVehicle;
 }
 
-void VehiclesFile::SetFallbackVehicleID(const VehicleID* fallbackVehicleID)
+void VehiclesFile::SetFallbackVehicle(const VanillaVehicle* fallbackVehicle)
 {
-    m_FallbackVehicleID = fallbackVehicleID;
+    m_FallbackVehicle = fallbackVehicle;
 }

@@ -12,15 +12,15 @@
 
 struct Vehicle
 {
-    VehicleID NewID;
-    const VehicleID* ReplacementID;
+    std::string Name;
+    const VanillaVehicle* Replacement = nullptr;
 };
 
 
 class VehiclesFile
 {
 public:
-    VehiclesFile(const Core::Logger& logger, const std::string& filePath);
+    VehiclesFile(const std::string& filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -28,20 +28,19 @@ public:
 
     const std::vector<uint64_t>& GetVehicleIDs() const;
     Vehicle* GetVehicle(uint64_t vehicleID);
-    void AddVehicle(const Vehicle& vehicle);
+    void AddVehicle(uint64_t vehicleID, const Vehicle& vehicle);
 
-    const VehicleID* GetFallbackVehicleID() const;
-    void SetFallbackVehicleID(const VehicleID* fallbackVehicleID);
+    const VanillaVehicle* GetFallbackVehicle() const;
+    void SetFallbackVehicle(const VanillaVehicle* fallbackVehicle);
 
 private:
-    const Core::Logger& m_Logger;
-
     std::string m_FilePath;
+    const Core::Logger& m_Logger;
 
     std::map<uint64_t, Vehicle> m_Vehicles;
     std::vector<uint64_t> m_VehicleIDs;
     
-    const VehicleID* m_FallbackVehicleID = k_LastResortFallbackVehicleID;
+    const VanillaVehicle* m_FallbackVehicle = k_LastResortFallbackVehicle;
 
     bool m_Valid = false;
 };

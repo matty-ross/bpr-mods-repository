@@ -23,7 +23,7 @@ Protection::Protection(HMODULE module)
     :
     Mod(module),
     m_Logger(k_ModName),
-    m_VehiclesFile(m_Logger, k_ModDirectory + "vehicles.yaml"s),
+    m_VehiclesFile(k_ModDirectory + "vehicles.yaml"s, m_Logger),
     m_ChallengesFile(k_ModDirectory + "challenges.yaml"s, m_Logger),
     m_VehicleProtection(m_VehiclesFile),
     m_ChallengeProtection(m_ChallengesFile),
@@ -123,7 +123,7 @@ void Protection::Load()
         {
             m_Logger.Info("Adding non-vanilla vehicles...");
 
-            m_VehicleProtection.AddNonVanillaVehicleIDsToVehiclesFile();
+            m_VehicleProtection.AddNonVanillaVehiclesToVehiclesFile();
 
             m_Logger.Info("Added non-vanilla vehicles.");
         }

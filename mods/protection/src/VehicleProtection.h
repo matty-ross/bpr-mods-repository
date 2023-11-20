@@ -16,7 +16,7 @@ public:
     void OnVehicleSelectMessageUnpack(void* vehicleSelectMessage);
     void OnRenderMenu();
 
-    void AddNonVanillaVehicleIDsToVehiclesFile();
+    void AddNonVanillaVehiclesToVehiclesFile();
     
 private:
     uint64_t HandleVehicleID(uint64_t vehicleID);

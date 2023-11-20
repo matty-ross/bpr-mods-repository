@@ -4,8 +4,6 @@
 
 #include "core/Pointer.h"
 
-#include "bpr/CgsID.h"
-
 
 namespace BPR
 {
@@ -98,6 +96,9 @@ void VehicleProtection::OnRenderMenu()
     {
         ImGui::Checkbox("Vehicle Protection Enabled", &m_VehicleProtectionEnabled);
 
+        static ImGuiTextFilter vehicleNameComboFilter;
+        vehicleNameComboFilter.Draw("Vehicle Combo Filter");
+
         if (ImGui::Button("Save"))
         {
             m_VehiclesFile.Save();
@@ -108,18 +109,21 @@ void VehicleProtection::OnRenderMenu()
             m_VehiclesFile.Load();
         }
 
-        if (ImGui::BeginCombo("Fallback Vehicle", m_VehiclesFile.GetFallbackVehicleID()->Uncompressed))
+        if (ImGui::BeginCombo("Fallback Vehicle", m_VehiclesFile.GetFallbackVehicle()->Name))
         {
-            for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
+            for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
             {
-                bool selected = m_VehiclesFile.GetFallbackVehicleID()->Compressed == vanillaVehicleID.Compressed;
-                if (ImGui::Selectable(vanillaVehicleID.Uncompressed, selected))
+                if (vehicleNameComboFilter.PassFilter(vanillaVehicle.Name))
                 {
-                    m_VehiclesFile.SetFallbackVehicleID(&vanillaVehicleID);
-                }
-                if (selected)
-                {
-                    ImGui::SetItemDefaultFocus();
+                    bool selected = m_VehiclesFile.GetFallbackVehicle()->ID == vanillaVehicle.ID;
+                    if (ImGui::Selectable(vanillaVehicle.Name, selected))
+                    {
+                        m_VehiclesFile.SetFallbackVehicle(&vanillaVehicle);
+                    }
+                    if (selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
                 }
             }
             ImGui::EndCombo();
@@ -130,45 +134,45 @@ void VehicleProtection::OnRenderMenu()
             ImGui::TableSetupColumn("New Vehicle");
             ImGui::TableSetupColumn("Replacement Vehicle");
             ImGui::TableHeadersRow();
-
             for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
             {
                 Vehicle& vehicle = *(m_VehiclesFile.GetVehicle(vehicleID));
-
                 ImGui::PushID(&vehicle);
-
                 ImGui::TableNextRow();
-
-                ImGui::TableSetColumnIndex(0);
-                ImGui::TextUnformatted(vehicle.NewID.Uncompressed);
-
-                ImGui::TableSetColumnIndex(1);
-                if (ImGui::BeginCombo("##replacement-vehicle-combo", vehicle.ReplacementID->Uncompressed))
                 {
-                    for (const VehicleID& vanillaVehicleID : k_VanillaVehicleIDs)
-                    {
-                        bool selected = vehicle.ReplacementID->Compressed == vanillaVehicleID.Compressed;
-                        if (ImGui::Selectable(vanillaVehicleID.Uncompressed, selected))
-                        {
-                            vehicle.ReplacementID = &vanillaVehicleID;
-                        }
-                        if (selected)
-                        {
-                            ImGui::SetItemDefaultFocus();
-                        }
-                    }
-                    ImGui::EndCombo();
+                    ImGui::TableNextColumn();
+                    ImGui::TextUnformatted(vehicle.Name.c_str());
                 }
-
+                {
+                    ImGui::TableNextColumn();
+                    if (ImGui::BeginCombo("##replacement-vehicle-combo", vehicle.Replacement->Name))
+                    {
+                        for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
+                        {
+                            if (vehicleNameComboFilter.PassFilter(vanillaVehicle.Name))
+                            {
+                                bool selected = vehicle.Replacement->ID == vanillaVehicle.ID;
+                                if (ImGui::Selectable(vanillaVehicle.Name, selected))
+                                {
+                                    vehicle.Replacement = &vanillaVehicle;
+                                }
+                                if (selected)
+                                {
+                                    ImGui::SetItemDefaultFocus();
+                                }
+                            }
+                        }
+                        ImGui::EndCombo();
+                    }
+                }
                 ImGui::PopID();
             }
-
             ImGui::EndTable();
         }
     }
 }
 
-void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
+void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
 {
     Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350);
 
@@ -183,18 +187,15 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
         Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0x108);
 
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
-        bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
+        bool isVanilla = GetVanillaVehicle(vehicleID) != nullptr;
         bool isInFile = m_VehiclesFile.GetVehicle(vehicleID) != nullptr;
         if (!isVanilla && !isInFile)
         {
-            VehicleID nonVanillaVehicleID = {};
-            nonVanillaVehicleID.Compressed = vehicleID;
-            BPR::CgsID_ConvertToString(vehicleID, nonVanillaVehicleID.Uncompressed);
-            
             m_VehiclesFile.AddVehicle(
+                vehicleID,
                 {
-                    .NewID = nonVanillaVehicleID,
-                    .ReplacementID = m_VehiclesFile.GetFallbackVehicleID(),
+                    .Name        = entry.at(0x30).as<char[64]>(), // perhaps just use CAR_CAPS_???
+                    .Replacement = m_VehiclesFile.GetFallbackVehicle(),
                 }
             );
         }
@@ -203,17 +204,17 @@ void VehicleProtection::AddNonVanillaVehicleIDsToVehiclesFile()
 
 uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
 {
-    bool isVanilla = GetVanillaVehicleID(vehicleID) != nullptr;
+    bool isVanilla = GetVanillaVehicle(vehicleID) != nullptr;
     if (isVanilla)
     {
         return vehicleID;
     }
 
     Vehicle* vehicle = m_VehiclesFile.GetVehicle(vehicleID);
-    if (vehicle == nullptr)
+    if (vehicle != nullptr)
     {
-        return m_VehiclesFile.GetFallbackVehicleID()->Compressed;
+        return vehicle->Replacement->ID;
     }
 
-    return vehicle->ReplacementID->Compressed;
+    return m_VehiclesFile.GetFallbackVehicle()->ID;
 }
