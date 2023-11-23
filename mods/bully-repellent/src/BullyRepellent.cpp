@@ -23,7 +23,7 @@ BullyRepellent::BullyRepellent(HMODULE module)
     :
     Mod(module),
     m_Logger(k_ModName),
-    m_BlacklistedPlayersFile(m_Logger, k_ModDirectory + "blacklisted-players.yaml"s),
+    m_BlacklistedPlayersFile(k_ModDirectory + "blacklisted-players.yaml"s, m_Logger),
     m_OnlinePlayers(m_BlacklistedPlayersFile),
     m_DetourOnGuiEventNetworkPlayerStatus
     {

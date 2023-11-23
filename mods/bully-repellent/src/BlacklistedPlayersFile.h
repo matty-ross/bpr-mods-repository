@@ -19,7 +19,7 @@ struct BlacklistedPlayer
 class BlacklistedPlayersFile
 {
 public:
-    BlacklistedPlayersFile(const Core::Logger& logger, const std::string& filePath);
+    BlacklistedPlayersFile(const std::string& filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -30,9 +30,8 @@ public:
     void AddBlacklistedPlayer(uint64_t blacklistedPlayerID, const BlacklistedPlayer& blacklistedPlayer);
 
 private:
-    const Core::Logger& m_Logger;
-
     std::string m_FilePath;
+    const Core::Logger& m_Logger;
     
     std::map<uint64_t, BlacklistedPlayer> m_BlacklistedPlayers;
     std::vector<uint64_t> m_BlacklistedPlayerIDs;

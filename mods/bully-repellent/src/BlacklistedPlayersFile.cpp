@@ -7,10 +7,10 @@
 #include "core/File.h"
 
 
-BlacklistedPlayersFile::BlacklistedPlayersFile(const Core::Logger& logger, const std::string& filePath)
+BlacklistedPlayersFile::BlacklistedPlayersFile(const std::string& filePath, const Core::Logger& logger)
     :
-    m_Logger(logger),
-    m_FilePath(filePath)
+    m_FilePath(filePath),
+    m_Logger(logger)
 {
 }
 
@@ -50,7 +50,9 @@ void BlacklistedPlayersFile::Load()
                 .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(),
                 .Automute = blacklistedPlayerNode["Automute"].as<bool>(),
             };
-            AddBlacklistedPlayer(blacklistedPlayerID, blacklistedPlayer);
+            
+            m_BlacklistedPlayers[blacklistedPlayerID] = blacklistedPlayer;
+            m_BlacklistedPlayerIDs.push_back(blacklistedPlayerID);
         }
 
         m_Logger.Info("Loaded blacklisted players.");
@@ -118,12 +120,7 @@ const std::vector<uint64_t>& BlacklistedPlayersFile::GetBlacklistedPlayerIDs() c
 BlacklistedPlayer* BlacklistedPlayersFile::GetBlacklistedPlayer(uint64_t blacklistedPlayerID)
 {
     auto it = m_BlacklistedPlayers.find(blacklistedPlayerID);
-    if (it != m_BlacklistedPlayers.end())
-    {
-        return &it->second;
-    }
-
-    return nullptr;
+    return it != m_BlacklistedPlayers.end() ? &(it->second) : nullptr;
 }
 
 void BlacklistedPlayersFile::AddBlacklistedPlayer(uint64_t blacklistedPlayerID, const BlacklistedPlayer& blacklistedPlayer)
