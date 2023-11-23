@@ -4,6 +4,8 @@
 
 #include "core/Pointer.h"
 
+#include "bpr/CgsID.h"
+
 
 namespace BPR
 {
@@ -131,8 +133,8 @@ void VehicleProtection::OnRenderMenu()
 
         if (ImGui::BeginTable("##vehicles-table", 2))
         {
-            ImGui::TableSetupColumn("New Vehicle");
-            ImGui::TableSetupColumn("Replacement Vehicle");
+            ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.4f);
+            ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.6f);
             ImGui::TableHeadersRow();
             for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
             {
@@ -145,6 +147,7 @@ void VehicleProtection::OnRenderMenu()
                 }
                 {
                     ImGui::TableNextColumn();
+                    ImGui::SetNextItemWidth(-35.0f);
                     if (ImGui::BeginCombo("##replacement-vehicle-combo", vehicle.Replacement->Name))
                     {
                         for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
@@ -191,10 +194,13 @@ void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
         bool isInFile = m_VehiclesFile.GetVehicle(vehicleID) != nullptr;
         if (!isVanilla && !isInFile)
         {
+            char stringVehicleID[13] = {};
+            BPR::CgsID_ConvertToString(vehicleID, stringVehicleID);
+
             m_VehiclesFile.AddVehicle(
                 vehicleID,
                 {
-                    .Name        = entry.at(0x30).as<char[64]>(), // perhaps just use CAR_CAPS_???
+                    .Name        = stringVehicleID,
                     .Replacement = m_VehiclesFile.GetFallbackVehicle(),
                 }
             );
