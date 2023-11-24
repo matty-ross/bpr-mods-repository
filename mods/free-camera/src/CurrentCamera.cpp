@@ -129,9 +129,9 @@ void CurrentCamera::OnRenderMenu()
             m_Transformation.Rotation[1] = 0.0f;
             m_Transformation.Rotation[2] = 0.0f;
         }
-        ImGui::SliderAngle("Rotation X", &m_Transformation.Rotation[0]);
-        ImGui::SliderAngle("Rotation Y", &m_Transformation.Rotation[1]);
-        ImGui::SliderAngle("Rotation Z", &m_Transformation.Rotation[2]);
+        ImGui::SliderAngle("Rotation X", &m_Transformation.Rotation[0], -180.0f, 180.0f);
+        ImGui::SliderAngle("Rotation Y", &m_Transformation.Rotation[1], -180.0f, 180.0f);
+        ImGui::SliderAngle("Rotation Z", &m_Transformation.Rotation[2], -180.0f, 180.0f);
         ImGui::DragFloat3("Translation", m_Transformation.Translation);
 
         ImGui::SeparatorText("Misc");
@@ -173,7 +173,6 @@ void CurrentCamera::OnRenderMenu()
                     }
                 }
             }
-            
             ImGui::EndListBox();
         }
         ImGui::SliderFloat("Blend Amount", &m_BackgroundEffect.BlendAmount, 0.0f, 1.0f);

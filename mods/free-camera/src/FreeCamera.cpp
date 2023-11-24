@@ -23,7 +23,7 @@ FreeCamera::FreeCamera(HMODULE module)
     :
     Mod(module),
     m_Logger(k_ModName),
-    m_CustomParamtersFile(m_Logger, k_ModDirectory + "custom-parameters.yaml"s),
+    m_CustomParamtersFile(k_ModDirectory + "custom-parameters.yaml"s, m_Logger),
     m_GameplayExternalCamera(m_CustomParamtersFile),
     m_DetourArbitratorUpdate
     {

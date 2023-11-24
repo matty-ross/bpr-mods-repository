@@ -317,7 +317,6 @@ void Behaviors::OnRenderMenu()
                     }
                     ImGui::PopID();
                 }
-                
                 ImGui::EndListBox();
             }
             ImGui::PopID();

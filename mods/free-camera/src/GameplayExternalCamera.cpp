@@ -179,13 +179,10 @@ void GameplayExternalCamera::OnRenderMenu()
                         }
                         ImGui::PopID();
                     }
-
                     ImGui::EndListBox();
                 }
-                
                 ImGui::EndTabItem();
             }
-            
             ImGui::EndTabBar();
         }
     }

@@ -7,10 +7,10 @@
 #include "core/File.h"
 
 
-CustomParametersFile::CustomParametersFile(const Core::Logger& logger, const std::string& filePath)
+CustomParametersFile::CustomParametersFile(const std::string& filePath, const Core::Logger& logger)
     :
-    m_Logger(logger),
-    m_FilePath(filePath)
+    m_FilePath(filePath),
+    m_Logger(logger)
 {
 }
 
@@ -56,9 +56,10 @@ void CustomParametersFile::Load()
                 .DriftYawSpring           = customParametersNode["DriftYawSpring"].as<float>(),
                 .BoostFOVZoomCompensation = customParametersNode["BoostFOVZoomCompensation"].as<float>(),
                 .DownAngle                = customParametersNode["DownAngle"].as<float>(),
-                .DropFactor               = customParametersNode["DropFactor"].as<float>()
+                .DropFactor               = customParametersNode["DropFactor"].as<float>(),
             };
-            AddCustomParameters(customParameters);
+
+            m_CustomParameters.push_back(customParameters);
         }
 
         m_Logger.Info("Loaded custom parameters.");
