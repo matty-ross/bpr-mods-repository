@@ -30,8 +30,11 @@ private:
     struct Transformation
     {
         float Rotation[3] = { 0.0f, 0.0f, 0.0f };
+        float RotationDelta[3] = { 0.0f, 0.0f, 0.0f };
         float Translation[3] = { 0.0f, 0.0f, 0.0f };
-        bool Active = false;
+        float TranslationDelta[3] = { 0.0f, 0.0f, 0.0f };
+        bool Init = false;
+        bool Override = false;
     };
 
     struct Misc

@@ -43,23 +43,61 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
     };
 
     {
-        float* r = m_Transformation.Rotation;
-        float* t = m_Transformation.Translation;
-        DirectX::XMFLOAT4X4& transform = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
-        
-        if (m_Transformation.Active)
+        if (m_Transformation.Override)
         {
-            DirectX::XMStoreFloat4x4(
-                &transform,
-                DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMVectorSet(r[0], r[1], r[2], 0.0f)) *
-                DirectX::XMMatrixTranslationFromVector(DirectX::XMVectorSet(t[0], t[1], t[2], 0.0f))
+            DirectX::XMFLOAT4X4& transform = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
+            
+            if (m_Transformation.Init)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    m_Transformation.Rotation[i] = 0.0f;
+                    m_Transformation.RotationDelta[i] = 0.0f;
+                    m_Transformation.Translation[i] = 0.0f;
+                    m_Transformation.TranslationDelta[i] = transform(3, i);
+                }
+                m_Transformation.Init = false;
+            }
+
+            m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);
+            m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.f);
+            m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.f);
+            DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
+                DirectX::XMConvertToRadians(m_Transformation.Rotation[0]),
+                DirectX::XMConvertToRadians(m_Transformation.Rotation[1]),
+                DirectX::XMConvertToRadians(m_Transformation.Rotation[2])
             );
-        }
-        else
-        {
-            t[0] = transform(3, 0);
-            t[1] = transform(3, 1);
-            t[2] = transform(3, 2);
+            
+            DirectX::XMFLOAT3 translationDelta = {};
+            DirectX::XMStoreFloat3(
+                &translationDelta,
+                DirectX::XMVector3Transform(
+                    DirectX::XMVectorSet(
+                        m_Transformation.TranslationDelta[0],
+                        m_Transformation.TranslationDelta[1],
+                        m_Transformation.TranslationDelta[2],
+                        0.0f
+                    ),
+                    rotationMatrix
+                )
+            );
+            
+            m_Transformation.Translation[0] += translationDelta.x;
+            m_Transformation.Translation[1] += translationDelta.y;
+            m_Transformation.Translation[2] += translationDelta.z;
+            DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(
+                m_Transformation.Translation[0],
+                m_Transformation.Translation[1],
+                m_Transformation.Translation[2]
+            );
+            
+            DirectX::XMStoreFloat4x4(&transform, rotationMatrix * translationMatrix);
+
+            for (int i = 0; i < 3; ++i)
+            {
+                m_Transformation.RotationDelta[i] = 0.0f;
+                m_Transformation.TranslationDelta[i] = 0.0f;
+            }
         }
     }
     
@@ -119,20 +157,14 @@ void CurrentCamera::OnRenderMenu()
             }
             ImGui::PopID();
         };
-
+        
         ImGui::SeparatorText("Transformation");
-        ImGui::Checkbox("Override", &m_Transformation.Active);
-        ImGui::SameLine();
-        if (ImGui::Button("Reset Rotation"))
+        if (ImGui::Checkbox("Override", &m_Transformation.Override))
         {
-            m_Transformation.Rotation[0] = 0.0f;
-            m_Transformation.Rotation[1] = 0.0f;
-            m_Transformation.Rotation[2] = 0.0f;
+            m_Transformation.Init = true;
         }
-        ImGui::SliderAngle("Rotation X", &m_Transformation.Rotation[0], -180.0f, 180.0f);
-        ImGui::SliderAngle("Rotation Y", &m_Transformation.Rotation[1], -180.0f, 180.0f);
-        ImGui::SliderAngle("Rotation Z", &m_Transformation.Rotation[2], -180.0f, 180.0f);
-        ImGui::DragFloat3("Translation", m_Transformation.Translation);
+        ImGui::DragFloat3("Rotation", m_Transformation.RotationDelta);
+        ImGui::DragFloat3("Translation", m_Transformation.TranslationDelta);
 
         ImGui::SeparatorText("Misc");
         renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
