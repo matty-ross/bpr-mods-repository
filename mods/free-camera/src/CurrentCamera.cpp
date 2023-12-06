@@ -59,6 +59,10 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
                 m_Transformation.Init = false;
             }
 
+            if (m_Transformation.UseMouseController)
+            {
+            }
+
             m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);
             m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.f);
             m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.f);
@@ -163,6 +167,8 @@ void CurrentCamera::OnRenderMenu()
         {
             m_Transformation.Init = true;
         }
+        ImGui::SameLine();
+        ImGui::Checkbox("Use Mouse", &m_Transformation.UseMouseController);
         ImGui::DragFloat3("Rotation", m_Transformation.RotationDelta);
         ImGui::DragFloat3("Translation", m_Transformation.TranslationDelta);
 

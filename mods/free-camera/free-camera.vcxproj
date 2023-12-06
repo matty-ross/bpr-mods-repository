@@ -169,6 +169,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\MouseController.cpp" />
     <ClCompile Include="src\Misc.cpp" />
     <ClCompile Include="src\CustomParametersFile.cpp" />
     <ClCompile Include="src\CurrentCamera.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MouseController.h" />
     <ClInclude Include="src\Misc.h" />
     <ClInclude Include="src\CustomParametersFile.h" />
     <ClInclude Include="src\CurrentCamera.h" />

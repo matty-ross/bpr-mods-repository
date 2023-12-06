@@ -34,6 +34,7 @@ private:
         float Translation[3] = { 0.0f, 0.0f, 0.0f };
         float TranslationDelta[3] = { 0.0f, 0.0f, 0.0f };
         bool Init = false;
+        bool UseMouseController = false;
         bool Override = false;
     };
 
