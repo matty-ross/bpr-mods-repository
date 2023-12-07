@@ -7,13 +7,13 @@
 class MouseController
 {
 public:
-    void OnWindowMessage(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+    void OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     bool IsRotating() const;
-    float GetRotationDeltaX() const;
-    float GetRotationDeltaY() const;
+    float GetRotationDeltaX();
+    float GetRotationDeltaY();
     
-    float GetTranslationDeltaZ() const;
+    float GetTranslationDeltaZ();
 
 private:
     float m_CurrentPositionX = 0.0f;

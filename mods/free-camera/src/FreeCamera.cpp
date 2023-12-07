@@ -24,6 +24,7 @@ FreeCamera::FreeCamera(HMODULE module)
     Mod(module),
     m_Logger(k_ModName),
     m_CustomParamtersFile(k_ModDirectory + "custom-parameters.yaml"s, m_Logger),
+    m_CurrentCamera(m_MouseController),
     m_GameplayExternalCamera(m_CustomParamtersFile),
     m_DetourArbitratorUpdate
     {
@@ -82,6 +83,19 @@ void FreeCamera::Load()
             m_Logger.Info("In game.");
         }
 
+        // Set window proc
+        {
+            m_Logger.Info("Setting window proc...");
+
+            m_PreviousWindowProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrA(
+                Core::Pointer(0x0139815C).as<HWND>(),
+                GWLP_WNDPROC,
+                reinterpret_cast<LONG_PTR>(&FreeCamera::WindowProc))
+            );
+
+            m_Logger.Info("Set window proc. Previous window proc: 0x%p.", m_PreviousWindowProc);
+        }
+
         // Attach ArbitratorUpdate detour.
         {
             m_Logger.Info("Attaching ArbitratorUpdate detour...");
@@ -137,6 +151,19 @@ void FreeCamera::Unload()
             
             m_Logger.Info("Detached ArbitratorUpdate detour.");
         }
+
+        // Set previous window proc
+        {
+            m_Logger.Info("Setting previous window proc...");
+
+            SetWindowLongPtrA(
+                Core::Pointer(0x0139815C).as<HWND>(),
+                GWLP_WNDPROC,
+                reinterpret_cast<LONG_PTR>(m_PreviousWindowProc)
+            );
+
+            m_Logger.Info("Set previous window proc.");
+        }
         
         m_Logger.Info("Unloaded.");
     }
@@ -173,6 +200,13 @@ void FreeCamera::OnRenderMenu()
         ImGui::PopItemWidth();
     }
     ImGui::End();
+}
+
+LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    g_Mod->m_MouseController.OnWindowMessage(hWnd, Msg, wParam, lParam);
+    
+    return CallWindowProcA(g_Mod->m_PreviousWindowProc, hWnd, Msg, wParam, lParam);
 }
 
 __declspec(naked) void FreeCamera::DetourArbitratorUpdate()

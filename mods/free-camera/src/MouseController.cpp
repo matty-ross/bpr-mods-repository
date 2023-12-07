@@ -3,9 +3,9 @@
 #include <Windowsx.h>
 
 
-void MouseController::OnWindowMessage(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+void MouseController::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    switch (Message)
+    switch (Msg)
     {
     case WM_LBUTTONDOWN:
         {
@@ -41,17 +41,23 @@ bool MouseController::IsRotating() const
     return m_LeftButtonDown;
 }
 
-float MouseController::GetRotationDeltaX() const
+float MouseController::GetRotationDeltaX()
 {
-    return m_CurrentPositionX - m_PreviousPositionX;
+    float delta = m_CurrentPositionX - m_PreviousPositionX;
+    m_PreviousPositionX = m_CurrentPositionX;
+    return delta;
 }
 
-float MouseController::GetRotationDeltaY() const
+float MouseController::GetRotationDeltaY()
 {
-    return m_CurrentPositionY - m_PreviousPositionY;
+    float delta = m_CurrentPositionY - m_PreviousPositionY;
+    m_PreviousPositionY = m_CurrentPositionY;
+    return delta;
 }
 
-float MouseController::GetTranslationDeltaZ() const
+float MouseController::GetTranslationDeltaZ()
 {
-    return m_WheelDelta;
+    float delta = m_WheelDelta;
+    m_WheelDelta = 0;
+    return delta;
 }

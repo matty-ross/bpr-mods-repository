@@ -14,6 +14,7 @@
 #include "CurrentCamera.h"
 #include "GameplayExternalCamera.h"
 #include "Behaviors.h"
+#include "MouseController.h"
 
 
 class FreeCamera : public Core::Mod
@@ -29,10 +30,13 @@ private:
     void OnRenderMenu();
 
 private:
+    static LRESULT CALLBACK WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
     static void DetourArbitratorUpdate();
 
 private:
     Core::Logger m_Logger;
+
+    WNDPROC m_PreviousWindowProc = nullptr;
     
     CustomParametersFile m_CustomParamtersFile;
     
@@ -40,6 +44,8 @@ private:
     CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
+
+    MouseController m_MouseController;
 
     DetourHook m_DetourArbitratorUpdate;
     

@@ -5,8 +5,9 @@
 #include "imgui/imgui.h"
 
 
-CurrentCamera::CurrentCamera()
+CurrentCamera::CurrentCamera(MouseController& mouseController)
     :
+    m_MouseController(mouseController),
     m_Misc
     {
         .Fov        = 0x58,
@@ -61,6 +62,12 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
 
             if (m_Transformation.UseMouseController)
             {
+                if (m_MouseController.IsRotating())
+                {
+                    m_Transformation.RotationDelta[1] -= m_MouseController.GetRotationDeltaX();
+                    m_Transformation.RotationDelta[0] += m_MouseController.GetRotationDeltaY();
+                }
+                m_Transformation.TranslationDelta[2] += m_MouseController.GetTranslationDeltaZ();
             }
 
             m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);

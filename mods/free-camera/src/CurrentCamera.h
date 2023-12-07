@@ -3,11 +3,13 @@
 
 #include "core/Pointer.h"
 
+#include "MouseController.h"
+
 
 class CurrentCamera
 {
 public:
-    CurrentCamera();
+    CurrentCamera(MouseController& mouseController);
 
 public:
     void OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo);
@@ -66,6 +68,8 @@ private:
     };
 
 private:
+    MouseController& m_MouseController;
+
     Transformation m_Transformation;
     Misc m_Misc;
     Effects m_Effects;
