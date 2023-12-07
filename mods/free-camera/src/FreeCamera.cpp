@@ -24,7 +24,6 @@ FreeCamera::FreeCamera(HMODULE module)
     Mod(module),
     m_Logger(k_ModName),
     m_CustomParamtersFile(k_ModDirectory + "custom-parameters.yaml"s, m_Logger),
-    m_CurrentCamera(m_MouseController),
     m_GameplayExternalCamera(m_CustomParamtersFile),
     m_DetourArbitratorUpdate
     {
@@ -204,7 +203,7 @@ void FreeCamera::OnRenderMenu()
 
 LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    g_Mod->m_MouseController.OnWindowMessage(hWnd, Msg, wParam, lParam);
+    g_Mod->m_CurrentCamera.OnWindowMessage(hWnd, Msg, wParam, lParam);
     
     return CallWindowProcA(g_Mod->m_PreviousWindowProc, hWnd, Msg, wParam, lParam);
 }

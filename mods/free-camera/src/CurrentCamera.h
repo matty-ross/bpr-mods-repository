@@ -1,19 +1,20 @@
 #pragma once
 
 
-#include "core/Pointer.h"
+#include <Windows.h>
 
-#include "MouseController.h"
+#include "core/Pointer.h"
 
 
 class CurrentCamera
 {
 public:
-    CurrentCamera(MouseController& mouseController);
+    CurrentCamera();
 
 public:
     void OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo);
     void OnRenderMenu();
+    void OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 private:
     template <typename T>
@@ -36,7 +37,7 @@ private:
         float Translation[3] = { 0.0f, 0.0f, 0.0f };
         float TranslationDelta[3] = { 0.0f, 0.0f, 0.0f };
         bool Init = false;
-        bool UseMouseController = false;
+        bool UseMouse = false;
         bool Override = false;
     };
 
@@ -67,12 +68,18 @@ private:
         bool Stop = false;
     };
 
-private:
-    MouseController& m_MouseController;
+    struct MouseData
+    {
+        bool LeftButtonDown = false;
+        float PreviousPositionX = 0.0f;
+        float PreviousPositionY = 0.0f;
+    };
 
+private:
     Transformation m_Transformation;
     Misc m_Misc;
     Effects m_Effects;
     MotionBlur m_MotionBlur;
     BackgroundEffect m_BackgroundEffect;
+    MouseData m_MouseData;
 };

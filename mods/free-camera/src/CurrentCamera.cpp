@@ -1,13 +1,13 @@
 #include "CurrentCamera.h"
 
+#include <Windowsx.h>
 #include <DirectXMath.h>
 
 #include "imgui/imgui.h"
 
 
-CurrentCamera::CurrentCamera(MouseController& mouseController)
+CurrentCamera::CurrentCamera()
     :
-    m_MouseController(mouseController),
     m_Misc
     {
         .Fov        = 0x58,
@@ -58,16 +58,6 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
                     m_Transformation.TranslationDelta[i] = transform(3, i);
                 }
                 m_Transformation.Init = false;
-            }
-
-            if (m_Transformation.UseMouseController)
-            {
-                if (m_MouseController.IsRotating())
-                {
-                    m_Transformation.RotationDelta[1] -= m_MouseController.GetRotationDeltaX();
-                    m_Transformation.RotationDelta[0] += m_MouseController.GetRotationDeltaY();
-                }
-                m_Transformation.TranslationDelta[2] += m_MouseController.GetTranslationDeltaZ();
             }
 
             m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);
@@ -175,7 +165,7 @@ void CurrentCamera::OnRenderMenu()
             m_Transformation.Init = true;
         }
         ImGui::SameLine();
-        ImGui::Checkbox("Use Mouse", &m_Transformation.UseMouseController);
+        ImGui::Checkbox("Use Mouse", &m_Transformation.UseMouse);
         ImGui::DragFloat3("Rotation", m_Transformation.RotationDelta);
         ImGui::DragFloat3("Translation", m_Transformation.TranslationDelta);
 
@@ -221,5 +211,53 @@ void CurrentCamera::OnRenderMenu()
             ImGui::EndListBox();
         }
         ImGui::SliderFloat("Blend Amount", &m_BackgroundEffect.BlendAmount, 0.0f, 1.0f);
+    }
+}
+
+void CurrentCamera::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    if (!m_Transformation.UseMouse || ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    switch (Msg)
+    {
+    case WM_LBUTTONDOWN:
+        {
+            m_MouseData.LeftButtonDown = true;
+        }
+        break;
+
+    case WM_LBUTTONUP:
+        {
+            m_MouseData.LeftButtonDown = false;
+        }
+        break;
+
+    case WM_MOUSEMOVE:
+        {
+            float x = static_cast<float>(GET_X_LPARAM(lParam));
+            float y = static_cast<float>(GET_Y_LPARAM(lParam));
+
+            if (m_MouseData.LeftButtonDown)
+            {
+                float deltaX = x - m_MouseData.PreviousPositionX;
+                float deltaY = y - m_MouseData.PreviousPositionY;
+                m_Transformation.RotationDelta[1] -= deltaX;
+                m_Transformation.RotationDelta[0] += deltaY;
+            }
+            
+            m_MouseData.PreviousPositionX = x;
+            m_MouseData.PreviousPositionY = y;
+        }
+        break;
+
+    case WM_MOUSEWHEEL:
+        {
+            float delta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
+            m_Transformation.TranslationDelta[2] += GET_KEYSTATE_WPARAM(wParam) == MK_CONTROL ? delta * 4.0f : delta;
+        }
+        break;
     }
 }

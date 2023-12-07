@@ -14,7 +14,6 @@
 #include "CurrentCamera.h"
 #include "GameplayExternalCamera.h"
 #include "Behaviors.h"
-#include "MouseController.h"
 
 
 class FreeCamera : public Core::Mod
@@ -44,8 +43,6 @@ private:
     CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
-
-    MouseController m_MouseController;
 
     DetourHook m_DetourArbitratorUpdate;
     
