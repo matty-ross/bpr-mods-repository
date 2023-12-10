@@ -87,6 +87,11 @@ void GameplayExternalCamera::OnRenderMenu()
                     behavior.at(0xBC1).as<bool>() = true;
                 }
                 ImGui::Checkbox("Disable Automatic Rotation", &behavior.at(0xBC3).as<bool>());
+                static bool disableCollision = false;
+                if (ImGui::Checkbox("Disable Collision", &disableCollision))
+                {
+                    frustumCollisionResolver.at(0x150).as<float>() = disableCollision ? -FLT_MAX : 0.01f;
+                }
 
                 ImGui::SeparatorText("Rotation Controller");
                 ImGui::SliderFloat("Yaw Degrees", &rotationController.at(0x10).as<float>(), -180.0f, 180.0f);
@@ -102,7 +107,6 @@ void GameplayExternalCamera::OnRenderMenu()
                 ImGui::SeparatorText("Frustum Collision Resolver");
                 ImGui::Checkbox("Use Frustum Resolver", &collisionPolicy.at(0x24D).as<bool>());
                 ImGui::DragFloat3("Vehicle Resolve Vector", frustumCollisionResolver.at(0x140).as<float[3]>(), 1.0f, 0.0f, 500.0f);
-                ImGui::SliderFloat("Min Distance", &frustumCollisionResolver.at(0x150).as<float>(), -500.0f, 10.0f);
 
                 ImGui::SeparatorText("Ground Constraint");
                 ImGui::Checkbox("Use Ground Constraint", &collisionPolicy.at(0x24B).as<bool>());
