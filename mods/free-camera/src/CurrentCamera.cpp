@@ -58,6 +58,8 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
                     m_Transformation.TranslationDelta[i] = transform(3, i);
                 }
                 m_Transformation.Init = false;
+                
+                m_Misc.Fov.Value = 90.0f;
             }
 
             m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);
@@ -163,6 +165,7 @@ void CurrentCamera::OnRenderMenu()
         if (ImGui::Checkbox("Override", &m_Transformation.Override))
         {
             m_Transformation.Init = true;
+            m_Misc.Fov.Override = m_Transformation.Override;
         }
         ImGui::SameLine();
         ImGui::Checkbox("Use Mouse", &m_Transformation.UseMouse);
