@@ -70,7 +70,6 @@ private:
 
     struct MouseData
     {
-        bool LeftButtonDown = false;
         float PreviousPositionX = 0.0f;
         float PreviousPositionY = 0.0f;
     };
