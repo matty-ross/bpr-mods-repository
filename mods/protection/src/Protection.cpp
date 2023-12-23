@@ -299,7 +299,7 @@ void Protection::Unload()
 
 void Protection::OnRenderMenu()
 {
-    if (ImGui::Begin(k_ModName))
+    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
 

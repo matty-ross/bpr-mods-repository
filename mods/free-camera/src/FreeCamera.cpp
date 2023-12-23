@@ -182,7 +182,7 @@ void FreeCamera::OnUpdate(void* camera, void* sharedInfo)
 
 void FreeCamera::OnRenderMenu()
 {
-    if (ImGui::Begin(k_ModName))
+    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
         ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
         
