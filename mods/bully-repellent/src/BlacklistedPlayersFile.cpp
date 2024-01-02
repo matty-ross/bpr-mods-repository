@@ -1,5 +1,7 @@
 #include "BlacklistedPlayersFile.h"
 
+#include <algorithm>
+
 #include <Windows.h>
 
 #include "yaml-cpp/yaml.h"
@@ -38,21 +40,19 @@ void BlacklistedPlayersFile::Load()
         m_Logger.Info("Loading blacklisted players from file '%s' ...", m_FilePath.c_str());
 
         m_BlacklistedPlayers.clear();
-        m_BlacklistedPlayerIDs.clear();
 
         YAML::Node yaml = YAML::Load(readFile());
         for (const YAML::Node& blacklistedPlayerNode : yaml["BlacklistedPlayers"])
         {
-            uint64_t blacklistedPlayerID = blacklistedPlayerNode["ID"].as<uint64_t>();
             BlacklistedPlayer blacklistedPlayer =
             {
+                .ID       = blacklistedPlayerNode["ID"].as<uint64_t>(),
                 .Name     = blacklistedPlayerNode["Name"].as<std::string>(),
                 .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(),
                 .Automute = blacklistedPlayerNode["Automute"].as<bool>(),
             };
             
-            m_BlacklistedPlayers[blacklistedPlayerID] = blacklistedPlayer;
-            m_BlacklistedPlayerIDs.push_back(blacklistedPlayerID);
+            m_BlacklistedPlayers.push_back(blacklistedPlayer);
         }
 
         m_Logger.Info("Loaded blacklisted players.");
@@ -90,12 +90,10 @@ void BlacklistedPlayersFile::Save() const
         m_Logger.Info("Saving blacklisted players to file '%s' ...", m_FilePath.c_str());
 
         YAML::Node yaml;
-        for (uint64_t blacklistedPlayerID : m_BlacklistedPlayerIDs)
+        for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
         {
-            const BlacklistedPlayer& blacklistedPlayer = m_BlacklistedPlayers.at(blacklistedPlayerID);
-            
             YAML::Node blacklistedPlayerNode;
-            blacklistedPlayerNode["ID"]       = blacklistedPlayerID;
+            blacklistedPlayerNode["ID"]       = blacklistedPlayer.ID;
             blacklistedPlayerNode["Name"]     = blacklistedPlayer.Name;
             blacklistedPlayerNode["Autokick"] = blacklistedPlayer.Autokick;
             blacklistedPlayerNode["Automute"] = blacklistedPlayer.Automute;
@@ -112,19 +110,18 @@ void BlacklistedPlayersFile::Save() const
     }
 }
 
-const std::vector<uint64_t>& BlacklistedPlayersFile::GetBlacklistedPlayerIDs() const
+std::vector<BlacklistedPlayer>& BlacklistedPlayersFile::GetBlacklistedPlayers()
 {
-    return m_BlacklistedPlayerIDs;
+    return m_BlacklistedPlayers;
 }
 
 BlacklistedPlayer* BlacklistedPlayersFile::GetBlacklistedPlayer(uint64_t blacklistedPlayerID)
 {
-    auto it = m_BlacklistedPlayers.find(blacklistedPlayerID);
-    return it != m_BlacklistedPlayers.end() ? &(it->second) : nullptr;
-}
-
-void BlacklistedPlayersFile::AddBlacklistedPlayer(uint64_t blacklistedPlayerID, const BlacklistedPlayer& blacklistedPlayer)
-{
-    m_BlacklistedPlayers[blacklistedPlayerID] = blacklistedPlayer;
-    m_BlacklistedPlayerIDs.push_back(blacklistedPlayerID);
+    auto it = std::find_if(m_BlacklistedPlayers.begin(), m_BlacklistedPlayers.end(),
+        [=](const BlacklistedPlayer& blacklistedPlayer)
+        {
+            return blacklistedPlayer.ID == blacklistedPlayerID;
+        }
+    );
+    return it != m_BlacklistedPlayers.end() ? &(*it) : nullptr;
 }

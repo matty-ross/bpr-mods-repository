@@ -163,9 +163,10 @@ void OnlinePlayers::OnRenderMenu()
                         }
                         if (ImGui::Button("Add"))
                         {
-                            m_BlacklistedPlayersFile.AddBlacklistedPlayer(
-                                playerID,
+                            m_BlacklistedPlayersFile.GetBlacklistedPlayers().push_back(
+                                BlacklistedPlayer
                                 {
+                                    .ID       = playerID,
                                     .Name     = playerStatusData.at(0xF0).as<char[25]>(),
                                     .Autokick = false,
                                     .Automute = false,
@@ -203,9 +204,8 @@ void OnlinePlayers::OnRenderMenu()
             ImGui::TableSetupColumn("Autokick");
             ImGui::TableSetupColumn("Automute");
             ImGui::TableHeadersRow();
-            for (uint64_t blacklistedPlayerID : m_BlacklistedPlayersFile.GetBlacklistedPlayerIDs())
+            for (BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayersFile.GetBlacklistedPlayers())
             {
-                BlacklistedPlayer& blacklistedPlayer = *(m_BlacklistedPlayersFile.GetBlacklistedPlayer(blacklistedPlayerID));
                 ImGui::PushID(&blacklistedPlayer);
                 ImGui::TableNextRow();
                 {

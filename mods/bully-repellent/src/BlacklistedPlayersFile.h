@@ -2,7 +2,6 @@
 
 
 #include <string>
-#include <map>
 #include <vector>
 
 #include "core/Logger.h"
@@ -10,6 +9,7 @@
 
 struct BlacklistedPlayer
 {
+    uint64_t ID = 0;
     std::string Name;
     bool Autokick = false;
     bool Automute = false;
@@ -25,16 +25,14 @@ public:
     void Load();
     void Save() const;
     
-    const std::vector<uint64_t>& GetBlacklistedPlayerIDs() const;
+    std::vector<BlacklistedPlayer>& GetBlacklistedPlayers();
     BlacklistedPlayer* GetBlacklistedPlayer(uint64_t blacklistedPlayerID);
-    void AddBlacklistedPlayer(uint64_t blacklistedPlayerID, const BlacklistedPlayer& blacklistedPlayer);
 
 private:
     std::string m_FilePath;
     const Core::Logger& m_Logger;
     
-    std::map<uint64_t, BlacklistedPlayer> m_BlacklistedPlayers;
-    std::vector<uint64_t> m_BlacklistedPlayerIDs;
+    std::vector<BlacklistedPlayer> m_BlacklistedPlayers;
 
     bool m_Valid = false;
 };
