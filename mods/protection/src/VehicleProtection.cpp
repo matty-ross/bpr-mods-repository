@@ -136,9 +136,8 @@ void VehicleProtection::OnRenderMenu()
             ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.4f);
             ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.6f);
             ImGui::TableHeadersRow();
-            for (uint64_t vehicleID : m_VehiclesFile.GetVehicleIDs())
+            for (Vehicle& vehicle : m_VehiclesFile.GetVehicles())
             {
-                Vehicle& vehicle = *(m_VehiclesFile.GetVehicle(vehicleID));
                 ImGui::PushID(&vehicle);
                 ImGui::TableNextRow();
                 {
@@ -197,9 +196,10 @@ void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
             char stringVehicleID[13] = {};
             BPR::CgsID_ConvertToString(vehicleID, stringVehicleID);
 
-            m_VehiclesFile.AddVehicle(
-                vehicleID,
+            m_VehiclesFile.GetVehicles().push_back(
+                Vehicle
                 {
+                    .ID          = vehicleID,
                     .Name        = stringVehicleID,
                     .Replacement = m_VehiclesFile.GetFallbackVehicle(),
                 }

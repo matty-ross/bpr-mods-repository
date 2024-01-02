@@ -1,5 +1,7 @@
 #include "ChallengesFile.h"
 
+#include <algorithm>
+
 #include <Windows.h>
 
 #include "yaml-cpp/yaml.h"
@@ -38,7 +40,6 @@ void ChallengesFile::Load()
         m_Logger.Info("Loading challenges from file '%s' ...", m_FilePath.c_str());
 
         m_Challenges.clear();
-        m_ChallengeIDs.clear();
         
         YAML::Node yaml = YAML::Load(readFile());
         {
@@ -48,17 +49,16 @@ void ChallengesFile::Load()
         }
         for (const YAML::Node& challengeNode : yaml["Challenges"])
         {
-            uint64_t challengeID = challengeNode["ID"].as<uint64_t>();
             uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
             const VanillaChallenge* replacementChallenge = GetVanillaChallenge(replacementChallengeID);
             Challenge challenge =
             {
+                .ID          = challengeNode["ID"].as<uint64_t>(),
                 .Title       = challengeNode["Title"].as<std::string>(),
                 .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
             };
             
-            m_Challenges[challengeID] = challenge;
-            m_ChallengeIDs.push_back(challengeID);
+            m_Challenges.push_back(challenge);
         }
 
         m_Logger.Info("Loaded challenges.");
@@ -99,12 +99,10 @@ void ChallengesFile::Save() const
         {
             yaml["FallbackID"] = m_FallbackChallenge->ID;
         }
-        for (uint64_t challengeID : m_ChallengeIDs)
+        for (const Challenge& challenge : m_Challenges)
         {
-            const Challenge& challenge = m_Challenges.at(challengeID);
-            
             YAML::Node challengeNode;
-            challengeNode["ID"]            = challengeID;
+            challengeNode["ID"]            = challenge.ID;
             challengeNode["Title"]         = challenge.Title;
             challengeNode["ReplacementID"] = challenge.Replacement->ID;
 
@@ -120,21 +118,20 @@ void ChallengesFile::Save() const
     }
 }
 
-const std::vector<uint64_t>& ChallengesFile::GetChallengeIDs() const
+std::vector<Challenge>& ChallengesFile::GetChallenges()
 {
-    return m_ChallengeIDs;
+    return m_Challenges;
 }
 
 Challenge* ChallengesFile::GetChallenge(uint64_t challengeID)
 {
-    auto it = m_Challenges.find(challengeID);
-    return it != m_Challenges.end() ? &(it->second) : nullptr;
-}
-
-void ChallengesFile::AddChallenge(uint64_t challengeID, const Challenge& challenge)
-{
-    m_Challenges[challengeID] = challenge;
-    m_ChallengeIDs.push_back(challengeID);
+    auto it = std::find_if(m_Challenges.begin(), m_Challenges.end(),
+        [=](const Challenge& challenge)
+        {
+            return challenge.ID == challengeID;
+        }
+    );
+    return it != m_Challenges.end() ? &(*it) : nullptr;
 }
 
 const VanillaChallenge* ChallengesFile::GetFallbackChallenge() const

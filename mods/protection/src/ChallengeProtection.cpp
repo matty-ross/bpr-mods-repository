@@ -77,9 +77,8 @@ void ChallengeProtection::OnRenderMenu()
             ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.4f);
             ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.6f);
             ImGui::TableHeadersRow();
-            for (uint64_t challengeID : m_ChallengesFile.GetChallengeIDs())
+            for (Challenge& challenge : m_ChallengesFile.GetChallenges())
             {
-                Challenge& challenge = *(m_ChallengesFile.GetChallenge(challengeID));
                 ImGui::PushID(&challenge);
                 ImGui::TableNextRow();
                 {
@@ -135,9 +134,10 @@ void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
         bool isInFile = m_ChallengesFile.GetChallenge(challengeID) != nullptr;
         if (!isVanilla && !isInFile)
         {
-            m_ChallengesFile.AddChallenge(
-                challengeID,
+            m_ChallengesFile.GetChallenges().push_back(
+                Challenge
                 {
+                    .ID          = challengeID,
                     .Title       = entry.at(0xB0).as<char[16]>(),
                     .Replacement = m_ChallengesFile.GetFallbackChallenge(),
                 }

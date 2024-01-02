@@ -1,5 +1,7 @@
 #include "VehiclesFile.h"
 
+#include <algorithm>
+
 #include <Windows.h>
 
 #include "yaml-cpp/yaml.h"
@@ -38,7 +40,6 @@ void VehiclesFile::Load()
         m_Logger.Info("Loading vehicles from file '%s' ...", m_FilePath.c_str());
 
         m_Vehicles.clear();
-        m_VehicleIDs.clear();
         
         YAML::Node yaml = YAML::Load(readFile());
         {
@@ -48,17 +49,16 @@ void VehiclesFile::Load()
         }
         for (const YAML::Node& vehicleNode : yaml["Vehicles"])
         {
-            uint64_t vehicleID = vehicleNode["ID"].as<uint64_t>();
             uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>();
             const VanillaVehicle* replacementVehicle = GetVanillaVehicle(replacementVehicleID);
             Vehicle vehicle =
             {
+                .ID          = vehicleNode["ID"].as<uint64_t>(),
                 .Name        = vehicleNode["Name"].as<std::string>(),
                 .Replacement = replacementVehicle != nullptr ? replacementVehicle : m_FallbackVehicle,
             };
 
-            m_Vehicles[vehicleID] = vehicle;
-            m_VehicleIDs.push_back(vehicleID);
+            m_Vehicles.push_back(vehicle);
         }
 
         m_Logger.Info("Loaded vehicles.");
@@ -99,12 +99,10 @@ void VehiclesFile::Save() const
         {
             yaml["FallbackID"] = m_FallbackVehicle->ID;
         }
-        for (uint64_t vehicleID : m_VehicleIDs)
+        for (const Vehicle& vehicle : m_Vehicles)
         {
-            const Vehicle& vehicle = m_Vehicles.at(vehicleID);
-            
             YAML::Node vehicleNode;
-            vehicleNode["ID"]            = vehicleID;
+            vehicleNode["ID"]            = vehicle.ID;
             vehicleNode["Name"]          = vehicle.Name;
             vehicleNode["ReplacementID"] = vehicle.Replacement->ID;
             
@@ -120,21 +118,20 @@ void VehiclesFile::Save() const
     }
 }
 
-const std::vector<uint64_t>& VehiclesFile::GetVehicleIDs() const
+std::vector<Vehicle>& VehiclesFile::GetVehicles()
 {
-    return m_VehicleIDs;
+    return m_Vehicles;
 }
 
 Vehicle* VehiclesFile::GetVehicle(uint64_t vehicleID)
 {
-    auto it = m_Vehicles.find(vehicleID);
-    return it != m_Vehicles.end() ? &(it->second) : nullptr;
-}
-
-void VehiclesFile::AddVehicle(uint64_t vehicleID, const Vehicle& vehicle)
-{
-    m_Vehicles[vehicleID] = vehicle;
-    m_VehicleIDs.push_back(vehicleID);
+    auto it = std::find_if(m_Vehicles.begin(), m_Vehicles.end(),
+        [=](const Vehicle& vehicle)
+        {
+            return vehicle.ID == vehicleID;
+        }
+    );
+    return it != m_Vehicles.end() ? &(*it) : nullptr;
 }
 
 const VanillaVehicle* VehiclesFile::GetFallbackVehicle() const

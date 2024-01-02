@@ -2,7 +2,6 @@
 
 
 #include <string>
-#include <map>
 #include <vector>
 
 #include "core/Logger.h"
@@ -12,6 +11,7 @@
 
 struct Challenge
 {
+    uint64_t ID = 0;
     std::string Title;
     const VanillaChallenge* Replacement = nullptr;
 };
@@ -26,9 +26,8 @@ public:
     void Load();
     void Save() const;
 
-    const std::vector<uint64_t>& GetChallengeIDs() const;
+    std::vector<Challenge>& GetChallenges();
     Challenge* GetChallenge(uint64_t challengeID);
-    void AddChallenge(uint64_t challengeID, const Challenge& challenge);
 
     const VanillaChallenge* GetFallbackChallenge() const;
     void SetFallbackChallenge(const VanillaChallenge* fallbackChallenge);
@@ -37,8 +36,7 @@ private:
     std::string m_FilePath;
     const Core::Logger& m_Logger;
 
-    std::map<uint64_t, Challenge> m_Challenges;
-    std::vector<uint64_t> m_ChallengeIDs;
+    std::vector<Challenge> m_Challenges;
     
     const VanillaChallenge* m_FallbackChallenge = k_LastResortFallbackChallenge;
 
