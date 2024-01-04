@@ -214,22 +214,22 @@ void GameplayExternalCamera::AddCurrentParametersIntoCustomParameters(const char
 {
     Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
     
-    CustomParameters customParameters =
-    {
-        .Name                     = name,
-        .PitchSpring              = parameters.at(0x3C).as<float>(),
-        .YawSpring                = parameters.at(0x40).as<float>(),
-        .PivotY                   = parameters.at(0x4C).as<float>(),
-        .PivotZ                   = parameters.at(0x50).as<float>(),
-        .PivotZOffset             = parameters.at(0x54).as<float>(),
-        .FOV                      = parameters.at(0x6C).as<float>(),
-        .InFrontFOVMax            = parameters.at(0x70).as<float>(),
-        .FrontInAmount            = parameters.at(0x74).as<float>(),
-        .DriftYawSpring           = parameters.at(0x8C).as<float>(),
-        .BoostFOVZoomCompensation = parameters.at(0x90).as<float>(),
-        .DownAngle                = parameters.at(0x94).as<float>(),
-        .DropFactor               = parameters.at(0xA8).as<float>(),
-    };
-    
-    m_CustomParametersFile.AddCustomParameters(customParameters);
+    m_CustomParametersFile.GetCustomParameters().push_back(
+        CustomParameters
+        {
+            .Name                     = name,
+            .PitchSpring              = parameters.at(0x3C).as<float>(),
+            .YawSpring                = parameters.at(0x40).as<float>(),
+            .PivotY                   = parameters.at(0x4C).as<float>(),
+            .PivotZ                   = parameters.at(0x50).as<float>(),
+            .PivotZOffset             = parameters.at(0x54).as<float>(),
+            .FOV                      = parameters.at(0x6C).as<float>(),
+            .InFrontFOVMax            = parameters.at(0x70).as<float>(),
+            .FrontInAmount            = parameters.at(0x74).as<float>(),
+            .DriftYawSpring           = parameters.at(0x8C).as<float>(),
+            .BoostFOVZoomCompensation = parameters.at(0x90).as<float>(),
+            .DownAngle                = parameters.at(0x94).as<float>(),
+            .DropFactor               = parameters.at(0xA8).as<float>(),
+        }
+    );
 }

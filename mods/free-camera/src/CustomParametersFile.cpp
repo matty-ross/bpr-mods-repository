@@ -126,12 +126,7 @@ void CustomParametersFile::Save() const
     }
 }
 
-const std::vector<CustomParameters>& CustomParametersFile::GetCustomParameters() const
+std::vector<CustomParameters>& CustomParametersFile::GetCustomParameters()
 {
     return m_CustomParameters;
-}
-
-void CustomParametersFile::AddCustomParameters(const CustomParameters& customParameters)
-{
-    m_CustomParameters.push_back(customParameters);
 }
