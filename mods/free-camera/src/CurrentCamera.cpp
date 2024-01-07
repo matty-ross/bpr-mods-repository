@@ -228,7 +228,7 @@ void CurrentCamera::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM l
     {
     case WM_MOUSEMOVE:
         {
-            bool leftMouseButtonDown = GET_KEYSTATE_WPARAM(wParam) == MK_LBUTTON;
+            bool leftMouseButtonDown = GET_KEYSTATE_WPARAM(wParam) & MK_LBUTTON;
             float x = static_cast<float>(GET_X_LPARAM(lParam));
             float y = static_cast<float>(GET_Y_LPARAM(lParam));
 
@@ -247,7 +247,7 @@ void CurrentCamera::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM l
 
     case WM_MOUSEWHEEL:
         {
-            bool ctrlKeyDown = GET_KEYSTATE_WPARAM(wParam) == MK_CONTROL;
+            bool ctrlKeyDown = GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL;
             float delta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
             
             m_Transformation.TranslationDelta[2] += ctrlKeyDown ? delta * 4.0f : delta;
