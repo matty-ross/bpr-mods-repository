@@ -1,6 +1,6 @@
 #include "GameplayExternalCamera.h"
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 
 GameplayExternalCamera::GameplayExternalCamera(CustomParametersFile& customParametersFile)

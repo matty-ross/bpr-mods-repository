@@ -3,7 +3,7 @@
 #include <Windowsx.h>
 #include <DirectXMath.h>
 
-#include "imgui/imgui.h"
+#include "imgui.h"
 
 
 CurrentCamera::CurrentCamera()
