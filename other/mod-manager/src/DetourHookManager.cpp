@@ -1,6 +1,6 @@
 #include "DetourHookManager.h"
 
-#include "detours/detours.h"
+#include "detours.h"
 
 #include "core/Pointer.h"
 
