@@ -4,3 +4,6 @@
 [submodule "vendor/yaml-cpp/modules/yaml-cpp"]
 	path = vendor/yaml-cpp/modules/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "vendor/detours/modules/detours"]
+	path = vendor/detours/modules/detours
+	url = https://github.com/microsoft/Detours.git

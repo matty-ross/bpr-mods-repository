@@ -15,27 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\creatwth.cpp">
+    <ClCompile Include="modules\detours\src\creatwth.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\detours.cpp">
+    <ClCompile Include="modules\detours\src\detours.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\disasm.cpp">
+    <ClCompile Include="modules\detours\src\disasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\image.cpp">
+    <ClCompile Include="modules\detours\src\image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\modules.cpp">
+    <ClCompile Include="modules\detours\src\modules.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\detver.h">
+    <ClInclude Include="modules\detours\src\detours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\detours\detours.h">
+    <ClInclude Include="modules\detours\src\detver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
