@@ -19,7 +19,7 @@ function Get-Configuration
 $Configuration = Get-Configuration
 $BprDirectory = Get-ItemPropertyValue -Path "HKLM:\SOFTWARE\WOW6432Node\Criterion\BurnoutPR\" -Name "Install Dir"
 
-Copy-Item -Path ".\other\mod-manager\bin\$Configuration\mod-manager.dll" -Destination $BprDirectory
+Copy-Item -Path ".\libraries\mod-manager\bin\$Configuration\mod-manager.dll" -Destination $BprDirectory
 Copy-Item -Path ".\vendor\imgui\bin\$Configuration\imgui.dll" -Destination $BprDirectory
 Copy-Item -Path ".\mods\*\bin\$Configuration\*.dll" -Destination ($BprDirectory + "mods\")
 
