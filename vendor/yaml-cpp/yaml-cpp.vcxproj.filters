@@ -287,5 +287,8 @@
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\yaml.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\vendor\yaml-cpp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
