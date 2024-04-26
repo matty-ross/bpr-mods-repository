@@ -1,16 +1,14 @@
-#include "ImGuiManager.h"
+#include "ImGuiManager.hpp"
 
-#include "imgui.h"
-#include "backends/imgui_impl_win32.h"
-#include "backends/imgui_impl_dx11.h"
+#include "vendor/imgui.hpp"
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
 
 // https://github.com/ocornut/imgui/blob/docking/examples/example_win32_directx11/main.cpp
 
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 ImGuiManager::ImGuiManager()
@@ -71,7 +69,7 @@ bool ImGuiManager::WantCaptureKeyboard() const
     return io.WantCaptureKeyboard;
 }
 
-void ImGuiManager::Initialize() const
+void ImGuiManager::Load() const
 {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -89,7 +87,7 @@ void ImGuiManager::Initialize() const
     ImGui_ImplDX11_Init(device, deviceContext);
 }
 
-void ImGuiManager::Shutdown() const
+void ImGuiManager::Unload() const
 {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -103,23 +101,38 @@ void ImGuiManager::OnRenderFrame()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
+    // TODO: store the hotkeys in a config file
+    if (ImGui::IsKeyPressed(ImGuiKey_F7, false))
+    {
+        m_MenusVisible = !m_MenusVisible;
+
+        // TODO: remove this debug log
+        printf_s("Toggled menus visibility: %d\n", m_MenusVisible);
+    }
+    if (ImGui::IsKeyPressed(ImGuiKey_F8, false))
+    {
+        m_OverlaysVisible = !m_OverlaysVisible;
+
+        // TODO: remove this debug log
+        printf_s("Toggled overlays visibility: %d\n", m_OverlaysVisible);
+    }
+
     ImGuiIO& io = ImGui::GetIO();
-    io.MouseDrawCursor = false;
+    io.MouseDrawCursor = m_MenusVisible;
 
     EnterCriticalSection(&m_CriticalSection);
-    for (const ImGuiMenu* menu : m_Menus)
+    if (m_MenusVisible)
     {
-        if (menu->Visible)
+        for (const ImGuiMenu* menu : m_Menus)
         {
-            menu->OnRenderMenuFunction();
-            io.MouseDrawCursor = true;
+            menu->OnRenderFunction();
         }
     }
-    for (const ImGuiOverlay* overlay : m_Overlays)
+    if (m_OverlaysVisible)
     {
-        if (overlay->Visible)
+        for (const ImGuiOverlay* overlay : m_Overlays)
         {
-            overlay->OnRenderOverlayFunction();
+            overlay->OnRenderFunction();
         }
     }
     LeaveCriticalSection(&m_CriticalSection);
@@ -131,35 +144,6 @@ void ImGuiManager::OnRenderFrame()
 bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
-
-    // Custom events.
-    switch (Msg)
-    {
-    case WM_KEYDOWN:
-        {
-            bool repeat = HIWORD(lParam) & KF_REPEAT;
-            if (!repeat)
-            {
-                EnterCriticalSection(&m_CriticalSection);
-                for (ImGuiMenu* menu : m_Menus)
-                {
-                    if (wParam == menu->ToggleVisibilityHotkey)
-                    {
-                        menu->Visible = !(menu->Visible);
-                    }
-                }
-                for (ImGuiOverlay* overlay : m_Overlays)
-                {
-                    if (wParam == overlay->ToggleVisibilityHotkey)
-                    {
-                        overlay->Visible = !(overlay->Visible);
-                    }
-                }
-                LeaveCriticalSection(&m_CriticalSection);
-            }
-        }
-        break;
-    }
 
     // Prevent forwarding messages meant for ImGui.
     ImGuiIO& io = ImGui::GetIO();
@@ -178,11 +162,11 @@ bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
     {
         switch (Msg)
         {
-        case WM_CHAR:
         case WM_KEYDOWN:
-        //case WM_SYSKEYDOWN:
-        //case WM_COMMAND:
-        //case WM_MENUCHAR:
+        case WM_CHAR:
+        case WM_SYSKEYDOWN:
+        case WM_MENUCHAR:
+        case WM_COMMAND:
             return true;
         }
     }

@@ -3,24 +3,19 @@
 
 #include <vector>
 #include <functional>
-
 #include <Windows.h>
 
-#include "mod-manager/ModManagerApi.h"
+#include "mod-manager/ModManagerApi.hpp"
 
 
 struct ImGuiMenu
 {
-    std::function<void()> OnRenderMenuFunction;
-    int ToggleVisibilityHotkey;
-    bool Visible;
+    std::function<void()> OnRenderFunction;
 };
 
 struct ImGuiOverlay
 {
-    std::function<void()> OnRenderOverlayFunction;
-    int ToggleVisibilityHotkey;
-    bool Visible;
+    std::function<void()> OnRenderFunction;
 };
 
 
@@ -48,14 +43,18 @@ public:
     MOD_MANAGER_API bool WantCaptureKeyboard() const;
 
 private:
-    void Initialize() const;
-    void Shutdown() const;
+    void Load() const;
+    void Unload() const;
 
     void OnRenderFrame();
     bool OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 private:
     std::vector<ImGuiMenu*> m_Menus;
+    bool m_MenusVisible = true;
+    
     std::vector<ImGuiOverlay*> m_Overlays;
+    bool m_OverlaysVisible = true;
+    
     CRITICAL_SECTION m_CriticalSection = {};
 };
