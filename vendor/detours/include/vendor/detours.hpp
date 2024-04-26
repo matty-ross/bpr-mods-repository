@@ -1,4 +1,4 @@
 #pragma once
 
 
-#include "detours.h"
+#include "../../modules/detours/src/detours.h"
