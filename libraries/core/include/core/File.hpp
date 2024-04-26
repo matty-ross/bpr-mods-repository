@@ -11,7 +11,14 @@ namespace Core
     class File
     {
     public:
-        File(const std::string& filePath, uint32_t desiredAccess, uint32_t shareMode, uint32_t creationDisposition);
+        enum class Operation
+        {
+            Read,
+            Write,
+        };
+
+    public:
+        File(const std::string& filePath, Operation fileOperation);
         ~File();
 
         File(const File&) = delete;

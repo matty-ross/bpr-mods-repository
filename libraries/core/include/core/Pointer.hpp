@@ -35,7 +35,7 @@ namespace Core
 
         __forceinline Pointer at(ptrdiff_t offset) const
         {
-            return (reinterpret_cast<uintptr_t>(m_Address) + offset);
+            return reinterpret_cast<uintptr_t>(m_Address) + offset;
         }
 
         template <typename T>

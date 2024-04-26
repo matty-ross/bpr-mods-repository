@@ -15,23 +15,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\core\Mod.h">
+    <ClInclude Include="include\core\Logger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\Logger.h">
+    <ClInclude Include="include\core\Pointer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\Pointer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\core\File.h">
+    <ClInclude Include="include\core\File.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Mod.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
