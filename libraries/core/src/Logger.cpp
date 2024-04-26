@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <cstdarg>
-
 #include <Windows.h>
 
 
