@@ -3,18 +3,19 @@
 
 #include <Windows.h>
 
-#include "core/Logger.h"
+#include "core/Logger.hpp"
 
-#include "mod-manager/ModManagerApi.h"
-#include "mod-manager/DetourHookManager.h"
-#include "mod-manager/ImGuiManager.h"
+#include "mod-manager/ModManagerApi.hpp"
+#include "mod-manager/DetourHookManager.hpp"
+#include "mod-manager/ImGuiManager.hpp"
 
 
 class ModManager
 {
-public:
+private:
     ModManager();
 
+public:
     ModManager(const ModManager&) = delete;
     ModManager(ModManager&&) = delete;
     ModManager& operator =(const ModManager&) = delete;
@@ -29,8 +30,6 @@ public:
 
     void OnProcessAttach();
     void OnProcessDetach();
-    void OnThreadAttach();
-    void OnThreadDetach();
 
 private:
     void Load();
@@ -40,6 +39,9 @@ private:
     static void DetourPresent();
     static void DetourWindowProc();
     static void DetourUpdateKeyboardState();
+
+private:
+    static ModManager s_Instance;
 
 private:
     Core::Logger m_Logger;

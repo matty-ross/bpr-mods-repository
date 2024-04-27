@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\mod-manager\ModManager.h">
+    <ClInclude Include="include\mod-manager\ModManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\mod-manager\DetourHookManager.hpp">

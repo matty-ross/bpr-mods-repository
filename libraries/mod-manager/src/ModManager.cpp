@@ -1,12 +1,12 @@
-#include "ModManager.h"
+#include "ModManager.hpp"
 
-#include "core/Pointer.h"
-
-
-extern ModManager* g_ModManager;
+#include "core/Pointer.hpp"
 
 
 static constexpr char k_Name[] = "Mod Manager";
+
+
+ModManager ModManager::s_Instance;
 
 
 ModManager::ModManager()
@@ -16,26 +16,23 @@ ModManager::ModManager()
     {
         .HookAddress    = Core::Pointer(0x00C89F90).GetAddress(),
         .DetourFunction = &ModManager::DetourPresent,
-        .StubFunction   = nullptr,
     },
     m_DetourWindowProc
     {
         .HookAddress    = Core::Pointer(0x008FB9E2).GetAddress(),
         .DetourFunction = &ModManager::DetourWindowProc,
-        .StubFunction   = nullptr,
     },
     m_DetourUpdateKeyboardState
     {
         .HookAddress    = Core::Pointer(0x0664BB29).GetAddress(),
         .DetourFunction = &ModManager::DetourUpdateKeyboardState,
-        .StubFunction   = nullptr,
     }
 {
 }
 
 ModManager& ModManager::Get()
 {
-    return *g_ModManager;
+    return s_Instance;
 }
 
 DetourHookManager& ModManager::GetDetourHookManager()
@@ -60,16 +57,8 @@ void ModManager::OnProcessAttach()
 
 void ModManager::OnProcessDetach()
 {
-    CloseHandle(m_LoadThread);
     Unload();
-}
-
-void ModManager::OnThreadAttach()
-{   
-}
-
-void ModManager::OnThreadDetach()
-{
+    CloseHandle(m_LoadThread);
 }
 
 void ModManager::Load()
@@ -78,9 +67,9 @@ void ModManager::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Wait to be at or past Start Screen. 
+        // Wait to be at or past the Start Screen. 
         {
-            m_Logger.Info("Waiting to be at or past Start Screen...");
+            m_Logger.Info("Waiting to be at or past the Start Screen...");
             
             auto isAtOrPastStartScreenState = []() -> bool
             {
@@ -97,16 +86,16 @@ void ModManager::Load()
                 Sleep(1000);
             }
             
-            m_Logger.Info("At or past Start Screen.");
+            m_Logger.Info("At or past the Start Screen.");
         }
 
-        // Initialize ImGui manager.
+        // Load ImGui manager.
         {
-            m_Logger.Info("Initializing ImGui manager...");
+            m_Logger.Info("Loading ImGui manager...");
             
-            m_ImGuiManager.Initialize();
+            m_ImGuiManager.Load();
             
-            m_Logger.Info("Initialized ImGui manager.");
+            m_Logger.Info("Loaded ImGui manager.");
         }
 
         // Attach Present detour.
@@ -178,13 +167,13 @@ void ModManager::Unload()
             m_Logger.Info("Detached Present detour.");
         }
 
-        // Shutdown ImGui manager.
+        // Unload ImGui manager.
         {
-            m_Logger.Info("Shutting down ImGui manager...");
+            m_Logger.Info("Unloading ImGui manager...");
             
-            m_ImGuiManager.Shutdown();
+            m_ImGuiManager.Unload();
             
-            m_Logger.Info("Shut down ImGui manager.");
+            m_Logger.Info("Unloaded ImGui manager.");
         }
 
         m_Logger.Info("Unloaded.");
@@ -203,15 +192,13 @@ __declspec(naked) void ModManager::DetourPresent()
         pushfd
         pushad
 
-        call ModManager::Get
-        mov ecx, eax
-        call ModManager::GetImGuiManager
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_ImGuiManager]
         call ImGuiManager::OnRenderFrame
 
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourPresent.HookAddress]
     }
 }
 
@@ -226,27 +213,22 @@ __declspec(naked) void ModManager::DetourWindowProc()
         push dword ptr [ebp + 0x10]
         push dword ptr [ebp + 0xC]
         push dword ptr [ebp + 0x8]
-
-        call ModManager::Get
-        mov ecx, eax
-        call ModManager::GetImGuiManager
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_ImGuiManager]
         call ImGuiManager::OnWindowMessage
 
         test al, al
-        jz _continue
-
-        // Break from the switch statement.
+        
         popad
         popfd
-        add esp, 0x4
+        
+        jz _continue
+        
+        // Break from the switch statement.
         mov eax, 0x008FBC01
         jmp eax
 
     _continue:
-        popad
-        popfd
-        ret
+        jmp dword ptr [s_Instance.m_DetourWindowProc.HookAddress]
     }
 }
 
@@ -257,10 +239,7 @@ __declspec(naked) void ModManager::DetourUpdateKeyboardState()
         pushfd
         pushad
 
-        call ModManager::Get
-        mov ecx, eax
-        call ModManager::GetImGuiManager
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_ImGuiManager]
         call ImGuiManager::WantCaptureKeyboard
 
         test al, al
@@ -275,6 +254,7 @@ __declspec(naked) void ModManager::DetourUpdateKeyboardState()
     _continue:
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourUpdateKeyboardState.HookAddress]
     }
 }
