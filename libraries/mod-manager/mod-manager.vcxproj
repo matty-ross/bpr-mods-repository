@@ -156,7 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\mod-manager\ImGuiManager.hpp" />
-    <ClInclude Include="include\mod-manager\DetourHookManager.h" />
+    <ClInclude Include="include\mod-manager\DetourHookManager.hpp" />
     <ClInclude Include="include\mod-manager\ModManager.h" />
     <ClInclude Include="include\mod-manager\ModManagerApi.hpp" />
   </ItemGroup>

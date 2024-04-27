@@ -3,14 +3,13 @@
 
 #include <Windows.h>
 
-#include "mod-manager/ModManagerApi.h"
+#include "mod-manager/ModManagerApi.hpp"
 
 
 struct DetourHook
 {
     void* HookAddress;
-    const void* DetourFunction;
-    void* StubFunction;
+    void* DetourFunction;
 };
 
 
@@ -29,14 +28,12 @@ public:
     DetourHookManager& operator =(DetourHookManager&&) = delete;
 
 public:
-    MOD_MANAGER_API void AttachDetourHook(DetourHook& detourHook, bool createStubFunction = true);
-    MOD_MANAGER_API void DetachDetourHook(DetourHook& detourHook, bool destroyStubFunction = true);
-
     MOD_MANAGER_API void BeginTransaction();
     MOD_MANAGER_API void EndTransaction();
-    MOD_MANAGER_API bool IsTransactionInProgress() const;
+    
+    MOD_MANAGER_API void AttachDetourHook(DetourHook& detourHook);
+    MOD_MANAGER_API void DetachDetourHook(DetourHook& detourHook);
 
 private:
-    CRITICAL_SECTION m_TransactionCriticalSection = {};
-    bool m_TransactionInProgress = false;
+    CRITICAL_SECTION m_CriticalSection = {};
 };

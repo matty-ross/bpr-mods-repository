@@ -18,7 +18,7 @@
     <ClInclude Include="include\mod-manager\ModManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\mod-manager\DetourHookManager.h">
+    <ClInclude Include="include\mod-manager\DetourHookManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\mod-manager\ImGuiManager.hpp">
