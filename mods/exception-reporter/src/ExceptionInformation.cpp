@@ -1,7 +1,6 @@
-#include "ExceptionInformation.h"
+#include "ExceptionInformation.hpp"
 
 #include <cstdio>
-
 #include <DbgHelp.h>
 
 
@@ -14,7 +13,7 @@ ExceptionInformation::ExceptionInformation(const EXCEPTION_RECORD* exceptionReco
 
 std::string ExceptionInformation::GetCode() const
 {
-    auto getCodeName = [](uint32_t code) -> const char*
+    auto getCodeName = [](DWORD code) -> const char*
     {
         switch (code)
         {
@@ -55,7 +54,7 @@ std::string ExceptionInformation::GetAddress() const
     auto getModuleName = [](HMODULE module) -> std::string
     {
         char fileName[MAX_PATH] = {};
-        GetModuleFileNameA(module, fileName, std::size(fileName));
+        GetModuleFileNameA(module, fileName, sizeof(fileName));
 
         std::string tmp = fileName;
         return tmp.substr(tmp.find_last_of("/\\") + 1); // Extract the file name without the path.

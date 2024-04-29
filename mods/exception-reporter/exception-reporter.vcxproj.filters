@@ -29,7 +29,7 @@
     <ClInclude Include="src\ExceptionReporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ExceptionInformation.h">
+    <ClInclude Include="src\ExceptionInformation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">

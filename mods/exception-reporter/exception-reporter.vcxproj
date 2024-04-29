@@ -170,7 +170,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\ExceptionInformation.h" />
+    <ClInclude Include="src\ExceptionInformation.hpp" />
     <ClInclude Include="src\ExceptionReporter.h" />
   </ItemGroup>
   <ItemGroup>
