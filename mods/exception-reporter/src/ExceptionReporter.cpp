@@ -1,20 +1,42 @@
-#include "ExceptionReporter.h"
+#include "ExceptionReporter.hpp"
 
 #include "../resource.h"
-#include "ExceptionInformation.h"
-
-
-extern ExceptionReporter* g_Mod;
+#include "ExceptionInformation.hpp"
 
 
 static constexpr char k_ModName[] = "Exception Reporter";
 
 
-ExceptionReporter::ExceptionReporter(HMODULE module)
+ExceptionReporter ExceptionReporter::s_Instance;
+
+
+ExceptionReporter::ExceptionReporter()
     :
-    Mod(module),
     m_Logger(k_ModName)
 {
+}
+
+ExceptionReporter& ExceptionReporter::Get()
+{
+    return s_Instance;
+}
+
+void ExceptionReporter::OnProcessAttach(HINSTANCE moduleInstance)
+{
+    m_ModuleInstance = moduleInstance;
+
+    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
+    {
+        static_cast<ExceptionReporter*>(lpThreadParameter)->Load();
+        return 0;
+    };
+    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+}
+
+void ExceptionReporter::OnProcessDetach()
+{
+    Unload();
+    CloseHandle(m_LoadThread);
 }
 
 LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
@@ -32,14 +54,12 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
                 SetDlgItemTextA(hDlg, IDC_VALUE_PARAMETERS, exceptionInformation->GetParameters().c_str());
                 SetDlgItemTextA(hDlg, IDC_VALUE_REGISTERS, exceptionInformation->GetRegisters().c_str());
                 SetDlgItemTextA(hDlg, IDC_VALUE_STACK_TRACE, exceptionInformation->GetStackTrace().c_str());
-                return TRUE;
             }
+            return TRUE;
 
         case WM_CLOSE:
-            {
-                EndDialog(hDlg, 0);
-                return TRUE;
-            }
+            EndDialog(hDlg, 0);
+            return TRUE;
         }
 
         return FALSE;
@@ -48,7 +68,7 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
     ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
 
     DialogBoxParamA(
-        GetModule(),
+        m_ModuleInstance,
         MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
         nullptr,
         dialogProc,
@@ -88,7 +108,7 @@ void ExceptionReporter::Load()
             
             PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
             {
-                return g_Mod->OnException(ExceptionInfo);
+                return s_Instance.OnException(ExceptionInfo);
             };
             m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
             

@@ -13,7 +13,7 @@ ExceptionInformation::ExceptionInformation(const EXCEPTION_RECORD* exceptionReco
 
 std::string ExceptionInformation::GetCode() const
 {
-    auto getCodeName = [](DWORD code) -> const char*
+    auto getCodeName = [](uint32_t code) -> const char*
     {
         switch (code)
         {
@@ -40,6 +40,7 @@ std::string ExceptionInformation::GetCode() const
         case EXCEPTION_GUARD_PAGE:               return "EXCEPTION_GUARD_PAGE";
         case EXCEPTION_INVALID_HANDLE:           return "EXCEPTION_INVALID_HANDLE";
         }
+        
         return "???";
     };
 
@@ -96,6 +97,7 @@ std::string ExceptionInformation::GetFlags() const
         case EXCEPTION_TARGET_UNWIND:   return "EXCEPTION_TARGET_UNWIND";
         case EXCEPTION_COLLIDED_UNWIND: return "EXCEPTION_COLLIDED_UNWIND";
         }
+        
         return "???";
     };
 
@@ -169,17 +171,17 @@ std::string ExceptionInformation::GetStackTrace() const
         .AddrPC =
         {
             .Offset = m_ContextRecord->Eip,
-            .Mode = AddrModeFlat
+            .Mode = AddrModeFlat,
         },
         .AddrFrame =
         {
             .Offset = m_ContextRecord->Ebp,
-            .Mode = AddrModeFlat
+            .Mode = AddrModeFlat,
         },
         .AddrStack =
         {
             .Offset = m_ContextRecord->Esp,
-            .Mode = AddrModeFlat
+            .Mode = AddrModeFlat,
         }
     };
     CONTEXT context = *m_ContextRecord;
