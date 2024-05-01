@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>16.0</VCProjectVersion>
+    <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{d7d7740b-d605-4cd3-a3d4-e4fc923e4f23}</ProjectGuid>
     <RootNamespace>bullyrepellent</RootNamespace>
