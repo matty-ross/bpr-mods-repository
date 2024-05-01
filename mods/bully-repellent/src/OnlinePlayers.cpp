@@ -1,6 +1,6 @@
-#include "OnlinePlayers.h"
+#include "OnlinePlayers.hpp"
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
 
 namespace BPR
@@ -17,7 +17,7 @@ namespace BPR
         uint64_t NetworkPlayerID;
     };
     
-    void AddSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
+    static void AddSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
     {
         __asm
         {

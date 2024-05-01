@@ -29,13 +29,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\BullyRepellent.h">
+    <ClInclude Include="src\BullyRepellent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OnlinePlayers.h">
+    <ClInclude Include="src\OnlinePlayers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BlacklistedPlayersFile.h">
+    <ClInclude Include="src\BlacklistedPlayersFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

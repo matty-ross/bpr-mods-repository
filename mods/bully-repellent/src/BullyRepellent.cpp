@@ -1,10 +1,10 @@
-#include "BullyRepellent.h"
+#include "BullyRepellent.hpp"
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
-#include "mod-manager/ModManager.h"
+#include "mod-manager/ModManager.hpp"
 
 
 using namespace std::string_literals;
@@ -16,28 +16,45 @@ static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
 static constexpr char k_ModDirectory[] = ".\\mods\\bully-repellent\\";
 
 
-extern BullyRepellent* g_Mod;
+BullyRepellent BullyRepellent::s_Instance;
 
 
-BullyRepellent::BullyRepellent(HMODULE module)
+BullyRepellent::BullyRepellent()
     :
-    Mod(module),
     m_Logger(k_ModName),
     m_BlacklistedPlayersFile(k_ModDirectory + "blacklisted-players.yaml"s, m_Logger),
     m_OnlinePlayers(m_BlacklistedPlayersFile),
+    m_Menu
+    {
+        .OnRenderFunction = [this]() { OnRenderMenu(); },
+    },
     m_DetourOnGuiEventNetworkPlayerStatus
     {
         .HookAddress    = Core::Pointer(0x0092BEC8).GetAddress(),
         .DetourFunction = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
-        .StubFunction   = nullptr,
-    },
-    m_Menu
-    {
-        .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
-        .ToggleVisibilityHotkey = VK_F7,
-        .Visible                = true,
     }
 {
+}
+
+BullyRepellent& BullyRepellent::Get()
+{
+    return s_Instance;
+}
+
+void BullyRepellent::OnProcessAttach()
+{
+    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
+    {
+        static_cast<BullyRepellent*>(lpThreadParameter)->Load();
+        return 0;
+    };
+    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+}
+
+void BullyRepellent::OnProcessDetach()
+{
+    Unload();
+    CloseHandle(m_LoadThread);
 }
 
 void BullyRepellent::Load()
@@ -178,11 +195,12 @@ __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
         pushad
 
         push dword ptr [ebp + 0x8]    // BrnGui::GuiEventNetworkPlayerStatus*
-        mov ecx, dword ptr [g_Mod]
+        mov ecx, dword ptr [s_Instance]
         call BullyRepellent::OnUpdate
 
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourOnGuiEventNetworkPlayerStatus.HookAddress]
     }
 }

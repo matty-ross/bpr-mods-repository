@@ -1,12 +1,10 @@
-#include "BlacklistedPlayersFile.h"
+#include "BlacklistedPlayersFile.hpp"
 
-#include <algorithm>
+#include <stdexcept>
 
-#include <Windows.h>
+#include "vendor/yaml-cpp.hpp"
 
-#include "yaml-cpp/yaml.h"
-
-#include "core/File.h"
+#include "core/File.hpp"
 
 
 BlacklistedPlayersFile::BlacklistedPlayersFile(const std::string& filePath, const Core::Logger& logger)
@@ -22,7 +20,7 @@ void BlacklistedPlayersFile::Load()
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Read);
             return file.Read();
         }
         catch (const std::runtime_error& e)
@@ -51,7 +49,7 @@ void BlacklistedPlayersFile::Load()
                 .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(),
                 .Automute = blacklistedPlayerNode["Automute"].as<bool>(),
             };
-            
+
             m_BlacklistedPlayers.push_back(blacklistedPlayer);
         }
 
@@ -71,7 +69,7 @@ void BlacklistedPlayersFile::Save() const
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Write);
             file.Write(content);
         }
         catch (const std::runtime_error& e)
@@ -117,11 +115,13 @@ std::vector<BlacklistedPlayer>& BlacklistedPlayersFile::GetBlacklistedPlayers()
 
 BlacklistedPlayer* BlacklistedPlayersFile::GetBlacklistedPlayer(uint64_t blacklistedPlayerID)
 {
-    auto it = std::find_if(m_BlacklistedPlayers.begin(), m_BlacklistedPlayers.end(),
-        [=](const BlacklistedPlayer& blacklistedPlayer)
+    for (BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
+    {
+        if (blacklistedPlayer.ID == blacklistedPlayerID)
         {
-            return blacklistedPlayer.ID == blacklistedPlayerID;
+            return &blacklistedPlayer;
         }
-    );
-    return it != m_BlacklistedPlayers.end() ? &(*it) : nullptr;
+    }
+    
+    return nullptr;
 }
