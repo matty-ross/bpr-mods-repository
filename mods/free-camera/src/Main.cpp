@@ -1,9 +1,6 @@
 #include <Windows.h>
 
-#include "FreeCamera.h"
-
-
-FreeCamera* g_Mod = nullptr;
+#include "FreeCamera.hpp"
 
 
 BOOL WINAPI DllMain(
@@ -15,29 +12,11 @@ BOOL WINAPI DllMain(
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        {
-            g_Mod = new FreeCamera(hinstDLL);
-            g_Mod->OnProcessAttach();
-        }
+        FreeCamera::Get().OnProcessAttach();
         break;
 
     case DLL_PROCESS_DETACH:
-        {
-            g_Mod->OnProcessDetach();
-            delete g_Mod;
-        }
-        break;
-
-    case DLL_THREAD_ATTACH:
-        {
-            g_Mod->OnThreadAttach();
-        }
-        break;
-
-    case DLL_THREAD_DETACH:
-        {
-            g_Mod->OnThreadDetach();
-        }
+        FreeCamera::Get().OnProcessDetach();
         break;
     }
 

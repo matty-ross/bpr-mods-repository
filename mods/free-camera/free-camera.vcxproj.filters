@@ -38,22 +38,22 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\FreeCamera.h">
+    <ClInclude Include="src\FreeCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameplayExternalCamera.h">
+    <ClInclude Include="src\GameplayExternalCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Behaviors.h">
+    <ClInclude Include="src\Behaviors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CurrentCamera.h">
+    <ClInclude Include="src\CurrentCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CustomParametersFile.h">
+    <ClInclude Include="src\CustomParametersFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Misc.h">
+    <ClInclude Include="src\Misc.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,8 +1,8 @@
-#include "Misc.h"
+#include "Misc.hpp"
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
 
 void Misc::OnRenderMenu()

@@ -1,9 +1,9 @@
-#include "CurrentCamera.h"
+#include "CurrentCamera.hpp"
 
 #include <Windowsx.h>
 #include <DirectXMath.h>
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
 
 CurrentCamera::CurrentCamera()

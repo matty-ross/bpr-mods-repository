@@ -1,10 +1,10 @@
-#include "CustomParametersFile.h"
+#include "CustomParametersFile.hpp"
 
-#include <Windows.h>
+#include <stdexcept>
 
-#include "yaml-cpp/yaml.h"
+#include "vendor/yaml-cpp.hpp"
 
-#include "core/File.h"
+#include "core/File.hpp"
 
 
 CustomParametersFile::CustomParametersFile(const std::string& filePath, const Core::Logger& logger)
@@ -20,7 +20,7 @@ void CustomParametersFile::Load()
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Read);
             return file.Read();
         }
         catch (const std::runtime_error& e)
@@ -78,7 +78,7 @@ void CustomParametersFile::Save() const
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Write);
             file.Write(content);
         }
         catch (const std::runtime_error& e)

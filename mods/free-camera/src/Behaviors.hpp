@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
 
 struct BehaviorData;

@@ -1,10 +1,10 @@
-#include "FreeCamera.h"
+#include "FreeCamera.hpp"
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
-#include "mod-manager/ModManager.h"
+#include "mod-manager/ModManager.hpp"
 
 
 using namespace std::string_literals;
@@ -16,28 +16,45 @@ static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
 static constexpr char k_ModDirectory[] = ".\\mods\\free-camera\\";
 
 
-extern FreeCamera* g_Mod;
+FreeCamera FreeCamera::s_Instance;
 
 
-FreeCamera::FreeCamera(HMODULE module)
+FreeCamera::FreeCamera()
     :
-    Mod(module),
     m_Logger(k_ModName),
     m_CustomParamtersFile(k_ModDirectory + "custom-parameters.yaml"s, m_Logger),
     m_GameplayExternalCamera(m_CustomParamtersFile),
+    m_Menu
+    {
+        .OnRenderFunction = [this]() { OnRenderMenu(); },
+    },
     m_DetourArbitratorUpdate
     {
         .HookAddress    = Core::Pointer(0x009645E0).GetAddress(),
         .DetourFunction = &FreeCamera::DetourArbitratorUpdate,
-        .StubFunction   = nullptr,
-    },
-    m_Menu
-    {
-        .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
-        .ToggleVisibilityHotkey = VK_F7,
-        .Visible                = true,
     }
 {
+}
+
+FreeCamera& FreeCamera::Get()
+{
+    return s_Instance;
+}
+
+void FreeCamera::OnProcessAttach()
+{
+    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
+    {
+        static_cast<FreeCamera*>(lpThreadParameter)->Load();
+        return 0;
+    };
+    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+}
+
+void FreeCamera::OnProcessDetach()
+{
+    Unload();
+    CloseHandle(m_LoadThread);
 }
 
 void FreeCamera::Load()
@@ -203,9 +220,9 @@ void FreeCamera::OnRenderMenu()
 
 LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    g_Mod->m_CurrentCamera.OnWindowMessage(hWnd, Msg, wParam, lParam);
+    s_Instance.m_CurrentCamera.OnWindowMessage(hWnd, Msg, wParam, lParam);
     
-    return CallWindowProcA(g_Mod->m_PreviousWindowProc, hWnd, Msg, wParam, lParam);
+    return CallWindowProcA(s_Instance.m_PreviousWindowProc, hWnd, Msg, wParam, lParam);
 }
 
 __declspec(naked) void FreeCamera::DetourArbitratorUpdate()
@@ -217,11 +234,12 @@ __declspec(naked) void FreeCamera::DetourArbitratorUpdate()
 
         push dword ptr [ebp + 0x10] // BrnDirector::ArbStateSharedInfo*
         push dword ptr [ebp + 0xC]  // BrnDirector::Camera::Camera*
-        mov ecx, dword ptr [g_Mod]
+        mov ecx, dword ptr [s_Instance]
         call FreeCamera::OnUpdate
 
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourArbitratorUpdate.HookAddress]
     }
 }

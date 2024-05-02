@@ -1,9 +1,9 @@
 #pragma once
 
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
-#include "CustomParametersFile.h"
+#include "CustomParametersFile.hpp"
 
 
 class GameplayExternalCamera

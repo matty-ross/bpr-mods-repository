@@ -1,9 +1,9 @@
-#include "Behaviors.h"
+#include "Behaviors.hpp"
 
 #include <array>
 #include <vector>
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
 
 struct BehaviorData
@@ -253,28 +253,20 @@ void Behaviors::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
     switch (m_Testbed.m_State)
     {
     case Testbed::State::Inactive:
-        {
-        }
         break;
 
     case Testbed::State::Prepare:
-        {
-            m_Testbed.OnPrepare(sharedInfo);
-            m_Testbed.m_State = Testbed::State::Update;
-        }
+        m_Testbed.OnPrepare(sharedInfo);
+        m_Testbed.m_State = Testbed::State::Update;
         break;
 
     case Testbed::State::Update:
-        {
-            m_Testbed.OnUpdate(camera);
-        }
+        m_Testbed.OnUpdate(camera);
         break;
 
     case Testbed::State::Release:
-        {
-            m_Testbed.OnRelease();
-            m_Testbed.m_State = Testbed::State::Inactive;
-        }
+        m_Testbed.OnRelease();
+        m_Testbed.m_State = Testbed::State::Inactive;
         break;
     }
 }

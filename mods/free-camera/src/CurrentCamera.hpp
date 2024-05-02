@@ -3,7 +3,7 @@
 
 #include <Windows.h>
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
 
 class CurrentCamera
