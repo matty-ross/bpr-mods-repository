@@ -7,6 +7,20 @@
 
 namespace BPR
 {
+    static void CgsID_ConvertToString(uint64_t id, char* string)
+    {
+        __asm
+        {
+            mov ecx, dword ptr [string]
+            push dword ptr [id + 0x4]
+            push dword ptr [id + 0x0]
+
+            mov eax, 0x0086CE00
+            call eax
+            add esp, 0x8
+        }
+    }
+    
     static void GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
     {
         __asm

@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "core/Logger.h"
+#include "core/Logger.hpp"
 
-#include "Challenges.h"
+#include "Challenges.hpp"
 
 
 struct Challenge
@@ -28,17 +28,15 @@ public:
 
     std::vector<Challenge>& GetChallenges();
     Challenge* GetChallenge(uint64_t challengeID);
-
     const VanillaChallenge* GetFallbackChallenge() const;
     void SetFallbackChallenge(const VanillaChallenge* fallbackChallenge);
 
 private:
     std::string m_FilePath;
-    const Core::Logger& m_Logger;
 
     std::vector<Challenge> m_Challenges;
-    
     const VanillaChallenge* m_FallbackChallenge = k_LastResortFallbackChallenge;
-
     bool m_Valid = false;
+
+    const Core::Logger& m_Logger;
 };

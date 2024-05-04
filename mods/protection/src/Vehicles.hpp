@@ -1,6 +1,9 @@
 #pragma once
 
 
+#include "cstdint"
+
+
 struct VanillaVehicle
 {
     uint64_t ID;

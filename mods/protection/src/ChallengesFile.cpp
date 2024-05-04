@@ -1,12 +1,10 @@
-#include "ChallengesFile.h"
+#include "ChallengesFile.hpp"
 
-#include <algorithm>
+#include <stdexcept>
 
-#include <Windows.h>
+#include "vendor/yaml-cpp.hpp"
 
-#include "yaml-cpp/yaml.h"
-
-#include "core/File.h"
+#include "core/File.hpp"
 
 
 ChallengesFile::ChallengesFile(const std::string& filePath, const Core::Logger& logger)
@@ -22,7 +20,7 @@ void ChallengesFile::Load()
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Read);
             return file.Read();
         }
         catch (const std::runtime_error& e)
@@ -77,7 +75,7 @@ void ChallengesFile::Save() const
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Write);
             file.Write(content);
         }
         catch (const std::runtime_error& e)
@@ -125,13 +123,15 @@ std::vector<Challenge>& ChallengesFile::GetChallenges()
 
 Challenge* ChallengesFile::GetChallenge(uint64_t challengeID)
 {
-    auto it = std::find_if(m_Challenges.begin(), m_Challenges.end(),
-        [=](const Challenge& challenge)
+    for (Challenge& challenge : m_Challenges)
+    {
+        if (challenge.ID == challengeID)
         {
-            return challenge.ID == challengeID;
+            return &challenge;
         }
-    );
-    return it != m_Challenges.end() ? &(*it) : nullptr;
+    }
+
+    return nullptr;
 }
 
 const VanillaChallenge* ChallengesFile::GetFallbackChallenge() const

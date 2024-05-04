@@ -27,13 +27,13 @@
     <ClInclude Include="src\Vehicles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Challenges.h">
+    <ClInclude Include="src\Challenges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ChallengesFile.h">
+    <ClInclude Include="src\ChallengesFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ChallengeProtection.h">
+    <ClInclude Include="src\ChallengeProtection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

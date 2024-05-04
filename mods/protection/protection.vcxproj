@@ -155,9 +155,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\ChallengeProtection.h" />
-    <ClInclude Include="src\ChallengesFile.h" />
-    <ClInclude Include="src\Challenges.h" />
+    <ClInclude Include="src\ChallengeProtection.hpp" />
+    <ClInclude Include="src\ChallengesFile.hpp" />
+    <ClInclude Include="src\Challenges.hpp" />
     <ClInclude Include="src\Vehicles.hpp" />
     <ClInclude Include="src\Protection.h" />
     <ClInclude Include="src\VehiclesFile.hpp" />

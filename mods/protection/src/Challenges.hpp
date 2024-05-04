@@ -1,8 +1,7 @@
 #pragma once
 
 
-#include <array>
-#include <algorithm>
+#include "cstdint"
 
 
 struct VanillaChallenge
@@ -12,7 +11,7 @@ struct VanillaChallenge
 };
 
 
-inline constexpr std::array<VanillaChallenge, 500> k_VanillaChallenges =
+inline constexpr VanillaChallenge k_VanillaChallenges[] =
 {
     VanillaChallenge{ .ID = 0x000000000009262A, .Title = "599594 - Near Miss Intro" },
     VanillaChallenge{ .ID = 0x0000000000092921, .Title = "600353 - Fast Start" },
@@ -522,11 +521,13 @@ inline constexpr const VanillaChallenge* k_LastResortFallbackChallenge = &k_Vani
 
 inline const VanillaChallenge* GetVanillaChallenge(uint64_t challengeID)
 {
-    auto it = std::find_if(k_VanillaChallenges.begin(), k_VanillaChallenges.end(),
-        [=](const VanillaChallenge& vanillaChallenge)
+    for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
+    {
+        if (vanillaChallenge.ID == challengeID)
         {
-            return vanillaChallenge.ID == challengeID;
+            return &vanillaChallenge;
         }
-    );
-    return it != k_VanillaChallenges.end() ? &(*it) : nullptr;
+    }
+
+    return nullptr;
 }
