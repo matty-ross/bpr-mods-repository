@@ -1,10 +1,10 @@
-#include "Protection.h"
+#include "Protection.hpp"
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
-#include "core/Pointer.h"
+#include "core/Pointer.hpp"
 
-#include "mod-manager/ModManager.h"
+#include "mod-manager/ModManager.hpp"
 
 
 using namespace std::string_literals;
@@ -16,60 +16,72 @@ static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
 static constexpr char k_ModDirectory[] = ".\\mods\\protection\\";
 
 
-extern Protection* g_Mod;
+Protection Protection::s_Instance;
 
 
-Protection::Protection(HMODULE module)
-    :
-    Mod(module),
+Protection::Protection()
+    :    
     m_Logger(k_ModName),
     m_VehiclesFile(k_ModDirectory + "vehicles.yaml"s, m_Logger),
     m_ChallengesFile(k_ModDirectory + "challenges.yaml"s, m_Logger),
     m_VehicleProtection(m_VehiclesFile),
     m_ChallengeProtection(m_ChallengesFile),
+    m_Menu
+    {
+        .OnRenderFunction = [this]() { OnRenderMenu(); },
+    },
     m_DetourPlayerParamsSerialize
     {
         .HookAddress    = Core::Pointer(0x00B7218A).GetAddress(),
         .DetourFunction = &Protection::DetourPlayerParamsSerialize,
-        .StubFunction   = nullptr,
     },
     m_DetourPlayerParamsDeserialize
     {
         .HookAddress    = Core::Pointer(0x00B72958).GetAddress(),
         .DetourFunction = &Protection::DetourPlayerParamsDeserialize,
-        .StubFunction   = nullptr,
     },
     m_DetourVehicleSelectMessagePack
     {
         .HookAddress    = Core::Pointer(0x00B62095).GetAddress(),
         .DetourFunction = &Protection::DetourVehicleSelectMessagePack,
-        .StubFunction   = nullptr,
     },
     m_DetourVehicleSelectMessageUnpack
     {
         .HookAddress    = Core::Pointer(0x00B6209F).GetAddress(),
         .DetourFunction = &Protection::DetourVehicleSelectMessageUnpack,
-        .StubFunction   = nullptr,
     },
     m_DetourFreeburnChallengeMessagePack
     {
         .HookAddress    = Core::Pointer(0x0790A490).GetAddress(),
         .DetourFunction = &Protection::DetourFreeburnChallengeMessagePack,
-        .StubFunction   = nullptr,
     },
     m_DetourFreeburnChallengeMessageUnpack
     {
         .HookAddress    = Core::Pointer(0x0790A49A).GetAddress(),
         .DetourFunction = &Protection::DetourFreeburnChallengeMessageUnpack,
-        .StubFunction   = nullptr,
-    },
-    m_Menu
-    {
-        .OnRenderMenuFunction   = [this]() { OnRenderMenu(); },
-        .ToggleVisibilityHotkey = VK_F7,
-        .Visible                = true,
     }
 {
+}
+
+Protection& Protection::Get()
+{
+    return s_Instance;
+}
+
+void Protection::OnProcessAttach()
+{
+    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
+    {
+        static_cast<Protection*>(lpThreadParameter)->Load();
+        return 0;
+    };
+    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+}
+
+void Protection::OnProcessDetach()
+{
+    Unload();
+    CloseHandle(m_LoadThread);
 }
 
 void Protection::Load()
@@ -316,16 +328,6 @@ void Protection::OnRenderMenu()
     ImGui::End();
 }
 
-VehicleProtection& Protection::GetVehicleProtection()
-{
-    return m_VehicleProtection;
-}
-
-ChallengeProtection& Protection::GetChallengeProtection()
-{
-    return m_ChallengeProtection;
-}
-
 __declspec(naked) void Protection::DetourPlayerParamsSerialize()
 {
     __asm
@@ -334,15 +336,13 @@ __declspec(naked) void Protection::DetourPlayerParamsSerialize()
         pushad
 
         push edi // BrnNetwork::PlayerParams*
-        
-        mov ecx, dword ptr [g_Mod]
-        call Protection::GetVehicleProtection
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
         call VehicleProtection::OnPlayerParamsSerialize
 
         popad
-        popfd    
-        ret
+        popfd
+        
+        jmp dword ptr [s_Instance.m_DetourPlayerParamsSerialize.HookAddress]
     }
 }
 
@@ -354,15 +354,13 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
         pushad
 
         push edi // BrnNetwork::PlayerParams*
-        
-        mov ecx, dword ptr [g_Mod]
-        call Protection::GetVehicleProtection
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
         call VehicleProtection::OnPlayerParamsDeserialize
 
         popad
-        popfd    
-        ret
+        popfd
+        
+        jmp dword ptr [s_Instance.m_DetourPlayerParamsDeserialize.HookAddress]
     }
 }
 
@@ -377,16 +375,14 @@ __declspec(naked) void Protection::DetourVehicleSelectMessagePack()
         jne _continue
 
         push esi // BrnNetwork::CarSelectMessage*
-        
-        mov ecx, dword ptr [g_Mod]
-        call Protection::GetVehicleProtection
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
         call VehicleProtection::OnVehicleSelectMessagePack
 
     _continue:
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessagePack.HookAddress]
     }
 }
 
@@ -401,16 +397,14 @@ __declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
         jne _continue
 
         push esi // BrnNetwork::CarSelectMessage*
-        
-        mov ecx, dword ptr [g_Mod]
-        call Protection::GetVehicleProtection
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
         call VehicleProtection::OnVehicleSelectMessageUnpack
         
     _continue:
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessageUnpack.HookAddress]
     }
 }
 
@@ -425,16 +419,14 @@ __declspec(naked) void Protection::DetourFreeburnChallengeMessagePack()
         jne _continue
 
         push esi // BrnNetwork::FreeburnChallengeMessage*
-        
-        mov ecx, dword ptr [g_Mod]
-        call Protection::GetChallengeProtection
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_ChallengeProtection]
         call ChallengeProtection::OnFreeburnChallengeMessagePack
 
     _continue:
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessagePack.HookAddress]
     }
 }
 
@@ -449,15 +441,13 @@ __declspec(naked) void Protection::DetourFreeburnChallengeMessageUnpack()
         jne _continue
 
         push esi // BrnNetwork::FreeburnChallengeMessage*
-        
-        mov ecx, dword ptr [g_Mod]
-        call Protection::GetChallengeProtection
-        mov ecx, eax
+        mov ecx, dword ptr [s_Instance.m_ChallengeProtection]
         call ChallengeProtection::OnFreeburnChallengeMessageUnpack
         
     _continue:
         popad
         popfd
-        ret
+        
+        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessageUnpack.HookAddress]
     }
 }

@@ -159,7 +159,7 @@
     <ClInclude Include="src\ChallengesFile.hpp" />
     <ClInclude Include="src\Challenges.hpp" />
     <ClInclude Include="src\Vehicles.hpp" />
-    <ClInclude Include="src\Protection.h" />
+    <ClInclude Include="src\Protection.hpp" />
     <ClInclude Include="src\VehiclesFile.hpp" />
     <ClInclude Include="src\VehicleProtection.hpp" />
   </ItemGroup>

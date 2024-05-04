@@ -1,9 +1,6 @@
 #include <Windows.h>
 
-#include "Protection.h"
-
-
-Protection* g_Mod = nullptr;
+#include "Protection.hpp"
 
 
 BOOL WINAPI DllMain(
@@ -15,29 +12,11 @@ BOOL WINAPI DllMain(
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        {
-            g_Mod = new Protection(hinstDLL);
-            g_Mod->OnProcessAttach();
-        }
+        Protection::Get().OnProcessAttach();
         break;
 
     case DLL_PROCESS_DETACH:
-        {
-            g_Mod->OnProcessDetach();
-            delete g_Mod;
-        }
-        break;
-
-    case DLL_THREAD_ATTACH:
-        {
-            g_Mod->OnThreadAttach();
-        }
-        break;
-
-    case DLL_THREAD_DETACH:
-        {
-            g_Mod->OnThreadDetach();
-        }
+        Protection::Get().OnProcessDetach();
         break;
     }
 

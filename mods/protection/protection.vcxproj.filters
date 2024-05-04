@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Protection.h">
+    <ClInclude Include="src\Protection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VehiclesFile.hpp">

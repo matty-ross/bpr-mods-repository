@@ -3,31 +3,34 @@
 
 #include <Windows.h>
 
-#include "core/Mod.h"
-#include "core/Logger.h"
+#include "core/Logger.hpp"
 
-#include "mod-manager/DetourHookManager.h"
-#include "mod-manager/ImGuiManager.h"
+#include "mod-manager/DetourHookManager.hpp"
+#include "mod-manager/ImGuiManager.hpp"
 
-#include "VehiclesFile.h"
-#include "ChallengesFile.h"
-#include "VehicleProtection.h"
-#include "ChallengeProtection.h"
+#include "VehiclesFile.hpp"
+#include "ChallengesFile.hpp"
+#include "VehicleProtection.hpp"
+#include "ChallengeProtection.hpp"
 
 
-class Protection : public Core::Mod
+class Protection
 {
+private:
+    Protection();
+
 public:
-    Protection(HMODULE module);
+    static Protection& Get();
+
+public:
+    void OnProcessAttach();
+    void OnProcessDetach();
 
 private:
-    void Load() override;
-    void Unload() override;
+    void Load();
+    void Unload();
 
     void OnRenderMenu();
-
-    VehicleProtection& GetVehicleProtection();
-    ChallengeProtection& GetChallengeProtection();
 
 private:
     static void DetourPlayerParamsSerialize();
@@ -38,6 +41,9 @@ private:
     static void DetourFreeburnChallengeMessageUnpack();
 
 private:
+    static Protection s_Instance;
+
+private:
     Core::Logger m_Logger;
 
     VehiclesFile m_VehiclesFile;
@@ -45,6 +51,7 @@ private:
 
     VehicleProtection m_VehicleProtection;
     ChallengeProtection m_ChallengeProtection;
+    ImGuiMenu m_Menu;
 
     DetourHook m_DetourPlayerParamsSerialize;
     DetourHook m_DetourPlayerParamsDeserialize;
@@ -53,5 +60,5 @@ private:
     DetourHook m_DetourFreeburnChallengeMessagePack;
     DetourHook m_DetourFreeburnChallengeMessageUnpack;
 
-    ImGuiMenu m_Menu;
+    HANDLE m_LoadThread = nullptr;
 };
