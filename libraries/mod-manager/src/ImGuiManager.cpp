@@ -105,16 +105,10 @@ void ImGuiManager::OnRenderFrame()
     if (ImGui::IsKeyPressed(ImGuiKey_F7, false))
     {
         m_MenusVisible = !m_MenusVisible;
-
-        // TODO: remove this debug log
-        printf_s("Toggled menus visibility: %d\n", m_MenusVisible);
     }
     if (ImGui::IsKeyPressed(ImGuiKey_F8, false))
     {
         m_OverlaysVisible = !m_OverlaysVisible;
-
-        // TODO: remove this debug log
-        printf_s("Toggled overlays visibility: %d\n", m_OverlaysVisible);
     }
 
     ImGuiIO& io = ImGui::GetIO();

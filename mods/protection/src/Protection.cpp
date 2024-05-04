@@ -336,7 +336,7 @@ __declspec(naked) void Protection::DetourPlayerParamsSerialize()
         pushad
 
         push edi // BrnNetwork::PlayerParams*
-        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
+        mov ecx, offset s_Instance.m_VehicleProtection
         call VehicleProtection::OnPlayerParamsSerialize
 
         popad
@@ -354,7 +354,7 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
         pushad
 
         push edi // BrnNetwork::PlayerParams*
-        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
+        mov ecx, offset s_Instance.m_VehicleProtection
         call VehicleProtection::OnPlayerParamsDeserialize
 
         popad
@@ -375,7 +375,7 @@ __declspec(naked) void Protection::DetourVehicleSelectMessagePack()
         jne _continue
 
         push esi // BrnNetwork::CarSelectMessage*
-        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
+        mov ecx, offset s_Instance.m_VehicleProtection
         call VehicleProtection::OnVehicleSelectMessagePack
 
     _continue:
@@ -397,7 +397,7 @@ __declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
         jne _continue
 
         push esi // BrnNetwork::CarSelectMessage*
-        mov ecx, dword ptr [s_Instance.m_VehicleProtection]
+        mov ecx, offset s_Instance.m_VehicleProtection
         call VehicleProtection::OnVehicleSelectMessageUnpack
         
     _continue:
@@ -419,7 +419,7 @@ __declspec(naked) void Protection::DetourFreeburnChallengeMessagePack()
         jne _continue
 
         push esi // BrnNetwork::FreeburnChallengeMessage*
-        mov ecx, dword ptr [s_Instance.m_ChallengeProtection]
+        mov ecx, offset s_Instance.m_ChallengeProtection
         call ChallengeProtection::OnFreeburnChallengeMessagePack
 
     _continue:
@@ -441,7 +441,7 @@ __declspec(naked) void Protection::DetourFreeburnChallengeMessageUnpack()
         jne _continue
 
         push esi // BrnNetwork::FreeburnChallengeMessage*
-        mov ecx, dword ptr [s_Instance.m_ChallengeProtection]
+        mov ecx, offset s_Instance.m_ChallengeProtection
         call ChallengeProtection::OnFreeburnChallengeMessageUnpack
         
     _continue:

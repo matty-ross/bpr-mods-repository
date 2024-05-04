@@ -234,7 +234,7 @@ __declspec(naked) void FreeCamera::DetourArbitratorUpdate()
 
         push dword ptr [ebp + 0x10] // BrnDirector::ArbStateSharedInfo*
         push dword ptr [ebp + 0xC]  // BrnDirector::Camera::Camera*
-        mov ecx, dword ptr [s_Instance]
+        mov ecx, offset s_Instance
         call FreeCamera::OnUpdate
 
         popad

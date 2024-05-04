@@ -192,7 +192,7 @@ __declspec(naked) void ModManager::DetourPresent()
         pushfd
         pushad
 
-        mov ecx, dword ptr [s_Instance.m_ImGuiManager]
+        mov ecx, offset s_Instance.m_ImGuiManager
         call ImGuiManager::OnRenderFrame
 
         popad
@@ -213,21 +213,23 @@ __declspec(naked) void ModManager::DetourWindowProc()
         push dword ptr [ebp + 0x10]
         push dword ptr [ebp + 0xC]
         push dword ptr [ebp + 0x8]
-        mov ecx, dword ptr [s_Instance.m_ImGuiManager]
+        mov ecx, offset s_Instance.m_ImGuiManager
         call ImGuiManager::OnWindowMessage
 
         test al, al
+        jz _continue
         
         popad
         popfd
-        
-        jz _continue
         
         // Break from the switch statement.
         mov eax, 0x008FBC01
         jmp eax
 
     _continue:
+        popad
+        popfd
+        
         jmp dword ptr [s_Instance.m_DetourWindowProc.HookAddress]
     }
 }
@@ -239,7 +241,7 @@ __declspec(naked) void ModManager::DetourUpdateKeyboardState()
         pushfd
         pushad
 
-        mov ecx, dword ptr [s_Instance.m_ImGuiManager]
+        mov ecx, offset s_Instance.m_ImGuiManager
         call ImGuiManager::WantCaptureKeyboard
 
         test al, al
