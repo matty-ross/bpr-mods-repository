@@ -1,12 +1,10 @@
-#include "VehiclesFile.h"
+#include "VehiclesFile.hpp"
 
-#include <algorithm>
+#include <stdexcept>
 
-#include <Windows.h>
+#include "vendor/yaml-cpp.hpp"
 
-#include "yaml-cpp/yaml.h"
-
-#include "core/File.h"
+#include "core/File.hpp"
 
 
 VehiclesFile::VehiclesFile(const std::string& filePath, const Core::Logger& logger)
@@ -22,7 +20,7 @@ void VehiclesFile::Load()
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_READ, FILE_SHARE_READ, OPEN_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Read);
             return file.Read();
         }
         catch (const std::runtime_error& e)
@@ -77,7 +75,7 @@ void VehiclesFile::Save() const
     {
         try
         {
-            Core::File file(m_FilePath, GENERIC_WRITE, FILE_SHARE_READ, CREATE_ALWAYS);
+            Core::File file(m_FilePath, Core::File::Operation::Write);
             file.Write(content);
         }
         catch (const std::runtime_error& e)
@@ -125,13 +123,15 @@ std::vector<Vehicle>& VehiclesFile::GetVehicles()
 
 Vehicle* VehiclesFile::GetVehicle(uint64_t vehicleID)
 {
-    auto it = std::find_if(m_Vehicles.begin(), m_Vehicles.end(),
-        [=](const Vehicle& vehicle)
+    for (Vehicle& vehicle : m_Vehicles)
+    {
+        if (vehicle.ID == vehicleID)
         {
-            return vehicle.ID == vehicleID;
+            return &vehicle;
         }
-    );
-    return it != m_Vehicles.end() ? &(*it) : nullptr;
+    }
+
+    return nullptr;
 }
 
 const VanillaVehicle* VehiclesFile::GetFallbackVehicle() const

@@ -1,15 +1,13 @@
-#include "VehicleProtection.h"
+#include "VehicleProtection.hpp"
 
-#include "imgui.h"
+#include "vendor/imgui.hpp"
 
-#include "core/Pointer.h"
-
-#include "bpr/CgsID.h"
+#include "core/Pointer.hpp"
 
 
 namespace BPR
 {
-    void GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
+    static void GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
     {
         __asm
         {
@@ -21,7 +19,7 @@ namespace BPR
         }
     }
 
-    void SetFreeburnVehicleID(void* playerParams, uint64_t vehicleID)
+    static void SetFreeburnVehicleID(void* playerParams, uint64_t vehicleID)
     {
         __asm
         {

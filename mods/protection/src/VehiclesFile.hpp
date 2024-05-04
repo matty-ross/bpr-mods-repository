@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "core/Logger.h"
+#include "core/Logger.hpp"
 
-#include "Vehicles.h"
+#include "Vehicles.hpp"
 
 
 struct Vehicle
@@ -28,17 +28,15 @@ public:
 
     std::vector<Vehicle>& GetVehicles();
     Vehicle* GetVehicle(uint64_t vehicleID);
-
     const VanillaVehicle* GetFallbackVehicle() const;
     void SetFallbackVehicle(const VanillaVehicle* fallbackVehicle);
 
 private:
     std::string m_FilePath;
-    const Core::Logger& m_Logger;
 
     std::vector<Vehicle> m_Vehicles;
-    
     const VanillaVehicle* m_FallbackVehicle = k_LastResortFallbackVehicle;
-
     bool m_Valid = false;
+
+    const Core::Logger& m_Logger;
 };

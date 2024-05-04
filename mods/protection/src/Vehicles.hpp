@@ -1,10 +1,6 @@
 #pragma once
 
 
-#include <array>
-#include <algorithm>
-
-
 struct VanillaVehicle
 {
     uint64_t ID;
@@ -12,7 +8,7 @@ struct VanillaVehicle
 };
 
 
-inline constexpr std::array<VanillaVehicle, 495> k_VanillaVehicles =
+inline constexpr VanillaVehicle k_VanillaVehicles[] =
 {
     VanillaVehicle{ .ID = 0xA7E60F1A3A360000, .Name = "PUSMC01  - CAVALRY" },
     VanillaVehicle{ .ID = 0xD676FB5119E20000, .Name = "XUSM1B1  - OVAL CHAMP 69" },
@@ -518,11 +514,13 @@ inline constexpr const VanillaVehicle* k_LastResortFallbackVehicle = &k_VanillaV
 
 inline const VanillaVehicle* GetVanillaVehicle(uint64_t vehicleID)
 {
-    auto it = std::find_if(k_VanillaVehicles.begin(), k_VanillaVehicles.end(),
-        [=](const VanillaVehicle& vanillaVehicle)
+    for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
+    {
+        if (vanillaVehicle.ID == vehicleID)
         {
-            return vanillaVehicle.ID == vehicleID;
+            return &vanillaVehicle;
         }
-    );
-    return it != k_VanillaVehicles.end() ? &(*it) : nullptr;
+    }
+
+    return nullptr;
 }

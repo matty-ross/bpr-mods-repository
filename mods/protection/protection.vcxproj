@@ -94,10 +94,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\bpr\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -110,10 +110,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\bpr\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -126,10 +126,10 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\bpr\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -142,10 +142,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\bpr\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,10 +158,10 @@
     <ClInclude Include="src\ChallengeProtection.h" />
     <ClInclude Include="src\ChallengesFile.h" />
     <ClInclude Include="src\Challenges.h" />
-    <ClInclude Include="src\Vehicles.h" />
+    <ClInclude Include="src\Vehicles.hpp" />
     <ClInclude Include="src\Protection.h" />
-    <ClInclude Include="src\VehiclesFile.h" />
-    <ClInclude Include="src\VehicleProtection.h" />
+    <ClInclude Include="src\VehiclesFile.hpp" />
+    <ClInclude Include="src\VehicleProtection.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ChallengeProtection.cpp" />

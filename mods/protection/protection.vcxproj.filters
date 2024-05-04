@@ -18,13 +18,13 @@
     <ClInclude Include="src\Protection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VehiclesFile.h">
+    <ClInclude Include="src\VehiclesFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VehicleProtection.h">
+    <ClInclude Include="src\VehicleProtection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Vehicles.h">
+    <ClInclude Include="src\Vehicles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Challenges.h">
