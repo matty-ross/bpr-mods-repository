@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ModMangerConfigFile.cpp" />
     <ClCompile Include="src\ImGuiManager.cpp" />
     <ClCompile Include="src\DetourHookManager.cpp" />
     <ClCompile Include="src\Main.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="include\mod-manager\DetourHookManager.hpp" />
     <ClInclude Include="include\mod-manager\ModManager.hpp" />
     <ClInclude Include="include\mod-manager\ModManagerApi.hpp" />
+    <ClInclude Include="src\ModMangerConfigFile.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
