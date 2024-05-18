@@ -52,12 +52,14 @@ namespace Core
         Log("ERROR", message);
     }
 
-    void Logger::Log(const char* logLevel, const char* message) const
+    void Logger::Log(const char* level, const char* message) const
     {
         SYSTEMTIME localTime = {};
         GetLocalTime(&localTime);
 
-        printf_s(
+        char buffer[70 + k_MessageMaxSize] = {};    
+        int length = sprintf_s(
+            buffer,
             "[%04d-%02d-%02d %02d:%02d:%02d.%03d]  %-20s  %-8s  -- : %s\n",
             localTime.wYear,
             localTime.wMonth,
@@ -67,8 +69,11 @@ namespace Core
             localTime.wSecond,
             localTime.wMilliseconds,
             m_Name,
-            logLevel,
+            level,
             message
         );
+
+        HANDLE consoleOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        WriteConsoleA(consoleOutputHandle, buffer, length, nullptr, nullptr);
     }
 }

@@ -20,7 +20,7 @@ void BlacklistedPlayersFile::Load()
     {
         try
         {
-            Core::File file(m_FilePath, Core::File::Operation::Read);
+            Core::File file(m_FilePath, Core::File::Mode::Read);
             return file.Read();
         }
         catch (const std::runtime_error& e)
@@ -69,7 +69,7 @@ void BlacklistedPlayersFile::Save() const
     {
         try
         {
-            Core::File file(m_FilePath, Core::File::Operation::Write);
+            Core::File file(m_FilePath, Core::File::Mode::Write);
             file.Write(content);
         }
         catch (const std::runtime_error& e)

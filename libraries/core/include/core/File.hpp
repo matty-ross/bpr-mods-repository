@@ -10,14 +10,14 @@ namespace Core
     class File
     {
     public:
-        enum class Operation
+        enum class Mode
         {
             Read,
             Write,
         };
 
     public:
-        File(const std::string& filePath, Operation fileOperation);
+        File(const std::string& filePath, Mode mode);
         ~File();
 
         File(const File&) = delete;

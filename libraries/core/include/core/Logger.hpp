@@ -19,7 +19,7 @@ namespace Core
         void Error(const char* format, ...) const;
 
     private:
-        void Log(const char* logLevel, const char* message) const;
+        void Log(const char* level, const char* message) const;
 
     private:
         const char* m_Name = nullptr;
