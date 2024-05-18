@@ -27,9 +27,6 @@
     <ClCompile Include="src\ImGuiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ModMangerConfigFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\mod-manager\ModManager.hpp">
@@ -42,9 +39,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\mod-manager\ModManagerApi.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ModMangerConfigFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
