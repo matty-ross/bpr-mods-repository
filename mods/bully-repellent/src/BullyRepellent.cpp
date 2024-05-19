@@ -30,8 +30,8 @@ BullyRepellent::BullyRepellent()
     },
     m_DetourOnGuiEventNetworkPlayerStatus
     {
-        .HookAddress    = Core::Pointer(0x0092BEC8).GetAddress(),
-        .DetourFunction = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
+        .Target    = Core::Pointer(0x0092BEC8).GetAddress(),
+        .Detour = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
     }
 {
 }
@@ -103,7 +103,7 @@ void BullyRepellent::Load()
         {
             m_Logger.Info("Attaching UpatePlayerStatus detour...");
 
-            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourOnGuiEventNetworkPlayerStatus);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnGuiEventNetworkPlayerStatus);
 
             m_Logger.Info("Attached UpatePlayerStatus detour.");
         }
@@ -150,7 +150,7 @@ void BullyRepellent::Unload()
         {
             m_Logger.Info("Detaching UpatePlayerStatus detour...");
 
-            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourOnGuiEventNetworkPlayerStatus);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnGuiEventNetworkPlayerStatus);
 
             m_Logger.Info("Detached UpatePlayerStatus detour.");
         }
@@ -201,6 +201,6 @@ __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourOnGuiEventNetworkPlayerStatus.HookAddress]
+        jmp dword ptr [s_Instance.m_DetourOnGuiEventNetworkPlayerStatus.Target]
     }
 }

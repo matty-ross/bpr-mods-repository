@@ -30,8 +30,8 @@ FreeCamera::FreeCamera()
     },
     m_DetourArbitratorUpdate
     {
-        .HookAddress    = Core::Pointer(0x009645E0).GetAddress(),
-        .DetourFunction = &FreeCamera::DetourArbitratorUpdate,
+        .Target    = Core::Pointer(0x009645E0).GetAddress(),
+        .Detour = &FreeCamera::DetourArbitratorUpdate,
     }
 {
 }
@@ -116,7 +116,7 @@ void FreeCamera::Load()
         {
             m_Logger.Info("Attaching ArbitratorUpdate detour...");
             
-            ModManager::Get().GetDetourHookManager().AttachDetourHook(m_DetourArbitratorUpdate);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourArbitratorUpdate);
             
             m_Logger.Info("Attached ArbitratorUpdate detour.");
         }
@@ -163,7 +163,7 @@ void FreeCamera::Unload()
         {
             m_Logger.Info("Detaching ArbitratorUpdate detour...");
             
-            ModManager::Get().GetDetourHookManager().DetachDetourHook(m_DetourArbitratorUpdate);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourArbitratorUpdate);
             
             m_Logger.Info("Detached ArbitratorUpdate detour.");
         }
@@ -240,6 +240,6 @@ __declspec(naked) void FreeCamera::DetourArbitratorUpdate()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourArbitratorUpdate.HookAddress]
+        jmp dword ptr [s_Instance.m_DetourArbitratorUpdate.Target]
     }
 }

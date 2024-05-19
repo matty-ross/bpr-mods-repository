@@ -14,18 +14,18 @@ ModManager::ModManager()
     m_Logger(k_Name),
     m_DetourPresent
     {
-        .HookAddress    = Core::Pointer(0x00C89F90).GetAddress(),
-        .DetourFunction = &ModManager::DetourPresent,
+        .Target = Core::Pointer(0x00C89F90).GetAddress(),
+        .Detour = &ModManager::DetourPresent,
     },
     m_DetourWindowProc
     {
-        .HookAddress    = Core::Pointer(0x008FB9E2).GetAddress(),
-        .DetourFunction = &ModManager::DetourWindowProc,
+        .Target = Core::Pointer(0x008FB9E2).GetAddress(),
+        .Detour = &ModManager::DetourWindowProc,
     },
     m_DetourUpdateKeyboardState
     {
-        .HookAddress    = Core::Pointer(0x0664BB29).GetAddress(),
-        .DetourFunction = &ModManager::DetourUpdateKeyboardState,
+        .Target = Core::Pointer(0x0664BB29).GetAddress(),
+        .Detour = &ModManager::DetourUpdateKeyboardState,
     }
 {
 }
@@ -47,18 +47,20 @@ ImGuiManager& ModManager::GetImGuiManager()
 
 void ModManager::OnProcessAttach()
 {
+    AllocConsole();
+
     PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
     {
         static_cast<ModManager*>(lpThreadParameter)->Load();
         return 0;
     };
-    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
 }
 
 void ModManager::OnProcessDetach()
 {
     Unload();
-    CloseHandle(m_LoadThread);
+    CloseHandle(m_LoadThreadHandle);
 }
 
 void ModManager::Load()
@@ -71,18 +73,17 @@ void ModManager::Load()
         {
             m_Logger.Info("Waiting to be at or past the Start Screen...");
             
-            auto isAtOrPastStartScreenState = []() -> bool
+            while (true)
             {
                 Core::Pointer gameModule = 0x013FC8E0;
-
-                return
+                if (
                     gameModule.as<void*>() != nullptr &&
                     gameModule.deref().at(0xB6D4C8).as<int32_t>() >= 3
-                ;
-            };
-            
-            while (!isAtOrPastStartScreenState())
-            {
+                )
+                {
+                    break;
+                }
+                
                 Sleep(1000);
             }
             
@@ -102,7 +103,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Attaching Present detour...");
             
-            m_DetourHookManager.AttachDetourHook(m_DetourPresent);
+            m_DetourHookManager.Attach(m_DetourPresent);
             
             m_Logger.Info("Attached Present detour.");
         }
@@ -111,7 +112,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Attaching WindowProc detour...");
             
-            m_DetourHookManager.AttachDetourHook(m_DetourWindowProc);
+            m_DetourHookManager.Attach(m_DetourWindowProc);
             
             m_Logger.Info("Attached WindowProc detour.");
         }
@@ -120,7 +121,7 @@ void ModManager::Load()
         {
             m_Logger.Info("Attaching UpdateKeyboardState detour...");
             
-            m_DetourHookManager.AttachDetourHook(m_DetourUpdateKeyboardState);
+            m_DetourHookManager.Attach(m_DetourUpdateKeyboardState);
             
             m_Logger.Info("Attached UpdateKeyboardState detour.");
         }
@@ -130,7 +131,7 @@ void ModManager::Load()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_Name, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_Name, MB_ICONERROR);
     }
 }
 
@@ -144,7 +145,7 @@ void ModManager::Unload()
         {
             m_Logger.Info("Detaching UpdateKeyboardState detour...");
             
-            m_DetourHookManager.DetachDetourHook(m_DetourUpdateKeyboardState);
+            m_DetourHookManager.Detach(m_DetourUpdateKeyboardState);
             
             m_Logger.Info("Detached UpdateKeyboardState detour.");
         }
@@ -153,7 +154,7 @@ void ModManager::Unload()
         {
             m_Logger.Info("Detaching WindowProc detour...");
             
-            m_DetourHookManager.DetachDetourHook(m_DetourWindowProc);
+            m_DetourHookManager.Detach(m_DetourWindowProc);
             
             m_Logger.Info("Detached WindowProc detour.");
         }
@@ -162,7 +163,7 @@ void ModManager::Unload()
         {
             m_Logger.Info("Detaching Present detour...");
             
-            m_DetourHookManager.DetachDetourHook(m_DetourPresent);
+            m_DetourHookManager.Detach(m_DetourPresent);
             
             m_Logger.Info("Detached Present detour.");
         }
@@ -181,7 +182,7 @@ void ModManager::Unload()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_Name, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_Name, MB_ICONERROR);
     }
 }
 
@@ -198,7 +199,7 @@ __declspec(naked) void ModManager::DetourPresent()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourPresent.HookAddress]
+        jmp dword ptr [s_Instance.m_DetourPresent.Target]
     }
 }
 
@@ -230,7 +231,7 @@ __declspec(naked) void ModManager::DetourWindowProc()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourWindowProc.HookAddress]
+        jmp dword ptr [s_Instance.m_DetourWindowProc.Target]
     }
 }
 
@@ -257,6 +258,6 @@ __declspec(naked) void ModManager::DetourUpdateKeyboardState()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourUpdateKeyboardState.HookAddress]
+        jmp dword ptr [s_Instance.m_DetourUpdateKeyboardState.Target]
     }
 }

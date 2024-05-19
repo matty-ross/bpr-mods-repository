@@ -16,28 +16,24 @@ DetourHookManager::~DetourHookManager()
     DeleteCriticalSection(&m_CriticalSection);
 }
 
-void DetourHookManager::BeginTransaction()
+void DetourHookManager::Attach(DetourHook& detourHook)
 {
     EnterCriticalSection(&m_CriticalSection);
-    DetourTransactionBegin();
-}
 
-void DetourHookManager::EndTransaction()
-{
+    DetourTransactionBegin();
+    DetourAttach(&detourHook.Target, detourHook.Detour);
     DetourTransactionCommit();
+
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void DetourHookManager::AttachDetourHook(DetourHook& detourHook)
+void DetourHookManager::Detach(DetourHook& detourHook)
 {
-    BeginTransaction();
-    DetourAttach(&detourHook.HookAddress, detourHook.DetourFunction);
-    EndTransaction();
-}
+    EnterCriticalSection(&m_CriticalSection);
 
-void DetourHookManager::DetachDetourHook(DetourHook& detourHook)
-{
-    BeginTransaction();
-    DetourDetach(&detourHook.HookAddress, detourHook.DetourFunction);
-    EndTransaction();
+    DetourTransactionBegin();
+    DetourDetach(&detourHook.Target, detourHook.Detour);
+    DetourTransactionCommit();
+
+    LeaveCriticalSection(&m_CriticalSection);
 }

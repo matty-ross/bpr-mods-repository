@@ -101,7 +101,6 @@ void ImGuiManager::OnRenderFrame()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    // TODO: store the hotkeys in a config file
     if (ImGui::IsKeyPressed(ImGuiKey_F7, false))
     {
         m_MenusVisible = !m_MenusVisible;

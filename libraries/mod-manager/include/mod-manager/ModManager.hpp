@@ -53,5 +53,5 @@ private:
     DetourHook m_DetourWindowProc;
     DetourHook m_DetourUpdateKeyboardState;
 
-    HANDLE m_LoadThread = nullptr;
+    HANDLE m_LoadThreadHandle = NULL;
 };

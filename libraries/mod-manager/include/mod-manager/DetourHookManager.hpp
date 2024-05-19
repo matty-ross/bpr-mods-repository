@@ -8,8 +8,8 @@
 
 struct DetourHook
 {
-    void* HookAddress;
-    void* DetourFunction;
+    void* Target;
+    void* Detour;
 };
 
 
@@ -28,11 +28,8 @@ public:
     DetourHookManager& operator =(DetourHookManager&&) = delete;
 
 public:
-    MOD_MANAGER_API void BeginTransaction();
-    MOD_MANAGER_API void EndTransaction();
-    
-    MOD_MANAGER_API void AttachDetourHook(DetourHook& detourHook);
-    MOD_MANAGER_API void DetachDetourHook(DetourHook& detourHook);
+    MOD_MANAGER_API void Attach(DetourHook& detourHook);
+    MOD_MANAGER_API void Detach(DetourHook& detourHook);
 
 private:
     CRITICAL_SECTION m_CriticalSection = {};
