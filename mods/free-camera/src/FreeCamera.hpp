@@ -50,11 +50,11 @@ private:
     CurrentCamera m_CurrentCamera;
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
+    
     ImGuiMenu m_Menu;
 
     DetourHook m_DetourArbitratorUpdate;
 
     WNDPROC m_PreviousWindowProc = nullptr;
-    
-    HANDLE m_LoadThread = nullptr;
+    HANDLE m_LoadThread = NULL;
 };

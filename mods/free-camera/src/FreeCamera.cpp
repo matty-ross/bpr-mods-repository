@@ -30,7 +30,7 @@ FreeCamera::FreeCamera()
     },
     m_DetourArbitratorUpdate
     {
-        .Target    = Core::Pointer(0x009645E0).GetAddress(),
+        .Target = Core::Pointer(0x009645E0).GetAddress(),
         .Detour = &FreeCamera::DetourArbitratorUpdate,
     }
 {
@@ -81,18 +81,17 @@ void FreeCamera::Load()
         {
             m_Logger.Info("Waiting to be in game...");
             
-            auto isInGameState = []() -> bool
+            while (true)
             {
                 Core::Pointer gameModule = 0x013FC8E0;
-
-                return
+                if (
                     gameModule.as<void*>() != nullptr &&
                     gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
-                ;
-            };
-            
-            while (!isInGameState())
-            {
+                )
+                {
+                    break;
+                }
+
                 Sleep(1000);
             }
  
@@ -106,8 +105,8 @@ void FreeCamera::Load()
             m_PreviousWindowProc = reinterpret_cast<WNDPROC>(SetWindowLongPtrA(
                 Core::Pointer(0x0139815C).as<HWND>(),
                 GWLP_WNDPROC,
-                reinterpret_cast<LONG_PTR>(&FreeCamera::WindowProc))
-            );
+                reinterpret_cast<LONG_PTR>(&FreeCamera::WindowProc)
+            ));
 
             m_Logger.Info("Set window proc. Previous window proc: 0x%p.", m_PreviousWindowProc);
         }
@@ -135,7 +134,7 @@ void FreeCamera::Load()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
@@ -186,7 +185,7 @@ void FreeCamera::Unload()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
