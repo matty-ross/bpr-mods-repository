@@ -44,7 +44,6 @@ private:
     struct Misc
     {
         Property<float> Fov;
-        Property<float> Blurriness;
     };
     
     struct Effects
@@ -58,6 +57,15 @@ private:
     {
         Property<float> Vehicle;
         Property<float> World;
+    };
+
+    struct DepthOfField
+    {
+        Property<float> FocusStartDistance;
+        Property<float> PerfectFocusStartDistance;
+        Property<float> PerfectFocusEndDistance;
+        Property<float> FocusEndDistance;
+        Property<float> Blurriness;
     };
 
     struct BackgroundEffect
@@ -79,6 +87,7 @@ private:
     Misc m_Misc;
     Effects m_Effects;
     MotionBlur m_MotionBlur;
+    DepthOfField m_DepthOfField;
     BackgroundEffect m_BackgroundEffect;
     MouseData m_MouseData;
 };

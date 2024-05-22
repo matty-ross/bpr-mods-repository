@@ -10,8 +10,7 @@ CurrentCamera::CurrentCamera()
     :
     m_Misc
     {
-        .Fov        = 0x58,
-        .Blurriness = 0x130,
+        .Fov = 0x58,
     },
     m_Effects
     {
@@ -23,6 +22,14 @@ CurrentCamera::CurrentCamera()
     {
         .Vehicle = 0xA8,
         .World   = 0xAC
+    },
+    m_DepthOfField
+    {
+        .FocusStartDistance        = 0x120,
+        .PerfectFocusStartDistance = 0x124,
+        .PerfectFocusEndDistance   = 0x128,
+        .FocusEndDistance          = 0x12C,
+        .Blurriness                = 0x130,
     }
 {
 }
@@ -106,7 +113,6 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
     
     {
         updateProperty(m_Misc.Fov);
-        updateProperty(m_Misc.Blurriness);
     }
 
     {
@@ -118,6 +124,14 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
     {
         updateProperty(m_MotionBlur.Vehicle);
         updateProperty(m_MotionBlur.World);
+    }
+
+    {
+        updateProperty(m_DepthOfField.FocusStartDistance);
+        updateProperty(m_DepthOfField.PerfectFocusStartDistance);
+        updateProperty(m_DepthOfField.PerfectFocusEndDistance);
+        updateProperty(m_DepthOfField.FocusEndDistance);
+        updateProperty(m_DepthOfField.Blurriness);
     }
 
     {
@@ -174,7 +188,6 @@ void CurrentCamera::OnRenderMenu()
 
         ImGui::SeparatorText("Misc");
         renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
-        renderProperty(m_Misc.Blurriness, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Blurriness", &address.as<float>(), 0.0f, 1.0f); });
         
         ImGui::SeparatorText("Effects");
         renderProperty(m_Effects.SimulationTimeScale, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Simulation Time Scale", &address.as<float>(), 0.0f, 2.0f); });
@@ -184,6 +197,13 @@ void CurrentCamera::OnRenderMenu()
         ImGui::SeparatorText("Motion Blur");
         renderProperty(m_MotionBlur.Vehicle, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Vehicle", &address.as<float>(), 0.0f, 1.0f); });
         renderProperty(m_MotionBlur.World,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("World", &address.as<float>(), 0.0f, 1.0f); });
+
+        ImGui::SeparatorText("Depth of Field");
+        // TODO: tweak the limits
+        renderProperty(m_DepthOfField.FocusStartDistance,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Focus Start Distance", &address.as<float>(), -100.0f, 100.0f); });
+        renderProperty(m_DepthOfField.PerfectFocusStartDistance, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Perfect Focus Start Distance", &address.as<float>(), -100.0f, 100.0f); });
+        renderProperty(m_DepthOfField.PerfectFocusEndDistance,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Perfect Focus End Distance", &address.as<float>(), -100.0f, 100.0f); });
+        renderProperty(m_DepthOfField.FocusEndDistance,          [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Focus End Distance", &address.as<float>(), -100.0f, 100.0f); });
 
         ImGui::SeparatorText("Background Effect");
         if (ImGui::Button("Stop"))
