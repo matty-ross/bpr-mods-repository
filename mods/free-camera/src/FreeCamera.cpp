@@ -1,5 +1,7 @@
 #include "FreeCamera.hpp"
 
+#include <hidusage.h>
+
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
@@ -96,6 +98,21 @@ void FreeCamera::Load()
             }
  
             m_Logger.Info("In game.");
+        }
+
+        // Register raw mouse input
+        {
+            m_Logger.Info("Registering raw mouse input...");
+            
+            RAWINPUTDEVICE mouse =
+            {
+                .usUsagePage = HID_USAGE_PAGE_GENERIC,
+                .usUsage     = HID_USAGE_GENERIC_MOUSE,
+                .hwndTarget  = Core::Pointer(0x0139815C).as<HWND>(),
+            };
+            RegisterRawInputDevices(&mouse, 1, sizeof(RAWINPUTDEVICE));
+
+            m_Logger.Info("Registered raw mouse input.");
         }
 
         // Set window proc
@@ -219,7 +236,26 @@ void FreeCamera::OnRenderMenu()
 
 LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-    s_Instance.m_CurrentCamera.OnWindowMessage(hWnd, Msg, wParam, lParam);
+    switch (Msg)
+    {
+    case WM_INPUT:
+        if (GET_RAWINPUT_CODE_WPARAM(wParam) == RIM_INPUTSINK)
+        {
+            puts("sink");
+        }
+        {
+            RAWINPUT rawInput = {};
+            UINT size = sizeof(rawInput);
+            GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &rawInput, &size, sizeof(RAWINPUTHEADER));
+            if (rawInput.header.dwType == RIM_TYPEMOUSE)
+            {
+                s_Instance.m_CurrentCamera.OnMouseInput(rawInput.data.mouse);
+            }
+        }
+        break;
+    }
+    
+    //s_Instance.m_CurrentCamera.OnWindowMessage(hWnd, Msg, wParam, lParam);
     
     return CallWindowProcA(s_Instance.m_PreviousWindowProc, hWnd, Msg, wParam, lParam);
 }

@@ -14,6 +14,7 @@ public:
 public:
     void OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo);
     void OnRenderMenu();
+    void OnMouseInput(const RAWMOUSE& mouse);
     void OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 private:

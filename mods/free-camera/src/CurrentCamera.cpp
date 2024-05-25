@@ -237,6 +237,29 @@ void CurrentCamera::OnRenderMenu()
     }
 }
 
+void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
+{
+    if (!m_Transformation.UseMouse || ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    /*
+    * mouse move while the left button is presed rotates the camera along the Y and X axis
+    * mouse move while the right button is pressed translates the camera upwards/sidewards
+    * mouse wheel translates the camera forwards/backwards
+    */
+
+    if (mouse.usFlags == MOUSE_MOVE_RELATIVE)
+    {
+        if (GetKeyState(VK_LBUTTON) & 0x8000)
+        {
+            m_Transformation.RotationDelta[1] -= mouse.lLastX;
+            m_Transformation.RotationDelta[0] += mouse.lLastY;
+        }
+    }
+}
+
 void CurrentCamera::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     if (!m_Transformation.UseMouse || ImGui::GetIO().WantCaptureMouse)
