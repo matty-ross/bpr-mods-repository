@@ -239,10 +239,7 @@ LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
     switch (Msg)
     {
     case WM_INPUT:
-        if (GET_RAWINPUT_CODE_WPARAM(wParam) == RIM_INPUTSINK)
-        {
-            puts("sink");
-        }
+        if (GET_RAWINPUT_CODE_WPARAM(wParam) == RIM_INPUT)
         {
             RAWINPUT rawInput = {};
             UINT size = sizeof(rawInput);
@@ -254,8 +251,6 @@ LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
         }
         break;
     }
-    
-    //s_Instance.m_CurrentCamera.OnWindowMessage(hWnd, Msg, wParam, lParam);
     
     return CallWindowProcA(s_Instance.m_PreviousWindowProc, hWnd, Msg, wParam, lParam);
 }

@@ -1,6 +1,5 @@
 #include "CurrentCamera.hpp"
 
-#include <Windowsx.h>
 #include <DirectXMath.h>
 
 #include "vendor/imgui.hpp"
@@ -245,56 +244,30 @@ void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
     }
 
     /*
-    * mouse move while the left button is presed rotates the camera along the Y and X axis
-    * mouse move while the right button is pressed translates the camera upwards/sidewards
-    * mouse wheel translates the camera forwards/backwards
+    * mouse movement while the left button is presed rotates the camera along the Y and X axis
+    * mouse movement while the right button is pressed translates the camera sidewards and upwards
+    * mouse wheel translates the camera forwards and backwards
+    * shift key increases the mouse input sensitivity
     */
+
+    bool isShiftKeyDown = GetKeyState(VK_SHIFT) & 0x8000;
 
     if (mouse.usFlags == MOUSE_MOVE_RELATIVE)
     {
         if (GetKeyState(VK_LBUTTON) & 0x8000)
         {
-            m_Transformation.RotationDelta[1] -= mouse.lLastX;
-            m_Transformation.RotationDelta[0] += mouse.lLastY;
+            m_Transformation.RotationDelta[1] -= isShiftKeyDown ? mouse.lLastX : (mouse.lLastX / 2.0f);
+            m_Transformation.RotationDelta[0] += isShiftKeyDown ? mouse.lLastY : (mouse.lLastY / 2.0f);
+        }
+        if (GetKeyState(VK_RBUTTON) & 0x8000)
+        {
+            m_Transformation.TranslationDelta[0] -= isShiftKeyDown ? mouse.lLastX : (mouse.lLastX / 2.0f);
+            m_Transformation.TranslationDelta[1] -= isShiftKeyDown ? mouse.lLastY : (mouse.lLastY / 2.0f);
         }
     }
-}
-
-void CurrentCamera::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-    if (!m_Transformation.UseMouse || ImGui::GetIO().WantCaptureMouse)
+    if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
     {
-        return;
-    }
-
-    switch (Msg)
-    {
-    case WM_MOUSEMOVE:
-        {
-            bool leftMouseButtonDown = GET_KEYSTATE_WPARAM(wParam) & MK_LBUTTON;
-            float x = static_cast<float>(GET_X_LPARAM(lParam));
-            float y = static_cast<float>(GET_Y_LPARAM(lParam));
-
-            if (leftMouseButtonDown)
-            {
-                float deltaX = x - m_MouseData.PreviousPositionX;
-                float deltaY = y - m_MouseData.PreviousPositionY;
-                m_Transformation.RotationDelta[1] -= deltaX;
-                m_Transformation.RotationDelta[0] += deltaY;
-            }
-            
-            m_MouseData.PreviousPositionX = x;
-            m_MouseData.PreviousPositionY = y;
-        }
-        break;
-
-    case WM_MOUSEWHEEL:
-        {
-            bool ctrlKeyDown = GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL;
-            float delta = static_cast<float>(GET_WHEEL_DELTA_WPARAM(wParam)) / WHEEL_DELTA;
-            
-            m_Transformation.TranslationDelta[2] += ctrlKeyDown ? delta * 4.0f : delta;
-        }
-        break;
+        short scrolls = static_cast<short>(mouse.usButtonData) / WHEEL_DELTA;
+        m_Transformation.TranslationDelta[2] += isShiftKeyDown ? (scrolls * 4.0f) : scrolls;
     }
 }
