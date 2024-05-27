@@ -4,7 +4,6 @@
 #include <Windows.h>
 
 #include "core/Logger.hpp"
-
 #include "mod-manager/ModManagerApi.hpp"
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"

@@ -60,7 +60,7 @@ namespace Core
         char buffer[70 + k_MessageMaxSize] = {};    
         int length = sprintf_s(
             buffer,
-            "[%04d-%02d-%02d %02d:%02d:%02d.%03d]  %-20s  %-8s  -- : %s\n",
+            "[%04d-%02d-%02d %02d:%02d:%02d.%03d]  %-8s  %-20s  |  %s\n",
             localTime.wYear,
             localTime.wMonth,
             localTime.wDay,
@@ -68,8 +68,8 @@ namespace Core
             localTime.wMinute,
             localTime.wSecond,
             localTime.wMilliseconds,
-            m_Name,
             level,
+            m_Name,
             message
         );
 

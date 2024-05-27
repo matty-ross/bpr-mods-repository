@@ -39,15 +39,15 @@ public:
     MOD_MANAGER_API void AddOverlay(ImGuiOverlay* overlay);
     MOD_MANAGER_API void RemoveOverlay(ImGuiOverlay* overlay);
 
-    MOD_MANAGER_API bool WantCaptureMouse() const;
-    MOD_MANAGER_API bool WantCaptureKeyboard() const;
-
 private:
     void Load() const;
     void Unload() const;
 
     void OnRenderFrame();
     bool OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+
+    bool WantCaptureMouse() const;
+    bool WantCaptureKeyboard() const;
 
 private:
     std::vector<ImGuiMenu*> m_Menus;

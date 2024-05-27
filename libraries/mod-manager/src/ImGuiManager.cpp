@@ -24,17 +24,21 @@ ImGuiManager::~ImGuiManager()
 void ImGuiManager::AddMenu(ImGuiMenu* menu)
 {
     EnterCriticalSection(&m_CriticalSection);
-    m_Menus.push_back(menu);
+    {
+        m_Menus.push_back(menu);
+    }
     LeaveCriticalSection(&m_CriticalSection);
 }
 
 void ImGuiManager::RemoveMenu(ImGuiMenu* menu)
 {
     EnterCriticalSection(&m_CriticalSection);
-    auto it = std::find(m_Menus.begin(), m_Menus.end(), menu);
-    if (it != m_Menus.end())
     {
-        m_Menus.erase(it);
+        auto it = std::find(m_Menus.begin(), m_Menus.end(), menu);
+        if (it != m_Menus.end())
+        {
+            m_Menus.erase(it);
+        }
     }
     LeaveCriticalSection(&m_CriticalSection);
 }
@@ -42,31 +46,23 @@ void ImGuiManager::RemoveMenu(ImGuiMenu* menu)
 void ImGuiManager::AddOverlay(ImGuiOverlay* overlay)
 {
     EnterCriticalSection(&m_CriticalSection);
-    m_Overlays.push_back(overlay);
+    {
+        m_Overlays.push_back(overlay);
+    }
     LeaveCriticalSection(&m_CriticalSection);
 }
 
 void ImGuiManager::RemoveOverlay(ImGuiOverlay* overlay)
 {
     EnterCriticalSection(&m_CriticalSection);
-    auto it = std::find(m_Overlays.begin(), m_Overlays.end(), overlay);
-    if (it != m_Overlays.end())
     {
-        m_Overlays.erase(it);
+        auto it = std::find(m_Overlays.begin(), m_Overlays.end(), overlay);
+        if (it != m_Overlays.end())
+        {
+            m_Overlays.erase(it);
+        }
     }
     LeaveCriticalSection(&m_CriticalSection);
-}
-
-bool ImGuiManager::WantCaptureMouse() const
-{
-    ImGuiIO& io = ImGui::GetIO();
-    return io.WantCaptureMouse;
-}
-
-bool ImGuiManager::WantCaptureKeyboard() const
-{
-    ImGuiIO& io = ImGui::GetIO();
-    return io.WantCaptureKeyboard;
 }
 
 void ImGuiManager::Load() const
@@ -76,6 +72,7 @@ void ImGuiManager::Load() const
 
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
     ImGui::StyleColorsClassic();
     
@@ -114,18 +111,20 @@ void ImGuiManager::OnRenderFrame()
     io.MouseDrawCursor = m_MenusVisible;
 
     EnterCriticalSection(&m_CriticalSection);
-    if (m_MenusVisible)
     {
-        for (const ImGuiMenu* menu : m_Menus)
+        if (m_MenusVisible)
         {
-            menu->OnRenderFunction();
+            for (const ImGuiMenu* menu : m_Menus)
+            {
+                menu->OnRenderFunction();
+            }
         }
-    }
-    if (m_OverlaysVisible)
-    {
-        for (const ImGuiOverlay* overlay : m_Overlays)
+        if (m_OverlaysVisible)
         {
-            overlay->OnRenderFunction();
+            for (const ImGuiOverlay* overlay : m_Overlays)
+            {
+                overlay->OnRenderFunction();
+            }
         }
     }
     LeaveCriticalSection(&m_CriticalSection);
@@ -165,4 +164,14 @@ bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
     }
     
     return false;
+}
+
+bool ImGuiManager::WantCaptureMouse() const
+{
+    return ImGui::GetIO().WantCaptureMouse;
+}
+
+bool ImGuiManager::WantCaptureKeyboard() const
+{
+    return ImGui::GetIO().WantCaptureKeyboard;
 }
