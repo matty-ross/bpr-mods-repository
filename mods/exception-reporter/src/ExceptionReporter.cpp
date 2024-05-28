@@ -70,7 +70,7 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
     DialogBoxParamA(
         m_ModuleInstance,
         MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
-        nullptr,
+        NULL,
         dialogProc,
         reinterpret_cast<LPARAM>(&exceptionInformation)
     );
@@ -88,14 +88,14 @@ void ExceptionReporter::Load()
         {
             m_Logger.Info("Waiting to enter WinMain...");
             
-            auto hasEnteredWinMain = []() -> bool
+            while (true)
             {
                 HANDLE mutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
-                return mutex != nullptr;
-            };
+                if (mutex != NULL)
+                {
+                    break;
+                }
 
-            while (!hasEnteredWinMain())
-            {
                 Sleep(100);
             }
 
@@ -120,7 +120,7 @@ void ExceptionReporter::Load()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
@@ -144,6 +144,6 @@ void ExceptionReporter::Unload()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }

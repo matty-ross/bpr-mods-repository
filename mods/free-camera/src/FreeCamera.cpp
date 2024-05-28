@@ -5,7 +5,6 @@
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
-
 #include "mod-manager/ModManager.hpp"
 
 

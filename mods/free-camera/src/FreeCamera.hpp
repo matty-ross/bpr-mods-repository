@@ -4,7 +4,6 @@
 #include <Windows.h>
 
 #include "core/Logger.hpp"
-
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
@@ -36,6 +35,7 @@ private:
 
 private:
     static LRESULT CALLBACK WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+    
     static void DetourArbitratorUpdate();
 
 private:

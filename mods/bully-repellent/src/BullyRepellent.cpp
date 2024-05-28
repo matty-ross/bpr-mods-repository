@@ -3,7 +3,6 @@
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
-
 #include "mod-manager/ModManager.hpp"
 
 
@@ -30,7 +29,7 @@ BullyRepellent::BullyRepellent()
     },
     m_DetourOnGuiEventNetworkPlayerStatus
     {
-        .Target    = Core::Pointer(0x0092BEC8).GetAddress(),
+        .Target = Core::Pointer(0x0092BEC8).GetAddress(),
         .Detour = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
     }
 {
@@ -81,18 +80,17 @@ void BullyRepellent::Load()
         {
             m_Logger.Info("Waiting to be in game...");
             
-            auto isInGameState = []() -> bool
+            while (true)
             {
                 Core::Pointer gameModule = 0x013FC8E0;
-
-                return
+                if (
                     gameModule.as<void*>() != nullptr &&
                     gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
-                ;
-            };
-            
-            while (!isInGameState())
-            {
+                )
+                {
+                    break;
+                }
+
                 Sleep(1000);
             }
  
@@ -122,7 +120,7 @@ void BullyRepellent::Load()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
@@ -160,7 +158,7 @@ void BullyRepellent::Unload()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 

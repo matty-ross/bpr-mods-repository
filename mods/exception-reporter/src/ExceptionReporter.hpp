@@ -30,8 +30,7 @@ private:
 private:
     Core::Logger m_Logger;
 
-    HINSTANCE m_ModuleInstance = nullptr;
+    HINSTANCE m_ModuleInstance = NULL;
     PTOP_LEVEL_EXCEPTION_FILTER m_PreviousTopLevelExceptionFilter = nullptr;
-
-    HANDLE m_LoadThread = nullptr;
+    HANDLE m_LoadThread = NULL;
 };

@@ -4,7 +4,6 @@
 #include <Windows.h>
 
 #include "core/Logger.hpp"
-
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
@@ -51,6 +50,7 @@ private:
 
     VehicleProtection m_VehicleProtection;
     ChallengeProtection m_ChallengeProtection;
+    
     ImGuiMenu m_Menu;
 
     DetourHook m_DetourPlayerParamsSerialize;
@@ -60,5 +60,5 @@ private:
     DetourHook m_DetourFreeburnChallengeMessagePack;
     DetourHook m_DetourFreeburnChallengeMessageUnpack;
 
-    HANDLE m_LoadThread = nullptr;
+    HANDLE m_LoadThread = NULL;
 };

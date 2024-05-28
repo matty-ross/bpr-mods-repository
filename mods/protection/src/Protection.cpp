@@ -3,7 +3,6 @@
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
-
 #include "mod-manager/ModManager.hpp"
 
 
@@ -32,32 +31,32 @@ Protection::Protection()
     },
     m_DetourPlayerParamsSerialize
     {
-        .Target    = Core::Pointer(0x00B7218A).GetAddress(),
+        .Target = Core::Pointer(0x00B7218A).GetAddress(),
         .Detour = &Protection::DetourPlayerParamsSerialize,
     },
     m_DetourPlayerParamsDeserialize
     {
-        .Target    = Core::Pointer(0x00B72958).GetAddress(),
+        .Target = Core::Pointer(0x00B72958).GetAddress(),
         .Detour = &Protection::DetourPlayerParamsDeserialize,
     },
     m_DetourVehicleSelectMessagePack
     {
-        .Target    = Core::Pointer(0x00B62095).GetAddress(),
+        .Target = Core::Pointer(0x00B62095).GetAddress(),
         .Detour = &Protection::DetourVehicleSelectMessagePack,
     },
     m_DetourVehicleSelectMessageUnpack
     {
-        .Target    = Core::Pointer(0x00B6209F).GetAddress(),
+        .Target = Core::Pointer(0x00B6209F).GetAddress(),
         .Detour = &Protection::DetourVehicleSelectMessageUnpack,
     },
     m_DetourFreeburnChallengeMessagePack
     {
-        .Target    = Core::Pointer(0x0790A490).GetAddress(),
+        .Target = Core::Pointer(0x0790A490).GetAddress(),
         .Detour = &Protection::DetourFreeburnChallengeMessagePack,
     },
     m_DetourFreeburnChallengeMessageUnpack
     {
-        .Target    = Core::Pointer(0x0790A49A).GetAddress(),
+        .Target = Core::Pointer(0x0790A49A).GetAddress(),
         .Detour = &Protection::DetourFreeburnChallengeMessageUnpack,
     }
 {
@@ -113,18 +112,17 @@ void Protection::Load()
         {
             m_Logger.Info("Waiting to be in game...");
 
-            auto isInGameState = []() -> bool
+            while (true)
             {
                 Core::Pointer gameModule = 0x013FC8E0;
-
-                return
+                if (
                     gameModule.as<void*>() != nullptr &&
                     gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
-                ;
-            };
+                )
+                {
+                    break;
+                }
 
-            while (!isInGameState())
-            {
                 Sleep(1000);
             }
 
@@ -217,7 +215,7 @@ void Protection::Load()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 
@@ -305,7 +303,7 @@ void Protection::Unload()
     catch (const std::exception& e)
     {
         m_Logger.Error("%s", e.what());
-        MessageBoxA(nullptr, e.what(), k_ModName, MB_ICONERROR);
+        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
 }
 

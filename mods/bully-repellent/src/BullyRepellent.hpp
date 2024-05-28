@@ -4,7 +4,6 @@
 #include <Windows.h>
 
 #include "core/Logger.hpp"
-
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
@@ -43,9 +42,10 @@ private:
     BlacklistedPlayersFile m_BlacklistedPlayersFile;
     
     OnlinePlayers m_OnlinePlayers;
+    
     ImGuiMenu m_Menu;
 
     DetourHook m_DetourOnGuiEventNetworkPlayerStatus;
     
-    HANDLE m_LoadThread = nullptr;
+    HANDLE m_LoadThread = NULL;
 };
