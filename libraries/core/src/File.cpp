@@ -1,6 +1,6 @@
 #include "File.hpp"
 
-#include <stdexcept>
+#include "WindowsException.hpp"
 
 
 namespace Core
@@ -26,7 +26,7 @@ namespace Core
         m_FileHandle = CreateFileA(filePath.c_str(), desiredAccess, FILE_SHARE_READ, nullptr, creationDisposition, 0, NULL);
         if (m_FileHandle == INVALID_HANDLE_VALUE)
         {
-            throw std::runtime_error("Cannot open/create file.");
+            throw WindowsException("Cannot open/create file");
         }
     }
 
@@ -41,12 +41,12 @@ namespace Core
     std::string File::Read() const
     {
         size_t size = GetFileSize(m_FileHandle, nullptr);
-        std::string content(size, ' ');
+        std::string content(size, '\0');
 
         DWORD bytesRead = 0;
         if (ReadFile(m_FileHandle, content.data(), content.size(), &bytesRead, nullptr) == FALSE)
         {
-            throw std::runtime_error("Cannot read file.");
+            throw WindowsException("Cannot read file");
         }
 
         return content;
@@ -57,7 +57,7 @@ namespace Core
         DWORD bytesWritten = 0;
         if (WriteFile(m_FileHandle, content.data(), content.size(), &bytesWritten, nullptr) == FALSE)
         {
-            throw std::runtime_error("Cannot write file.");
+            throw WindowsException("Cannot write file");
         }
     }
 }
