@@ -30,9 +30,7 @@ public:
 
 private:
     std::string m_FilePath;
+    const Core::Logger& m_Logger;
     
     std::vector<BlacklistedPlayer> m_BlacklistedPlayers;
-    bool m_Valid = false;
-
-    const Core::Logger& m_Logger;
 };
