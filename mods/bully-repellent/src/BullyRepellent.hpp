@@ -27,7 +27,6 @@ private:
     void Load();
     void Unload();
 
-    void OnUpdate(void* guiEventNetworkPlayerStatus);
     void OnRenderMenu();
 
 private:

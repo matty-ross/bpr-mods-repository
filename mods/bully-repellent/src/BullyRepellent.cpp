@@ -162,11 +162,6 @@ void BullyRepellent::Unload()
     }
 }
 
-void BullyRepellent::OnUpdate(void* guiEventNetworkPlayerStatus)
-{
-    m_OnlinePlayers.OnUpdate(guiEventNetworkPlayerStatus);
-}
-
 void BullyRepellent::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
@@ -192,9 +187,9 @@ __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
         pushfd
         pushad
 
-        push dword ptr [ebp + 0x8]    // BrnGui::GuiEventNetworkPlayerStatus*
-        mov ecx, offset s_Instance
-        call BullyRepellent::OnUpdate
+        push dword ptr [ebp + 0x8] // BrnGui::GuiEventNetworkPlayerStatus*
+        mov ecx, offset s_Instance.m_OnlinePlayers
+        call OnlinePlayers::OnGuiEventNetworkPlayerStatus
 
         popad
         popfd

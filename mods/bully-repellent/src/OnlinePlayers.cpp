@@ -2,19 +2,16 @@
 
 #include "vendor/imgui.hpp"
 
+#include "core/Pointer.hpp"
+
 
 namespace BPR
 {
-    enum class PlayerOption
-    {
-        Kick = 2,
-        Mute = 3,
-    };
-    
+    // BrnGui::GuiEventNetworkSelectedPlayerOption
     struct SelectedPlayerOptionEvent
     {
-        PlayerOption PlayerOption;
-        uint64_t NetworkPlayerID;
+        int32_t Option; // BrnGui::GuiEventNetworkSelectedPlayerOption::EOptionSelected
+        uint64_t PlayerID;
     };
     
     static void AddSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
@@ -38,8 +35,11 @@ OnlinePlayers::OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile)
 {
 }
 
-void OnlinePlayers::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
+void OnlinePlayers::OnGuiEventNetworkPlayerStatus(void* event)
 {
+    // BrnGui::GuiEventNetworkPlayerStatus*
+    Core::Pointer guiEventNetworkPlayerStatus = event;
+
     if (!m_BlacklistEnabled)
     {
         return;
@@ -76,8 +76,8 @@ void OnlinePlayers::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
             {
                 BPR::SelectedPlayerOptionEvent selectedPlayerOptionEvent =
                 {
-                    .PlayerOption    = BPR::PlayerOption::Kick,
-                    .NetworkPlayerID = playerID,
+                    .Option   = 2,
+                    .PlayerID = playerID,
                 };
                 BPR::AddSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
@@ -89,8 +89,8 @@ void OnlinePlayers::OnUpdate(Core::Pointer guiEventNetworkPlayerStatus)
             {
                 BPR::SelectedPlayerOptionEvent selectedPlayerOptionEvent =
                 {
-                    .PlayerOption    = BPR::PlayerOption::Mute,
-                    .NetworkPlayerID = playerID,
+                    .Option   = 3,
+                    .PlayerID = playerID,
                 };
                 BPR::AddSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
