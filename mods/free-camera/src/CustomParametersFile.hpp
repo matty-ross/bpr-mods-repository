@@ -38,9 +38,7 @@ public:
 
 private:
     std::string m_FilePath;
+    const Core::Logger& m_Logger;
 
     std::vector<CustomParameters> m_CustomParameters;
-    bool m_Valid = false;
-
-    const Core::Logger& m_Logger;
 };
