@@ -1,7 +1,5 @@
 #include "VehiclesFile.hpp"
 
-#include <stdexcept>
-
 #include "vendor/yaml-cpp.hpp"
 
 #include "core/File.hpp"
@@ -16,103 +14,71 @@ VehiclesFile::VehiclesFile(const std::string& filePath, const Core::Logger& logg
 
 void VehiclesFile::Load()
 {
-    auto readFile = [this]() -> std::string
-    {
-        try
-        {
-            Core::File file(m_FilePath, Core::File::Mode::Read);
-            return file.Read();
-        }
-        catch (const std::runtime_error& e)
-        {
-            m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-        }
-
-        return std::string();
-    };
-
-    m_Valid = false;
-    
     try
     {
         m_Logger.Info("Loading vehicles from file '%s' ...", m_FilePath.c_str());
 
-        m_Vehicles.clear();
+        Core::File file(m_FilePath, Core::File::Mode::Read);
         
-        YAML::Node yaml = YAML::Load(readFile());
+        YAML::Node yaml = YAML::Load(file.Read());
         {
             uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>();
             const VanillaVehicle* fallbackVehicle = GetVanillaVehicle(fallbackVehicleID);
             m_FallbackVehicle = fallbackVehicle != nullptr ? fallbackVehicle : k_LastResortFallbackVehicle;
-        }
-        for (const YAML::Node& vehicleNode : yaml["Vehicles"])
-        {
-            uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>();
-            const VanillaVehicle* replacementVehicle = GetVanillaVehicle(replacementVehicleID);
-            Vehicle vehicle =
-            {
-                .ID          = vehicleNode["ID"].as<uint64_t>(),
-                .Name        = vehicleNode["Name"].as<std::string>(),
-                .Replacement = replacementVehicle != nullptr ? replacementVehicle : m_FallbackVehicle,
-            };
 
-            m_Vehicles.push_back(vehicle);
+            m_Vehicles.clear();
+            for (const YAML::Node& vehicleNode : yaml["Vehicles"])
+            {
+                uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>();
+                const VanillaVehicle* replacementVehicle = GetVanillaVehicle(replacementVehicleID);
+                Vehicle vehicle =
+                {
+                    .ID          = vehicleNode["ID"].as<uint64_t>(),
+                    .Name        = vehicleNode["Name"].as<std::string>(),
+                    .Replacement = replacementVehicle != nullptr ? replacementVehicle : m_FallbackVehicle,
+                };
+
+                m_Vehicles.push_back(vehicle);
+            }
         }
 
         m_Logger.Info("Loaded vehicles.");
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load vehicles. %s", e.what());
+        m_Logger.Warning("Failed to load vehicles - %s", e.what());
     }
-    
-    m_Valid = true;
 }
 
 void VehiclesFile::Save() const
 {
-    auto writeFile = [this](const std::string& content) -> void
-    {
-        try
-        {
-            Core::File file(m_FilePath, Core::File::Mode::Write);
-            file.Write(content);
-        }
-        catch (const std::runtime_error& e)
-        {
-            m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-        }
-    };
-
-    if (!m_Valid)
-    {
-        return;
-    }
-    
     try
     {
         m_Logger.Info("Saving vehicles to file '%s' ...", m_FilePath.c_str());
 
+        Core::File file(m_FilePath, Core::File::Mode::Write);
+
         YAML::Node yaml;
         {
             yaml["FallbackID"] = m_FallbackVehicle->ID;
-        }
-        for (const Vehicle& vehicle : m_Vehicles)
-        {
-            YAML::Node vehicleNode;
-            vehicleNode["ID"]            = vehicle.ID;
-            vehicleNode["Name"]          = vehicle.Name;
-            vehicleNode["ReplacementID"] = vehicle.Replacement->ID;
+        
+            for (const Vehicle& vehicle : m_Vehicles)
+            {
+                YAML::Node vehicleNode;
+                vehicleNode["ID"]            = vehicle.ID;
+                vehicleNode["Name"]          = vehicle.Name;
+                vehicleNode["ReplacementID"] = vehicle.Replacement->ID;
             
-            yaml["Vehicles"].push_back(vehicleNode);
+                yaml["Vehicles"].push_back(vehicleNode);
+            }
         }
-        writeFile(YAML::Dump(yaml));
+        file.Write(YAML::Dump(yaml));
 
         m_Logger.Info("Saved vehicles.");
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save vehicles. %s", e.what());
+        m_Logger.Warning("Failed to save vehicles - %s", e.what());
     }
 }
 

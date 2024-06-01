@@ -1,7 +1,5 @@
 #include "ChallengesFile.hpp"
 
-#include <stdexcept>
-
 #include "vendor/yaml-cpp.hpp"
 
 #include "core/File.hpp"
@@ -16,103 +14,71 @@ ChallengesFile::ChallengesFile(const std::string& filePath, const Core::Logger& 
 
 void ChallengesFile::Load()
 {
-    auto readFile = [this]() -> std::string
-    {
-        try
-        {
-            Core::File file(m_FilePath, Core::File::Mode::Read);
-            return file.Read();
-        }
-        catch (const std::runtime_error& e)
-        {
-            m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-        }
-
-        return std::string();
-    };
-
-    m_Valid = false;
-
     try
     {
         m_Logger.Info("Loading challenges from file '%s' ...", m_FilePath.c_str());
 
-        m_Challenges.clear();
+        Core::File file(m_FilePath, Core::File::Mode::Read);
         
-        YAML::Node yaml = YAML::Load(readFile());
+        YAML::Node yaml = YAML::Load(file.Read());
         {
             uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>();
             const VanillaChallenge* fallbackChallenge = GetVanillaChallenge(fallbackChallengeID);
             m_FallbackChallenge = fallbackChallenge != nullptr ? fallbackChallenge : k_LastResortFallbackChallenge;
-        }
-        for (const YAML::Node& challengeNode : yaml["Challenges"])
-        {
-            uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
-            const VanillaChallenge* replacementChallenge = GetVanillaChallenge(replacementChallengeID);
-            Challenge challenge =
+
+            m_Challenges.clear();
+            for (const YAML::Node& challengeNode : yaml["Challenges"])
             {
-                .ID          = challengeNode["ID"].as<uint64_t>(),
-                .Title       = challengeNode["Title"].as<std::string>(),
-                .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
-            };
+                uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
+                const VanillaChallenge* replacementChallenge = GetVanillaChallenge(replacementChallengeID);
+                Challenge challenge =
+                {
+                    .ID          = challengeNode["ID"].as<uint64_t>(),
+                    .Title       = challengeNode["Title"].as<std::string>(),
+                    .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
+                };
             
-            m_Challenges.push_back(challenge);
+                m_Challenges.push_back(challenge);
+            }
         }
 
         m_Logger.Info("Loaded challenges.");
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load challenges. %s", e.what());
+        m_Logger.Warning("Failed to load challenges - %s", e.what());
     }
-    
-    m_Valid = true;
 }
 
 void ChallengesFile::Save() const
 {
-    auto writeFile = [this](const std::string& content) -> void
-    {
-        try
-        {
-            Core::File file(m_FilePath, Core::File::Mode::Write);
-            file.Write(content);
-        }
-        catch (const std::runtime_error& e)
-        {
-            m_Logger.Warning("%s. Last error: 0x%08X.", e.what(), GetLastError());
-        }
-    };
-
-    if (!m_Valid)
-    {
-        return;
-    }
-
     try
     {
         m_Logger.Info("Saving challenges to file '%s' ...", m_FilePath.c_str());
 
+        Core::File file(m_FilePath, Core::File::Mode::Write);
+
         YAML::Node yaml;
         {
             yaml["FallbackID"] = m_FallbackChallenge->ID;
-        }
-        for (const Challenge& challenge : m_Challenges)
-        {
-            YAML::Node challengeNode;
-            challengeNode["ID"]            = challenge.ID;
-            challengeNode["Title"]         = challenge.Title;
-            challengeNode["ReplacementID"] = challenge.Replacement->ID;
+            
+            for (const Challenge& challenge : m_Challenges)
+            {
+                YAML::Node challengeNode;
+                challengeNode["ID"]            = challenge.ID;
+                challengeNode["Title"]         = challenge.Title;
+                challengeNode["ReplacementID"] = challenge.Replacement->ID;
 
-            yaml["Challenges"].push_back(challengeNode);
+                yaml["Challenges"].push_back(challengeNode);
+            }
         }
-        writeFile(YAML::Dump(yaml));
+        file.Write(YAML::Dump(yaml));
 
         m_Logger.Info("Saved challenges.");
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save challenges. %s", e.what());
+        m_Logger.Warning("Failed to save challenges - %s", e.what());
     }
 }
 

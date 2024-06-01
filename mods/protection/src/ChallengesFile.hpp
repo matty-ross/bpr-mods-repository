@@ -33,10 +33,8 @@ public:
 
 private:
     std::string m_FilePath;
+    const Core::Logger& m_Logger;
 
     std::vector<Challenge> m_Challenges;
     const VanillaChallenge* m_FallbackChallenge = k_LastResortFallbackChallenge;
-    bool m_Valid = false;
-
-    const Core::Logger& m_Logger;
 };
