@@ -10,7 +10,7 @@ namespace BPR
     // BrnGui::GuiEventNetworkSelectedPlayerOption
     struct SelectedPlayerOptionEvent
     {
-        int32_t Option; // BrnGui::GuiEventNetworkSelectedPlayerOption::EOptionSelected
+        int32_t Option;
         uint64_t PlayerID;
     };
     
@@ -100,40 +100,23 @@ void OnlinePlayers::OnGuiEventNetworkPlayerStatus(void* event)
 
 void OnlinePlayers::OnRenderMenu()
 {
-    if (ImGui::CollapsingHeader("Online Players"))
+    if (ImGui::CollapsingHeader("Current Players"))
     {
+        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
+        
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
-        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
-
-        ImGui::SeparatorText("Current Players");
         bool isOnline = guiCache.at(0x7B00).as<bool>();
         if (isOnline)
-        {
-            auto getGameModeName = [](int32_t gameMode) -> const char*
-            {
-                switch (gameMode)
-                {
-                case 10: return "Race";
-                case 12: return "Stunt Run";
-                case 14: return "Stunt Run Free-for-all";
-                case 15: return "Freeburn";
-                case 16: return "Showtime";
-                case 17: return "Stunt Run Co-op";
-                }
-                return "???";
-            };
-                    
-            ImGui::Text("Lobby Name     %s", guiCache.at(0xEA00).as<char[65]>());
+        {        
+            ImGui::Text("Host Name      %s", guiCache.at(0xEA00).as<char[65]>());
             ImGui::Text("You are Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
-            ImGui::Text("Game Mode      %s", getGameModeName(guiCache.at(0xCF38).as<int32_t>()));
 
-            if (ImGui::BeginTable("##player-info-table", 3))
+            if (ImGui::BeginTable("##player-info-table", 2))
             {
                 Core::Pointer playerInfo = guiCache.at(0xDE38);
 
                 ImGui::TableSetupColumn("Name");
-                ImGui::TableSetupColumn("Is Host");
                 ImGui::TableSetupColumn("Blacklist");
                 ImGui::TableHeadersRow();
                 
@@ -148,12 +131,7 @@ void OnlinePlayers::OnRenderMenu()
                     {
                         ImGui::TableNextColumn();
                         ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
-                    }
-                    {
-                        ImGui::TableNextColumn();
-                        ImGui::TextUnformatted(playerStatusData.at(0x12C).as<bool>() ? "Yes" : "No");
-                    }
-                    {
+                    
                         ImGui::TableNextColumn();
                         bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
                         bool alreadyOnBlacklist = m_BlacklistedPlayersFile.GetBlacklistedPlayer(playerID) != nullptr;
@@ -180,6 +158,7 @@ void OnlinePlayers::OnRenderMenu()
                     }
                     ImGui::PopID();
                 }
+
                 ImGui::EndTable();
             }
         }
@@ -187,8 +166,10 @@ void OnlinePlayers::OnRenderMenu()
         {
             ImGui::TextUnformatted("Currently Offline");
         }
+    }
 
-        ImGui::SeparatorText("Blacklisted Players");
+    if (ImGui::CollapsingHeader("Blacklisted Players"))
+    {
         if (ImGui::Button("Save"))
         {
             m_BlacklistedPlayersFile.Save();
@@ -198,12 +179,14 @@ void OnlinePlayers::OnRenderMenu()
         {
             m_BlacklistedPlayersFile.Load();
         }
+        
         if (ImGui::BeginTable("##blacklisted-players-table", 3))
         {
             ImGui::TableSetupColumn("Name");
             ImGui::TableSetupColumn("Autokick");
             ImGui::TableSetupColumn("Automute");
             ImGui::TableHeadersRow();
+            
             for (BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayersFile.GetBlacklistedPlayers())
             {
                 ImGui::PushID(&blacklistedPlayer);
@@ -211,17 +194,16 @@ void OnlinePlayers::OnRenderMenu()
                 {
                     ImGui::TableNextColumn();
                     ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
-                }
-                {
+                
                     ImGui::TableNextColumn();
                     ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
-                }
-                {
+                
                     ImGui::TableNextColumn();
                     ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
                 }
                 ImGui::PopID();
             }
+
             ImGui::EndTable();
         }
     }
