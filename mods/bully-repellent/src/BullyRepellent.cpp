@@ -187,6 +187,7 @@ __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
         pushfd
         pushad
 
+        push ebx // BrnGui::GuiCache*
         push dword ptr [ebp + 0x8] // BrnGui::GuiEventNetworkPlayerStatus*
         mov ecx, offset s_Instance.m_OnlinePlayers
         call OnlinePlayers::OnGuiEventNetworkPlayerStatus

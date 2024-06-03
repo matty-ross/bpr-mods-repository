@@ -14,6 +14,8 @@ namespace BPR
         uint64_t PlayerID;
     };
     
+
+    // void __thiscall GuiEventQueueBase<65536,16>::AddGuiEvent<>(BrnGui::GuiEventNetworkSelectedPlayerOption* lEvent)
     static void AddSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
     {
         __asm
@@ -35,7 +37,7 @@ OnlinePlayers::OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile)
 {
 }
 
-void OnlinePlayers::OnGuiEventNetworkPlayerStatus(void* event)
+void OnlinePlayers::OnGuiEventNetworkPlayerStatus(void* event, void* guiCache)
 {
     // BrnGui::GuiEventNetworkPlayerStatus*
     Core::Pointer guiEventNetworkPlayerStatus = event;
@@ -45,7 +47,7 @@ void OnlinePlayers::OnGuiEventNetworkPlayerStatus(void* event)
         return;
     }
 
-    int32_t currentGameMode = Core::Pointer(0x013FC8E0).deref().at(0x8F5368).as<int32_t>();
+    int32_t currentGameMode = Core::Pointer(guiCache).at(0xCF38).as<int32_t>();
     if (!(currentGameMode == 15 || currentGameMode == 16))
     {
         return;
@@ -114,8 +116,6 @@ void OnlinePlayers::OnRenderMenu()
 
             if (ImGui::BeginTable("##player-info-table", 2))
             {
-                Core::Pointer playerInfo = guiCache.at(0xDE38);
-
                 ImGui::TableSetupColumn("Name");
                 ImGui::TableSetupColumn("Blacklist");
                 ImGui::TableHeadersRow();
@@ -123,7 +123,7 @@ void OnlinePlayers::OnRenderMenu()
                 int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
                 for (int32_t i = 0; i < playersCount; ++i)
                 {
-                    Core::Pointer playerStatusData = playerInfo.at(i * 0x138);
+                    Core::Pointer playerStatusData = guiCache.at(0xDE38 + i * 0x138);
                     uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
 
                     ImGui::PushID(playerStatusData.GetAddress());

@@ -10,7 +10,7 @@ public:
     OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile);
 
 public:
-    void OnGuiEventNetworkPlayerStatus(void* event);
+    void OnGuiEventNetworkPlayerStatus(void* event, void* guiCache);
     void OnRenderMenu();
     
 private:
