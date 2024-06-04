@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include "core/Pointer.hpp"
+
 #include "BlacklistedPlayersFile.hpp"
 
 
@@ -10,7 +12,7 @@ public:
     OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile);
 
 public:
-    void OnGuiEventNetworkPlayerStatus(void* event, void* guiCache);
+    void OnGuiEventNetworkPlayerStatus(Core::Pointer guiEventNetworkPlayerStatus, Core::Pointer guiCache);
     void OnRenderMenu();
     
 private:

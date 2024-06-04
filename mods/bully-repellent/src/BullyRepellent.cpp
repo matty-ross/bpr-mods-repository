@@ -29,7 +29,7 @@ BullyRepellent::BullyRepellent()
     },
     m_DetourOnGuiEventNetworkPlayerStatus
     {
-        .Target = Core::Pointer(0x0092BEC8).GetAddress(),
+        .Target = Core::Pointer(0x0092BECB).GetAddress(),
         .Detour = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
     }
 {
@@ -186,15 +186,28 @@ __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
     {
         pushfd
         pushad
+        mov ebp, esp
+        sub esp, __LOCAL_SIZE
+    }
 
-        push ebx // BrnGui::GuiCache*
-        push dword ptr [ebp + 0x8] // BrnGui::GuiEventNetworkPlayerStatus*
-        mov ecx, offset s_Instance.m_OnlinePlayers
-        call OnlinePlayers::OnGuiEventNetworkPlayerStatus
+    {
+        void* guiEventNetworkPlayerStatus; // BrnGui::GuiEventNetworkPlayerStatus*
+        void* guiCache; // BrnGui::GuiCache*
 
+        __asm
+        {
+            mov dword ptr [guiEventNetworkPlayerStatus], ecx
+            mov dword ptr [guiCache], ebx
+        }
+
+        s_Instance.m_OnlinePlayers.OnGuiEventNetworkPlayerStatus(guiEventNetworkPlayerStatus, guiCache);
+    }
+
+    __asm
+    {
+        mov esp, ebp
         popad
         popfd
-        
         jmp dword ptr [s_Instance.m_DetourOnGuiEventNetworkPlayerStatus.Target]
     }
 }

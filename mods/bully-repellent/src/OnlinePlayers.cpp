@@ -2,8 +2,6 @@
 
 #include "vendor/imgui.hpp"
 
-#include "core/Pointer.hpp"
-
 
 namespace BPR
 {
@@ -37,17 +35,17 @@ OnlinePlayers::OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile)
 {
 }
 
-void OnlinePlayers::OnGuiEventNetworkPlayerStatus(void* event, void* guiCache)
+void OnlinePlayers::OnGuiEventNetworkPlayerStatus(Core::Pointer guiEventNetworkPlayerStatus, Core::Pointer guiCache)
 {
-    // BrnGui::GuiEventNetworkPlayerStatus*
-    Core::Pointer guiEventNetworkPlayerStatus = event;
+    // BrnGui::GuiEventNetworkPlayerStatus* guiEventNetworkPlayerStatus
+    // BrnGui::GuiCache* guiCache
 
     if (!m_BlacklistEnabled)
     {
         return;
     }
 
-    int32_t currentGameMode = Core::Pointer(guiCache).at(0xCF38).as<int32_t>();
+    int32_t currentGameMode = guiCache.at(0xCF38).as<int32_t>();
     if (!(currentGameMode == 15 || currentGameMode == 16))
     {
         return;
