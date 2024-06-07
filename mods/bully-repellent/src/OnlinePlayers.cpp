@@ -13,7 +13,7 @@ namespace BPR
     };
     
 
-    // void __thiscall CgsGui::StateInterface::OutputGuiEvent<>(GuiEventNetworkSelectedPlayerOption* lOutEvent)
+    // void __thiscall CgsGui::StateInterface::OutputGuiEvent<>(BrnGui::GuiEventNetworkSelectedPlayerOption* lOutEvent)
     static void OutputSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
     {
         __asm

@@ -166,7 +166,7 @@ void BullyRepellent::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
-        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2);
 
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Version     %s", k_ModVersion);
