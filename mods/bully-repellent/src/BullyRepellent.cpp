@@ -180,34 +180,26 @@ void BullyRepellent::OnRenderMenu()
     ImGui::End();
 }
 
+void BullyRepellent::OnGuiEventNetworkPlayerStatus(void* guiEventNetworkPlayerStatus, void* guiCache)
+{
+    m_OnlinePlayers.OnGuiEventNetworkPlayerStatus(guiEventNetworkPlayerStatus, guiCache);
+}
+
 __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()
 {
     __asm
     {
         pushfd
         pushad
-        mov ebp, esp
-        sub esp, __LOCAL_SIZE
-    }
 
-    {
-        void* guiEventNetworkPlayerStatus; // BrnGui::GuiEventNetworkPlayerStatus*
-        void* guiCache; // BrnGui::GuiCache*
-
-        __asm
-        {
-            mov dword ptr [guiEventNetworkPlayerStatus], ecx
-            mov dword ptr [guiCache], ebx
-        }
-
-        s_Instance.m_OnlinePlayers.OnGuiEventNetworkPlayerStatus(guiEventNetworkPlayerStatus, guiCache);
-    }
-
-    __asm
-    {
-        mov esp, ebp
+        push ebx // BrnGui::GuiCache*
+        push ecx // BrnGui::GuiEventNetworkPlayerStatus*
+        mov ecx, offset s_Instance
+        call BullyRepellent::OnGuiEventNetworkPlayerStatus
+        
         popad
         popfd
+        
         jmp dword ptr [s_Instance.m_DetourOnGuiEventNetworkPlayerStatus.Target]
     }
 }

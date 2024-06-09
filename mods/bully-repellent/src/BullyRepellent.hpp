@@ -29,6 +29,8 @@ private:
 
     void OnRenderMenu();
 
+    void OnGuiEventNetworkPlayerStatus(void* guiEventNetworkPlayerStatus, void* guiCache);
+
 private:
     static void DetourOnGuiEventNetworkPlayerStatus();
 

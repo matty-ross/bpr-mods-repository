@@ -102,8 +102,6 @@ void OnlinePlayers::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Current Players"))
     {
-        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
-        
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
         bool isOnline = guiCache.at(0x7B00).as<bool>();
@@ -168,6 +166,8 @@ void OnlinePlayers::OnRenderMenu()
 
     if (ImGui::CollapsingHeader("Blacklisted Players"))
     {
+        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
+        
         if (ImGui::Button("Save"))
         {
             m_BlacklistedPlayersFile.Save();
