@@ -2,8 +2,6 @@
 
 #include "vendor/imgui.hpp"
 
-#include "core/Pointer.hpp"
-
 
 ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
     :
@@ -11,26 +9,32 @@ ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
 {
 }
 
-void ChallengeProtection::OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage)
+void ChallengeProtection::OnFreeburnChallengeMessagePack(Core::Pointer freeburnChallengeMessage)
 {
+    // BrnNetwork::FreeburnChallengeMessage* freeburnChallengeMessage
+    
     if (!m_ChallengeProtectionEnabled)
     {
         return;
     }
 
-    uint64_t& challengeID = Core::Pointer(freeburnChallengeMessage).at(0x38).as<uint64_t>();
+    uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
     challengeID = HandleChallengeID(challengeID);
+    freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
 }
 
-void ChallengeProtection::OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage)
+void ChallengeProtection::OnFreeburnChallengeMessageUnpack(Core::Pointer freeburnChallengeMessage)
 {
+    // BrnNetwork::FreeburnChallengeMessage* freeburnChallengeMessage
+
     if (!m_ChallengeProtectionEnabled)
     {
         return;
     }
 
-    uint64_t& challengeID = Core::Pointer(freeburnChallengeMessage).at(0x38).as<uint64_t>();
+    uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
     challengeID = HandleChallengeID(challengeID);
+    freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
 }
 
 void ChallengeProtection::OnRenderMenu()
@@ -38,9 +42,6 @@ void ChallengeProtection::OnRenderMenu()
     if (ImGui::CollapsingHeader("Challenge Protection"))
     {
         ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
-
-        static ImGuiTextFilter challengeTitleComboFilter;
-        challengeTitleComboFilter.Draw("Challenge Combo Filter");
 
         if (ImGui::Button("Save"))
         {
@@ -51,6 +52,9 @@ void ChallengeProtection::OnRenderMenu()
         {
             m_ChallengesFile.Load();
         }
+
+        static ImGuiTextFilter challengeTitleComboFilter;
+        challengeTitleComboFilter.Draw("Challenge Combo Filter");
         
         if (ImGui::BeginCombo("Fallback Challenge", m_ChallengesFile.GetFallbackChallenge()->Title))
         {
@@ -69,6 +73,7 @@ void ChallengeProtection::OnRenderMenu()
                     }
                 }
             }
+            
             ImGui::EndCombo();
         }
 
@@ -77,6 +82,7 @@ void ChallengeProtection::OnRenderMenu()
             ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.4f);
             ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.6f);
             ImGui::TableHeadersRow();
+            
             for (Challenge& challenge : m_ChallengesFile.GetChallenges())
             {
                 ImGui::PushID(&challenge);
@@ -84,8 +90,7 @@ void ChallengeProtection::OnRenderMenu()
                 {
                     ImGui::TableNextColumn();
                     ImGui::TextUnformatted(challenge.Title.c_str());
-                }
-                {
+                
                     ImGui::TableNextColumn();
                     ImGui::SetNextItemWidth(-35.0f);
                     if (ImGui::BeginCombo("##replacement-challenge-combo", challenge.Replacement->Title))
@@ -105,11 +110,13 @@ void ChallengeProtection::OnRenderMenu()
                                 }
                             }
                         }
+                        
                         ImGui::EndCombo();
                     }
                 }
                 ImGui::PopID();
             }
+            
             ImGui::EndTable();
         }
     }

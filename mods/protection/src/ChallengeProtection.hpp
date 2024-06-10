@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include "core/Pointer.hpp"
+
 #include "ChallengesFile.hpp"
 
 
@@ -10,8 +12,8 @@ public:
     ChallengeProtection(ChallengesFile& challengesFile);
 
 public:
-    void OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage);
-    void OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage);
+    void OnFreeburnChallengeMessagePack(Core::Pointer freeburnChallengeMessage);
+    void OnFreeburnChallengeMessageUnpack(Core::Pointer freeburnChallengeMessage);
     void OnRenderMenu();
 
     void AddNonVanillaChallengesToChallengesFile();
@@ -21,6 +23,5 @@ private:
 
 private:
     ChallengesFile& m_ChallengesFile;
-
     bool m_ChallengeProtectionEnabled = true;
 };

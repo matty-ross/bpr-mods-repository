@@ -49,15 +49,15 @@ Protection::Protection()
         .Target = Core::Pointer(0x00B6209F).GetAddress(),
         .Detour = &Protection::DetourVehicleSelectMessageUnpack,
     },
-    m_DetourFreeburnChallengeMessagePack
+    m_DetourOnFreeburnChallengeMessagePack
     {
         .Target = Core::Pointer(0x0790A490).GetAddress(),
-        .Detour = &Protection::DetourFreeburnChallengeMessagePack,
+        .Detour = &Protection::DetourOnFreeburnChallengeMessagePack,
     },
-    m_DetourFreeburnChallengeMessageUnpack
+    m_DetourOnFreeburnChallengeMessageUnpack
     {
         .Target = Core::Pointer(0x0790A49A).GetAddress(),
-        .Detour = &Protection::DetourFreeburnChallengeMessageUnpack,
+        .Detour = &Protection::DetourOnFreeburnChallengeMessageUnpack,
     }
 {
 }
@@ -187,7 +187,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching FreeburnChallengeMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourFreeburnChallengeMessagePack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnFreeburnChallengeMessagePack);
 
             m_Logger.Info("Attached FreeburnChallengeMessagePack detour.");
         }
@@ -196,7 +196,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching FreeburnChallengeMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourFreeburnChallengeMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnFreeburnChallengeMessageUnpack);
 
             m_Logger.Info("Attached FreeburnChallengeMessageUnpack detour.");
         }
@@ -248,7 +248,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching FreeburnChallengeMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourFreeburnChallengeMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnFreeburnChallengeMessageUnpack);
 
             m_Logger.Info("Detached FreeburnChallengeMessageUnpack detour.");
         }
@@ -257,7 +257,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching FreeburnChallengeMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourFreeburnChallengeMessagePack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnFreeburnChallengeMessagePack);
 
             m_Logger.Info("Detached FreeburnChallengeMessagePack detour.");
         }
@@ -324,6 +324,16 @@ void Protection::OnRenderMenu()
         ImGui::PopItemWidth();
     }
     ImGui::End();
+}
+
+void Protection::OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage)
+{
+    m_ChallengeProtection.OnFreeburnChallengeMessagePack(freeburnChallengeMessage);
+}
+
+void Protection::OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage)
+{
+    m_ChallengeProtection.OnFreeburnChallengeMessageUnpack(freeburnChallengeMessage);
 }
 
 __declspec(naked) void Protection::DetourPlayerParamsSerialize()
@@ -406,46 +416,46 @@ __declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
     }
 }
 
-__declspec(naked) void Protection::DetourFreeburnChallengeMessagePack()
+__declspec(naked) void Protection::DetourOnFreeburnChallengeMessagePack()
 {
     __asm
     {
         pushfd
         pushad
 
-        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::E_PACK_INTO_BITSTREAM
+        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::EPackOrUnpack::E_PACK_INTO_BITSTREAM
         jne _continue
 
         push esi // BrnNetwork::FreeburnChallengeMessage*
-        mov ecx, offset s_Instance.m_ChallengeProtection
-        call ChallengeProtection::OnFreeburnChallengeMessagePack
+        mov ecx, offset s_Instance
+        call Protection::OnFreeburnChallengeMessagePack
 
     _continue:
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessagePack.Target]
+        jmp dword ptr [s_Instance.m_DetourOnFreeburnChallengeMessagePack.Target]
     }
 }
 
-__declspec(naked) void Protection::DetourFreeburnChallengeMessageUnpack()
+__declspec(naked) void Protection::DetourOnFreeburnChallengeMessageUnpack()
 {
     __asm
     {
         pushfd
         pushad
 
-        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::E_UNPACK_FROM_BITSTREAM
+        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::EPackOrUnpack::E_UNPACK_FROM_BITSTREAM
         jne _continue
 
         push esi // BrnNetwork::FreeburnChallengeMessage*
-        mov ecx, offset s_Instance.m_ChallengeProtection
-        call ChallengeProtection::OnFreeburnChallengeMessageUnpack
+        mov ecx, offset s_Instance
+        call Protection::OnFreeburnChallengeMessageUnpack
         
     _continue:
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessageUnpack.Target]
+        jmp dword ptr [s_Instance.m_DetourOnFreeburnChallengeMessageUnpack.Target]
     }
 }

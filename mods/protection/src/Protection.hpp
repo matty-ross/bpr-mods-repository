@@ -31,13 +31,16 @@ private:
 
     void OnRenderMenu();
 
+    void OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage);
+    void OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage);
+
 private:
     static void DetourPlayerParamsSerialize();
     static void DetourPlayerParamsDeserialize();
     static void DetourVehicleSelectMessagePack();
     static void DetourVehicleSelectMessageUnpack();
-    static void DetourFreeburnChallengeMessagePack();
-    static void DetourFreeburnChallengeMessageUnpack();
+    static void DetourOnFreeburnChallengeMessagePack();
+    static void DetourOnFreeburnChallengeMessageUnpack();
 
 private:
     static Protection s_Instance;
@@ -57,8 +60,8 @@ private:
     DetourHook m_DetourPlayerParamsDeserialize;
     DetourHook m_DetourVehicleSelectMessagePack;
     DetourHook m_DetourVehicleSelectMessageUnpack;
-    DetourHook m_DetourFreeburnChallengeMessagePack;
-    DetourHook m_DetourFreeburnChallengeMessageUnpack;
+    DetourHook m_DetourOnFreeburnChallengeMessagePack;
+    DetourHook m_DetourOnFreeburnChallengeMessageUnpack;
 
     HANDLE m_LoadThread = NULL;
 };
