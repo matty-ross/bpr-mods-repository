@@ -2,8 +2,6 @@
 
 #include "vendor/imgui.hpp"
 
-#include "core/Pointer.hpp"
-
 
 namespace BPR
 {
@@ -82,26 +80,32 @@ void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
     BPR::SetFreeburnVehicleID(playerParams, vehicleID);
 }
 
-void VehicleProtection::OnVehicleSelectMessagePack(void* vehicleSelectMessage)
+void VehicleProtection::OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMessage)
 {
+    // BrnNetwork::CarSelectMessage* vehicleSelectMessage
+    
     if (!m_VehicleProtectionEnabled)
     {
         return;
     }
 
-    uint64_t& vehicleID = Core::Pointer(vehicleSelectMessage).at(0x38).as<uint64_t>();
+    uint64_t vehicleID = vehicleSelectMessage.at(0x38).as<uint64_t>();
     vehicleID = HandleVehicleID(vehicleID);
+    vehicleSelectMessage.at(0x38).as<uint64_t>() = vehicleID;
 }
 
-void VehicleProtection::OnVehicleSelectMessageUnpack(void* vehicleSelectMessage)
+void VehicleProtection::OnVehicleSelectMessageUnpack(Core::Pointer vehicleSelectMessage)
 {
+    // BrnNetwork::CarSelectMessage* vehicleSelectMessage
+    
     if (!m_VehicleProtectionEnabled)
     {
         return;
     }
     
-    uint64_t& vehicleID = Core::Pointer(vehicleSelectMessage).at(0x38).as<uint64_t>();
+    uint64_t vehicleID = Core::Pointer(vehicleSelectMessage).at(0x38).as<uint64_t>();
     vehicleID = HandleVehicleID(vehicleID);
+    vehicleSelectMessage.at(0x38).as<uint64_t>() = vehicleID;
 }
 
 void VehicleProtection::OnRenderMenu()
@@ -109,9 +113,6 @@ void VehicleProtection::OnRenderMenu()
     if (ImGui::CollapsingHeader("Vehicle Protection"))
     {
         ImGui::Checkbox("Vehicle Protection Enabled", &m_VehicleProtectionEnabled);
-
-        static ImGuiTextFilter vehicleNameComboFilter;
-        vehicleNameComboFilter.Draw("Vehicle Combo Filter");
 
         if (ImGui::Button("Save"))
         {
@@ -122,6 +123,9 @@ void VehicleProtection::OnRenderMenu()
         {
             m_VehiclesFile.Load();
         }
+
+        static ImGuiTextFilter vehicleNameComboFilter;
+        vehicleNameComboFilter.Draw("Vehicle Combo Filter");
 
         if (ImGui::BeginCombo("Fallback Vehicle", m_VehiclesFile.GetFallbackVehicle()->Name))
         {
@@ -140,6 +144,7 @@ void VehicleProtection::OnRenderMenu()
                     }
                 }
             }
+            
             ImGui::EndCombo();
         }
 
@@ -148,6 +153,7 @@ void VehicleProtection::OnRenderMenu()
             ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.4f);
             ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.6f);
             ImGui::TableHeadersRow();
+            
             for (Vehicle& vehicle : m_VehiclesFile.GetVehicles())
             {
                 ImGui::PushID(&vehicle);
@@ -155,8 +161,7 @@ void VehicleProtection::OnRenderMenu()
                 {
                     ImGui::TableNextColumn();
                     ImGui::TextUnformatted(vehicle.Name.c_str());
-                }
-                {
+                
                     ImGui::TableNextColumn();
                     ImGui::SetNextItemWidth(-35.0f);
                     if (ImGui::BeginCombo("##replacement-vehicle-combo", vehicle.Replacement->Name))
@@ -176,11 +181,13 @@ void VehicleProtection::OnRenderMenu()
                                 }
                             }
                         }
+                        
                         ImGui::EndCombo();
                     }
                 }
                 ImGui::PopID();
             }
+            
             ImGui::EndTable();
         }
     }
@@ -220,7 +227,7 @@ void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
     }
 }
 
-uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID)
+uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID) const
 {
     bool isVanilla = GetVanillaVehicle(vehicleID) != nullptr;
     if (isVanilla)

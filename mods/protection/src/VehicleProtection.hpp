@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include "core/Pointer.hpp"
+
 #include "VehiclesFile.hpp"
 
 
@@ -12,17 +14,16 @@ public:
 public:
     void OnPlayerParamsSerialize(void* playerParams);
     void OnPlayerParamsDeserialize(void* playerParams);
-    void OnVehicleSelectMessagePack(void* vehicleSelectMessage);
-    void OnVehicleSelectMessageUnpack(void* vehicleSelectMessage);
+    void OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMessage);
+    void OnVehicleSelectMessageUnpack(Core::Pointer vehicleSelectMessage);
     void OnRenderMenu();
 
     void AddNonVanillaVehiclesToVehiclesFile();
     
 private:
-    uint64_t HandleVehicleID(uint64_t vehicleID);
+    uint64_t HandleVehicleID(uint64_t vehicleID) const;
 
 private:
     VehiclesFile& m_VehiclesFile;
-
     bool m_VehicleProtectionEnabled = true;
 };

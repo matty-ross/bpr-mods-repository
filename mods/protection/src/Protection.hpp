@@ -31,14 +31,16 @@ private:
 
     void OnRenderMenu();
 
+    void OnVehicleSelectMessagePack(void* vehicleSelectMessage);
+    void OnVehicleSelectMessageUnpack(void* vehicleSelectMessage);
     void OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage);
     void OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage);
 
 private:
     static void DetourPlayerParamsSerialize();
     static void DetourPlayerParamsDeserialize();
-    static void DetourVehicleSelectMessagePack();
-    static void DetourVehicleSelectMessageUnpack();
+    static void DetourOnVehicleSelectMessagePack();
+    static void DetourOnVehicleSelectMessageUnpack();
     static void DetourOnFreeburnChallengeMessagePack();
     static void DetourOnFreeburnChallengeMessageUnpack();
 
@@ -58,8 +60,8 @@ private:
 
     DetourHook m_DetourPlayerParamsSerialize;
     DetourHook m_DetourPlayerParamsDeserialize;
-    DetourHook m_DetourVehicleSelectMessagePack;
-    DetourHook m_DetourVehicleSelectMessageUnpack;
+    DetourHook m_DetourOnVehicleSelectMessagePack;
+    DetourHook m_DetourOnVehicleSelectMessageUnpack;
     DetourHook m_DetourOnFreeburnChallengeMessagePack;
     DetourHook m_DetourOnFreeburnChallengeMessageUnpack;
 

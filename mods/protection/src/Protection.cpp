@@ -39,15 +39,15 @@ Protection::Protection()
         .Target = Core::Pointer(0x00B72958).GetAddress(),
         .Detour = &Protection::DetourPlayerParamsDeserialize,
     },
-    m_DetourVehicleSelectMessagePack
+    m_DetourOnVehicleSelectMessagePack
     {
         .Target = Core::Pointer(0x00B62095).GetAddress(),
-        .Detour = &Protection::DetourVehicleSelectMessagePack,
+        .Detour = &Protection::DetourOnVehicleSelectMessagePack,
     },
-    m_DetourVehicleSelectMessageUnpack
+    m_DetourOnVehicleSelectMessageUnpack
     {
         .Target = Core::Pointer(0x00B6209F).GetAddress(),
-        .Detour = &Protection::DetourVehicleSelectMessageUnpack,
+        .Detour = &Protection::DetourOnVehicleSelectMessageUnpack,
     },
     m_DetourOnFreeburnChallengeMessagePack
     {
@@ -169,7 +169,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching VehicleSelectMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourVehicleSelectMessagePack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnVehicleSelectMessagePack);
 
             m_Logger.Info("Attached VehicleSelectMessagePack detour.");
         }
@@ -178,7 +178,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching VehicleSelectMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourVehicleSelectMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnVehicleSelectMessageUnpack);
 
             m_Logger.Info("Attached VehicleSelectMessageUnpack detour.");
         }
@@ -266,7 +266,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching VehicleSelectMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourVehicleSelectMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnVehicleSelectMessageUnpack);
 
             m_Logger.Info("Detached VehicleSelectMessageUnpack detour.");
         }
@@ -275,7 +275,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching VehicleSelectMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourVehicleSelectMessagePack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnVehicleSelectMessagePack);
 
             m_Logger.Info("Detached VehicleSelectMessagePack detour.");
         }
@@ -326,6 +326,16 @@ void Protection::OnRenderMenu()
     ImGui::End();
 }
 
+void Protection::OnVehicleSelectMessagePack(void* vehicleSelectMessage)
+{
+    m_VehicleProtection.OnVehicleSelectMessagePack(vehicleSelectMessage);
+}
+
+void Protection::OnVehicleSelectMessageUnpack(void* vehicleSelectMessage)
+{
+    m_VehicleProtection.OnVehicleSelectMessageUnpack(vehicleSelectMessage);
+}
+
 void Protection::OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage)
 {
     m_ChallengeProtection.OnFreeburnChallengeMessagePack(freeburnChallengeMessage);
@@ -372,47 +382,47 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
     }
 }
 
-__declspec(naked) void Protection::DetourVehicleSelectMessagePack()
+__declspec(naked) void Protection::DetourOnVehicleSelectMessagePack()
 {
     __asm
     {
         pushfd
         pushad
 
-        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::E_PACK_INTO_BITSTREAM
+        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::EPackOrUnpack::E_PACK_INTO_BITSTREAM
         jne _continue
 
         push esi // BrnNetwork::CarSelectMessage*
-        mov ecx, offset s_Instance.m_VehicleProtection
-        call VehicleProtection::OnVehicleSelectMessagePack
+        mov ecx, offset s_Instance
+        call Protection::OnVehicleSelectMessagePack
 
     _continue:
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessagePack.Target]
+        jmp dword ptr [s_Instance.m_DetourOnVehicleSelectMessagePack.Target]
     }
 }
 
-__declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
+__declspec(naked) void Protection::DetourOnVehicleSelectMessageUnpack()
 {
     __asm
     {
         pushfd
         pushad
 
-        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::E_UNPACK_FROM_BITSTREAM
+        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::EPackOrUnpack::E_UNPACK_FROM_BITSTREAM
         jne _continue
 
         push esi // BrnNetwork::CarSelectMessage*
-        mov ecx, offset s_Instance.m_VehicleProtection
-        call VehicleProtection::OnVehicleSelectMessageUnpack
+        mov ecx, offset s_Instance
+        call Protection::OnVehicleSelectMessageUnpack
         
     _continue:
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessageUnpack.Target]
+        jmp dword ptr [s_Instance.m_DetourOnVehicleSelectMessageUnpack.Target]
     }
 }
 
