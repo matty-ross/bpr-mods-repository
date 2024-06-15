@@ -12,8 +12,8 @@ public:
     VehicleProtection(VehiclesFile& vehiclesFile);
 
 public:
-    void OnPlayerParamsSerialize(void* playerParams);
-    void OnPlayerParamsDeserialize(void* playerParams);
+    void OnPlayerParamsSerialize(Core::Pointer playerParams);
+    void OnPlayerParamsDeserialize(Core::Pointer playerParams);
     void OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMessage);
     void OnVehicleSelectMessageUnpack(Core::Pointer vehicleSelectMessage);
     void OnRenderMenu();

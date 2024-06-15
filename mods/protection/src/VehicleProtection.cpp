@@ -5,6 +5,7 @@
 
 namespace BPR
 {
+    // void CgsIDConvertToString(CgsID lID, char* lpcString)
     static void CgsID_ConvertToString(uint64_t id, char* string)
     {
         __asm
@@ -19,7 +20,8 @@ namespace BPR
         }
     }
     
-    static void GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
+    // void __thiscall BrnNetwork::PlayerParamsBase::GetFreeBurnCarID(CgsID* lpCarId)
+    static void PlayerParamsBase_GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
     {
         __asm
         {
@@ -31,7 +33,8 @@ namespace BPR
         }
     }
 
-    static void SetFreeburnVehicleID(void* playerParams, uint64_t vehicleID)
+    // void __thiscall BrnNetwork::PlayerParamsBase::SetFreeBurnCarID(CgsID lCarId)
+    static void PlayerParamsBase_SetFreeburnVehicleID(void* playerParams, uint64_t vehicleID)
     {
         __asm
         {
@@ -52,8 +55,10 @@ VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
 {
 }
 
-void VehicleProtection::OnPlayerParamsSerialize(void* playerParams)
+void VehicleProtection::OnPlayerParamsSerialize(Core::Pointer playerParams)
 {
+    // BrnNetwork::PlayerParams* playerParams
+    
     if (!m_VehicleProtectionEnabled)
     {
         return;
@@ -61,13 +66,15 @@ void VehicleProtection::OnPlayerParamsSerialize(void* playerParams)
 
     uint64_t vehicleID = 0x0000000000000000;
  
-    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
+    BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetAddress(), &vehicleID);
     vehicleID = HandleVehicleID(vehicleID);
-    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
+    BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetAddress(), vehicleID);
 }
 
-void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
+void VehicleProtection::OnPlayerParamsDeserialize(Core::Pointer playerParams)
 {
+    // BrnNetwork::PlayerParams* playerParams
+    
     if (!m_VehicleProtectionEnabled)
     {
         return;
@@ -75,9 +82,9 @@ void VehicleProtection::OnPlayerParamsDeserialize(void* playerParams)
 
     uint64_t vehicleID = 0x0000000000000000;
     
-    BPR::GetFreeburnVehicleID(playerParams, &vehicleID);
+    BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetAddress(), &vehicleID);
     vehicleID = HandleVehicleID(vehicleID);
-    BPR::SetFreeburnVehicleID(playerParams, vehicleID);
+    BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetAddress(), vehicleID);
 }
 
 void VehicleProtection::OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMessage)
@@ -103,7 +110,7 @@ void VehicleProtection::OnVehicleSelectMessageUnpack(Core::Pointer vehicleSelect
         return;
     }
     
-    uint64_t vehicleID = Core::Pointer(vehicleSelectMessage).at(0x38).as<uint64_t>();
+    uint64_t vehicleID = vehicleSelectMessage.at(0x38).as<uint64_t>();
     vehicleID = HandleVehicleID(vehicleID);
     vehicleSelectMessage.at(0x38).as<uint64_t>() = vehicleID;
 }

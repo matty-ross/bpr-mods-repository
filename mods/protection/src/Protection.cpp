@@ -39,25 +39,25 @@ Protection::Protection()
         .Target = Core::Pointer(0x00B72958).GetAddress(),
         .Detour = &Protection::DetourPlayerParamsDeserialize,
     },
-    m_DetourOnVehicleSelectMessagePack
+    m_DetourVehicleSelectMessagePack
     {
         .Target = Core::Pointer(0x00B62095).GetAddress(),
-        .Detour = &Protection::DetourOnVehicleSelectMessagePack,
+        .Detour = &Protection::DetourVehicleSelectMessagePack,
     },
-    m_DetourOnVehicleSelectMessageUnpack
+    m_DetourVehicleSelectMessageUnpack
     {
         .Target = Core::Pointer(0x00B6209F).GetAddress(),
-        .Detour = &Protection::DetourOnVehicleSelectMessageUnpack,
+        .Detour = &Protection::DetourVehicleSelectMessageUnpack,
     },
-    m_DetourOnFreeburnChallengeMessagePack
+    m_DetourFreeburnChallengeMessagePack
     {
         .Target = Core::Pointer(0x0790A490).GetAddress(),
-        .Detour = &Protection::DetourOnFreeburnChallengeMessagePack,
+        .Detour = &Protection::DetourFreeburnChallengeMessagePack,
     },
-    m_DetourOnFreeburnChallengeMessageUnpack
+    m_DetourFreeburnChallengeMessageUnpack
     {
         .Target = Core::Pointer(0x0790A49A).GetAddress(),
-        .Detour = &Protection::DetourOnFreeburnChallengeMessageUnpack,
+        .Detour = &Protection::DetourFreeburnChallengeMessageUnpack,
     }
 {
 }
@@ -169,7 +169,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching VehicleSelectMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnVehicleSelectMessagePack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourVehicleSelectMessagePack);
 
             m_Logger.Info("Attached VehicleSelectMessagePack detour.");
         }
@@ -178,7 +178,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching VehicleSelectMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnVehicleSelectMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourVehicleSelectMessageUnpack);
 
             m_Logger.Info("Attached VehicleSelectMessageUnpack detour.");
         }
@@ -187,7 +187,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching FreeburnChallengeMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnFreeburnChallengeMessagePack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourFreeburnChallengeMessagePack);
 
             m_Logger.Info("Attached FreeburnChallengeMessagePack detour.");
         }
@@ -196,7 +196,7 @@ void Protection::Load()
         {
             m_Logger.Info("Attaching FreeburnChallengeMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourOnFreeburnChallengeMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourFreeburnChallengeMessageUnpack);
 
             m_Logger.Info("Attached FreeburnChallengeMessageUnpack detour.");
         }
@@ -248,7 +248,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching FreeburnChallengeMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnFreeburnChallengeMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourFreeburnChallengeMessageUnpack);
 
             m_Logger.Info("Detached FreeburnChallengeMessageUnpack detour.");
         }
@@ -257,7 +257,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching FreeburnChallengeMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnFreeburnChallengeMessagePack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourFreeburnChallengeMessagePack);
 
             m_Logger.Info("Detached FreeburnChallengeMessagePack detour.");
         }
@@ -266,7 +266,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching VehicleSelectMessageUnpack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnVehicleSelectMessageUnpack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourVehicleSelectMessageUnpack);
 
             m_Logger.Info("Detached VehicleSelectMessageUnpack detour.");
         }
@@ -275,7 +275,7 @@ void Protection::Unload()
         {
             m_Logger.Info("Detaching VehicleSelectMessagePack detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourOnVehicleSelectMessagePack);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourVehicleSelectMessagePack);
 
             m_Logger.Info("Detached VehicleSelectMessagePack detour.");
         }
@@ -326,6 +326,16 @@ void Protection::OnRenderMenu()
     ImGui::End();
 }
 
+void Protection::OnPlayerParamsSerialize(void* playerParams)
+{
+    m_VehicleProtection.OnPlayerParamsSerialize(playerParams);
+}
+
+void Protection::OnPlayerParamsDeserialize(void* playerParams)
+{
+    m_VehicleProtection.OnPlayerParamsDeserialize(playerParams);
+}
+
 void Protection::OnVehicleSelectMessagePack(void* vehicleSelectMessage)
 {
     m_VehicleProtection.OnVehicleSelectMessagePack(vehicleSelectMessage);
@@ -354,8 +364,8 @@ __declspec(naked) void Protection::DetourPlayerParamsSerialize()
         pushad
 
         push edi // BrnNetwork::PlayerParams*
-        mov ecx, offset s_Instance.m_VehicleProtection
-        call VehicleProtection::OnPlayerParamsSerialize
+        mov ecx, offset s_Instance
+        call Protection::OnPlayerParamsSerialize
 
         popad
         popfd
@@ -372,8 +382,8 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
         pushad
 
         push edi // BrnNetwork::PlayerParams*
-        mov ecx, offset s_Instance.m_VehicleProtection
-        call VehicleProtection::OnPlayerParamsDeserialize
+        mov ecx, offset s_Instance
+        call Protection::OnPlayerParamsDeserialize
 
         popad
         popfd
@@ -382,7 +392,7 @@ __declspec(naked) void Protection::DetourPlayerParamsDeserialize()
     }
 }
 
-__declspec(naked) void Protection::DetourOnVehicleSelectMessagePack()
+__declspec(naked) void Protection::DetourVehicleSelectMessagePack()
 {
     __asm
     {
@@ -400,11 +410,11 @@ __declspec(naked) void Protection::DetourOnVehicleSelectMessagePack()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourOnVehicleSelectMessagePack.Target]
+        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessagePack.Target]
     }
 }
 
-__declspec(naked) void Protection::DetourOnVehicleSelectMessageUnpack()
+__declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
 {
     __asm
     {
@@ -422,11 +432,11 @@ __declspec(naked) void Protection::DetourOnVehicleSelectMessageUnpack()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourOnVehicleSelectMessageUnpack.Target]
+        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessageUnpack.Target]
     }
 }
 
-__declspec(naked) void Protection::DetourOnFreeburnChallengeMessagePack()
+__declspec(naked) void Protection::DetourFreeburnChallengeMessagePack()
 {
     __asm
     {
@@ -444,11 +454,11 @@ __declspec(naked) void Protection::DetourOnFreeburnChallengeMessagePack()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourOnFreeburnChallengeMessagePack.Target]
+        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessagePack.Target]
     }
 }
 
-__declspec(naked) void Protection::DetourOnFreeburnChallengeMessageUnpack()
+__declspec(naked) void Protection::DetourFreeburnChallengeMessageUnpack()
 {
     __asm
     {
@@ -466,6 +476,6 @@ __declspec(naked) void Protection::DetourOnFreeburnChallengeMessageUnpack()
         popad
         popfd
         
-        jmp dword ptr [s_Instance.m_DetourOnFreeburnChallengeMessageUnpack.Target]
+        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessageUnpack.Target]
     }
 }
