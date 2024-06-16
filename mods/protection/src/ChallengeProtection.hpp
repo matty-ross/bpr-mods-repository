@@ -14,6 +14,7 @@ public:
 public:
     void OnFreeburnChallengeMessagePack(Core::Pointer freeburnChallengeMessage);
     void OnFreeburnChallengeMessageUnpack(Core::Pointer freeburnChallengeMessage);
+    
     void OnRenderMenu();
 
     void AddNonVanillaChallengesToChallengesFile();

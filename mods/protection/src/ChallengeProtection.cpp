@@ -41,83 +41,124 @@ void ChallengeProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Challenge Protection"))
     {
-        ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
-
-        if (ImGui::Button("Save"))
+        using OnVanillaChallengeSelectedFn = void(*)(const VanillaChallenge&, void*);
+        auto renderVanillaChallengesPopup = [](const char* title, uint64_t selectedChallengeID, void* parameter, OnVanillaChallengeSelectedFn onSelected) -> void
         {
-            m_ChallengesFile.Save();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load"))
-        {
-            m_ChallengesFile.Load();
-        }
-
-        static ImGuiTextFilter challengeTitleComboFilter;
-        challengeTitleComboFilter.Draw("Challenge Combo Filter");
-        
-        if (ImGui::BeginCombo("Fallback Challenge", m_ChallengesFile.GetFallbackChallenge()->Title))
-        {
-            for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
+            ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
+            if (ImGui::BeginPopup("vanilla-challenges-popup"))
             {
-                if (challengeTitleComboFilter.PassFilter(vanillaChallenge.Title))
-                {
-                    bool selected = m_ChallengesFile.GetFallbackChallenge()->ID == vanillaChallenge.ID;
-                    if (ImGui::Selectable(vanillaChallenge.Title, selected))
-                    {
-                        m_ChallengesFile.SetFallbackChallenge(&vanillaChallenge);
-                    }
-                    if (selected)
-                    {
-                        ImGui::SetItemDefaultFocus();
-                    }
-                }
-            }
-            
-            ImGui::EndCombo();
-        }
+                ImGui::SeparatorText(title);
 
-        if (ImGui::BeginTable("##challenges-table", 2))
-        {
-            ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.4f);
-            ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-            ImGui::TableHeadersRow();
-            
-            for (Challenge& challenge : m_ChallengesFile.GetChallenges())
-            {
-                ImGui::PushID(&challenge);
-                ImGui::TableNextRow();
+                static ImGuiTextFilter vanillaChallengeFilter;
+                vanillaChallengeFilter.Draw("Filter##vanilla-challenge");
+
+                if (ImGui::BeginListBox("##vanilla-challenges-list", ImVec2(-FLT_MIN, -FLT_MIN)))
                 {
-                    ImGui::TableNextColumn();
-                    ImGui::TextUnformatted(challenge.Title.c_str());
-                
-                    ImGui::TableNextColumn();
-                    ImGui::SetNextItemWidth(-35.0f);
-                    if (ImGui::BeginCombo("##replacement-challenge-combo", challenge.Replacement->Title))
+                    for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
                     {
-                        for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
+                        if (vanillaChallengeFilter.PassFilter(vanillaChallenge.Title))
                         {
-                            if (challengeTitleComboFilter.PassFilter(vanillaChallenge.Title))
+                            bool selected = vanillaChallenge.ID == selectedChallengeID;
+                            if (ImGui::Selectable(vanillaChallenge.Title, selected))
                             {
-                                bool selected = challenge.Replacement->ID == vanillaChallenge.ID;
-                                if (ImGui::Selectable(vanillaChallenge.Title, selected))
-                                {
-                                    challenge.Replacement = &vanillaChallenge;
-                                }
-                                if (selected)
-                                {
-                                    ImGui::SetItemDefaultFocus();
-                                }
+                                onSelected(vanillaChallenge, parameter);
+                                ImGui::CloseCurrentPopup();
+                            }
+                            if (selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
                             }
                         }
-                        
-                        ImGui::EndCombo();
+                    }
+
+                    ImGui::EndListBox();
+                }
+
+                ImGui::EndPopup();
+            }
+        };
+        
+        {
+            ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
+
+            if (ImGui::Button("Save"))
+            {
+                m_ChallengesFile.Save();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Load"))
+            {
+                m_ChallengesFile.Load();
+            }
+        }
+
+        {
+            ImGui::SeparatorText("Fallback Challenge");
+            
+            ImGui::TextUnformatted(m_ChallengesFile.GetFallbackChallenge()->Title);
+            ImGui::SameLine(300.0f);
+            if (ImGui::Button("Change...##fallback-challenge-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
+            {
+                ImGui::OpenPopup("vanilla-challenges-popup");
+            }
+            renderVanillaChallengesPopup(
+                "Fallback Challenge",
+                m_ChallengesFile.GetFallbackChallenge()->ID,
+                &m_ChallengesFile,
+                [](const VanillaChallenge& vanillaChallenge, void* challengesFile) -> void
+                {
+                    static_cast<ChallengesFile*>(challengesFile)->SetFallbackChallenge(&vanillaChallenge);
+                }
+            );
+        }
+
+        {
+            ImGui::SeparatorText("Challenges");
+        
+            static ImGuiTextFilter challengeFilter;
+            challengeFilter.Draw("Filter##challenge");
+
+            if (ImGui::BeginTable("##challenges-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20)))
+            {
+                ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+                ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+                ImGui::TableSetupColumn("##change-challenge-column", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+                ImGui::TableHeadersRow();
+            
+                for (Challenge& challenge : m_ChallengesFile.GetChallenges())
+                {
+                    if (challengeFilter.PassFilter(challenge.Title.c_str()))
+                    {
+                        ImGui::PushID(&challenge);
+                        ImGui::TableNextRow();
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::TextUnformatted(challenge.Title.c_str());
+                
+                            ImGui::TableNextColumn();
+                            ImGui::TextUnformatted(challenge.Replacement->Title);
+                    
+                            ImGui::TableNextColumn();
+                            if (ImGui::Button("Change...##replacement-challenge-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
+                            {
+                                ImGui::OpenPopup("vanilla-challenges-popup");
+                            }
+                            renderVanillaChallengesPopup(
+                                "Replacement Challenge",
+                                challenge.Replacement->ID,
+                                &challenge,
+                                [](const VanillaChallenge& vanillaChallenge, void* challenge) -> void
+                                {
+                                    static_cast<Challenge*>(challenge)->Replacement = &vanillaChallenge;
+                                }
+                            );
+                        }
+                        ImGui::PopID();
                     }
                 }
-                ImGui::PopID();
-            }
             
-            ImGui::EndTable();
+                ImGui::EndTable();
+            }
         }
     }
 }
