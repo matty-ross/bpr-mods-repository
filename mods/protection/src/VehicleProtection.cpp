@@ -119,83 +119,124 @@ void VehicleProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Vehicle Protection"))
     {
-        ImGui::Checkbox("Vehicle Protection Enabled", &m_VehicleProtectionEnabled);
-
-        if (ImGui::Button("Save"))
+        using OnVanillaVehicleSelectedFn = void(*)(const VanillaVehicle&, void*);
+        auto renderVanillaVehiclesPopup = [](const char* title, uint64_t selectedVehicleID, void* parameter, OnVanillaVehicleSelectedFn onSelected) -> void
         {
-            m_VehiclesFile.Save();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load"))
-        {
-            m_VehiclesFile.Load();
-        }
-
-        static ImGuiTextFilter vehicleNameComboFilter;
-        vehicleNameComboFilter.Draw("Vehicle Combo Filter");
-
-        if (ImGui::BeginCombo("Fallback Vehicle", m_VehiclesFile.GetFallbackVehicle()->Name))
-        {
-            for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
+            ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
+            if (ImGui::BeginPopup("vanilla-vehicles-popup"))
             {
-                if (vehicleNameComboFilter.PassFilter(vanillaVehicle.Name))
-                {
-                    bool selected = m_VehiclesFile.GetFallbackVehicle()->ID == vanillaVehicle.ID;
-                    if (ImGui::Selectable(vanillaVehicle.Name, selected))
-                    {
-                        m_VehiclesFile.SetFallbackVehicle(&vanillaVehicle);
-                    }
-                    if (selected)
-                    {
-                        ImGui::SetItemDefaultFocus();
-                    }
-                }
-            }
-            
-            ImGui::EndCombo();
-        }
+                ImGui::SeparatorText(title);
 
-        if (ImGui::BeginTable("##vehicles-table", 2))
-        {
-            ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.4f);
-            ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.6f);
-            ImGui::TableHeadersRow();
-            
-            for (Vehicle& vehicle : m_VehiclesFile.GetVehicles())
-            {
-                ImGui::PushID(&vehicle);
-                ImGui::TableNextRow();
+                static ImGuiTextFilter vanillaVehicleFilter;
+                vanillaVehicleFilter.Draw("Filter##vanilla-vehicle");
+
+                if (ImGui::BeginListBox("##vanilla-vehicles-list", ImVec2(-FLT_MIN, -FLT_MIN)))
                 {
-                    ImGui::TableNextColumn();
-                    ImGui::TextUnformatted(vehicle.Name.c_str());
-                
-                    ImGui::TableNextColumn();
-                    ImGui::SetNextItemWidth(-35.0f);
-                    if (ImGui::BeginCombo("##replacement-vehicle-combo", vehicle.Replacement->Name))
+                    for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
                     {
-                        for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
+                        if (vanillaVehicleFilter.PassFilter(vanillaVehicle.Name))
                         {
-                            if (vehicleNameComboFilter.PassFilter(vanillaVehicle.Name))
+                            bool selected = vanillaVehicle.ID == selectedVehicleID;
+                            if (ImGui::Selectable(vanillaVehicle.Name, selected))
                             {
-                                bool selected = vehicle.Replacement->ID == vanillaVehicle.ID;
-                                if (ImGui::Selectable(vanillaVehicle.Name, selected))
-                                {
-                                    vehicle.Replacement = &vanillaVehicle;
-                                }
-                                if (selected)
-                                {
-                                    ImGui::SetItemDefaultFocus();
-                                }
+                                onSelected(vanillaVehicle, parameter);
+                                ImGui::CloseCurrentPopup();
+                            }
+                            if (selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
                             }
                         }
-                        
-                        ImGui::EndCombo();
+                    }
+
+                    ImGui::EndListBox();
+                }
+
+                ImGui::EndPopup();
+            }
+        };
+
+        {
+            ImGui::Checkbox("Vehicle Protection Enabled", &m_VehicleProtectionEnabled);
+
+            if (ImGui::Button("Save"))
+            {
+                m_VehiclesFile.Save();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Load"))
+            {
+                m_VehiclesFile.Load();
+            }
+        }
+
+        {
+            ImGui::SeparatorText("Fallback Vehicle");
+
+            ImGui::TextUnformatted(m_VehiclesFile.GetFallbackVehicle()->Name);
+            ImGui::SameLine(300.0f);
+            if (ImGui::Button("Change...##fallback-vehicle-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
+            {
+                ImGui::OpenPopup("vanilla-vehicles-popup");
+            }
+            renderVanillaVehiclesPopup(
+                "Fallback Vehicle",
+                m_VehiclesFile.GetFallbackVehicle()->ID,
+                &m_VehiclesFile,
+                [](const VanillaVehicle& vanillaVehicle, void* vehiclesFile) -> void
+                {
+                    static_cast<VehiclesFile*>(vehiclesFile)->SetFallbackVehicle(&vanillaVehicle);
+                }
+            );
+        }
+
+        {
+            ImGui::SeparatorText("Vehicles");
+
+            static ImGuiTextFilter vehicleFilter;
+            vehicleFilter.Draw("Filter##vehicle");
+            
+            if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20)))
+            {
+                ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+                ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+                ImGui::TableSetupColumn("##change-vehicle-column", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+                ImGui::TableHeadersRow();
+
+                for (Vehicle& vehicle : m_VehiclesFile.GetVehicles())
+                {
+                    if (vehicleFilter.PassFilter(vehicle.Name.c_str()))
+                    {
+                        ImGui::PushID(&vehicle);
+                        ImGui::TableNextRow();
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::TextUnformatted(vehicle.Name.c_str());
+
+                            ImGui::TableNextColumn();
+                            ImGui::TextUnformatted(vehicle.Replacement->Name);
+
+                            ImGui::TableNextColumn();
+                            if (ImGui::Button("Change...##replacement-vehicle-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
+                            {
+                                ImGui::OpenPopup("vanilla-vehicles-popup");
+                            }
+                            renderVanillaVehiclesPopup(
+                                "Replacement Vehicle",
+                                vehicle.Replacement->ID,
+                                &vehicle,
+                                [](const VanillaVehicle& vanillaVehicle, void* vehicle) -> void
+                                {
+                                    static_cast<Vehicle*>(vehicle)->Replacement = &vanillaVehicle;
+                                }
+                            );
+                        }
+                        ImGui::PopID();
                     }
                 }
-                ImGui::PopID();
+
+                ImGui::EndTable();
             }
-            
-            ImGui::EndTable();
         }
     }
 }
