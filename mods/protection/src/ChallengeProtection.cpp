@@ -118,7 +118,7 @@ void ChallengeProtection::OnRenderMenu()
             static ImGuiTextFilter challengeFilter;
             challengeFilter.Draw("Filter##challenge");
 
-            if (ImGui::BeginTable("##challenges-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20)))
+            if (ImGui::BeginTable("##challenges-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
             {
                 ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.3f);
                 ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.5f);

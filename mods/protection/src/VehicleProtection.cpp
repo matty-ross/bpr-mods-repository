@@ -196,7 +196,7 @@ void VehicleProtection::OnRenderMenu()
             static ImGuiTextFilter vehicleFilter;
             vehicleFilter.Draw("Filter##vehicle");
             
-            if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20)))
+            if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
             {
                 ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.3f);
                 ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.5f);

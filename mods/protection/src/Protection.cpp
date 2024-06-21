@@ -25,10 +25,6 @@ Protection::Protection()
     m_ChallengesFile(k_ModDirectory + "challenges.yaml"s, m_Logger),
     m_VehicleProtection(m_VehiclesFile),
     m_ChallengeProtection(m_ChallengesFile),
-    m_Menu
-    {
-        .OnRenderFunction = [this]() { OnRenderMenu(); },
-    },
     m_DetourPlayerParamsSerialize
     {
         .Target = Core::Pointer(0x00B7218A).GetAddress(),
@@ -58,6 +54,10 @@ Protection::Protection()
     {
         .Target = Core::Pointer(0x0790A49A).GetAddress(),
         .Detour = &Protection::DetourFreeburnChallengeMessageUnpack,
+    },
+    m_Menu
+    {
+        .OnRenderFunction = [this]() { OnRenderMenu(); },
     }
 {
 }
@@ -307,25 +307,6 @@ void Protection::Unload()
     }
 }
 
-void Protection::OnRenderMenu()
-{
-    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
-    {
-        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
-
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Version     %s", k_ModVersion);
-        ImGui::Text("Author      %s", k_ModAuthor);
-        ImGui::Text("Framerate   %.3f", io.Framerate);
-
-        m_VehicleProtection.OnRenderMenu();
-        m_ChallengeProtection.OnRenderMenu();
-
-        ImGui::PopItemWidth();
-    }
-    ImGui::End();
-}
-
 void Protection::OnPlayerParamsSerialize(void* playerParams)
 {
     m_VehicleProtection.OnPlayerParamsSerialize(playerParams);
@@ -354,6 +335,25 @@ void Protection::OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage)
 void Protection::OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage)
 {
     m_ChallengeProtection.OnFreeburnChallengeMessageUnpack(freeburnChallengeMessage);
+}
+
+void Protection::OnRenderMenu()
+{
+    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+    {
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
+
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("Version     %s", k_ModVersion);
+        ImGui::Text("Author      %s", k_ModAuthor);
+        ImGui::Text("Framerate   %.3f", io.Framerate);
+
+        m_VehicleProtection.OnRenderMenu();
+        m_ChallengeProtection.OnRenderMenu();
+
+        ImGui::PopItemWidth();
+    }
+    ImGui::End();
 }
 
 __declspec(naked) void Protection::DetourPlayerParamsSerialize()
