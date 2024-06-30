@@ -13,6 +13,7 @@ public:
 
 public:
     void OnGuiEventNetworkPlayerStatus(Core::Pointer guiEventNetworkPlayerStatus, Core::Pointer guiCache);
+    
     void OnRenderMenu();
     
 private:

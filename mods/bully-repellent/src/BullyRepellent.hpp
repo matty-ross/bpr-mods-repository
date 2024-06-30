@@ -27,9 +27,9 @@ private:
     void Load();
     void Unload();
 
-    void OnRenderMenu();
-
     void OnGuiEventNetworkPlayerStatus(void* guiEventNetworkPlayerStatus, void* guiCache);
+
+    void OnRenderMenu();
 
 private:
     static void DetourOnGuiEventNetworkPlayerStatus();
@@ -44,9 +44,9 @@ private:
     
     OnlinePlayers m_OnlinePlayers;
     
-    ImGuiMenu m_Menu;
-
     DetourHook m_DetourOnGuiEventNetworkPlayerStatus;
+
+    ImGuiMenu m_Menu;
     
     HANDLE m_LoadThread = NULL;
 };

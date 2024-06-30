@@ -23,14 +23,14 @@ BullyRepellent::BullyRepellent()
     m_Logger(k_ModName),
     m_BlacklistedPlayersFile(k_ModDirectory + "blacklisted-players.yaml"s, m_Logger),
     m_OnlinePlayers(m_BlacklistedPlayersFile),
-    m_Menu
-    {
-        .OnRenderFunction = [this]() { OnRenderMenu(); },
-    },
     m_DetourOnGuiEventNetworkPlayerStatus
     {
         .Target = Core::Pointer(0x0092BECB).GetAddress(),
         .Detour = &BullyRepellent::DetourOnGuiEventNetworkPlayerStatus,
+    },
+    m_Menu
+    {
+        .OnRenderFunction = [this]() { OnRenderMenu(); },
     }
 {
 }
@@ -97,13 +97,13 @@ void BullyRepellent::Load()
             m_Logger.Info("In game.");
         }
 
-        // Attach UpatePlayerStatus detour.
+        // Attach OnGuiEventNetworkPlayerStatus detour.
         {
-            m_Logger.Info("Attaching UpatePlayerStatus detour...");
+            m_Logger.Info("Attaching OnGuiEventNetworkPlayerStatus detour...");
 
             ModManager::Get().GetDetourHookManager().Attach(m_DetourOnGuiEventNetworkPlayerStatus);
 
-            m_Logger.Info("Attached UpatePlayerStatus detour.");
+            m_Logger.Info("Attached OnGuiEventNetworkPlayerStatus detour.");
         }
 
         // Add menu.
@@ -144,13 +144,13 @@ void BullyRepellent::Unload()
             m_Logger.Info("Removed menu.");
         }
 
-        // Detach UpatePlayerStatus detour.
+        // Detach OnGuiEventNetworkPlayerStatus detour.
         {
-            m_Logger.Info("Detaching UpatePlayerStatus detour...");
+            m_Logger.Info("Detaching OnGuiEventNetworkPlayerStatus detour...");
 
             ModManager::Get().GetDetourHookManager().Detach(m_DetourOnGuiEventNetworkPlayerStatus);
 
-            m_Logger.Info("Detached UpatePlayerStatus detour.");
+            m_Logger.Info("Detached OnGuiEventNetworkPlayerStatus detour.");
         }
 
         m_Logger.Info("Unloaded.");
@@ -162,11 +162,16 @@ void BullyRepellent::Unload()
     }
 }
 
+void BullyRepellent::OnGuiEventNetworkPlayerStatus(void* guiEventNetworkPlayerStatus, void* guiCache)
+{
+    m_OnlinePlayers.OnGuiEventNetworkPlayerStatus(guiEventNetworkPlayerStatus, guiCache);
+}
+
 void BullyRepellent::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
-        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2);
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
 
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Version     %s", k_ModVersion);
@@ -178,11 +183,6 @@ void BullyRepellent::OnRenderMenu()
         ImGui::PopItemWidth();
     }
     ImGui::End();
-}
-
-void BullyRepellent::OnGuiEventNetworkPlayerStatus(void* guiEventNetworkPlayerStatus, void* guiCache)
-{
-    m_OnlinePlayers.OnGuiEventNetworkPlayerStatus(guiEventNetworkPlayerStatus, guiCache);
 }
 
 __declspec(naked) void BullyRepellent::DetourOnGuiEventNetworkPlayerStatus()

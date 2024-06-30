@@ -102,60 +102,68 @@ void OnlinePlayers::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Current Players"))
     {
+        // BrnGui::GuiCache* guiCache
+        
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
 
         bool isOnline = guiCache.at(0x7B00).as<bool>();
         if (isOnline)
         {        
-            ImGui::Text("Host Name      %s", guiCache.at(0xEA00).as<char[65]>());
-            ImGui::Text("You are Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
-
-            if (ImGui::BeginTable("##player-info-table", 2))
             {
-                ImGui::TableSetupColumn("Name");
-                ImGui::TableSetupColumn("Blacklist");
-                ImGui::TableHeadersRow();
+                ImGui::Text("Host Name      %s", guiCache.at(0xEA00).as<char[65]>());
+                ImGui::Text("You are Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
+            }
+
+            {
+                ImGui::SeparatorText("Current Players");
                 
-                int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
-                for (int32_t i = 0; i < playersCount; ++i)
+                if (ImGui::BeginTable("##player-info-table", 2, ImGuiTableFlags_None, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 12.0f)))
                 {
-                    Core::Pointer playerStatusData = guiCache.at(0xDE38 + i * 0x138);
-                    uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
-
-                    ImGui::PushID(playerStatusData.GetAddress());
-                    ImGui::TableNextRow();
+                    ImGui::TableSetupColumn("Name");
+                    ImGui::TableSetupColumn("Blacklist");
+                    ImGui::TableHeadersRow();
+                
+                    int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
+                    for (int32_t i = 0; i < playersCount; ++i)
                     {
-                        ImGui::TableNextColumn();
-                        ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
-                    
-                        ImGui::TableNextColumn();
-                        bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
-                        bool alreadyOnBlacklist = m_BlacklistedPlayersFile.GetBlacklistedPlayer(playerID) != nullptr;
-                        if (isLocalPlayer || alreadyOnBlacklist)
-                        {
-                            ImGui::BeginDisabled();
-                        }
-                        if (ImGui::Button("Add"))
-                        {
-                            m_BlacklistedPlayersFile.GetBlacklistedPlayers().push_back(
-                                BlacklistedPlayer
-                                {
-                                    .ID       = playerID,
-                                    .Name     = playerStatusData.at(0xF0).as<char[25]>(),
-                                    .Autokick = false,
-                                    .Automute = false,
-                                }
-                            );
-                        }
-                        if (isLocalPlayer || alreadyOnBlacklist)
-                        {
-                            ImGui::EndDisabled();
-                        }
-                    }
-                    ImGui::PopID();
-                }
+                        Core::Pointer playerStatusData = guiCache.at(0xDE38 + i * 0x138);
+                        uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
 
-                ImGui::EndTable();
+                        ImGui::PushID(playerStatusData.GetAddress());
+                        ImGui::TableNextRow();
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
+                    
+                            ImGui::TableNextColumn();
+                            bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
+                            bool alreadyOnBlacklist = m_BlacklistedPlayersFile.GetBlacklistedPlayer(playerID) != nullptr;
+                            if (isLocalPlayer || alreadyOnBlacklist)
+                            {
+                                ImGui::BeginDisabled();
+                            }
+                            if (ImGui::Button("Add"))
+                            {
+                                m_BlacklistedPlayersFile.GetBlacklistedPlayers().push_back(
+                                    BlacklistedPlayer
+                                    {
+                                        .ID       = playerID,
+                                        .Name     = playerStatusData.at(0xF0).as<char[25]>(),
+                                        .Autokick = false,
+                                        .Automute = false,
+                                    }
+                                );
+                            }
+                            if (isLocalPlayer || alreadyOnBlacklist)
+                            {
+                                ImGui::EndDisabled();
+                            }
+                        }
+                        ImGui::PopID();
+                    }
+
+                    ImGui::EndTable();
+                }
             }
         }
         else
@@ -166,43 +174,55 @@ void OnlinePlayers::OnRenderMenu()
 
     if (ImGui::CollapsingHeader("Blacklisted Players"))
     {
-        ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
+        {
+            ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
         
-        if (ImGui::Button("Save"))
-        {
-            m_BlacklistedPlayersFile.Save();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("Load"))
-        {
-            m_BlacklistedPlayersFile.Load();
-        }
-        
-        if (ImGui::BeginTable("##blacklisted-players-table", 3))
-        {
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Autokick");
-            ImGui::TableSetupColumn("Automute");
-            ImGui::TableHeadersRow();
-            
-            for (BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayersFile.GetBlacklistedPlayers())
+            if (ImGui::Button("Save"))
             {
-                ImGui::PushID(&blacklistedPlayer);
-                ImGui::TableNextRow();
-                {
-                    ImGui::TableNextColumn();
-                    ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
-                
-                    ImGui::TableNextColumn();
-                    ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
-                
-                    ImGui::TableNextColumn();
-                    ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
-                }
-                ImGui::PopID();
+                m_BlacklistedPlayersFile.Save();
             }
+            ImGui::SameLine();
+            if (ImGui::Button("Load"))
+            {
+                m_BlacklistedPlayersFile.Load();
+            }
+        }
 
-            ImGui::EndTable();
+        {
+            ImGui::SeparatorText("Blacklisted Players");
+
+            static ImGuiTextFilter blacklistedPlayerFilter;
+            blacklistedPlayerFilter.Draw("Filter##blacklisted-player");
+            
+            if (ImGui::BeginTable("##blacklisted-players-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
+            {
+                ImGui::TableSetupColumn("Name");
+                ImGui::TableSetupColumn("Autokick");
+                ImGui::TableSetupColumn("Automute");
+                ImGui::TableHeadersRow();
+            
+                for (BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayersFile.GetBlacklistedPlayers())
+                {
+                    if (blacklistedPlayerFilter.PassFilter(blacklistedPlayer.Name.c_str()))
+                    {
+                        ImGui::PushID(&blacklistedPlayer);
+                        ImGui::TableNextRow();
+                        {
+                            ImGui::TableNextColumn();
+                            ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
+                
+                            ImGui::TableNextColumn();
+                            ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
+                
+                            ImGui::TableNextColumn();
+                            ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
+                        }
+                        ImGui::PopID();
+                    }
+                }
+
+                ImGui::EndTable();
+            }
         }
     }
 }
