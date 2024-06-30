@@ -119,8 +119,7 @@ void VehicleProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Vehicle Protection"))
     {
-        using OnVanillaVehicleSelectedFn = void(*)(const VanillaVehicle&, void*);
-        auto renderVanillaVehiclesPopup = [](const char* title, uint64_t selectedVehicleID, void* parameter, OnVanillaVehicleSelectedFn onSelected) -> void
+        auto renderVanillaVehiclesPopup = []<typename T>(const char* title, uint64_t selectedVehicleID, T onSelected) -> void
         {
             ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
             if (ImGui::BeginPopup("vanilla-vehicles-popup"))
@@ -139,7 +138,7 @@ void VehicleProtection::OnRenderMenu()
                             bool selected = vanillaVehicle.ID == selectedVehicleID;
                             if (ImGui::Selectable(vanillaVehicle.Name, selected))
                             {
-                                onSelected(vanillaVehicle, parameter);
+                                onSelected(vanillaVehicle);
                                 ImGui::CloseCurrentPopup();
                             }
                             if (selected)
@@ -182,10 +181,9 @@ void VehicleProtection::OnRenderMenu()
             renderVanillaVehiclesPopup(
                 "Fallback Vehicle",
                 m_VehiclesFile.GetFallbackVehicle()->ID,
-                &m_VehiclesFile,
-                [](const VanillaVehicle& vanillaVehicle, void* vehiclesFile) -> void
+                [&](const VanillaVehicle& vanillaVehicle) -> void
                 {
-                    static_cast<VehiclesFile*>(vehiclesFile)->SetFallbackVehicle(&vanillaVehicle);
+                    m_VehiclesFile.SetFallbackVehicle(&vanillaVehicle);
                 }
             );
         }
@@ -224,10 +222,9 @@ void VehicleProtection::OnRenderMenu()
                             renderVanillaVehiclesPopup(
                                 "Replacement Vehicle",
                                 vehicle.Replacement->ID,
-                                &vehicle,
-                                [](const VanillaVehicle& vanillaVehicle, void* vehicle) -> void
+                                [&](const VanillaVehicle& vanillaVehicle) -> void
                                 {
-                                    static_cast<Vehicle*>(vehicle)->Replacement = &vanillaVehicle;
+                                    vehicle.Replacement = &vanillaVehicle;
                                 }
                             );
                         }
@@ -243,6 +240,8 @@ void VehicleProtection::OnRenderMenu()
 
 void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
 {
+    // BrnResource::VehicleList* vehicleList
+    
     Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350);
 
     int32_t vehiclesCount = vehicleList.at(0x3400).as<int32_t>();

@@ -41,8 +41,7 @@ void ChallengeProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Challenge Protection"))
     {
-        using OnVanillaChallengeSelectedFn = void(*)(const VanillaChallenge&, void*);
-        auto renderVanillaChallengesPopup = [](const char* title, uint64_t selectedChallengeID, void* parameter, OnVanillaChallengeSelectedFn onSelected) -> void
+        auto renderVanillaChallengesPopup = []<typename T>(const char* title, uint64_t selectedChallengeID, T onSelected) -> void
         {
             ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
             if (ImGui::BeginPopup("vanilla-challenges-popup"))
@@ -61,7 +60,7 @@ void ChallengeProtection::OnRenderMenu()
                             bool selected = vanillaChallenge.ID == selectedChallengeID;
                             if (ImGui::Selectable(vanillaChallenge.Title, selected))
                             {
-                                onSelected(vanillaChallenge, parameter);
+                                onSelected(vanillaChallenge);
                                 ImGui::CloseCurrentPopup();
                             }
                             if (selected)
@@ -104,10 +103,9 @@ void ChallengeProtection::OnRenderMenu()
             renderVanillaChallengesPopup(
                 "Fallback Challenge",
                 m_ChallengesFile.GetFallbackChallenge()->ID,
-                &m_ChallengesFile,
-                [](const VanillaChallenge& vanillaChallenge, void* challengesFile) -> void
+                [&](const VanillaChallenge& vanillaChallenge) -> void
                 {
-                    static_cast<ChallengesFile*>(challengesFile)->SetFallbackChallenge(&vanillaChallenge);
+                    m_ChallengesFile.SetFallbackChallenge(&vanillaChallenge);
                 }
             );
         }
@@ -146,10 +144,9 @@ void ChallengeProtection::OnRenderMenu()
                             renderVanillaChallengesPopup(
                                 "Replacement Challenge",
                                 challenge.Replacement->ID,
-                                &challenge,
-                                [](const VanillaChallenge& vanillaChallenge, void* challenge) -> void
+                                [&](const VanillaChallenge& vanillaChallenge) -> void
                                 {
-                                    static_cast<Challenge*>(challenge)->Replacement = &vanillaChallenge;
+                                    challenge.Replacement = &vanillaChallenge;
                                 }
                             );
                         }
@@ -165,6 +162,8 @@ void ChallengeProtection::OnRenderMenu()
 
 void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
 {
+    // BrnResource::ChallengeList* challengeList
+
     Core::Pointer challengeList = Core::Pointer(0x013FC8E0).deref().at(0x690B70);
 
     int32_t challengesCount = challengeList.at(0x32E0).as<int32_t>();
