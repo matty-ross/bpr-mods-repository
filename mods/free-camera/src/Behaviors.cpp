@@ -26,7 +26,6 @@ struct BehaviorParametersData
 
 static const std::array<BehaviorData, 8> k_BehaviorData =
 {
-    // AftertouchCrash
     BehaviorData
     {
         .Name                = "Aftertouch Crash",
@@ -43,7 +42,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // GyroCam
     BehaviorData
     {
         .Name                = "Gyro Cam",
@@ -73,7 +71,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // BystanderCam
     BehaviorData
     {
         .Name                = "Bystander Cam",
@@ -96,7 +93,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // Rig
     BehaviorData
     {
         .Name                = "Rig",
@@ -126,7 +122,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // LooseAttachment
     BehaviorData
     {
         .Name                = "Loose Attachment",
@@ -146,7 +141,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // FixedCam
     BehaviorData
     {
         .Name                = "Fixed Cam",
@@ -163,7 +157,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // RotateAboutVehicle
     BehaviorData
     {
         .Name                = "Rotate About Vehicle",
@@ -179,7 +172,6 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
         },
     },
     
-    // SpirallingDeathCam
     BehaviorData
     {
         .Name                = "Spiralling Death Cam",
@@ -199,7 +191,7 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
 
 namespace BPR
 {
-    // Originally templated, hence the function address parameter.
+    // void __thiscall BrnDirector::Camera::BehaviourManager::NewBehaviour<T>(BrnDirector::Camera::BehaviourManager::BehaviourHandle<T>&, const BrnDirector::ArbitratorState*, const BrnDirector::Moment*, int)
     static void BehaviorManager_NewBehavior(const void* functionAddress, void* behaviorHandle)
     {
         __asm
@@ -215,6 +207,7 @@ namespace BPR
         }
     }
 
+    // void __thiscall BrnDirector::Camera::BehaviourManager::UnSetBehaviourUsedByHandle(BrnDirector::Camera::BehaviourHelperIndex)
     static void BehaviorManager_UnsetBehaviorUsedByHandle(int32_t behaviorHelperIndex)
     {
         __asm
@@ -228,6 +221,7 @@ namespace BPR
         }
     }
 
+    // BrnDirector::Camera::Camera& __thiscall BrnDirector::Camera::Camera::operator=(const BrnDirector::Camera::Camera&)
     static void Camera_OperatorEquals(void* destination, void* source)
     {
         __asm
@@ -248,15 +242,18 @@ Behaviors::Behaviors()
 {
 }
 
-void Behaviors::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
+void Behaviors::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo)
 {
+    // BrnDirector::Camera::Camera* camera
+    // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
+    
     switch (m_Testbed.m_State)
     {
     case Testbed::State::Inactive:
         break;
 
     case Testbed::State::Prepare:
-        m_Testbed.OnPrepare(sharedInfo);
+        m_Testbed.OnPrepare(arbStateSharedInfo);
         m_Testbed.m_State = Testbed::State::Update;
         break;
 
@@ -275,43 +272,51 @@ void Behaviors::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Behaviors"))
     {
-        if (ImGui::Button("Deactivate"))
         {
-            if (m_Testbed.m_State == Testbed::State::Update)
+            if (ImGui::Button("Deactivate"))
             {
-                m_Testbed.m_State = Testbed::State::Release;
-                m_SelectedBehavior = nullptr;
-                m_SelectedBehaviorParameters = nullptr;
+                if (m_Testbed.m_State == Testbed::State::Update)
+                {
+                    m_Testbed.m_State = Testbed::State::Release;
+                    m_SelectedBehavior = nullptr;
+                    m_SelectedBehaviorParameters = nullptr;
+                }
             }
         }
-        for (const BehaviorData& behaviorData : k_BehaviorData)
+
         {
-            ImGui::SeparatorText(behaviorData.Name);
-            ImGui::PushID(&behaviorData);
-            if (
-                ImGui::BeginListBox(
-                    "##behavior-parameters-list",
-                    ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * behaviorData.ParametersData.size() + ImGui::GetStyle().FramePadding.y * 2.0f)
-                )
-            )
+            for (const BehaviorData& behaviorData : k_BehaviorData)
             {
-                for (const BehaviorParametersData& behaviorParametersData : behaviorData.ParametersData)
+                ImGui::SeparatorText(behaviorData.Name);
+                
+                ImGui::PushID(&behaviorData);
+                if (
+                    ImGui::BeginListBox(
+                        "##behavior-parameters-list",
+                        ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * behaviorData.ParametersData.size() + ImGui::GetStyle().FramePadding.y * 2.0f)
+                    )
+                )
                 {
-                    ImGui::PushID(&behaviorParametersData);
-                    if (ImGui::Selectable(behaviorParametersData.Name, m_SelectedBehaviorParameters == &behaviorParametersData))
+                    for (const BehaviorParametersData& behaviorParametersData : behaviorData.ParametersData)
                     {
-                        if (m_Testbed.m_State == Testbed::State::Inactive)
+                        ImGui::PushID(&behaviorParametersData);
+                        bool selected = m_SelectedBehaviorParameters == &behaviorParametersData;
+                        if (ImGui::Selectable(behaviorParametersData.Name, selected))
                         {
-                            m_Testbed.m_State = Testbed::State::Prepare;
-                            m_SelectedBehavior = &behaviorData;
-                            m_SelectedBehaviorParameters = &behaviorParametersData;
+                            if (m_Testbed.m_State == Testbed::State::Inactive)
+                            {
+                                m_Testbed.m_State = Testbed::State::Prepare;
+                                m_SelectedBehavior = &behaviorData;
+                                m_SelectedBehaviorParameters = &behaviorParametersData;
+                            }
                         }
+                        ImGui::PopID();
                     }
-                    ImGui::PopID();
+                    
+                    ImGui::EndListBox();
                 }
-                ImGui::EndListBox();
+                ImGui::PopID();
             }
-            ImGui::PopID();
         }
     }
 }
@@ -323,13 +328,15 @@ Behaviors::Testbed::Testbed(Behaviors& behaviors)
 {
 }
 
-void Behaviors::Testbed::OnPrepare(Core::Pointer sharedInfo)
+void Behaviors::Testbed::OnPrepare(Core::Pointer arbStateSharedInfo)
 {
-    memset(&m_BehaviorHandle, 0, sizeof(m_BehaviorHandle));
+    // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
+
+    m_BehaviorHandle = {};
     BPR::BehaviorManager_NewBehavior(m_Behaviors.m_SelectedBehavior->NewBehaviorFunction.GetAddress(), &m_BehaviorHandle);
 
     Core::Pointer behavior = Core::Pointer(m_BehaviorHandle.BehaviorHelperPool).at(m_BehaviorHandle.BehaviorHelperIndex * 0x1A0).at(0x0).as<void*>();
-    Core::Pointer namedParameters = sharedInfo.at(0x1C).as<void*>();
+    Core::Pointer namedParameters = arbStateSharedInfo.at(0x1C).as<void*>();
     behavior.at(m_Behaviors.m_SelectedBehavior->ParametersOffset).as<void*>() = namedParameters.at(m_Behaviors.m_SelectedBehaviorParameters->Offset).GetAddress();
 
     m_Behaviors.m_SelectedBehavior->PostPrepare(behavior);
@@ -337,6 +344,8 @@ void Behaviors::Testbed::OnPrepare(Core::Pointer sharedInfo)
 
 void Behaviors::Testbed::OnUpdate(Core::Pointer camera)
 {
+    // BrnDirector::Camera::Camera* camera
+    
     Core::Pointer behaviorHelperCamera = Core::Pointer(m_BehaviorHandle.BehaviorHelperPool).at(m_BehaviorHandle.BehaviorHelperIndex * 0x1A0).at(0x10);
     BPR::Camera_OperatorEquals(camera.GetAddress(), behaviorHelperCamera.GetAddress());
 }
@@ -344,5 +353,5 @@ void Behaviors::Testbed::OnUpdate(Core::Pointer camera)
 void Behaviors::Testbed::OnRelease()
 {
     BPR::BehaviorManager_UnsetBehaviorUsedByHandle(m_BehaviorHandle.BehaviorHelperIndex);
-    memset(&m_BehaviorHandle, 0, sizeof(m_BehaviorHandle));
+    m_BehaviorHandle = {};
 }

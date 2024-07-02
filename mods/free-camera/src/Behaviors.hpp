@@ -14,7 +14,8 @@ public:
     Behaviors();
 
 public:
-    void OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo);
+    void OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo);
+
     void OnRenderMenu();
 
 private:
@@ -44,7 +45,7 @@ private:
         };
 
     private:
-        void OnPrepare(Core::Pointer sharedInfo);
+        void OnPrepare(Core::Pointer arbStateSharedInfo);
         void OnUpdate(Core::Pointer camera);
         void OnRelease();
 
