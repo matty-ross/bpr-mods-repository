@@ -11,54 +11,30 @@ struct BehaviorParametersData;
 class Behaviors
 {
 public:
-    Behaviors();
-
-public:
     void OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo);
 
     void OnRenderMenu();
 
 private:
-    class Testbed
+    enum class BehaviorState
     {
-        friend class Behaviors;
-
-    public:
-        Testbed(Behaviors& behaviors);
-
-    private:
-        struct BehaviorHandle
-        {
-            bool IsAllocated;
-            int32_t BehaviorHelperIndex;
-            void* BehaviorHelperPool;
-            void* ParentController;
-            void* Behavior;
-        };
-
-        enum class State
-        {
-            Inactive,
-            Prepare,
-            Update,
-            Release
-        };
-
-    private:
-        void OnPrepare(Core::Pointer arbStateSharedInfo);
-        void OnUpdate(Core::Pointer camera);
-        void OnRelease();
-
-    private:
-        Behaviors& m_Behaviors;
-        
-        BehaviorHandle m_BehaviorHandle = {};
-        State m_State = State::Inactive;
+        Inactive,
+        Prepare,
+        Update,
+        Release,
     };
-    
+
 private:
-    Testbed m_Testbed;
+    void PrepareBehavior(Core::Pointer arbStateSharedInfo);
+    void UpdateBehavior(Core::Pointer camera);
+    void ReleaseBehavior();
+
+private:
+    BehaviorState m_BehaviorState = BehaviorState::Inactive;
     
     const BehaviorData* m_SelectedBehavior = nullptr;
     const BehaviorParametersData* m_SelectedBehaviorParameters = nullptr;
+
+    Core::Pointer m_BehaviorHelper = nullptr;
+    int32_t m_BehaviorHelperIndex = -1;
 };

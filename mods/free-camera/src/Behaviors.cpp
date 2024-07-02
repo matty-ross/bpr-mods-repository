@@ -191,8 +191,19 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
 
 namespace BPR
 {
+    // BrnDirector::Camera::BehaviourManager::BehaviourHandle<T>
+    struct BehaviorHandle
+    {
+        bool IsAllocated;
+        int32_t BehaviorHelperIndex;
+        void* BehaviorHelperPool;
+        void* ParentController;
+        void* Behavior;
+    };
+
+    
     // void __thiscall BrnDirector::Camera::BehaviourManager::NewBehaviour<T>(BrnDirector::Camera::BehaviourManager::BehaviourHandle<T>&, const BrnDirector::ArbitratorState*, const BrnDirector::Moment*, int)
-    static void BehaviorManager_NewBehavior(const void* functionAddress, void* behaviorHandle)
+    static void BehaviorManager_NewBehavior(const void* functionAddress, BehaviorHandle* behaviorHandle)
     {
         __asm
         {
@@ -236,34 +247,25 @@ namespace BPR
 }
 
 
-Behaviors::Behaviors()
-    :
-    m_Testbed(*this)
-{
-}
-
 void Behaviors::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo)
 {
     // BrnDirector::Camera::Camera* camera
     // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
     
-    switch (m_Testbed.m_State)
+    switch (m_BehaviorState)
     {
-    case Testbed::State::Inactive:
+    case BehaviorState::Prepare:
+        PrepareBehavior(arbStateSharedInfo);
+        m_BehaviorState = BehaviorState::Update;
         break;
 
-    case Testbed::State::Prepare:
-        m_Testbed.OnPrepare(arbStateSharedInfo);
-        m_Testbed.m_State = Testbed::State::Update;
+    case BehaviorState::Update:
+        UpdateBehavior(camera);
         break;
 
-    case Testbed::State::Update:
-        m_Testbed.OnUpdate(camera);
-        break;
-
-    case Testbed::State::Release:
-        m_Testbed.OnRelease();
-        m_Testbed.m_State = Testbed::State::Inactive;
+    case BehaviorState::Release:
+        ReleaseBehavior();
+        m_BehaviorState = BehaviorState::Inactive;
         break;
     }
 }
@@ -275,9 +277,9 @@ void Behaviors::OnRenderMenu()
         {
             if (ImGui::Button("Deactivate"))
             {
-                if (m_Testbed.m_State == Testbed::State::Update)
+                if (m_BehaviorState == BehaviorState::Update)
                 {
-                    m_Testbed.m_State = Testbed::State::Release;
+                    m_BehaviorState = BehaviorState::Release;
                     m_SelectedBehavior = nullptr;
                     m_SelectedBehaviorParameters = nullptr;
                 }
@@ -303,9 +305,9 @@ void Behaviors::OnRenderMenu()
                         bool selected = m_SelectedBehaviorParameters == &behaviorParametersData;
                         if (ImGui::Selectable(behaviorParametersData.Name, selected))
                         {
-                            if (m_Testbed.m_State == Testbed::State::Inactive)
+                            if (m_BehaviorState == BehaviorState::Inactive)
                             {
-                                m_Testbed.m_State = Testbed::State::Prepare;
+                                m_BehaviorState = BehaviorState::Prepare;
                                 m_SelectedBehavior = &behaviorData;
                                 m_SelectedBehaviorParameters = &behaviorParametersData;
                             }
@@ -321,37 +323,35 @@ void Behaviors::OnRenderMenu()
     }
 }
 
-
-Behaviors::Testbed::Testbed(Behaviors& behaviors)
-    :
-    m_Behaviors(behaviors)
-{
-}
-
-void Behaviors::Testbed::OnPrepare(Core::Pointer arbStateSharedInfo)
+void Behaviors::PrepareBehavior(Core::Pointer arbStateSharedInfo)
 {
     // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
 
-    m_BehaviorHandle = {};
-    BPR::BehaviorManager_NewBehavior(m_Behaviors.m_SelectedBehavior->NewBehaviorFunction.GetAddress(), &m_BehaviorHandle);
+    BPR::BehaviorHandle behaviorHandle = {};
+    BPR::BehaviorManager_NewBehavior(m_SelectedBehavior->NewBehaviorFunction.GetAddress(), &behaviorHandle);
 
-    Core::Pointer behavior = Core::Pointer(m_BehaviorHandle.BehaviorHelperPool).at(m_BehaviorHandle.BehaviorHelperIndex * 0x1A0).at(0x0).as<void*>();
+    m_BehaviorHelper = Core::Pointer(behaviorHandle.BehaviorHelperPool).at(behaviorHandle.BehaviorHelperIndex * 0x1A0);
+    m_BehaviorHelperIndex = behaviorHandle.BehaviorHelperIndex;
+
+    Core::Pointer behavior = m_BehaviorHelper.at(0x0).as<void*>();
     Core::Pointer namedParameters = arbStateSharedInfo.at(0x1C).as<void*>();
-    behavior.at(m_Behaviors.m_SelectedBehavior->ParametersOffset).as<void*>() = namedParameters.at(m_Behaviors.m_SelectedBehaviorParameters->Offset).GetAddress();
+    behavior.at(m_SelectedBehavior->ParametersOffset).as<void*>() = namedParameters.at(m_SelectedBehaviorParameters->Offset).GetAddress();
 
-    m_Behaviors.m_SelectedBehavior->PostPrepare(behavior);
+    m_SelectedBehavior->PostPrepare(behavior);
 }
 
-void Behaviors::Testbed::OnUpdate(Core::Pointer camera)
+void Behaviors::UpdateBehavior(Core::Pointer camera)
 {
     // BrnDirector::Camera::Camera* camera
     
-    Core::Pointer behaviorHelperCamera = Core::Pointer(m_BehaviorHandle.BehaviorHelperPool).at(m_BehaviorHandle.BehaviorHelperIndex * 0x1A0).at(0x10);
+    Core::Pointer behaviorHelperCamera = m_BehaviorHelper.at(0x10);
     BPR::Camera_OperatorEquals(camera.GetAddress(), behaviorHelperCamera.GetAddress());
 }
 
-void Behaviors::Testbed::OnRelease()
+void Behaviors::ReleaseBehavior()
 {
-    BPR::BehaviorManager_UnsetBehaviorUsedByHandle(m_BehaviorHandle.BehaviorHelperIndex);
-    m_BehaviorHandle = {};
+    BPR::BehaviorManager_UnsetBehaviorUsedByHandle(m_BehaviorHelperIndex);
+
+    m_BehaviorHelper = nullptr;
+    m_BehaviorHelperIndex = -1;
 }
