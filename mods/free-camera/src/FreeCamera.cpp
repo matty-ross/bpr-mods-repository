@@ -207,7 +207,7 @@ void FreeCamera::Unload()
 
 void FreeCamera::OnUpdate(void* camera, void* sharedInfo)
 {
-    m_CurrentCamera.OnUpdate(camera, sharedInfo);
+    m_CurrentCamera.OnArbitratorUpdate(camera, sharedInfo);
     m_GameplayExternalCamera.OnUpdate(camera, sharedInfo);
     m_Behaviors.OnArbitratorUpdate(camera, sharedInfo);
 }

@@ -33,9 +33,9 @@ CurrentCamera::CurrentCamera()
 {
 }
 
-void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
+void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo)
 {
-    auto updateProperty = [camera]<typename T>(Property<T>& property) -> void
+    auto updateProperty = [&]<typename T>(Property<T>& property) -> void
     {
         Core::Pointer address = camera.at(property.Offset);
 
@@ -52,20 +52,30 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
     {
         if (m_Transformation.Override)
         {
-            DirectX::XMFLOAT4X4& transform = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
+            DirectX::XMFLOAT4X4& transformation = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
             
             if (m_Transformation.Init)
             {
-                for (int i = 0; i < 3; ++i)
-                {
-                    m_Transformation.Rotation[i] = 0.0f;
-                    m_Transformation.RotationDelta[i] = 0.0f;
-                    m_Transformation.Translation[i] = 0.0f;
-                    m_Transformation.TranslationDelta[i] = transform(3, i);
-                }
-                m_Transformation.Init = false;
+                DirectX::XMVECTOR scaleVector = {};
+                DirectX::XMVECTOR rotationVector = {};
+                DirectX::XMVECTOR translationVector = {};
+                DirectX::XMMatrixDecompose(&scaleVector, &rotationVector, &translationVector, DirectX::XMLoadFloat4x4(&transformation));
+
+                DirectX::XMFLOAT4 rotation = {};
+                DirectX::XMStoreFloat4(&rotation, rotationVector);
+                m_Transformation.Rotation[0] = DirectX::XMConvertToDegrees(asinf(2.0f * (rotation.x * rotation.z - rotation.w * rotation.y)));
+                m_Transformation.Rotation[1] = DirectX::XMConvertToDegrees(atan2f(2.0f * (rotation.x * rotation.w + rotation.y * rotation.z), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z)));
+                m_Transformation.Rotation[2] = DirectX::XMConvertToDegrees(atan2f(2.0f * (rotation.x * rotation.y + rotation.z * rotation.w), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z)));
+                
+                DirectX::XMFLOAT4 translation = {};
+                DirectX::XMStoreFloat4(&translation, translationVector);
+                m_Transformation.Translation[0] = translation.x;
+                m_Transformation.Translation[1] = translation.y;
+                m_Transformation.Translation[2] = translation.z;
                 
                 m_Misc.Fov.Value = 90.0f;
+                
+                m_Transformation.Init = false;
             }
 
             m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);
@@ -90,7 +100,6 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
                     rotationMatrix
                 )
             );
-            
             m_Transformation.Translation[0] += translationDelta.x;
             m_Transformation.Translation[1] += translationDelta.y;
             m_Transformation.Translation[2] += translationDelta.z;
@@ -100,7 +109,7 @@ void CurrentCamera::OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo)
                 m_Transformation.Translation[2]
             );
             
-            DirectX::XMStoreFloat4x4(&transform, rotationMatrix * translationMatrix);
+            DirectX::XMStoreFloat4x4(&transformation, rotationMatrix * translationMatrix);
 
             for (int i = 0; i < 3; ++i)
             {
@@ -180,10 +189,8 @@ void CurrentCamera::OnRenderMenu()
             m_Transformation.Init = true;
             m_Misc.Fov.Override = m_Transformation.Override;
         }
-        ImGui::SameLine();
-        ImGui::Checkbox("Use Mouse", &m_Transformation.UseMouse);
-        ImGui::DragFloat3("Rotation", m_Transformation.RotationDelta);
-        ImGui::DragFloat3("Translation", m_Transformation.TranslationDelta);
+        ImGui::DragFloat3("Rotation", m_Transformation.Rotation);
+        ImGui::DragFloat3("Translation", m_Transformation.Translation);
 
         ImGui::SeparatorText("Misc");
         renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
@@ -238,7 +245,7 @@ void CurrentCamera::OnRenderMenu()
 
 void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
 {
-    if (!m_Transformation.UseMouse || ImGui::GetIO().WantCaptureMouse)
+    if (!m_Transformation.Override || ImGui::GetIO().WantCaptureMouse)
     {
         return;
     }

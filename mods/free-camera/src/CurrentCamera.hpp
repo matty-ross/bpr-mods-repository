@@ -12,8 +12,10 @@ public:
     CurrentCamera();
 
 public:
-    void OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo);
+    void OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo);
+    
     void OnRenderMenu();
+    
     void OnMouseInput(const RAWMOUSE& mouse);
 
 private:
@@ -37,7 +39,6 @@ private:
         float Translation[3] = { 0.0f, 0.0f, 0.0f };
         float TranslationDelta[3] = { 0.0f, 0.0f, 0.0f };
         bool Init = false;
-        bool UseMouse = false;
         bool Override = false;
     };
 
