@@ -63,9 +63,9 @@ void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbSt
 
                 DirectX::XMFLOAT4 rotation = {};
                 DirectX::XMStoreFloat4(&rotation, rotationVector);
-                m_Transformation.Rotation[0] = DirectX::XMConvertToDegrees(asinf(2.0f * (rotation.x * rotation.z - rotation.w * rotation.y)));
-                m_Transformation.Rotation[1] = DirectX::XMConvertToDegrees(atan2f(2.0f * (rotation.x * rotation.w + rotation.y * rotation.z), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z)));
-                m_Transformation.Rotation[2] = DirectX::XMConvertToDegrees(atan2f(2.0f * (rotation.x * rotation.y + rotation.z * rotation.w), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.z * rotation.z)));
+                m_Transformation.Rotation[0] = asinf(2.0f * (rotation.w * rotation.x - rotation.z * rotation.y));
+                m_Transformation.Rotation[1] = atan2f(2.0f * (rotation.w * rotation.y + rotation.x * rotation.z), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.x * rotation.x));
+                m_Transformation.Rotation[2] = atan2f(2.0f * (rotation.w * rotation.z + rotation.y * rotation.x), 1.0f - 2.0f * (rotation.x * rotation.x + rotation.z * rotation.z));
                 
                 DirectX::XMFLOAT4 translation = {};
                 DirectX::XMStoreFloat4(&translation, translationVector);
@@ -73,18 +73,16 @@ void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbSt
                 m_Transformation.Translation[1] = translation.y;
                 m_Transformation.Translation[2] = translation.z;
                 
-                m_Misc.Fov.Value = 90.0f;
-                
                 m_Transformation.Init = false;
             }
 
-            m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.f);
-            m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.f);
-            m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.f);
+            m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.0f);
+            m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.0f);
+            m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.0f);
             DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
-                DirectX::XMConvertToRadians(m_Transformation.Rotation[0]),
-                DirectX::XMConvertToRadians(m_Transformation.Rotation[1]),
-                DirectX::XMConvertToRadians(m_Transformation.Rotation[2])
+                m_Transformation.Rotation[0],
+                m_Transformation.Rotation[1],
+                m_Transformation.Rotation[2]
             );
             
             DirectX::XMFLOAT3 translationDelta = {};
@@ -187,10 +185,9 @@ void CurrentCamera::OnRenderMenu()
         if (ImGui::Checkbox("Override", &m_Transformation.Override))
         {
             m_Transformation.Init = true;
-            m_Misc.Fov.Override = m_Transformation.Override;
         }
-        ImGui::DragFloat3("Rotation", m_Transformation.Rotation);
-        ImGui::DragFloat3("Translation", m_Transformation.Translation);
+        ImGui::DragFloat3("Rotate", m_Transformation.RotationDelta);
+        ImGui::DragFloat3("Translate", m_Transformation.TranslationDelta);
 
         ImGui::SeparatorText("Misc");
         renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
@@ -263,13 +260,13 @@ void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
     {
         if (GetKeyState(VK_LBUTTON) & 0x8000)
         {
-            m_Transformation.RotationDelta[1] -= isShiftKeyDown ? mouse.lLastX : (mouse.lLastX / 2.0f);
-            m_Transformation.RotationDelta[0] += isShiftKeyDown ? mouse.lLastY : (mouse.lLastY / 2.0f);
+            m_Transformation.RotationDelta[1] -= isShiftKeyDown ? (mouse.lLastX / 200.0f) : (mouse.lLastX / 400.0f);
+            m_Transformation.RotationDelta[0] += isShiftKeyDown ? (mouse.lLastY / 200.0f) : (mouse.lLastY / 400.0f);
         }
         if (GetKeyState(VK_RBUTTON) & 0x8000)
         {
-            m_Transformation.TranslationDelta[0] -= isShiftKeyDown ? mouse.lLastX : (mouse.lLastX / 2.0f);
-            m_Transformation.TranslationDelta[1] -= isShiftKeyDown ? mouse.lLastY : (mouse.lLastY / 2.0f);
+            m_Transformation.TranslationDelta[0] -= isShiftKeyDown ? (mouse.lLastX / 10.0f) : (mouse.lLastX / 20.0f);
+            m_Transformation.TranslationDelta[1] -= isShiftKeyDown ? (mouse.lLastY / 10.0f) : (mouse.lLastY / 20.0f);
         }
     }
     if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
