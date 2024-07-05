@@ -69,11 +69,11 @@ private:
         Property<float> Blurriness;
     };
 
-    struct BackgroundEffect
+    struct Effect
     {
-        const char* HookName = nullptr;
+        const char* Name = nullptr;
         float BlendAmount = 0.0f;
-        bool Active = false;
+        bool Play = false;
         bool Stop = false;
     };
 
@@ -83,5 +83,5 @@ private:
     Effects m_Effects;
     MotionBlur m_MotionBlur;
     DepthOfField m_DepthOfField;
-    BackgroundEffect m_BackgroundEffect;
+    Effect m_Effect;
 };

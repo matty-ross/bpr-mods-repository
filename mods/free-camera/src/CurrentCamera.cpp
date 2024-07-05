@@ -5,6 +5,39 @@
 #include "vendor/imgui.hpp"
 
 
+namespace BPR
+{
+    // void BrnDirector::Camera::EnsureEffectIsPlaying(BrnDirector::Camera::Camera&, const BrnDirector::EffectInterface&, const char*, float)
+    static void Camera_EnsureEffectIsPlaying(void* camera, const void* effectInterface, const char* name, float blendAmount)
+    {
+        __asm
+        {
+            movss xmm3, dword ptr [blendAmount]
+            push dword ptr [name]
+            mov edx, dword ptr [effectInterface]
+            mov ecx, dword ptr [camera]
+            
+            mov eax, 0x004D2700
+            call eax
+            add esp, 4
+        }
+    }
+
+    // void BrnDirector::Camera::StopCurrentEffect(BrnDirector::Camera::Camera&, const BrnDirector::EffectInterface&)
+    static void Camera_StopCurrentEffect(void* camera, const void* effectInterface)
+    {
+        __asm
+        {
+            mov edx, dword ptr [effectInterface]
+            mov ecx, dword ptr [camera]
+
+            mov eax, 0x004D26A0
+            call eax
+        }
+    }
+}
+
+
 CurrentCamera::CurrentCamera()
     :
     m_Misc
@@ -141,22 +174,19 @@ void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbSt
     }
 
     {
-        Core::Pointer backgroundEffectRequest = camera.at(0xB4);
-        
-        if (m_BackgroundEffect.Active)
+        if (m_Effect.Play)
         {
-            strcpy_s(backgroundEffectRequest.at(0x0).GetAddress<char*>(), 32, m_BackgroundEffect.HookName);
-            backgroundEffectRequest.at(0x24).as<float>() = m_BackgroundEffect.BlendAmount;
-            backgroundEffectRequest.at(0x28).as<bool>() = true;
+            BPR::Camera_EnsureEffectIsPlaying(camera.GetAddress(), arbStateSharedInfo.at(0x30).as<void*>(), m_Effect.Name, m_Effect.BlendAmount);
         }
-        
-        if (m_BackgroundEffect.Stop)
+
+        if (m_Effect.Stop)
         {
-            backgroundEffectRequest.at(0x29).as<bool>() = true;
-            m_BackgroundEffect.HookName = nullptr;
-            m_BackgroundEffect.BlendAmount = 0.0f;
-            m_BackgroundEffect.Active = false;
-            m_BackgroundEffect.Stop = false;
+            BPR::Camera_StopCurrentEffect(camera.GetAddress(), arbStateSharedInfo.at(0x30).as<void*>());
+            
+            m_Effect.Name = nullptr;
+            m_Effect.BlendAmount = 0.0f;
+            m_Effect.Play = false;
+            m_Effect.Stop = false;
         }
     }
 }
@@ -211,9 +241,9 @@ void CurrentCamera::OnRenderMenu()
         ImGui::SeparatorText("Background Effect");
         if (ImGui::Button("Stop"))
         {
-            if (m_BackgroundEffect.Active)
+            if (m_Effect.Play)
             {
-                m_BackgroundEffect.Stop = true;
+                m_Effect.Stop = true;
             }
         }
         if (ImGui::BeginListBox("##hook-names-list", ImVec2(-FLT_MIN, 0.0f)))
@@ -224,19 +254,19 @@ void CurrentCamera::OnRenderMenu()
             for (uint32_t i = 0; i < hookNamesCount; ++i)
             {
                 const char* hookName = effectInterface.at(0x0 + i * 0x21).GetAddress<const char*>();
-                if (ImGui::Selectable(hookName, m_BackgroundEffect.HookName == hookName))
+                if (ImGui::Selectable(hookName, m_Effect.Name == hookName))
                 {
-                    if (!m_BackgroundEffect.Active)
+                    if (!m_Effect.Play)
                     {
-                        m_BackgroundEffect.HookName = hookName;
-                        m_BackgroundEffect.BlendAmount = 0.75f;
-                        m_BackgroundEffect.Active = true;
+                        m_Effect.Name = hookName;
+                        m_Effect.BlendAmount = 0.75f;
+                        m_Effect.Play = true;
                     }
                 }
             }
             ImGui::EndListBox();
         }
-        ImGui::SliderFloat("Blend Amount", &m_BackgroundEffect.BlendAmount, 0.0f, 1.0f);
+        ImGui::SliderFloat("Blend Amount", &m_Effect.BlendAmount, 0.0f, 1.0f);
     }
 }
 
