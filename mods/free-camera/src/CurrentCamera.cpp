@@ -7,6 +7,21 @@
 
 namespace BPR
 {
+    // rw::math::vpu::Matrix44Affine BrnDirector::Camera::Utils::CreateLookAt(rw::math::vpu::Vector3, rw::math::vpu::Vector3)
+    static void CameraUtils_CreateLookAt(void* transform, const float* eyePosition, const float* targetPosition)
+    {
+        __asm
+        {
+            push dword ptr [targetPosition]
+            mov edx, dword ptr [eyePosition]
+            mov ecx, dword ptr [transform]
+            
+            mov eax, 0x0094A1C0
+            call eax
+            add esp, 4
+        }
+    }
+    
     // void BrnDirector::Camera::EnsureEffectIsPlaying(BrnDirector::Camera::Camera&, const BrnDirector::EffectInterface&, const char*, float)
     static void Camera_EnsureEffectIsPlaying(void* camera, const void* effectInterface, const char* name, float blendAmount)
     {
@@ -85,68 +100,70 @@ void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbSt
     {
         if (m_Transformation.Override)
         {
-            DirectX::XMFLOAT4X4& transformation = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
+            BPR::CameraUtils_CreateLookAt(camera.at(0x0).GetAddress(), m_Transformation.EyePosition, m_Transformation.TargetPosition);
             
-            if (m_Transformation.Init)
-            {
-                DirectX::XMVECTOR scaleVector = {};
-                DirectX::XMVECTOR rotationVector = {};
-                DirectX::XMVECTOR translationVector = {};
-                DirectX::XMMatrixDecompose(&scaleVector, &rotationVector, &translationVector, DirectX::XMLoadFloat4x4(&transformation));
+            //DirectX::XMFLOAT4X4& transformation = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
+            //
+            //if (m_Transformation.Init)
+            //{
+            //    DirectX::XMVECTOR scaleVector = {};
+            //    DirectX::XMVECTOR rotationVector = {};
+            //    DirectX::XMVECTOR translationVector = {};
+            //    DirectX::XMMatrixDecompose(&scaleVector, &rotationVector, &translationVector, DirectX::XMLoadFloat4x4(&transformation));
 
-                DirectX::XMFLOAT4 rotation = {};
-                DirectX::XMStoreFloat4(&rotation, rotationVector);
-                m_Transformation.Rotation[0] = asinf(2.0f * (rotation.w * rotation.x - rotation.z * rotation.y));
-                m_Transformation.Rotation[1] = atan2f(2.0f * (rotation.w * rotation.y + rotation.x * rotation.z), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.x * rotation.x));
-                m_Transformation.Rotation[2] = atan2f(2.0f * (rotation.w * rotation.z + rotation.y * rotation.x), 1.0f - 2.0f * (rotation.x * rotation.x + rotation.z * rotation.z));
-                
-                DirectX::XMFLOAT4 translation = {};
-                DirectX::XMStoreFloat4(&translation, translationVector);
-                m_Transformation.Translation[0] = translation.x;
-                m_Transformation.Translation[1] = translation.y;
-                m_Transformation.Translation[2] = translation.z;
-                
-                m_Transformation.Init = false;
-            }
+            //    DirectX::XMFLOAT4 rotation = {};
+            //    DirectX::XMStoreFloat4(&rotation, rotationVector);
+            //    m_Transformation.Rotation[0] = asinf(2.0f * (rotation.w * rotation.x - rotation.z * rotation.y));
+            //    m_Transformation.Rotation[1] = atan2f(2.0f * (rotation.w * rotation.y + rotation.x * rotation.z), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.x * rotation.x));
+            //    m_Transformation.Rotation[2] = atan2f(2.0f * (rotation.w * rotation.z + rotation.y * rotation.x), 1.0f - 2.0f * (rotation.x * rotation.x + rotation.z * rotation.z));
+            //    
+            //    DirectX::XMFLOAT4 translation = {};
+            //    DirectX::XMStoreFloat4(&translation, translationVector);
+            //    m_Transformation.Translation[0] = translation.x;
+            //    m_Transformation.Translation[1] = translation.y;
+            //    m_Transformation.Translation[2] = translation.z;
+            //    
+            //    m_Transformation.Init = false;
+            //}
 
-            m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.0f);
-            m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.0f);
-            m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.0f);
-            DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
-                m_Transformation.Rotation[0],
-                m_Transformation.Rotation[1],
-                m_Transformation.Rotation[2]
-            );
-            
-            DirectX::XMFLOAT3 translationDelta = {};
-            DirectX::XMStoreFloat3(
-                &translationDelta,
-                DirectX::XMVector3Transform(
-                    DirectX::XMVectorSet(
-                        m_Transformation.TranslationDelta[0],
-                        m_Transformation.TranslationDelta[1],
-                        m_Transformation.TranslationDelta[2],
-                        0.0f
-                    ),
-                    rotationMatrix
-                )
-            );
-            m_Transformation.Translation[0] += translationDelta.x;
-            m_Transformation.Translation[1] += translationDelta.y;
-            m_Transformation.Translation[2] += translationDelta.z;
-            DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(
-                m_Transformation.Translation[0],
-                m_Transformation.Translation[1],
-                m_Transformation.Translation[2]
-            );
-            
-            DirectX::XMStoreFloat4x4(&transformation, rotationMatrix * translationMatrix);
+            //m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.0f);
+            //m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.0f);
+            //m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.0f);
+            //DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
+            //    m_Transformation.Rotation[0],
+            //    m_Transformation.Rotation[1],
+            //    m_Transformation.Rotation[2]
+            //);
+            //
+            //DirectX::XMFLOAT3 translationDelta = {};
+            //DirectX::XMStoreFloat3(
+            //    &translationDelta,
+            //    DirectX::XMVector3Transform(
+            //        DirectX::XMVectorSet(
+            //            m_Transformation.TranslationDelta[0],
+            //            m_Transformation.TranslationDelta[1],
+            //            m_Transformation.TranslationDelta[2],
+            //            0.0f
+            //        ),
+            //        rotationMatrix
+            //    )
+            //);
+            //m_Transformation.Translation[0] += translationDelta.x;
+            //m_Transformation.Translation[1] += translationDelta.y;
+            //m_Transformation.Translation[2] += translationDelta.z;
+            //DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(
+            //    m_Transformation.Translation[0],
+            //    m_Transformation.Translation[1],
+            //    m_Transformation.Translation[2]
+            //);
+            //
+            //DirectX::XMStoreFloat4x4(&transformation, rotationMatrix * translationMatrix);
 
-            for (int i = 0; i < 3; ++i)
-            {
-                m_Transformation.RotationDelta[i] = 0.0f;
-                m_Transformation.TranslationDelta[i] = 0.0f;
-            }
+            //for (int i = 0; i < 3; ++i)
+            //{
+            //    m_Transformation.RotationDelta[i] = 0.0f;
+            //    m_Transformation.TranslationDelta[i] = 0.0f;
+            //}
         }
     }
     
