@@ -34,9 +34,6 @@ private:
 
     struct Transformation
     {
-        alignas(16) float EyePosition[3] = { 0.0f, 0.0f, 0.0f };
-        alignas(16) float TargetPosition[3] = { 0.0f, 0.0f, 0.0f };
-        
         float Rotation[3] = { 0.0f, 0.0f, 0.0f };
         float RotationDelta[3] = { 0.0f, 0.0f, 0.0f };
         float Translation[3] = { 0.0f, 0.0f, 0.0f };
