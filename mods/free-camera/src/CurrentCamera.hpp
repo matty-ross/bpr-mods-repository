@@ -2,6 +2,7 @@
 
 
 #include <Windows.h>
+#include <DirectXMath.h>
 
 #include "core/Pointer.hpp"
 
@@ -34,10 +35,10 @@ private:
 
     struct Transformation
     {
-        float Rotation[3] = { 0.0f, 0.0f, 0.0f };
-        float RotationDelta[3] = { 0.0f, 0.0f, 0.0f };
-        float Translation[3] = { 0.0f, 0.0f, 0.0f };
-        float TranslationDelta[3] = { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3A Rotation = { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3A RotationDelta = { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3A Translation = { 0.0f, 0.0f, 0.0f };
+        DirectX::XMFLOAT3A TranslationDelta = { 0.0f, 0.0f, 0.0f };
         bool Init = false;
         bool Override = false;
     };

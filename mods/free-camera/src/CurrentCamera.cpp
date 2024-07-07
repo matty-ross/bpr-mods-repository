@@ -1,12 +1,25 @@
 #include "CurrentCamera.hpp"
 
-#include <DirectXMath.h>
-
 #include "vendor/imgui.hpp"
 
 
 namespace BPR
 {
+    // rw::math::vpu::Vector3 BrnDirector::Camera::Utils::EulerAnglesZXYFromMatrix44Affine(rw::math::vpu::Matrix44Affine, rw::math::vpu::Vector3*)
+    static void CameraUtils_EulerAnglesZXYFromMatrix44Affine(void* angles, const void* transform)
+    {
+        __asm
+        {
+            push 0
+            mov edx, dword ptr [transform]
+            mov ecx, dword ptr [angles]
+
+            mov eax, 0x0094A650
+            call eax
+            add esp, 4
+        }
+    }
+    
     // void BrnDirector::Camera::EnsureEffectIsPlaying(BrnDirector::Camera::Camera&, const BrnDirector::EffectInterface&, const char*, float)
     static void Camera_EnsureEffectIsPlaying(void* camera, const void* effectInterface, const char* name, float blendAmount)
     {
@@ -86,67 +99,40 @@ void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbSt
         if (m_Transformation.Override)
         {
             DirectX::XMFLOAT4X4& transformation = camera.at(0x0).as<DirectX::XMFLOAT4X4>();
-            
+
             if (m_Transformation.Init)
             {
-                DirectX::XMVECTOR scaleVector = {};
-                DirectX::XMVECTOR rotationVector = {};
-                DirectX::XMVECTOR translationVector = {};
-                DirectX::XMMatrixDecompose(&scaleVector, &rotationVector, &translationVector, DirectX::XMLoadFloat4x4(&transformation));
+                BPR::CameraUtils_EulerAnglesZXYFromMatrix44Affine(&m_Transformation.Rotation, &transformation);
 
-                DirectX::XMFLOAT4 rotation = {};
-                DirectX::XMStoreFloat4(&rotation, rotationVector);
-                m_Transformation.Rotation[0] = asinf(2.0f * (rotation.w * rotation.x - rotation.z * rotation.y));
-                m_Transformation.Rotation[1] = atan2f(2.0f * (rotation.w * rotation.y + rotation.x * rotation.z), 1.0f - 2.0f * (rotation.y * rotation.y + rotation.x * rotation.x));
-                m_Transformation.Rotation[2] = atan2f(2.0f * (rotation.w * rotation.z + rotation.y * rotation.x), 1.0f - 2.0f * (rotation.x * rotation.x + rotation.z * rotation.z));
-                
-                DirectX::XMFLOAT4 translation = {};
-                DirectX::XMStoreFloat4(&translation, translationVector);
-                m_Transformation.Translation[0] = translation.x;
-                m_Transformation.Translation[1] = translation.y;
-                m_Transformation.Translation[2] = translation.z;
-                
+                m_Transformation.Translation.x = transformation(3, 0);
+                m_Transformation.Translation.y = transformation(3, 1);
+                m_Transformation.Translation.z = transformation(3, 2);
+
                 m_Transformation.Init = false;
             }
 
-            m_Transformation.Rotation[0] = fmodf(m_Transformation.Rotation[0] + m_Transformation.RotationDelta[0], 360.0f);
-            m_Transformation.Rotation[1] = fmodf(m_Transformation.Rotation[1] + m_Transformation.RotationDelta[1], 360.0f);
-            m_Transformation.Rotation[2] = fmodf(m_Transformation.Rotation[2] + m_Transformation.RotationDelta[2], 360.0f);
-            DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(
-                m_Transformation.Rotation[0],
-                m_Transformation.Rotation[1],
-                m_Transformation.Rotation[2]
-            );
-            
-            DirectX::XMFLOAT3 translationDelta = {};
-            DirectX::XMStoreFloat3(
-                &translationDelta,
-                DirectX::XMVector3Transform(
-                    DirectX::XMVectorSet(
-                        m_Transformation.TranslationDelta[0],
-                        m_Transformation.TranslationDelta[1],
-                        m_Transformation.TranslationDelta[2],
-                        0.0f
-                    ),
-                    rotationMatrix
+            DirectX::XMStoreFloat3A(
+                &m_Transformation.Rotation,
+                DirectX::XMVectorAddAngles(
+                    DirectX::XMLoadFloat3A(&m_Transformation.Rotation),
+                    DirectX::XMLoadFloat3A(&m_Transformation.RotationDelta)
                 )
             );
-            m_Transformation.Translation[0] += translationDelta.x;
-            m_Transformation.Translation[1] += translationDelta.y;
-            m_Transformation.Translation[2] += translationDelta.z;
-            DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslation(
-                m_Transformation.Translation[0],
-                m_Transformation.Translation[1],
-                m_Transformation.Translation[2]
+            DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3A(&m_Transformation.Rotation));
+
+            DirectX::XMStoreFloat3A(
+                &m_Transformation.Translation,
+                DirectX::XMVectorAdd(
+                    DirectX::XMLoadFloat3A(&m_Transformation.Translation),
+                    DirectX::XMVector3Transform(DirectX::XMLoadFloat3A(&m_Transformation.TranslationDelta), rotationMatrix)
+                )
             );
-            
+            DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3A(&m_Transformation.Translation));
+
             DirectX::XMStoreFloat4x4(&transformation, rotationMatrix * translationMatrix);
 
-            for (int i = 0; i < 3; ++i)
-            {
-                m_Transformation.RotationDelta[i] = 0.0f;
-                m_Transformation.TranslationDelta[i] = 0.0f;
-            }
+            m_Transformation.RotationDelta = { 0.0f, 0.0f, 0.0f };
+            m_Transformation.TranslationDelta = { 0.0f, 0.0f, 0.0f };
         }
     }
     
@@ -216,8 +202,10 @@ void CurrentCamera::OnRenderMenu()
         {
             m_Transformation.Init = true;
         }
-        ImGui::DragFloat3("Rotate", m_Transformation.RotationDelta);
-        ImGui::DragFloat3("Translate", m_Transformation.TranslationDelta);
+        ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&m_Transformation.RotationDelta));
+        ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&m_Transformation.TranslationDelta));
+        ImGui::Text("Rotation:     %.3f | %.3f | %.3f", m_Transformation.Rotation.x, m_Transformation.Rotation.y, m_Transformation.Rotation.z);
+        ImGui::Text("Translation:  %.3f | %.3f | %.3f", m_Transformation.Translation.x, m_Transformation.Translation.y, m_Transformation.Translation.z);
 
         ImGui::SeparatorText("Misc");
         renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
@@ -290,18 +278,18 @@ void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
     {
         if (GetKeyState(VK_LBUTTON) & 0x8000)
         {
-            m_Transformation.RotationDelta[1] -= isShiftKeyDown ? (mouse.lLastX / 200.0f) : (mouse.lLastX / 400.0f);
-            m_Transformation.RotationDelta[0] += isShiftKeyDown ? (mouse.lLastY / 200.0f) : (mouse.lLastY / 400.0f);
+            m_Transformation.RotationDelta.y -= isShiftKeyDown ? (mouse.lLastX / 200.0f) : (mouse.lLastX / 400.0f);
+            m_Transformation.RotationDelta.x += isShiftKeyDown ? (mouse.lLastY / 200.0f) : (mouse.lLastY / 400.0f);
         }
         if (GetKeyState(VK_RBUTTON) & 0x8000)
         {
-            m_Transformation.TranslationDelta[0] -= isShiftKeyDown ? (mouse.lLastX / 10.0f) : (mouse.lLastX / 20.0f);
-            m_Transformation.TranslationDelta[1] -= isShiftKeyDown ? (mouse.lLastY / 10.0f) : (mouse.lLastY / 20.0f);
+            m_Transformation.TranslationDelta.x -= isShiftKeyDown ? (mouse.lLastX / 10.0f) : (mouse.lLastX / 20.0f);
+            m_Transformation.TranslationDelta.y -= isShiftKeyDown ? (mouse.lLastY / 10.0f) : (mouse.lLastY / 20.0f);
         }
     }
     if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
     {
         short scrolls = static_cast<short>(mouse.usButtonData) / WHEEL_DELTA;
-        m_Transformation.TranslationDelta[2] += isShiftKeyDown ? (scrolls * 4.0f) : scrolls;
+        m_Transformation.TranslationDelta.z += isShiftKeyDown ? (scrolls * 4.0f) : scrolls;
     }
 }
