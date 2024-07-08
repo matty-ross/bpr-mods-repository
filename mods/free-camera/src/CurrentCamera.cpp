@@ -6,12 +6,12 @@
 namespace BPR
 {
     // rw::math::vpu::Vector3 BrnDirector::Camera::Utils::EulerAnglesZXYFromMatrix44Affine(rw::math::vpu::Matrix44Affine, rw::math::vpu::Vector3*)
-    static void CameraUtils_EulerAnglesZXYFromMatrix44Affine(void* angles, const void* transform)
+    static void CameraUtils_EulerAnglesZXYFromMatrix44Affine(void* angles, const void* transformation)
     {
         __asm
         {
             push 0
-            mov edx, dword ptr [transform]
+            mov edx, dword ptr [transformation]
             mov ecx, dword ptr [angles]
 
             mov eax, 0x0094A650
@@ -81,17 +81,18 @@ CurrentCamera::CurrentCamera()
 
 void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo)
 {
+    // BrnDirector::Camera::Camera* camera
+    // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
+
     auto updateProperty = [&]<typename T>(Property<T>& property) -> void
     {
-        Core::Pointer address = camera.at(property.Offset);
-
         if (property.Override)
         {
-            address.as<T>() = property.Value;
+            camera.at(property.Offset).as<T>() = property.Value;
         }
         else
         {
-            property.Value = address.as<T>();
+            property.Value = camera.at(property.Offset).as<T>();
         }
     };
 
@@ -111,27 +112,22 @@ void CurrentCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbSt
                 m_Transformation.Init = false;
             }
 
-            DirectX::XMStoreFloat3A(
-                &m_Transformation.Rotation,
-                DirectX::XMVectorAddAngles(
-                    DirectX::XMLoadFloat3A(&m_Transformation.Rotation),
-                    DirectX::XMLoadFloat3A(&m_Transformation.RotationDelta)
-                )
-            );
-            DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(DirectX::XMLoadFloat3A(&m_Transformation.Rotation));
+            DirectX::XMVECTOR rotation = DirectX::XMLoadFloat3A(&m_Transformation.Rotation);
+            DirectX::XMVECTOR rotationDelta = DirectX::XMLoadFloat3A(&m_Transformation.RotationDelta);
+            DirectX::XMVECTOR translation = DirectX::XMLoadFloat3A(&m_Transformation.Translation);
+            DirectX::XMVECTOR translationDelta = DirectX::XMLoadFloat3A(&m_Transformation.TranslationDelta);
 
-            DirectX::XMStoreFloat3A(
-                &m_Transformation.Translation,
-                DirectX::XMVectorAdd(
-                    DirectX::XMLoadFloat3A(&m_Transformation.Translation),
-                    DirectX::XMVector3Transform(DirectX::XMLoadFloat3A(&m_Transformation.TranslationDelta), rotationMatrix)
-                )
-            );
-            DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(DirectX::XMLoadFloat3A(&m_Transformation.Translation));
+            rotation = DirectX::XMVectorAddAngles(rotation, rotationDelta);
+            DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYawFromVector(rotation);
+
+            translation = DirectX::XMVectorAdd(translation, DirectX::XMVector3Transform(translationDelta, rotationMatrix));
+            DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(translation);
 
             DirectX::XMStoreFloat4x4(&transformation, rotationMatrix * translationMatrix);
 
+            DirectX::XMStoreFloat3A(&m_Transformation.Rotation, rotation);
             m_Transformation.RotationDelta = { 0.0f, 0.0f, 0.0f };
+            DirectX::XMStoreFloat3A(&m_Transformation.Translation, translation);
             m_Transformation.TranslationDelta = { 0.0f, 0.0f, 0.0f };
         }
     }
@@ -196,65 +192,91 @@ void CurrentCamera::OnRenderMenu()
             }
             ImGui::PopID();
         };
-        
-        ImGui::SeparatorText("Transformation");
-        if (ImGui::Checkbox("Override", &m_Transformation.Override))
+
         {
-            m_Transformation.Init = true;
-        }
-        ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&m_Transformation.RotationDelta));
-        ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&m_Transformation.TranslationDelta));
-        ImGui::Text("Rotation:     %.3f | %.3f | %.3f", m_Transformation.Rotation.x, m_Transformation.Rotation.y, m_Transformation.Rotation.z);
-        ImGui::Text("Translation:  %.3f | %.3f | %.3f", m_Transformation.Translation.x, m_Transformation.Translation.y, m_Transformation.Translation.z);
-
-        ImGui::SeparatorText("Misc");
-        renderProperty(m_Misc.Fov,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
-        
-        ImGui::SeparatorText("Effects");
-        renderProperty(m_Effects.SimulationTimeScale, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Simulation Time Scale", &address.as<float>(), 0.0f, 2.0f); });
-        renderProperty(m_Effects.CameraLag,           [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Camera Lag", &address.as<float>(), 0.0f, 1.0f); });
-        renderProperty(m_Effects.BlackBarAmount,      [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Black Bar Amount", &address.as<float>(), 0.0f, 0.5f); });
-
-        ImGui::SeparatorText("Motion Blur");
-        renderProperty(m_MotionBlur.Vehicle, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Vehicle", &address.as<float>(), 0.0f, 1.0f); });
-        renderProperty(m_MotionBlur.World,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("World", &address.as<float>(), 0.0f, 1.0f); });
-
-        ImGui::SeparatorText("Depth of Field");
-        renderProperty(m_DepthOfField.FocusStartDistance,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Focus Start Distance", &address.as<float>(), 0.0f, 150.0f); });
-        renderProperty(m_DepthOfField.PerfectFocusStartDistance, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Perfect Focus Start Distance", &address.as<float>(), 0.0f, 150.0f); });
-        renderProperty(m_DepthOfField.PerfectFocusEndDistance,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Perfect Focus End Distance", &address.as<float>(), 150.0f, 300.0f); });
-        renderProperty(m_DepthOfField.FocusEndDistance,          [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Focus End Distance", &address.as<float>(), 150.0f, 300.0f); });
-        renderProperty(m_DepthOfField.Blurriness,                [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Blurriness", &address.as<float>(), 0.0f, 1.0f); });
-
-        ImGui::SeparatorText("Background Effect");
-        if (ImGui::Button("Stop"))
-        {
-            if (m_Effect.Play)
+            ImGui::SeparatorText("Transformation");
+            
+            if (ImGui::Checkbox("Override", &m_Transformation.Override))
             {
-                m_Effect.Stop = true;
+                m_Transformation.Init = true;
             }
+            ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&m_Transformation.RotationDelta));
+            ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&m_Transformation.TranslationDelta));
         }
-        if (ImGui::BeginListBox("##hook-names-list", ImVec2(-FLT_MIN, 0.0f)))
-        {
-            Core::Pointer effectInterface = Core::Pointer(0x013FC8E0).deref().at(0x7179D0);
 
-            uint32_t hookNamesCount = effectInterface.at(0xCE4).as<uint32_t>();
-            for (uint32_t i = 0; i < hookNamesCount; ++i)
+        {
+            ImGui::SeparatorText("Misc");
+            
+            renderProperty(m_Misc.Fov, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
+        }
+
+        {
+            ImGui::SeparatorText("Effects");
+            
+            renderProperty(m_Effects.SimulationTimeScale, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Simulation Time Scale", &address.as<float>(), 0.0f, 2.0f); });
+            renderProperty(m_Effects.CameraLag,           [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Camera Lag", &address.as<float>(), 0.0f, 1.0f); });
+            renderProperty(m_Effects.BlackBarAmount,      [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Black Bar Amount", &address.as<float>(), 0.0f, 0.5f); });
+        }
+
+        {
+            ImGui::SeparatorText("Motion Blur");
+            
+            renderProperty(m_MotionBlur.Vehicle, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Vehicle", &address.as<float>(), 0.0f, 1.0f); });
+            renderProperty(m_MotionBlur.World,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("World", &address.as<float>(), 0.0f, 1.0f); });
+        }
+
+        {
+            ImGui::SeparatorText("Depth of Field");
+            
+            renderProperty(m_DepthOfField.FocusStartDistance,        [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Focus Start Distance", &address.as<float>(), 0.0f, 150.0f); });
+            renderProperty(m_DepthOfField.PerfectFocusStartDistance, [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Perfect Focus Start Distance", &address.as<float>(), 0.0f, 150.0f); });
+            renderProperty(m_DepthOfField.PerfectFocusEndDistance,   [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Perfect Focus End Distance", &address.as<float>(), 150.0f, 300.0f); });
+            renderProperty(m_DepthOfField.FocusEndDistance,          [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Focus End Distance", &address.as<float>(), 150.0f, 300.0f); });
+            renderProperty(m_DepthOfField.Blurriness,                [](Core::Pointer address) -> bool { return ImGui::SliderFloat("Blurriness", &address.as<float>(), 0.0f, 1.0f); });
+        }
+
+        {
+            ImGui::SeparatorText("Effect");
+
+            if (ImGui::Button("Stop"))
             {
-                const char* hookName = effectInterface.at(0x0 + i * 0x21).GetAddress<const char*>();
-                if (ImGui::Selectable(hookName, m_Effect.Name == hookName))
+                if (m_Effect.Play)
                 {
-                    if (!m_Effect.Play)
-                    {
-                        m_Effect.Name = hookName;
-                        m_Effect.BlendAmount = 0.75f;
-                        m_Effect.Play = true;
-                    }
+                    m_Effect.Stop = true;
                 }
             }
-            ImGui::EndListBox();
+
+            ImGui::SliderFloat("Blend Amount", &m_Effect.BlendAmount, 0.0f, 1.0f);
+
+            if (ImGui::BeginListBox("##hook-names-list", ImVec2(-FLT_MIN, 0.0f)))
+            {
+                // BrnDirector::EffectInterface* effectInterface
+                
+                Core::Pointer effectInterface = Core::Pointer(0x013FC8E0).deref().at(0x7179D0);
+
+                uint32_t hookNamesCount = effectInterface.at(0xCE4).as<uint32_t>();
+                for (uint32_t i = 0; i < hookNamesCount; ++i)
+                {
+                    const char* hookName = effectInterface.at(0x0 + i * 0x21).GetAddress<const char*>();
+                    bool selected = m_Effect.Name == hookName;
+                    if (ImGui::Selectable(hookName, selected))
+                    {
+                        if (!m_Effect.Play)
+                        {
+                            m_Effect.Name = hookName;
+                            m_Effect.BlendAmount = 0.75f;
+                            m_Effect.Play = true;
+                        }
+                    }
+                    if (selected)
+                    {
+                        ImGui::SetItemDefaultFocus();
+                    }
+                }
+                
+                ImGui::EndListBox();
+            }
         }
-        ImGui::SliderFloat("Blend Amount", &m_Effect.BlendAmount, 0.0f, 1.0f);
     }
 }
 
@@ -267,8 +289,8 @@ void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
 
     /*
     * mouse movement while the left button is presed rotates the camera along the Y and X axis
-    * mouse movement while the right button is pressed translates the camera sidewards and upwards
-    * mouse wheel translates the camera forwards and backwards
+    * mouse movement while the right button is pressed translates the camera sidewards and upwards/downwards
+    * mouse wheel translates the camera forwards/backwards
     * shift key increases the mouse input sensitivity
     */
 
@@ -290,6 +312,6 @@ void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
     if (mouse.usButtonFlags & RI_MOUSE_WHEEL)
     {
         short scrolls = static_cast<short>(mouse.usButtonData) / WHEEL_DELTA;
-        m_Transformation.TranslationDelta.z += isShiftKeyDown ? (scrolls * 4.0f) : scrolls;
+        m_Transformation.TranslationDelta.z += isShiftKeyDown ? (scrolls * 4.0f) : (scrolls * 1.0f);
     }
 }
