@@ -12,7 +12,8 @@ public:
     GameplayExternalCamera(CustomParametersFile& customParametersFile);
 
 public:
-    void OnUpdate(Core::Pointer camera, Core::Pointer sharedInfo);
+    void OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo);
+    
     void OnRenderMenu();
 
 private:
@@ -49,10 +50,10 @@ private:
     void AddCurrentParametersIntoCustomParameters(const char* name);
 
 private:
-    uint64_t m_PreviousAttribKey = 0x0000000000000000;
+    CustomParametersFile& m_CustomParametersFile;
 
     Parameters m_Parameters;
     bool m_ResetAllParameters = false;
 
-    CustomParametersFile& m_CustomParametersFile;
+    uint64_t m_PreviousAttribKey = 0x0000000000000000;
 };
