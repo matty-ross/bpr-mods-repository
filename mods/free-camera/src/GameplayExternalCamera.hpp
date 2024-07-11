@@ -47,7 +47,7 @@ private:
 
 private:
     void SetCurrentParametersFromCustomParameters(const CustomParameters& customParameters);
-    void AddCurrentParametersIntoCustomParameters(const char* name);
+    void AddCurrentParametersToCustomParametersFile(const char* name);
 
 private:
     CustomParametersFile& m_CustomParametersFile;

@@ -175,42 +175,58 @@ void GameplayExternalCamera::OnRenderMenu()
                     renderParameter(m_Parameters.DropFactor,               [](Core::Pointer address) { ImGui::SliderFloat("Drop Factor", &address.as<float>(), 0.0f, 1.0f); });
                 }
 
-                ImGui::SeparatorText("Custom Parameters");
-                if (ImGui::Button("Save"))
                 {
-                    m_CustomParametersFile.Save();
-                }
-                ImGui::SameLine();
-                if (ImGui::Button("Load"))
-                {
-                    m_CustomParametersFile.Load();
-                }
-                static char name[64] = {};
-                if (ImGui::Button("Add Current Parameters"))
-                {
-                    if (name[0] != '\0')
+                    ImGui::SeparatorText("Custom Parameters");
+                    
+                    if (ImGui::Button("Save"))
                     {
-                        AddCurrentParametersIntoCustomParameters(name);
-                        name[0] = '\0';
+                        m_CustomParametersFile.Save();
                     }
-                }
-                ImGui::SameLine();
-                ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
-                if (ImGui::BeginListBox("##custom-parameters-list", ImVec2(-FLT_MIN, 0.0f)))
-                {
-                    for (const CustomParameters& customParameters : m_CustomParametersFile.GetCustomParameters())
+                    ImGui::SameLine();
+                    if (ImGui::Button("Load"))
                     {
-                        ImGui::PushID(&customParameters);
-                        if (ImGui::Selectable(customParameters.Name.c_str()))
+                        m_CustomParametersFile.Load();
+                    }
+                    
+                    static char name[64] = {};
+                    if (ImGui::Button("Add Current Parameters"))
+                    {
+                        if (name[0] != '\0')
                         {
-                            SetCurrentParametersFromCustomParameters(customParameters);
+                            AddCurrentParametersToCustomParametersFile(name);
+                            name[0] = '\0';
                         }
-                        ImGui::PopID();
                     }
-                    ImGui::EndListBox();
+                    ImGui::SameLine();
+                    ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
                 }
+
+                {
+                    static ImGuiTextFilter customParametersFilter;
+                    customParametersFilter.Draw("Filter##custom-parameters");
+                    
+                    if (ImGui::BeginListBox("##custom-parameters-list", ImVec2(-FLT_MIN, 0.0f)))
+                    {
+                        for (const CustomParameters& customParameters : m_CustomParametersFile.GetCustomParameters())
+                        {
+                            if (customParametersFilter.PassFilter(customParameters.Name.c_str()))
+                            {
+                                ImGui::PushID(&customParameters);
+                                if (ImGui::Selectable(customParameters.Name.c_str()))
+                                {
+                                    SetCurrentParametersFromCustomParameters(customParameters);
+                                }
+                                ImGui::PopID();
+                            }
+                        }
+
+                        ImGui::EndListBox();
+                    }
+                }
+                
                 ImGui::EndTabItem();
             }
+            
             ImGui::EndTabBar();
         }
     }
@@ -218,6 +234,8 @@ void GameplayExternalCamera::OnRenderMenu()
 
 void GameplayExternalCamera::SetCurrentParametersFromCustomParameters(const CustomParameters& customParameters)
 {
+    // BrnDirector::Camera::BehaviourGameplayExternal::Parameters* parameters
+    
     Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
 
     parameters.at(0x3C).as<float>() = customParameters.PitchSpring;
@@ -234,8 +252,10 @@ void GameplayExternalCamera::SetCurrentParametersFromCustomParameters(const Cust
     parameters.at(0xA8).as<float>() = customParameters.DropFactor;
 }
 
-void GameplayExternalCamera::AddCurrentParametersIntoCustomParameters(const char* name)
+void GameplayExternalCamera::AddCurrentParametersToCustomParametersFile(const char* name)
 {
+    // BrnDirector::Camera::BehaviourGameplayExternal::Parameters* parameters
+    
     Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
     
     m_CustomParametersFile.GetCustomParameters().push_back(
