@@ -25,14 +25,14 @@ FreeCamera::FreeCamera()
     m_Logger(k_ModName),
     m_CustomParamtersFile(k_ModDirectory + "custom-parameters.yaml"s, m_Logger),
     m_GameplayExternalCamera(m_CustomParamtersFile),
-    m_Menu
-    {
-        .OnRenderFunction = [this]() { OnRenderMenu(); },
-    },
     m_DetourArbitratorUpdate
     {
         .Target = Core::Pointer(0x009645E0).GetAddress(),
         .Detour = &FreeCamera::DetourArbitratorUpdate,
+    },
+    m_Menu
+    {
+        .OnRenderFunction = [this]() { OnRenderMenu(); },
     }
 {
 }
@@ -205,18 +205,18 @@ void FreeCamera::Unload()
     }
 }
 
-void FreeCamera::OnUpdate(void* camera, void* sharedInfo)
+void FreeCamera::OnArbitratorUpdate(void* camera, void* arbStateSharedInfo)
 {
-    m_CurrentCamera.OnArbitratorUpdate(camera, sharedInfo);
-    m_GameplayExternalCamera.OnArbitratorUpdate(camera, sharedInfo);
-    m_Behaviors.OnArbitratorUpdate(camera, sharedInfo);
+    m_CurrentCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
+    m_GameplayExternalCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
+    m_Behaviors.OnArbitratorUpdate(camera, arbStateSharedInfo);
 }
 
 void FreeCamera::OnRenderMenu()
 {
     if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
-        ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
         
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Version     %s", k_ModVersion);
@@ -264,7 +264,7 @@ __declspec(naked) void FreeCamera::DetourArbitratorUpdate()
         push dword ptr [ebp + 0x10] // BrnDirector::ArbStateSharedInfo*
         push dword ptr [ebp + 0xC]  // BrnDirector::Camera::Camera*
         mov ecx, offset s_Instance
-        call FreeCamera::OnUpdate
+        call FreeCamera::OnArbitratorUpdate
 
         popad
         popfd

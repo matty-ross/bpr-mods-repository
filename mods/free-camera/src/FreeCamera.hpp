@@ -30,7 +30,8 @@ private:
     void Load();
     void Unload();
 
-    void OnUpdate(void* camera, void* sharedInfo);
+    void OnArbitratorUpdate(void* camera, void* arbStateSharedInfo);
+    
     void OnRenderMenu();
 
 private:
@@ -51,10 +52,10 @@ private:
     GameplayExternalCamera m_GameplayExternalCamera;
     Behaviors m_Behaviors;
     
-    ImGuiMenu m_Menu;
-
     DetourHook m_DetourArbitratorUpdate;
 
-    WNDPROC m_PreviousWindowProc = nullptr;
+    ImGuiMenu m_Menu;
+
     HANDLE m_LoadThread = NULL;
+    WNDPROC m_PreviousWindowProc = nullptr;
 };

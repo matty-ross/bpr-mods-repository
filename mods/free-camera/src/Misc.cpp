@@ -14,14 +14,24 @@ void Misc::OnRenderMenu()
         Core::Pointer arbitrator = gameModule.at(0x6F2AF0);
         Core::Pointer arbStateRoaming = arbitrator.at(0x1340);
 
-        ImGui::Checkbox("Allow Jump Moment", &directorModule.at(0x29F5D).as<bool>());
-        ImGui::Checkbox("Allow Slow Motion", &directorModule.at(0x283A8).as<bool>());
-        ImGui::Checkbox("Disable Depth of Field", &directorModule.at(0x29F68).as<bool>());
+        {
+            ImGui::Checkbox("Allow Jump Moment", &directorModule.at(0x29F5D).as<bool>());
+            ImGui::Checkbox("Allow Slow Motion", &directorModule.at(0x283A8).as<bool>());
+            ImGui::Checkbox("Disable Depth of Field", &directorModule.at(0x29F68).as<bool>());
+        }
 
-        ImGui::Checkbox("Do Attract Mode", &arbitrator.at(0x3DCD).as<bool>());
-        ImGui::Checkbox("Do Render Metrics", &arbitrator.at(0x3DCE).as<bool>());
+        ImGui::Separator();
+
+        {
+            ImGui::Checkbox("Do Attract Mode", &arbitrator.at(0x3DCD).as<bool>());
+            ImGui::Checkbox("Do Render Metrics", &arbitrator.at(0x3DCE).as<bool>());
+        }
         
-        ImGui::Checkbox("Disable Picture Paradise", &arbStateRoaming.at(0x3BF).as<bool>());
-        ImGui::Checkbox("Play Race End Effect", &arbStateRoaming.at(0x3C0).as<bool>());
+        ImGui::Separator();
+
+        {
+            ImGui::Checkbox("Disable Picture Paradise", &arbStateRoaming.at(0x3BF).as<bool>());
+            ImGui::Checkbox("Play Race End Effect", &arbStateRoaming.at(0x3C0).as<bool>());
+        }
     }
 }

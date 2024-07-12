@@ -201,6 +201,8 @@ void GameplayExternalCamera::OnRenderMenu()
                     ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
                 }
 
+                ImGui::Separator();
+
                 {
                     static ImGuiTextFilter customParametersFilter;
                     customParametersFilter.Draw("Filter##custom-parameters");
