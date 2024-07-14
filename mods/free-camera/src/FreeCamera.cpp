@@ -30,6 +30,11 @@ FreeCamera::FreeCamera()
         .Target = Core::Pointer(0x009645E0).GetAddress(),
         .Detour = &FreeCamera::DetourArbitratorUpdate,
     },
+    m_DetourSetPlayerVehicleIndex
+    {
+        .Target = Core::Pointer(0x00A3393B).GetAddress(),
+        .Detour = &FreeCamera::DetourSetPlayerVehicleIndex,
+    },
     m_Menu
     {
         .OnRenderFunction = [this]() { OnRenderMenu(); },
@@ -136,6 +141,15 @@ void FreeCamera::Load()
             m_Logger.Info("Attached ArbitratorUpdate detour.");
         }
 
+        // Attach SetPlayerVehicleIndex detour.
+        {
+            m_Logger.Info("Attaching SetPlayerVehicleIndex detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourSetPlayerVehicleIndex);
+
+            m_Logger.Info("Attached SetPlayerVehicleIndex detour.");
+        }
+
         // Add menu.
         {
             m_Logger.Info("Adding menu...");
@@ -174,6 +188,15 @@ void FreeCamera::Unload()
             m_Logger.Info("Removed menu.");
         }
 
+        // Detach SetPlayerVehicleIndex detour.
+        {
+            m_Logger.Info("Detaching SetPlayerVehicleIndex detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourSetPlayerVehicleIndex);
+
+            m_Logger.Info("Detached SetPlayerVehicleIndex detour.");
+        }
+
         // Detach ArbitratorUpdate detour.
         {
             m_Logger.Info("Detaching ArbitratorUpdate detour...");
@@ -210,6 +233,11 @@ void FreeCamera::OnArbitratorUpdate(void* camera, void* arbStateSharedInfo)
     m_CurrentCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
     m_GameplayExternalCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
     m_Behaviors.OnArbitratorUpdate(camera, arbStateSharedInfo);
+}
+
+void FreeCamera::OnSetPlayerVehicleIndex(void* directorInputBuffer)
+{
+    m_Misc.OnSetPlayerVehicleIndex(directorInputBuffer);
 }
 
 void FreeCamera::OnRenderMenu()
@@ -270,5 +298,23 @@ __declspec(naked) void FreeCamera::DetourArbitratorUpdate()
         popfd
         
         jmp dword ptr [s_Instance.m_DetourArbitratorUpdate.Target]
+    }
+}
+
+__declspec(naked) void FreeCamera::DetourSetPlayerVehicleIndex()
+{
+    __asm
+    {
+        pushfd
+        pushad
+        
+        push edi // BrnDirector::DirectorIO::InputBuffer*
+        mov ecx, offset s_Instance
+        call FreeCamera::OnSetPlayerVehicleIndex
+
+        popad
+        popfd
+
+        jmp dword ptr [s_Instance.m_DetourSetPlayerVehicleIndex.Target]
     }
 }

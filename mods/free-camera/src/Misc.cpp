@@ -5,6 +5,16 @@
 #include "core/Pointer.hpp"
 
 
+void Misc::OnSetPlayerVehicleIndex(Core::Pointer directorInputBuffer)
+{
+    // BrnDirector::DirectorIO::InputBuffer* directorInputBuffer
+    
+    if (m_OverridePlayerVehicleIndex)
+    {
+        directorInputBuffer.at(0x8168).as<int32_t>() = m_OverridenPlayerVehicleIndex;
+    }
+}
+
 void Misc::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Misc"))
@@ -32,6 +42,13 @@ void Misc::OnRenderMenu()
         {
             ImGui::Checkbox("Disable Picture Paradise", &arbStateRoaming.at(0x3BF).as<bool>());
             ImGui::Checkbox("Play Race End Effect", &arbStateRoaming.at(0x3C0).as<bool>());
+        }
+
+        ImGui::Separator();
+
+        {
+            ImGui::Checkbox("Override Player vehicle index", &m_OverridePlayerVehicleIndex);
+            ImGui::SliderInt("Overriden Player vehicle index", &m_OverridenPlayerVehicleIndex, 0, 7, "%d", ImGuiSliderFlags_AlwaysClamp);
         }
     }
 }

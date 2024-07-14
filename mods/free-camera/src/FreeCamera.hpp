@@ -31,6 +31,7 @@ private:
     void Unload();
 
     void OnArbitratorUpdate(void* camera, void* arbStateSharedInfo);
+    void OnSetPlayerVehicleIndex(void* directorInputBuffer);
     
     void OnRenderMenu();
 
@@ -38,6 +39,7 @@ private:
     static LRESULT CALLBACK WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
     
     static void DetourArbitratorUpdate();
+    static void DetourSetPlayerVehicleIndex();
 
 private:
     static FreeCamera s_Instance;
@@ -53,6 +55,7 @@ private:
     Behaviors m_Behaviors;
     
     DetourHook m_DetourArbitratorUpdate;
+    DetourHook m_DetourSetPlayerVehicleIndex;
 
     ImGuiMenu m_Menu;
 
