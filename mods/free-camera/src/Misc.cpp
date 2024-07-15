@@ -47,8 +47,9 @@ void Misc::OnRenderMenu()
         ImGui::Separator();
 
         {
-            ImGui::Checkbox("Override Player vehicle index", &m_OverridePlayerVehicleIndex);
-            ImGui::SliderInt("Overriden Player vehicle index", &m_OverridenPlayerVehicleIndex, 0, 7, "%d", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::Checkbox("Override", &m_OverridePlayerVehicleIndex);
+            ImGui::SameLine();
+            ImGui::SliderInt("Player Vehicle Index", &m_OverridenPlayerVehicleIndex, 0, 7, "%d", ImGuiSliderFlags_AlwaysClamp);
         }
     }
 }
