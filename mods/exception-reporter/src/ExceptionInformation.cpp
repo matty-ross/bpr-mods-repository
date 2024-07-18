@@ -1,6 +1,7 @@
 #include "ExceptionInformation.hpp"
 
 #include <cstdio>
+#include <Shlwapi.h>
 #include <DbgHelp.h>
 
 
@@ -57,8 +58,7 @@ std::string ExceptionInformation::GetAddress() const
         char fileName[MAX_PATH] = {};
         GetModuleFileNameA(module, fileName, sizeof(fileName));
 
-        std::string tmp = fileName;
-        return tmp.substr(tmp.find_last_of("/\\") + 1); // Extract the file name without the path.
+        return PathFindFileNameA(fileName);
     };
 
     HMODULE module = nullptr;
