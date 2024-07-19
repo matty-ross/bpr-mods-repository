@@ -35,11 +35,11 @@ OnlinePlayers::OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile)
 {
 }
 
-void OnlinePlayers::OnGuiEventNetworkPlayerStatus(Core::Pointer guiEventNetworkPlayerStatus, Core::Pointer guiCache)
+void OnlinePlayers::OnGuiEventNetworkPlayerStatus(
+    Core::Pointer guiEventNetworkPlayerStatus, // BrnGui::GuiEventNetworkPlayerStatus*
+    Core::Pointer guiCache // BrnGui::GuiCache*
+)
 {
-    // BrnGui::GuiEventNetworkPlayerStatus* guiEventNetworkPlayerStatus
-    // BrnGui::GuiCache* guiCache
-
     if (!m_BlacklistEnabled)
     {
         return;
@@ -54,7 +54,7 @@ void OnlinePlayers::OnGuiEventNetworkPlayerStatus(Core::Pointer guiEventNetworkP
     int32_t playersCount = guiEventNetworkPlayerStatus.at(0x9C0).as<int32_t>();
     for (int32_t i = 0; i < playersCount; ++i)
     {
-        Core::Pointer playerStatusData = guiEventNetworkPlayerStatus.at(0x0 + i * 0x138);
+        Core::Pointer playerStatusData = guiEventNetworkPlayerStatus.at(0x0 + i * 0x138); // BrnNetwork::BrnNetworkModuleIO::InGamePlayerStatusData*
         uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
 
         bool isLocalPlayer = playerStatusData.at(0x12D).as<bool>();
@@ -102,9 +102,7 @@ void OnlinePlayers::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Current Players"))
     {
-        // BrnGui::GuiCache* guiCache
-        
-        Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430);
+        Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430); // BrnGui::GuiCache*
 
         bool isOnline = guiCache.at(0x7B00).as<bool>();
         if (isOnline)
@@ -126,7 +124,7 @@ void OnlinePlayers::OnRenderMenu()
                     int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
                     for (int32_t i = 0; i < playersCount; ++i)
                     {
-                        Core::Pointer playerStatusData = guiCache.at(0xDE38 + i * 0x138);
+                        Core::Pointer playerStatusData = guiCache.at(0xDE38 + i * 0x138); // BrnNetwork::BrnNetworkModuleIO::InGamePlayerStatusData*
                         uint64_t playerID = playerStatusData.at(0x110).as<uint64_t>();
 
                         ImGui::PushID(playerStatusData.GetAddress());
@@ -192,7 +190,7 @@ void OnlinePlayers::OnRenderMenu()
             ImGui::SeparatorText("Blacklisted Players");
 
             static ImGuiTextFilter blacklistedPlayerFilter;
-            blacklistedPlayerFilter.Draw("Filter##blacklisted-player");
+            blacklistedPlayerFilter.Draw("Filter##blacklisted-player-filter");
             
             if (ImGui::BeginTable("##blacklisted-players-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
             {

@@ -75,10 +75,11 @@ void ModManager::Load()
             
             while (true)
             {
+                // BrnGameMainFlowController::GameMainFlowController::meCurrentState
                 Core::Pointer gameModule = 0x013FC8E0;
                 if (
                     gameModule.as<void*>() != nullptr &&
-                    gameModule.deref().at(0xB6D4C8).as<int32_t>() >= 3
+                    gameModule.deref().at(0xB6D4C8).as<int32_t>() >= 3 // BrnGameMainFlowController::EMainGameFlowState::E_MGS_START_SCREEN
                 )
                 {
                     break;
