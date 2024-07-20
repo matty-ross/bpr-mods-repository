@@ -55,42 +55,40 @@ VehicleProtection::VehicleProtection(VehiclesFile& vehiclesFile)
 {
 }
 
-void VehicleProtection::OnPlayerParamsSerialize(Core::Pointer playerParams)
+void VehicleProtection::OnPlayerParamsSerialize(
+    Core::Pointer playerParams // BrnNetwork::PlayerParams*
+)
 {
-    // BrnNetwork::PlayerParams* playerParams
-    
     if (!m_VehicleProtectionEnabled)
     {
         return;
     }
 
-    uint64_t vehicleID = 0x0000000000000000;
- 
+    uint64_t vehicleID = 0;
     BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetAddress(), &vehicleID);
     vehicleID = HandleVehicleID(vehicleID);
     BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetAddress(), vehicleID);
 }
 
-void VehicleProtection::OnPlayerParamsDeserialize(Core::Pointer playerParams)
+void VehicleProtection::OnPlayerParamsDeserialize(
+    Core::Pointer playerParams // BrnNetwork::PlayerParams*
+)
 {
-    // BrnNetwork::PlayerParams* playerParams
-    
     if (!m_VehicleProtectionEnabled)
     {
         return;
     }
 
-    uint64_t vehicleID = 0x0000000000000000;
-    
+    uint64_t vehicleID = 0;
     BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetAddress(), &vehicleID);
     vehicleID = HandleVehicleID(vehicleID);
     BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetAddress(), vehicleID);
 }
 
-void VehicleProtection::OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMessage)
+void VehicleProtection::OnVehicleSelectMessagePack(
+    Core::Pointer vehicleSelectMessage // BrnNetwork::CarSelectMessage*
+)
 {
-    // BrnNetwork::CarSelectMessage* vehicleSelectMessage
-    
     if (!m_VehicleProtectionEnabled)
     {
         return;
@@ -101,10 +99,10 @@ void VehicleProtection::OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMe
     vehicleSelectMessage.at(0x38).as<uint64_t>() = vehicleID;
 }
 
-void VehicleProtection::OnVehicleSelectMessageUnpack(Core::Pointer vehicleSelectMessage)
+void VehicleProtection::OnVehicleSelectMessageUnpack(
+    Core::Pointer vehicleSelectMessage // BrnNetwork::CarSelectMessage*
+)
 {
-    // BrnNetwork::CarSelectMessage* vehicleSelectMessage
-    
     if (!m_VehicleProtectionEnabled)
     {
         return;
@@ -119,7 +117,7 @@ void VehicleProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Vehicle Protection"))
     {
-        auto renderVanillaVehiclesPopup = []<typename T>(const char* title, uint64_t selectedVehicleID, T onSelected) -> void
+        auto renderVanillaVehiclesPopup = []<typename Fn>(const char* title, uint64_t selectedVehicleID, Fn onSelected) -> void
         {
             ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
             if (ImGui::BeginPopup("vanilla-vehicles-popup"))
@@ -127,7 +125,7 @@ void VehicleProtection::OnRenderMenu()
                 ImGui::SeparatorText(title);
 
                 static ImGuiTextFilter vanillaVehicleFilter;
-                vanillaVehicleFilter.Draw("Filter##vanilla-vehicle");
+                vanillaVehicleFilter.Draw("Filter##vanilla-vehicle-filter");
 
                 if (ImGui::BeginListBox("##vanilla-vehicles-list", ImVec2(-FLT_MIN, -FLT_MIN)))
                 {
@@ -139,6 +137,7 @@ void VehicleProtection::OnRenderMenu()
                             if (ImGui::Selectable(vanillaVehicle.Name, selected))
                             {
                                 onSelected(vanillaVehicle);
+                                vanillaVehicleFilter.Clear();
                                 ImGui::CloseCurrentPopup();
                             }
                             if (selected)
@@ -173,7 +172,7 @@ void VehicleProtection::OnRenderMenu()
             ImGui::SeparatorText("Fallback Vehicle");
 
             ImGui::TextUnformatted(m_VehiclesFile.GetFallbackVehicle()->Name);
-            ImGui::SameLine(300.0f);
+            ImGui::SameLine(0.0f, 20.0f);
             if (ImGui::Button("Change...##fallback-vehicle-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
             {
                 ImGui::OpenPopup("vanilla-vehicles-popup");
@@ -192,7 +191,7 @@ void VehicleProtection::OnRenderMenu()
             ImGui::SeparatorText("Vehicles");
 
             static ImGuiTextFilter vehicleFilter;
-            vehicleFilter.Draw("Filter##vehicle");
+            vehicleFilter.Draw("Filter##vehicle-filter");
             
             if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
             {
@@ -240,19 +239,17 @@ void VehicleProtection::OnRenderMenu()
 
 void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
 {
-    // BrnResource::VehicleList* vehicleList
-    
-    Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350);
+    Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350); // BrnResource::VehicleList*
 
     int32_t vehiclesCount = vehicleList.at(0x3400).as<int32_t>();
     for (int32_t i = 0; i < vehiclesCount; ++i)
     {
-        Core::Pointer vehicleSlot = vehicleList.at(0x400 + i * 0xC);
+        Core::Pointer vehicleSlot = vehicleList.at(0x400 + i * 0xC); // BrnResource::VehicleSlot*
         int32_t listIndex = vehicleSlot.at(0x4).as<int32_t>();
         int32_t entryIndex = vehicleSlot.at(0x8).as<int32_t>();
 
-        Core::Pointer list = vehicleList.at(0x0 + listIndex * 0x20).as<void*>();
-        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0x108);
+        Core::Pointer list = vehicleList.at(0x0 + listIndex * 0x20).as<void*>(); // BrnResource::VehicleListResource*
+        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0x108); // BrnResource::VehicleListEntry*
 
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
         bool isVanilla = GetVanillaVehicle(vehicleID) != nullptr;

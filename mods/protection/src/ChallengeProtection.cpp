@@ -9,10 +9,10 @@ ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
 {
 }
 
-void ChallengeProtection::OnFreeburnChallengeMessagePack(Core::Pointer freeburnChallengeMessage)
+void ChallengeProtection::OnFreeburnChallengeMessagePack(
+    Core::Pointer freeburnChallengeMessage // BrnNetwork::FreeburnChallengeMessage*
+)
 {
-    // BrnNetwork::FreeburnChallengeMessage* freeburnChallengeMessage
-    
     if (!m_ChallengeProtectionEnabled)
     {
         return;
@@ -23,10 +23,10 @@ void ChallengeProtection::OnFreeburnChallengeMessagePack(Core::Pointer freeburnC
     freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
 }
 
-void ChallengeProtection::OnFreeburnChallengeMessageUnpack(Core::Pointer freeburnChallengeMessage)
+void ChallengeProtection::OnFreeburnChallengeMessageUnpack(
+    Core::Pointer freeburnChallengeMessage // BrnNetwork::FreeburnChallengeMessage*
+)
 {
-    // BrnNetwork::FreeburnChallengeMessage* freeburnChallengeMessage
-
     if (!m_ChallengeProtectionEnabled)
     {
         return;
@@ -41,7 +41,7 @@ void ChallengeProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Challenge Protection"))
     {
-        auto renderVanillaChallengesPopup = []<typename T>(const char* title, uint64_t selectedChallengeID, T onSelected) -> void
+        auto renderVanillaChallengesPopup = []<typename Fn>(const char* title, uint64_t selectedChallengeID, Fn onSelected) -> void
         {
             ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
             if (ImGui::BeginPopup("vanilla-challenges-popup"))
@@ -49,7 +49,7 @@ void ChallengeProtection::OnRenderMenu()
                 ImGui::SeparatorText(title);
 
                 static ImGuiTextFilter vanillaChallengeFilter;
-                vanillaChallengeFilter.Draw("Filter##vanilla-challenge");
+                vanillaChallengeFilter.Draw("Filter##vanilla-challenge-filter");
 
                 if (ImGui::BeginListBox("##vanilla-challenges-list", ImVec2(-FLT_MIN, -FLT_MIN)))
                 {
@@ -61,6 +61,7 @@ void ChallengeProtection::OnRenderMenu()
                             if (ImGui::Selectable(vanillaChallenge.Title, selected))
                             {
                                 onSelected(vanillaChallenge);
+                                vanillaChallengeFilter.Clear();
                                 ImGui::CloseCurrentPopup();
                             }
                             if (selected)
@@ -95,7 +96,7 @@ void ChallengeProtection::OnRenderMenu()
             ImGui::SeparatorText("Fallback Challenge");
             
             ImGui::TextUnformatted(m_ChallengesFile.GetFallbackChallenge()->Title);
-            ImGui::SameLine(300.0f);
+            ImGui::SameLine(0.0f, 20.0f);
             if (ImGui::Button("Change...##fallback-challenge-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
             {
                 ImGui::OpenPopup("vanilla-challenges-popup");
@@ -114,7 +115,7 @@ void ChallengeProtection::OnRenderMenu()
             ImGui::SeparatorText("Challenges");
         
             static ImGuiTextFilter challengeFilter;
-            challengeFilter.Draw("Filter##challenge");
+            challengeFilter.Draw("Filter##challenge-filter");
 
             if (ImGui::BeginTable("##challenges-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
             {
@@ -162,19 +163,17 @@ void ChallengeProtection::OnRenderMenu()
 
 void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
 {
-    // BrnResource::ChallengeList* challengeList
-
-    Core::Pointer challengeList = Core::Pointer(0x013FC8E0).deref().at(0x690B70);
+    Core::Pointer challengeList = Core::Pointer(0x013FC8E0).deref().at(0x690B70); // BrnResource::ChallengeList*
 
     int32_t challengesCount = challengeList.at(0x32E0).as<int32_t>();
     for (int32_t i = 0; i < challengesCount; ++i)
     {
-        Core::Pointer challengeSlot = challengeList.at(0x400 + i * 0xC);
+        Core::Pointer challengeSlot = challengeList.at(0x400 + i * 0xC); // BrnResource::ChallengeSlot*
         int32_t listIndex = challengeSlot.at(0x4).as<int32_t>();
         int32_t entryIndex = challengeSlot.at(0x8).as<int32_t>();
 
-        Core::Pointer list = challengeList.at(0x0 + listIndex * 0x20).as<void*>();
-        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0xD8);
+        Core::Pointer list = challengeList.at(0x0 + listIndex * 0x20).as<void*>(); // BrnResource::ChallengeListResource*
+        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0xD8); // BrnResource::ChallengeListEntry*
 
         uint64_t challengeID = entry.at(0xC0).as<uint64_t>();
         bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;

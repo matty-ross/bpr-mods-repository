@@ -114,10 +114,11 @@ void Protection::Load()
 
             while (true)
             {
+                // BrnGameMainFlowController::GameMainFlowController::meCurrentState
                 Core::Pointer gameModule = 0x013FC8E0;
                 if (
                     gameModule.as<void*>() != nullptr &&
-                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6
+                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6 // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
                 )
                 {
                     break;
