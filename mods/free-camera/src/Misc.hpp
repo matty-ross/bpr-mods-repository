@@ -12,6 +12,6 @@ public:
     void OnRenderMenu();
 
 private:
-    int32_t m_OverridenPlayerVehicleIndex = 0;
+    int32_t m_PlayerVehicleIndex = 0;
     bool m_OverridePlayerVehicleIndex = false;
 };

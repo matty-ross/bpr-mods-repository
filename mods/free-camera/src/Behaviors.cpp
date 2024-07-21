@@ -247,11 +247,11 @@ namespace BPR
 }
 
 
-void Behaviors::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo)
+void Behaviors::OnArbitratorUpdate(
+    Core::Pointer camera, // BrnDirector::Camera::Camera*
+    Core::Pointer arbStateSharedInfo // BrnDirector::ArbStateSharedInfo*
+)
 {
-    // BrnDirector::Camera::Camera* camera
-    // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
-    
     switch (m_BehaviorState)
     {
     case BehaviorState::Prepare:
@@ -302,8 +302,7 @@ void Behaviors::OnRenderMenu()
                     for (const BehaviorParametersData& behaviorParametersData : behaviorData.ParametersData)
                     {
                         ImGui::PushID(&behaviorParametersData);
-                        bool selected = m_SelectedBehaviorParameters == &behaviorParametersData;
-                        if (ImGui::Selectable(behaviorParametersData.Name, selected))
+                        if (ImGui::Selectable(behaviorParametersData.Name, m_SelectedBehaviorParameters == &behaviorParametersData))
                         {
                             if (m_BehaviorState == BehaviorState::Inactive)
                             {
@@ -323,28 +322,28 @@ void Behaviors::OnRenderMenu()
     }
 }
 
-void Behaviors::PrepareBehavior(Core::Pointer arbStateSharedInfo)
+void Behaviors::PrepareBehavior(
+    Core::Pointer arbStateSharedInfo // BrnDirector::ArbStateSharedInfo*
+)
 {
-    // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
-
     BPR::BehaviorHandle behaviorHandle = {};
     BPR::BehaviorManager_NewBehavior(m_SelectedBehavior->NewBehaviorFunction.GetAddress(), &behaviorHandle);
 
     m_BehaviorHelper = Core::Pointer(behaviorHandle.BehaviorHelperPool).at(behaviorHandle.BehaviorHelperIndex * 0x1A0);
     m_BehaviorHelperIndex = behaviorHandle.BehaviorHelperIndex;
 
-    Core::Pointer behavior = m_BehaviorHelper.at(0x0).as<void*>();
-    Core::Pointer namedParameters = arbStateSharedInfo.at(0x1C).as<void*>();
+    Core::Pointer behavior = m_BehaviorHelper.at(0x0).as<void*>(); // BrnDirector::Camera::Behaviour*
+    Core::Pointer namedParameters = arbStateSharedInfo.at(0x1C).as<void*>(); // BrnDirector::Camera::NamedParameters*
     behavior.at(m_SelectedBehavior->ParametersOffset).as<void*>() = namedParameters.at(m_SelectedBehaviorParameters->Offset).GetAddress();
 
     m_SelectedBehavior->PostPrepare(behavior);
 }
 
-void Behaviors::UpdateBehavior(Core::Pointer camera)
+void Behaviors::UpdateBehavior(
+    Core::Pointer camera // BrnDirector::Camera::Camera*
+)
 {
-    // BrnDirector::Camera::Camera* camera
-    
-    Core::Pointer behaviorHelperCamera = m_BehaviorHelper.at(0x10);
+    Core::Pointer behaviorHelperCamera = m_BehaviorHelper.at(0x10); // BrnDirector::Camera::Camera*
     BPR::Camera_OperatorEquals(camera.GetAddress(), behaviorHelperCamera.GetAddress());
 }
 

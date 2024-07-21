@@ -2,16 +2,14 @@
 
 #include "vendor/imgui.hpp"
 
-#include "core/Pointer.hpp"
 
-
-void Misc::OnSetPlayerVehicleIndex(Core::Pointer directorInputBuffer)
+void Misc::OnSetPlayerVehicleIndex(
+    Core::Pointer directorInputBuffer // BrnDirector::DirectorIO::InputBuffer*
+)
 {
-    // BrnDirector::DirectorIO::InputBuffer* directorInputBuffer
-    
     if (m_OverridePlayerVehicleIndex)
     {
-        directorInputBuffer.at(0x8168).as<int32_t>() = m_OverridenPlayerVehicleIndex;
+        directorInputBuffer.at(0x8168).as<int32_t>() = m_PlayerVehicleIndex;
     }
 }
 
@@ -47,9 +45,18 @@ void Misc::OnRenderMenu()
         ImGui::Separator();
 
         {
-            ImGui::Checkbox("Override", &m_OverridePlayerVehicleIndex);
+            if (ImGui::Button("Reset"))
+            {
+                m_PlayerVehicleIndex = 0;
+                m_OverridePlayerVehicleIndex = false;
+            }
+            
             ImGui::SameLine();
-            ImGui::SliderInt("Player Vehicle Index", &m_OverridenPlayerVehicleIndex, 0, 7, "%d", ImGuiSliderFlags_AlwaysClamp);
+            
+            if (ImGui::SliderInt("Player Vehicle Index", &m_PlayerVehicleIndex, 0, 7, "%d", ImGuiSliderFlags_AlwaysClamp))
+            {
+                m_OverridePlayerVehicleIndex = true;
+            }
         }
     }
 }
