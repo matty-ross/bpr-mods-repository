@@ -286,37 +286,40 @@ void Behaviors::OnRenderMenu()
             }
         }
 
+        ImGui::Separator();
+
         {
             for (const BehaviorData& behaviorData : k_BehaviorData)
             {
-                ImGui::SeparatorText(behaviorData.Name);
-                
-                ImGui::PushID(&behaviorData);
-                if (
-                    ImGui::BeginListBox(
-                        "##behavior-parameters-list",
-                        ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * behaviorData.ParametersData.size() + ImGui::GetStyle().FramePadding.y * 2.0f)
-                    )
-                )
+                if (ImGui::TreeNode(behaviorData.Name))
                 {
-                    for (const BehaviorParametersData& behaviorParametersData : behaviorData.ParametersData)
+                    ImGui::PushID(&behaviorData);
+                    if (ImGui::BeginListBox("##behavior-parameters-list", ImVec2(-FLT_MIN, behaviorData.ParametersData.size() * ImGui::GetTextLineHeightWithSpacing())))
                     {
-                        ImGui::PushID(&behaviorParametersData);
-                        if (ImGui::Selectable(behaviorParametersData.Name, m_SelectedBehaviorParameters == &behaviorParametersData))
+                        for (const BehaviorParametersData& behaviorParametersData : behaviorData.ParametersData)
                         {
-                            if (m_BehaviorState == BehaviorState::Inactive)
+                            bool selected = m_SelectedBehaviorParameters == &behaviorParametersData;
+                            if (ImGui::Selectable(behaviorParametersData.Name, selected))
                             {
-                                m_BehaviorState = BehaviorState::Prepare;
-                                m_SelectedBehavior = &behaviorData;
-                                m_SelectedBehaviorParameters = &behaviorParametersData;
+                                if (m_BehaviorState == BehaviorState::Inactive)
+                                {
+                                    m_BehaviorState = BehaviorState::Prepare;
+                                    m_SelectedBehavior = &behaviorData;
+                                    m_SelectedBehaviorParameters = &behaviorParametersData;
+                                }
+                            }
+                            if (selected)
+                            {
+                                ImGui::SetItemDefaultFocus();
                             }
                         }
-                        ImGui::PopID();
+
+                        ImGui::EndListBox();
                     }
+                    ImGui::PopID();
                     
-                    ImGui::EndListBox();
+                    ImGui::TreePop();
                 }
-                ImGui::PopID();
             }
         }
     }
@@ -329,7 +332,7 @@ void Behaviors::PrepareBehavior(
     BPR::BehaviorHandle behaviorHandle = {};
     BPR::BehaviorManager_NewBehavior(m_SelectedBehavior->NewBehaviorFunction.GetAddress(), &behaviorHandle);
 
-    m_BehaviorHelper = Core::Pointer(behaviorHandle.BehaviorHelperPool).at(behaviorHandle.BehaviorHelperIndex * 0x1A0);
+    m_BehaviorHelper = Core::Pointer(behaviorHandle.BehaviorHelperPool).at(behaviorHandle.BehaviorHelperIndex * 0x1A0); // BrnDirector::Camera::BehaviourManager::BehaviourHelper*
     m_BehaviorHelperIndex = behaviorHandle.BehaviorHelperIndex;
 
     Core::Pointer behavior = m_BehaviorHelper.at(0x0).as<void*>(); // BrnDirector::Camera::Behaviour*

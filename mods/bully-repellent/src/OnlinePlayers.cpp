@@ -112,9 +112,9 @@ void OnlinePlayers::OnRenderMenu()
                 ImGui::Text("You are Host   %s", guiCache.at(0xEA59).as<bool>() ? "Yes" : "No");
             }
 
+            ImGui::Separator();
+
             {
-                ImGui::SeparatorText("Current Players");
-                
                 if (ImGui::BeginTable("##player-info-table", 2, ImGuiTableFlags_None, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 12.0f)))
                 {
                     ImGui::TableSetupColumn("Name");
@@ -131,6 +131,7 @@ void OnlinePlayers::OnRenderMenu()
                         ImGui::TableNextRow();
                         {
                             ImGui::TableNextColumn();
+                            ImGui::AlignTextToFramePadding();
                             ImGui::TextUnformatted(playerStatusData.at(0xF0).as<char[25]>());
                     
                             ImGui::TableNextColumn();
@@ -174,7 +175,11 @@ void OnlinePlayers::OnRenderMenu()
     {
         {
             ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
-        
+        }
+
+        ImGui::Separator();
+         
+        {
             if (ImGui::Button("Save"))
             {
                 m_BlacklistedPlayersFile.Save();
@@ -184,16 +189,13 @@ void OnlinePlayers::OnRenderMenu()
             {
                 m_BlacklistedPlayersFile.Load();
             }
-        }
-
-        {
-            ImGui::SeparatorText("Blacklisted Players");
-
+            
             static ImGuiTextFilter blacklistedPlayerFilter;
             blacklistedPlayerFilter.Draw("Filter##blacklisted-player-filter");
             
             if (ImGui::BeginTable("##blacklisted-players-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
             {
+                ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Name");
                 ImGui::TableSetupColumn("Autokick");
                 ImGui::TableSetupColumn("Automute");
@@ -207,6 +209,7 @@ void OnlinePlayers::OnRenderMenu()
                         ImGui::TableNextRow();
                         {
                             ImGui::TableNextColumn();
+                            ImGui::AlignTextToFramePadding();
                             ImGui::TextUnformatted(blacklistedPlayer.Name.c_str());
                 
                             ImGui::TableNextColumn();

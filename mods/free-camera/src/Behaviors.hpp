@@ -35,6 +35,6 @@ private:
     const BehaviorData* m_SelectedBehavior = nullptr;
     const BehaviorParametersData* m_SelectedBehaviorParameters = nullptr;
 
-    Core::Pointer m_BehaviorHelper = nullptr; // BrnDirector::Camera::BehaviourManager::BehaviourHelper*
+    Core::Pointer m_BehaviorHelper = nullptr;
     int32_t m_BehaviorHelperIndex = -1;
 };
