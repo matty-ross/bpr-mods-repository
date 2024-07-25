@@ -117,10 +117,13 @@ void VehicleProtection::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Vehicle Protection"))
     {
+        static constexpr char vanillaVehiclesPopupID[] = "vanilla-vehicles-popup";
+        
         auto renderVanillaVehiclesPopup = []<typename Fn>(const char* title, uint64_t selectedVehicleID, Fn onSelected) -> void
         {
             ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
-            if (ImGui::BeginPopup("vanilla-vehicles-popup"))
+            
+            if (ImGui::BeginPopup(vanillaVehiclesPopupID))
             {
                 ImGui::SeparatorText(title);
 
@@ -133,6 +136,8 @@ void VehicleProtection::OnRenderMenu()
                     {
                         if (vanillaVehicleFilter.PassFilter(vanillaVehicle.Name))
                         {
+                            ImGui::PushID(&vanillaVehicle);
+                            
                             bool selected = vanillaVehicle.ID == selectedVehicleID;
                             if (ImGui::Selectable(vanillaVehicle.Name, selected))
                             {
@@ -144,6 +149,8 @@ void VehicleProtection::OnRenderMenu()
                             {
                                 ImGui::SetItemDefaultFocus();
                             }
+
+                            ImGui::PopID();
                         }
                     }
 
@@ -161,22 +168,28 @@ void VehicleProtection::OnRenderMenu()
             {
                 m_VehiclesFile.Save();
             }
+            
             ImGui::SameLine();
+            
             if (ImGui::Button("Load"))
             {
                 m_VehiclesFile.Load();
             }
         }
 
-        {
-            ImGui::SeparatorText("Fallback Vehicle");
+        ImGui::Separator();
 
-            ImGui::TextUnformatted(m_VehiclesFile.GetFallbackVehicle()->Name);
+        {
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Fallback Vehicle   %s", m_VehiclesFile.GetFallbackVehicle()->Name);
+
             ImGui::SameLine(0.0f, 20.0f);
-            if (ImGui::Button("Change...##fallback-vehicle-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
+            
+            if (ImGui::Button("Change..."))
             {
-                ImGui::OpenPopup("vanilla-vehicles-popup");
+                ImGui::OpenPopup(vanillaVehiclesPopupID);
             }
+            
             renderVanillaVehiclesPopup(
                 "Fallback Vehicle",
                 m_VehiclesFile.GetFallbackVehicle()->ID,
@@ -187,14 +200,15 @@ void VehicleProtection::OnRenderMenu()
             );
         }
 
-        {
-            ImGui::SeparatorText("Vehicles");
+        ImGui::Separator();
 
+        {
             static ImGuiTextFilter vehicleFilter;
             vehicleFilter.Draw("Filter##vehicle-filter");
             
-            if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing() * 20.0f)))
+            if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
             {
+                ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.3f);
                 ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.5f);
                 ImGui::TableSetupColumn("##change-vehicle-column", ImGuiTableColumnFlags_WidthStretch, 0.2f);
@@ -205,28 +219,39 @@ void VehicleProtection::OnRenderMenu()
                     if (vehicleFilter.PassFilter(vehicle.Name.c_str()))
                     {
                         ImGui::PushID(&vehicle);
+                        
                         ImGui::TableNextRow();
                         {
                             ImGui::TableNextColumn();
-                            ImGui::TextUnformatted(vehicle.Name.c_str());
-
-                            ImGui::TableNextColumn();
-                            ImGui::TextUnformatted(vehicle.Replacement->Name);
-
-                            ImGui::TableNextColumn();
-                            if (ImGui::Button("Change...##replacement-vehicle-button", ImVec2(0.0f, ImGui::GetTextLineHeightWithSpacing())))
                             {
-                                ImGui::OpenPopup("vanilla-vehicles-popup");
+                                ImGui::AlignTextToFramePadding();
+                                ImGui::TextUnformatted(vehicle.Name.c_str());
                             }
-                            renderVanillaVehiclesPopup(
-                                "Replacement Vehicle",
-                                vehicle.Replacement->ID,
-                                [&](const VanillaVehicle& vanillaVehicle) -> void
+
+                            ImGui::TableNextColumn();
+                            {
+                                ImGui::AlignTextToFramePadding();
+                                ImGui::TextUnformatted(vehicle.Replacement->Name);
+                            }
+
+                            ImGui::TableNextColumn();
+                            {
+                                if (ImGui::Button("Change..."))
                                 {
-                                    vehicle.Replacement = &vanillaVehicle;
+                                    ImGui::OpenPopup(vanillaVehiclesPopupID);
                                 }
-                            );
+                                
+                                renderVanillaVehiclesPopup(
+                                    "Replacement Vehicle",
+                                    vehicle.Replacement->ID,
+                                    [&](const VanillaVehicle& vanillaVehicle) -> void
+                                    {
+                                        vehicle.Replacement = &vanillaVehicle;
+                                    }
+                                );
+                            }
                         }
+                        
                         ImGui::PopID();
                     }
                 }
