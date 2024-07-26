@@ -52,9 +52,9 @@ void ChallengeProtection::OnRenderMenu()
                 ImGui::SeparatorText(title);
 
                 static ImGuiTextFilter vanillaChallengeFilter;
-                vanillaChallengeFilter.Draw("Filter##vanilla-challenge-filter");
+                vanillaChallengeFilter.Draw("Filter##vanilla-challenge");
 
-                if (ImGui::BeginListBox("##vanilla-challenges-list", ImVec2(-FLT_MIN, -FLT_MIN)))
+                if (ImGui::BeginListBox("##vanilla-challenges", ImVec2(-FLT_MIN, -FLT_MIN)))
                 {
                     for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
                     {
@@ -88,14 +88,14 @@ void ChallengeProtection::OnRenderMenu()
         {
             ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
             
-            if (ImGui::Button("Save"))
+            if (ImGui::Button("Save##challenges-file"))
             {
                 m_ChallengesFile.Save();
             }
             
             ImGui::SameLine();
             
-            if (ImGui::Button("Load"))
+            if (ImGui::Button("Load##challenges-file"))
             {
                 m_ChallengesFile.Load();
             }
@@ -109,7 +109,7 @@ void ChallengeProtection::OnRenderMenu()
             
             ImGui::SameLine(0.0f, 20.0f);
             
-            if (ImGui::Button("Change..."))
+            if (ImGui::Button("Change...##fallback-challenge"))
             {
                 ImGui::OpenPopup(vanillaChallengesPopupID);
             }
@@ -128,14 +128,14 @@ void ChallengeProtection::OnRenderMenu()
 
         {
             static ImGuiTextFilter challengeFilter;
-            challengeFilter.Draw("Filter##challenge-filter");
+            challengeFilter.Draw("Filter##challenge");
 
-            if (ImGui::BeginTable("##challenges-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
+            if (ImGui::BeginTable("##challenges", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
             {
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.3f);
                 ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.5f);
-                ImGui::TableSetupColumn("##change-challenge-column", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+                ImGui::TableSetupColumn("##change-challenge", ImGuiTableColumnFlags_WidthStretch, 0.2f);
                 ImGui::TableHeadersRow();
             
                 for (Challenge& challenge : m_ChallengesFile.GetChallenges())

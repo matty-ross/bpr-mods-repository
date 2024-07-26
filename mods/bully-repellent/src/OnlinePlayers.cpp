@@ -115,7 +115,7 @@ void OnlinePlayers::OnRenderMenu()
             ImGui::Separator();
 
             {
-                if (ImGui::BeginTable("##player-info-table", 2, ImGuiTableFlags_None))
+                if (ImGui::BeginTable("##current-players", 2, ImGuiTableFlags_None))
                 {
                     ImGui::TableSetupColumn("Name");
                     ImGui::TableSetupColumn("Blacklist");
@@ -185,14 +185,14 @@ void OnlinePlayers::OnRenderMenu()
         {
             ImGui::Checkbox("Blacklist Enabled", &m_BlacklistEnabled);
             
-            if (ImGui::Button("Save"))
+            if (ImGui::Button("Save##blacklisted-players-file"))
             {
                 m_BlacklistedPlayersFile.Save();
             }
             
             ImGui::SameLine();
             
-            if (ImGui::Button("Load"))
+            if (ImGui::Button("Load##blacklisted-players-file"))
             {
                 m_BlacklistedPlayersFile.Load();
             }
@@ -202,9 +202,9 @@ void OnlinePlayers::OnRenderMenu()
          
         {
             static ImGuiTextFilter blacklistedPlayerFilter;
-            blacklistedPlayerFilter.Draw("Filter##blacklisted-player-filter");
+            blacklistedPlayerFilter.Draw("Filter##blacklisted-player");
             
-            if (ImGui::BeginTable("##blacklisted-players-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
+            if (ImGui::BeginTable("##blacklisted-players", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
             {
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Name");
@@ -228,12 +228,12 @@ void OnlinePlayers::OnRenderMenu()
                 
                             ImGui::TableNextColumn();
                             {
-                                ImGui::Checkbox("##autokick-checkbox", &blacklistedPlayer.Autokick);
+                                ImGui::Checkbox("##autokick", &blacklistedPlayer.Autokick);
                             }
                 
                             ImGui::TableNextColumn();
                             {
-                                ImGui::Checkbox("##automute-checkbox", &blacklistedPlayer.Automute);
+                                ImGui::Checkbox("##automute", &blacklistedPlayer.Automute);
                             }
                         }
                         

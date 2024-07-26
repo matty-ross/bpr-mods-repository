@@ -30,7 +30,7 @@ BullyRepellent::BullyRepellent()
     },
     m_Menu
     {
-        .OnRenderFunction = [this]() { OnRenderMenu(); },
+        .OnRenderFunction = [&]() { OnRenderMenu(); },
     }
 {
 }

@@ -37,7 +37,7 @@ FreeCamera::FreeCamera()
     },
     m_Menu
     {
-        .OnRenderFunction = [this]() { OnRenderMenu(); },
+        .OnRenderFunction = [&]() { OnRenderMenu(); },
     }
 {
 }

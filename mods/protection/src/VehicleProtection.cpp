@@ -128,9 +128,9 @@ void VehicleProtection::OnRenderMenu()
                 ImGui::SeparatorText(title);
 
                 static ImGuiTextFilter vanillaVehicleFilter;
-                vanillaVehicleFilter.Draw("Filter##vanilla-vehicle-filter");
+                vanillaVehicleFilter.Draw("Filter##vanilla-vehicle");
 
-                if (ImGui::BeginListBox("##vanilla-vehicles-list", ImVec2(-FLT_MIN, -FLT_MIN)))
+                if (ImGui::BeginListBox("##vanilla-vehicles", ImVec2(-FLT_MIN, -FLT_MIN)))
                 {
                     for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
                     {
@@ -164,14 +164,14 @@ void VehicleProtection::OnRenderMenu()
         {
             ImGui::Checkbox("Vehicle Protection Enabled", &m_VehicleProtectionEnabled);
 
-            if (ImGui::Button("Save"))
+            if (ImGui::Button("Save##vehicles-file"))
             {
                 m_VehiclesFile.Save();
             }
             
             ImGui::SameLine();
             
-            if (ImGui::Button("Load"))
+            if (ImGui::Button("Load##vehicles-file"))
             {
                 m_VehiclesFile.Load();
             }
@@ -185,7 +185,7 @@ void VehicleProtection::OnRenderMenu()
 
             ImGui::SameLine(0.0f, 20.0f);
             
-            if (ImGui::Button("Change..."))
+            if (ImGui::Button("Change...##fallback-vehicle"))
             {
                 ImGui::OpenPopup(vanillaVehiclesPopupID);
             }
@@ -204,14 +204,14 @@ void VehicleProtection::OnRenderMenu()
 
         {
             static ImGuiTextFilter vehicleFilter;
-            vehicleFilter.Draw("Filter##vehicle-filter");
+            vehicleFilter.Draw("Filter##vehicle");
             
-            if (ImGui::BeginTable("##vehicles-table", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
+            if (ImGui::BeginTable("##vehicles", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
             {
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.3f);
                 ImGui::TableSetupColumn("Replacement Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.5f);
-                ImGui::TableSetupColumn("##change-vehicle-column", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+                ImGui::TableSetupColumn("##change-vehicle", ImGuiTableColumnFlags_WidthStretch, 0.2f);
                 ImGui::TableHeadersRow();
 
                 for (Vehicle& vehicle : m_VehiclesFile.GetVehicles())

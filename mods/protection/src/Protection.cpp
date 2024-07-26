@@ -57,7 +57,7 @@ Protection::Protection()
     },
     m_Menu
     {
-        .OnRenderFunction = [this]() { OnRenderMenu(); },
+        .OnRenderFunction = [&]() { OnRenderMenu(); },
     }
 {
 }
