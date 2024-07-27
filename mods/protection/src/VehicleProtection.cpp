@@ -5,7 +5,7 @@
 
 namespace BPR
 {
-    // void CgsIDConvertToString(CgsID lID, char* lpcString)
+    // void CgsIDConvertToString(CgsID, char*)
     static void CgsID_ConvertToString(uint64_t id, char* string)
     {
         __asm
@@ -20,7 +20,7 @@ namespace BPR
         }
     }
     
-    // void __thiscall BrnNetwork::PlayerParamsBase::GetFreeBurnCarID(CgsID* lpCarId)
+    // void __thiscall BrnNetwork::PlayerParamsBase::GetFreeBurnCarID(CgsID*)
     static void PlayerParamsBase_GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
     {
         __asm
@@ -33,7 +33,7 @@ namespace BPR
         }
     }
 
-    // void __thiscall BrnNetwork::PlayerParamsBase::SetFreeBurnCarID(CgsID lCarId)
+    // void __thiscall BrnNetwork::PlayerParamsBase::SetFreeBurnCarID(CgsID)
     static void PlayerParamsBase_SetFreeburnVehicleID(void* playerParams, uint64_t vehicleID)
     {
         __asm

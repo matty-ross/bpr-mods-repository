@@ -271,6 +271,7 @@ LRESULT CALLBACK FreeCamera::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPAR
             RAWINPUT rawInput = {};
             UINT size = sizeof(rawInput);
             GetRawInputData(reinterpret_cast<HRAWINPUT>(lParam), RID_INPUT, &rawInput, &size, sizeof(RAWINPUTHEADER));
+            
             if (rawInput.header.dwType == RIM_TYPEMOUSE)
             {
                 s_Instance.m_CurrentCamera.OnMouseInput(rawInput.data.mouse);

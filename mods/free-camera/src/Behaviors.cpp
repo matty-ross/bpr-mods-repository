@@ -73,7 +73,7 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
     
     BehaviorData
     {
-        .Name                = "Bystander Cam",
+        .Name                = "Bystander",
         .NewBehaviorFunction = 0x004D9990,
         .ParametersOffset    = 0x340,
         .PostPrepare         =
@@ -114,7 +114,7 @@ static const std::array<BehaviorData, 8> k_BehaviorData =
             BehaviorParametersData{ .Name = "Front Q Low Bwd",     .Offset = 0x1810 },
             BehaviorParametersData{ .Name = "Roof Fwd",            .Offset = 0x1930 },
             BehaviorParametersData{ .Name = "Boot Fwd",            .Offset = 0x1A50 },
-            BehaviorParametersData{ .Name = "Front Q Cu Fwd2",     .Offset = 0x1B70 },
+            BehaviorParametersData{ .Name = "Front Q Cu Fwd 2",    .Offset = 0x1B70 },
             BehaviorParametersData{ .Name = "Underbelly",          .Offset = 0x1C90 },
             BehaviorParametersData{ .Name = "Drop Underbelly",     .Offset = 0x1DB0 },
             BehaviorParametersData{ .Name = "Drop Front Q Cu Fwd", .Offset = 0x1ED0 },
@@ -207,7 +207,7 @@ namespace BPR
     {
         __asm
         {
-            push 0
+            push 1
             push 0
             push 0
             push dword ptr [behaviorHandle]
@@ -275,7 +275,7 @@ void Behaviors::OnRenderMenu()
     if (ImGui::CollapsingHeader("Behaviors"))
     {
         {
-            if (ImGui::Button("Deactivate"))
+            if (ImGui::Button("Deactivate##behavior"))
             {
                 if (m_BehaviorState == BehaviorState::Update)
                 {
@@ -293,11 +293,13 @@ void Behaviors::OnRenderMenu()
             {
                 if (ImGui::TreeNode(behaviorData.Name))
                 {
-                    ImGui::PushID(&behaviorData);
-                    if (ImGui::BeginListBox("##behavior-parameters-list", ImVec2(-FLT_MIN, behaviorData.ParametersData.size() * ImGui::GetTextLineHeightWithSpacing())))
+                    float height = behaviorData.ParametersData.size() * ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().FramePadding.y * 2.0f;
+                    if (ImGui::BeginListBox("##behavior-parameters", ImVec2(-FLT_MIN, height)))
                     {
                         for (const BehaviorParametersData& behaviorParametersData : behaviorData.ParametersData)
                         {
+                            ImGui::PushID(&behaviorParametersData);
+                            
                             bool selected = m_SelectedBehaviorParameters == &behaviorParametersData;
                             if (ImGui::Selectable(behaviorParametersData.Name, selected))
                             {
@@ -312,11 +314,12 @@ void Behaviors::OnRenderMenu()
                             {
                                 ImGui::SetItemDefaultFocus();
                             }
+
+                            ImGui::PopID();
                         }
 
                         ImGui::EndListBox();
                     }
-                    ImGui::PopID();
                     
                     ImGui::TreePop();
                 }

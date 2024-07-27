@@ -13,8 +13,8 @@ namespace BPR
     };
     
 
-    // void __thiscall CgsGui::StateInterface::OutputGuiEvent<>(BrnGui::GuiEventNetworkSelectedPlayerOption* lOutEvent)
-    static void OutputSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
+    // void __thiscall CgsGui::StateInterface::OutputGuiEvent<>(BrnGui::GuiEventNetworkSelectedPlayerOption*)
+    static void GuiStateInterface_OutputSelectedPlayerOptionEvent(const SelectedPlayerOptionEvent* selectedPlayerOptionEvent)
     {
         __asm
         {
@@ -79,7 +79,7 @@ void OnlinePlayers::OnGuiEventNetworkPlayerStatus(
                     .Option   = 2,
                     .PlayerID = playerID,
                 };
-                BPR::OutputSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
+                BPR::GuiStateInterface_OutputSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
         }
         if (blacklistedPlayer->Automute)
@@ -92,7 +92,7 @@ void OnlinePlayers::OnGuiEventNetworkPlayerStatus(
                     .Option   = 3,
                     .PlayerID = playerID,
                 };
-                BPR::OutputSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
+                BPR::GuiStateInterface_OutputSelectedPlayerOptionEvent(&selectedPlayerOptionEvent);
             }
         }
     }
