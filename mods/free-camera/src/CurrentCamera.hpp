@@ -33,6 +33,18 @@ private:
         }
     };
 
+    struct Properties
+    {
+        Property<float> FOV;
+        Property<float> SimulationTimeScale;
+        Property<float> CameraLag;
+        Property<float> BlackBarAmount;
+        Property<float> MotionBlurVehicle;
+        Property<float> MotionBlurWorld;
+        Property<float> Blurriness;
+        bool ResetAll = false;
+    };
+
     struct Transformation
     {
         DirectX::XMFLOAT3A Rotation = { 0.0f, 0.0f, 0.0f };
@@ -41,33 +53,6 @@ private:
         DirectX::XMFLOAT3A TranslationDelta = { 0.0f, 0.0f, 0.0f };
         bool Init = false;
         bool Override = false;
-    };
-
-    struct Misc
-    {
-        Property<float> Fov;
-    };
-    
-    struct Effects
-    {
-        Property<float> SimulationTimeScale;
-        Property<float> CameraLag;
-        Property<float> BlackBarAmount;
-    };
-    
-    struct MotionBlur
-    {
-        Property<float> Vehicle;
-        Property<float> World;
-    };
-
-    struct DepthOfField
-    {
-        Property<float> FocusStartDistance;
-        Property<float> PerfectFocusStartDistance;
-        Property<float> PerfectFocusEndDistance;
-        Property<float> FocusEndDistance;
-        Property<float> Blurriness;
     };
 
     struct Effect
@@ -79,10 +64,7 @@ private:
     };
 
 private:
+    Properties m_Properties;
     Transformation m_Transformation;
-    Misc m_Misc;
-    Effects m_Effects;
-    MotionBlur m_MotionBlur;
-    DepthOfField m_DepthOfField;
     Effect m_Effect;
 };
