@@ -43,6 +43,7 @@ private:
         Parameter BoostFOVZoomCompensation;
         Parameter DownAngle;
         Parameter DropFactor;
+        bool ResetAll = false;
     };
 
 private:
@@ -53,7 +54,6 @@ private:
     CustomParametersFile& m_CustomParametersFile;
 
     Parameters m_Parameters;
-    bool m_ResetAllParameters = false;
 
-    uint64_t m_PreviousAttribKey = 0x0000000000000000;
+    uint64_t m_PreviousAttribKey = 0;
 };

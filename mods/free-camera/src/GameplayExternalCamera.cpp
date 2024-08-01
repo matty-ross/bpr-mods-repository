@@ -24,26 +24,25 @@ GameplayExternalCamera::GameplayExternalCamera(CustomParametersFile& customParam
 {
 }
 
-void GameplayExternalCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Pointer arbStateSharedInfo)
+void GameplayExternalCamera::OnArbitratorUpdate(
+    Core::Pointer camera, // BrnDirector::Camera::Camera*
+    Core::Pointer arbStateSharedInfo // BrnDirector::ArbStateSharedInfo*
+)
 {
-    // BrnDirector::Camera::Camera* camera
-    // BrnDirector::ArbStateSharedInfo* arbStateSharedInfo
-    
-    uint64_t attribKey = Core::Pointer(0x013FC8E0).deref().at(0x7165C0).as<uint64_t>();
+    Core::Pointer behaviorParameterBank = Core::Pointer(0x013FC8E0).deref().at(0x714140); // BrnDirector::Camera::BehaviourParameterBank*
+    uint64_t attribKey = behaviorParameterBank.at(0x2480).as<uint64_t>();
 
     {
-        bool updateDefaultValues = attribKey != m_PreviousAttribKey;
-        
         auto updateParameter = [&](Parameter& parameter) -> void
         {
-            Core::Pointer address = Core::Pointer(0x013FC8E0).deref().at(0x7165C8 + parameter.Offset);
+            Core::Pointer address = behaviorParameterBank.at(0x2488 + parameter.Offset);
 
-            if (updateDefaultValues)
+            if (attribKey != m_PreviousAttribKey)
             {
                 parameter.DefaultValue = address.as<float>();
             }
 
-            if (parameter.Reset || m_ResetAllParameters)
+            if (parameter.Reset || m_Parameters.ResetAll)
             {
                 address.as<float>() = parameter.DefaultValue;
                 parameter.Reset = false;
@@ -63,7 +62,7 @@ void GameplayExternalCamera::OnArbitratorUpdate(Core::Pointer camera, Core::Poin
         updateParameter(m_Parameters.DownAngle);
         updateParameter(m_Parameters.DropFactor);
         
-        m_ResetAllParameters = false;
+        m_Parameters.ResetAll = false;
     }
 
     m_PreviousAttribKey = attribKey;
@@ -73,17 +72,12 @@ void GameplayExternalCamera::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Gameplay External Camera"))
     {
-        if (ImGui::BeginTabBar("##gameplay-external-camera-tabs"))
+        if (ImGui::BeginTabBar("##gameplay-external-camera"))
         {
             if (ImGui::BeginTabItem("Behavior"))
             {
                 int32_t gameplayExternalCameraIndex = Core::Pointer(0x013FC8E0).deref().at(0x6F5D38).as<int32_t>();
-                Core::Pointer behavior = Core::Pointer(0x013FC8E0).deref().at(0x711340 + gameplayExternalCameraIndex * 0x1A0).as<void*>();
-                
-                Core::Pointer rotationController = behavior.at(0x10);
-                Core::Pointer collisionPolicy = behavior.at(0x50);
-                Core::Pointer groundConstraint = collisionPolicy.at(0x1C0);
-                Core::Pointer frustumCollisionResolver = collisionPolicy.at(0x10);
+                Core::Pointer behavior = Core::Pointer(0x013FC8E0).deref().at(0x711340 + gameplayExternalCameraIndex * 0x1A0).as<void*>(); // BrnDirector::Camera::BehaviourGameplayExternal*
 
                 {
                     ImGui::SeparatorText("Misc");
@@ -98,39 +92,37 @@ void GameplayExternalCamera::OnRenderMenu()
                     static bool disableCollision = false;
                     if (ImGui::Checkbox("Disable Collision", &disableCollision))
                     {
-                        frustumCollisionResolver.at(0x150).as<float>() = disableCollision ? -FLT_MAX : 0.01f;
+                        behavior.at(0x1B0).as<float>() = disableCollision ? -FLT_MAX : 0.01f;
                     }
                 }
 
                 {
                     ImGui::SeparatorText("Rotation Controller");
                     
-                    ImGui::SliderFloat("Yaw Degrees", &rotationController.at(0x10).as<float>(), -180.0f, 180.0f);
-                    ImGui::SliderFloat("Yaw Velocity", &rotationController.at(0x14).as<float>(), -100.0f, 100.0f);
-                    ImGui::SliderFloat("Pitch Degrees", &rotationController.at(0x30).as<float>(), -10.0f, 10.0f);
-                    ImGui::SliderFloat("Pitch Velocity", &rotationController.at(0x2C).as<float>(), -10.0f, 10.0f);
+                    ImGui::SliderFloat("Yaw", &behavior.at(0x20).as<float>(), -180.0f, 180.0f);
+                    ImGui::SliderFloat("Pitch", &behavior.at(0x40).as<float>(), -10.0f, 10.0f);
                 }
 
                 {
                     ImGui::SeparatorText("Collision Policy");
                     
-                    ImGui::SliderFloat("Desired Near Clip", &collisionPolicy.at(0x23C).as<float>(), 0.0f, 1.0f);
-                    ImGui::Checkbox("Auto Elevate", &collisionPolicy.at(0x248).as<bool>());
-                    ImGui::Checkbox("Do Vehicle Collision", &collisionPolicy.at(0x24F).as<bool>());
+                    ImGui::SliderFloat("Desired Near Clip", &behavior.at(0x28C).as<float>(), 0.0f, 1.0f);
+                    ImGui::Checkbox("Auto Elevate", &behavior.at(0x298).as<bool>());
+                    ImGui::Checkbox("Do Vehicle Collision", &behavior.at(0x29F).as<bool>());
                 }
 
                 {
                     ImGui::SeparatorText("Frustum Collision Resolver");
                     
-                    ImGui::Checkbox("Use Frustum Resolver", &collisionPolicy.at(0x24D).as<bool>());
-                    ImGui::DragFloat3("Vehicle Resolve Vector", frustumCollisionResolver.at(0x140).as<float[3]>(), 1.0f, 0.0f, 500.0f);
+                    ImGui::Checkbox("Use Frustum Resolver", &behavior.at(0x29D).as<bool>());
+                    ImGui::DragFloat3("Vehicle Resolve Vector", behavior.at(0x1A0).as<float[3]>(), 1.0f, 0.0f, 500.0f);
                 }
 
                 {
                     ImGui::SeparatorText("Ground Constraint");
                     
-                    ImGui::Checkbox("Use Ground Constraint", &collisionPolicy.at(0x24B).as<bool>());
-                    ImGui::SliderFloat("Desired Height", &groundConstraint.at(0x50).as<float>(), -10.0f, 10.0f);
+                    ImGui::Checkbox("Use Ground Constraint", &behavior.at(0x29B).as<bool>());
+                    ImGui::SliderFloat("Desired Height", &behavior.at(0x260).as<float>(), -10.0f, 10.0f);
                 }
                 
                 ImGui::EndTabItem();
@@ -138,91 +130,112 @@ void GameplayExternalCamera::OnRenderMenu()
 
             if (ImGui::BeginTabItem("Parameters"))
             {
-                using WidgetFn = void(*)(Core::Pointer);
-                auto renderParameter = [](Parameter& parameter, WidgetFn widget) -> void
                 {
-                    Core::Pointer address = Core::Pointer(0x013FC8E0).deref().at(0x7165C8 + parameter.Offset);
-
-                    ImGui::PushID(&parameter);
-                    if (ImGui::Button("Reset"))
+                    auto renderParameter = []<typename Fn>(Parameter& parameter, Fn widget) -> void
                     {
-                        parameter.Reset = true;
-                    }
-                    ImGui::SameLine();
-                    widget(address);
-                    ImGui::PopID();
-                };
+                        float& value = Core::Pointer(0x013FC8E0).deref().at(0x7165C8 + parameter.Offset).as<float>();
 
-                {
+                        ImGui::PushID(&parameter);
+                        
+                        if (ImGui::Button("Reset"))
+                        {
+                            parameter.Reset = true;
+                        }
+                    
+                        ImGui::SameLine();
+                    
+                        widget(value);
+                    
+                        ImGui::PopID();
+                    };
+
                     ImGui::SeparatorText("Current Parameters");
-                    
-                    if (ImGui::Button("Reset All"))
+
                     {
-                        m_ResetAllParameters = true;
+                        if (ImGui::Button("Reset All##parameters"))
+                        {
+                            m_Parameters.ResetAll = true;
+                        }
                     }
-                    
-                    renderParameter(m_Parameters.PitchSpring,              [](Core::Pointer address) { ImGui::SliderFloat("Pitch Spring", &address.as<float>(), 0.0f, 1.0f); });
-                    renderParameter(m_Parameters.YawSpring,                [](Core::Pointer address) { ImGui::SliderFloat("Yaw Spring", &address.as<float>(), 0.0f, 1.0f); });
-                    renderParameter(m_Parameters.DriftYawSpring,           [](Core::Pointer address) { ImGui::SliderFloat("Drift Yaw Spring", &address.as<float>(), 0.0f, 1.0f); });
-                    renderParameter(m_Parameters.PivotY,                   [](Core::Pointer address) { ImGui::SliderFloat("Pivot Y", &address.as<float>(), 0.0f, 50.0f); });
-                    renderParameter(m_Parameters.PivotZ,                   [](Core::Pointer address) { ImGui::SliderFloat("Pivot Z", &address.as<float>(), 0.0f, 50.0f); });
-                    renderParameter(m_Parameters.PivotZOffset,             [](Core::Pointer address) { ImGui::SliderFloat("Pivot Z Offset", &address.as<float>(), 0.0f, 50.0f); });
-                    renderParameter(m_Parameters.FOV,                      [](Core::Pointer address) { ImGui::SliderFloat("FOV", &address.as<float>(), 1.0f, 179.0f); });
-                    renderParameter(m_Parameters.InFrontFOVMax,            [](Core::Pointer address) { ImGui::SliderFloat("In Front FOV Max", &address.as<float>(), 1.0f, 179.0f); });
-                    renderParameter(m_Parameters.FrontInAmount,            [](Core::Pointer address) { ImGui::SliderFloat("Front In Amount", &address.as<float>(), -2.0f, 2.0f); });
-                    renderParameter(m_Parameters.BoostFOVZoomCompensation, [](Core::Pointer address) { ImGui::SliderFloat("Boost FOV Zoom Compensation", &address.as<float>(), -5.0f, 5.0f); });
-                    renderParameter(m_Parameters.DownAngle,                [](Core::Pointer address) { ImGui::SliderFloat("Down Angle", &address.as<float>(), 0.0f, 90.0f); });
-                    renderParameter(m_Parameters.DropFactor,               [](Core::Pointer address) { ImGui::SliderFloat("Drop Factor", &address.as<float>(), 0.0f, 1.0f); });
+
+                    ImGui::Separator();
+
+                    {
+                        renderParameter(m_Parameters.PitchSpring,              [](float& value) { ImGui::SliderFloat("Pitch Spring", &value, 0.0f, 1.0f); });
+                        renderParameter(m_Parameters.YawSpring,                [](float& value) { ImGui::SliderFloat("Yaw Spring", &value, 0.0f, 1.0f); });
+                        renderParameter(m_Parameters.DriftYawSpring,           [](float& value) { ImGui::SliderFloat("Drift Yaw Spring", &value, 0.0f, 1.0f); });
+                        renderParameter(m_Parameters.PivotY,                   [](float& value) { ImGui::SliderFloat("Pivot Y", &value, 0.0f, 50.0f); });
+                        renderParameter(m_Parameters.PivotZ,                   [](float& value) { ImGui::SliderFloat("Pivot Z", &value, 0.0f, 50.0f); });
+                        renderParameter(m_Parameters.PivotZOffset,             [](float& value) { ImGui::SliderFloat("Pivot Z Offset", &value, 0.0f, 50.0f); });
+                        renderParameter(m_Parameters.FOV,                      [](float& value) { ImGui::SliderFloat("FOV", &value, 1.0f, 179.0f); });
+                        renderParameter(m_Parameters.InFrontFOVMax,            [](float& value) { ImGui::SliderFloat("In Front FOV Max", &value, 1.0f, 179.0f); });
+                        renderParameter(m_Parameters.FrontInAmount,            [](float& value) { ImGui::SliderFloat("Front In Amount", &value, -2.0f, 2.0f); });
+                        renderParameter(m_Parameters.BoostFOVZoomCompensation, [](float& value) { ImGui::SliderFloat("Boost FOV Zoom Compensation", &value, -5.0f, 5.0f); });
+                        renderParameter(m_Parameters.DownAngle,                [](float& value) { ImGui::SliderFloat("Down Angle", &value, 0.0f, 90.0f); });
+                        renderParameter(m_Parameters.DropFactor,               [](float& value) { ImGui::SliderFloat("Drop Factor", &value, 0.0f, 1.0f); });
+                    }
                 }
 
                 {
                     ImGui::SeparatorText("Custom Parameters");
-                    
-                    if (ImGui::Button("Save"))
+
                     {
-                        m_CustomParametersFile.Save();
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Load"))
-                    {
-                        m_CustomParametersFile.Load();
-                    }
-                    
-                    static char name[64] = {};
-                    if (ImGui::Button("Add Current Parameters"))
-                    {
-                        if (name[0] != '\0')
+                        if (ImGui::Button("Save##custom-prameters-file"))
                         {
-                            AddCurrentParametersToCustomParametersFile(name);
-                            name[0] = '\0';
+                            m_CustomParametersFile.Save();
+                        }
+                        
+                        ImGui::SameLine();
+                        
+                        if (ImGui::Button("Load##custom-prameters-file"))
+                        {
+                            m_CustomParametersFile.Load();
                         }
                     }
-                    ImGui::SameLine();
-                    ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
-                }
 
-                ImGui::Separator();
+                    ImGui::Separator();
 
-                {
-                    static ImGuiTextFilter customParametersFilter;
-                    customParametersFilter.Draw("Filter##custom-parameters");
-                    
-                    if (ImGui::BeginListBox("##custom-parameters-list", ImVec2(-FLT_MIN, 0.0f)))
                     {
-                        for (const CustomParameters& customParameters : m_CustomParametersFile.GetCustomParameters())
+                        static char name[64] = {};
+                        if (ImGui::Button("Add Current Parameters"))
                         {
-                            if (customParametersFilter.PassFilter(customParameters.Name.c_str()))
+                            if (name[0] != '\0')
                             {
-                                ImGui::PushID(&customParameters);
-                                if (ImGui::Selectable(customParameters.Name.c_str()))
-                                {
-                                    SetCurrentParametersFromCustomParameters(customParameters);
-                                }
-                                ImGui::PopID();
+                                AddCurrentParametersToCustomParametersFile(name);
+                                name[0] = '\0';
                             }
                         }
+                    
+                        ImGui::SameLine();
+                        
+                        ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
+                    }
+                    
+                    ImGui::Separator();
 
-                        ImGui::EndListBox();
+                    {
+                        static ImGuiTextFilter customParametersFilter;
+                        customParametersFilter.Draw("Filter##custom-parameters");
+                    
+                        if (ImGui::BeginListBox("##custom-parameters", ImVec2(-FLT_MIN, 0.0f)))
+                        {
+                            for (const CustomParameters& customParameters : m_CustomParametersFile.GetCustomParameters())
+                            {
+                                if (customParametersFilter.PassFilter(customParameters.Name.c_str()))
+                                {
+                                    ImGui::PushID(&customParameters);
+                                    
+                                    if (ImGui::Selectable(customParameters.Name.c_str()))
+                                    {
+                                        SetCurrentParametersFromCustomParameters(customParameters);
+                                    }
+                                    
+                                    ImGui::PopID();
+                                }
+                            }
+
+                            ImGui::EndListBox();
+                        }
                     }
                 }
                 
@@ -236,9 +249,7 @@ void GameplayExternalCamera::OnRenderMenu()
 
 void GameplayExternalCamera::SetCurrentParametersFromCustomParameters(const CustomParameters& customParameters)
 {
-    // BrnDirector::Camera::BehaviourGameplayExternal::Parameters* parameters
-    
-    Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
+    Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8); // BrnDirector::Camera::BehaviourGameplayExternal::Parameters*
 
     parameters.at(0x3C).as<float>() = customParameters.PitchSpring;
     parameters.at(0x40).as<float>() = customParameters.YawSpring;
@@ -256,9 +267,7 @@ void GameplayExternalCamera::SetCurrentParametersFromCustomParameters(const Cust
 
 void GameplayExternalCamera::AddCurrentParametersToCustomParametersFile(const char* name)
 {
-    // BrnDirector::Camera::BehaviourGameplayExternal::Parameters* parameters
-    
-    Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8);
+    Core::Pointer parameters = Core::Pointer(0x013FC8E0).deref().at(0x7165C8); // BrnDirector::Camera::BehaviourGameplayExternal::Parameters*
     
     m_CustomParametersFile.GetCustomParameters().push_back(
         CustomParameters
