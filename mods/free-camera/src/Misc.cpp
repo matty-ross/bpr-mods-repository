@@ -17,10 +17,8 @@ void Misc::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Misc"))
     {
-        Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref();
-        Core::Pointer directorModule = gameModule.at(0x6EF240);
-        Core::Pointer arbitrator = gameModule.at(0x6F2AF0);
-        Core::Pointer arbStateRoaming = arbitrator.at(0x1340);
+        Core::Pointer directorModule = Core::Pointer(0x013FC8E0).deref().at(0x6EF240); // BrnDirector::DirectorModule*
+        Core::Pointer arbitrator = Core::Pointer(0x013FC8E0).deref().at(0x6F2AF0); // BrnDirector::Arbitrator*
 
         {
             ImGui::Checkbox("Allow Jump Moment", &directorModule.at(0x29F5D).as<bool>());
@@ -31,21 +29,15 @@ void Misc::OnRenderMenu()
         ImGui::Separator();
 
         {
+            ImGui::Checkbox("Disable Picture Paradise", &arbitrator.at(0x16FF).as<bool>());
+            ImGui::Checkbox("Play Race End Effect", &arbitrator.at(0x1700).as<bool>());
             ImGui::Checkbox("Do Attract Mode", &arbitrator.at(0x3DCD).as<bool>());
-            ImGui::Checkbox("Do Render Metrics", &arbitrator.at(0x3DCE).as<bool>());
-        }
-        
-        ImGui::Separator();
-
-        {
-            ImGui::Checkbox("Disable Picture Paradise", &arbStateRoaming.at(0x3BF).as<bool>());
-            ImGui::Checkbox("Play Race End Effect", &arbStateRoaming.at(0x3C0).as<bool>());
         }
 
         ImGui::Separator();
 
         {
-            if (ImGui::Button("Reset"))
+            if (ImGui::Button("Reset##override-player-vehicle-index"))
             {
                 m_PlayerVehicleIndex = 0;
                 m_OverridePlayerVehicleIndex = false;
