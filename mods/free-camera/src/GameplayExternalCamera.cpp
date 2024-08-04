@@ -106,7 +106,7 @@ void GameplayExternalCamera::OnRenderMenu()
                 {
                     ImGui::SeparatorText("Collision Policy");
                     
-                    ImGui::SliderFloat("Desired Near Clip", &behavior.at(0x28C).as<float>(), 0.0f, 1.0f);
+                    ImGui::SliderFloat("Desired Near Clip", &behavior.at(0x28C).as<float>(), 0.0f, 0.2f);
                     ImGui::Checkbox("Auto Elevate", &behavior.at(0x298).as<bool>());
                     ImGui::Checkbox("Do Vehicle Collision", &behavior.at(0x29F).as<bool>());
                 }

@@ -196,8 +196,8 @@ void CurrentCamera::OnRenderMenu()
                 renderProperty(m_Properties.SimulationTimeScale, [](float& value) { return ImGui::SliderFloat("Simulation Time Scale", &value, 0.0f, 2.0f); });
                 renderProperty(m_Properties.CameraLag,           [](float& value) { return ImGui::SliderFloat("Camera Lag", &value, 0.0f, 1.0f); });
                 renderProperty(m_Properties.BlackBarAmount,      [](float& value) { return ImGui::SliderFloat("Black Bar Amount", &value, 0.0f, 0.5f); });
-                renderProperty(m_Properties.MotionBlurVehicle,   [](float& value) { return ImGui::SliderFloat("Vehicle", &value, 0.0f, 1.0f); });
-                renderProperty(m_Properties.MotionBlurWorld,     [](float& value) { return ImGui::SliderFloat("World", &value, 0.0f, 1.0f); });
+                renderProperty(m_Properties.MotionBlurVehicle,   [](float& value) { return ImGui::SliderFloat("Motion Blur Vehicle", &value, 0.0f, 1.0f); });
+                renderProperty(m_Properties.MotionBlurWorld,     [](float& value) { return ImGui::SliderFloat("Motion Blur World", &value, 0.0f, 1.0f); });
                 renderProperty(m_Properties.Blurriness,          [](float& value) { return ImGui::SliderFloat("Blurriness", &value, 0.0f, 1.0f); });
             }
         }
@@ -210,8 +210,8 @@ void CurrentCamera::OnRenderMenu()
                 m_Transformation.Init = true;
             }
             
-            ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&m_Transformation.RotationDelta));
-            ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&m_Transformation.TranslationDelta));
+            ImGui::DragFloat3("Rotate", reinterpret_cast<float*>(&m_Transformation.RotationDelta), 0.01f);
+            ImGui::DragFloat3("Translate", reinterpret_cast<float*>(&m_Transformation.TranslationDelta), 0.1f);
         }
 
         {
@@ -254,7 +254,7 @@ void CurrentCamera::OnRenderMenu()
                                 if (!m_Effect.Play)
                                 {
                                     m_Effect.Name = effectName;
-                                    m_Effect.BlendAmount = 0.75f;
+                                    m_Effect.BlendAmount = 1.0f;
                                     m_Effect.Play = true;
                                 }
                             }
@@ -275,6 +275,12 @@ void CurrentCamera::OnRenderMenu()
 void CurrentCamera::OnMouseInput(const RAWMOUSE& mouse)
 {
     if (!m_Transformation.Override || ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    Core::Pointer arbitrator = Core::Pointer(0x013FC8E0).deref().at(0x6F2AF0); // BrnDirector::Arbitrator*
+    if (arbitrator.at(0x3DC8).as<int32_t>() != 2) // BrnDirector::Arbitrator::E_STATE_NORMAL
     {
         return;
     }

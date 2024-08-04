@@ -231,9 +231,9 @@ void FreeCamera::Unload()
 
 void FreeCamera::OnArbitratorUpdate(void* camera, void* arbStateSharedInfo)
 {
-    m_CurrentCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
     m_GameplayExternalCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
     m_Behaviors.OnArbitratorUpdate(camera, arbStateSharedInfo);
+    m_CurrentCamera.OnArbitratorUpdate(camera, arbStateSharedInfo);
 }
 
 void FreeCamera::OnSetPlayerVehicleIndex(void* directorInputBuffer)
