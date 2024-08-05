@@ -89,13 +89,14 @@ std::string ExceptionInformation::GetFlags() const
     {
         switch (flag)
         {
-        case EXCEPTION_NONCONTINUABLE:  return "EXCEPTION_NONCONTINUABLE";
-        case EXCEPTION_UNWINDING:       return "EXCEPTION_UNWINDING";
-        case EXCEPTION_EXIT_UNWIND:     return "EXCEPTION_EXIT_UNWIND";
-        case EXCEPTION_STACK_INVALID:   return "EXCEPTION_STACK_INVALID";
-        case EXCEPTION_NESTED_CALL:     return "EXCEPTION_NESTED_CALL";
-        case EXCEPTION_TARGET_UNWIND:   return "EXCEPTION_TARGET_UNWIND";
-        case EXCEPTION_COLLIDED_UNWIND: return "EXCEPTION_COLLIDED_UNWIND";
+        case EXCEPTION_NONCONTINUABLE:     return "EXCEPTION_NONCONTINUABLE";
+        case EXCEPTION_UNWINDING:          return "EXCEPTION_UNWINDING";
+        case EXCEPTION_EXIT_UNWIND:        return "EXCEPTION_EXIT_UNWIND";
+        case EXCEPTION_STACK_INVALID:      return "EXCEPTION_STACK_INVALID";
+        case EXCEPTION_NESTED_CALL:        return "EXCEPTION_NESTED_CALL";
+        case EXCEPTION_TARGET_UNWIND:      return "EXCEPTION_TARGET_UNWIND";
+        case EXCEPTION_COLLIDED_UNWIND:    return "EXCEPTION_COLLIDED_UNWIND";
+        case EXCEPTION_SOFTWARE_ORIGINATE: return "EXCEPTION_SOFTWARE_ORIGINATE";
         }
         
         return "???";
