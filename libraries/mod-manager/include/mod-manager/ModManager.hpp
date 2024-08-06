@@ -5,6 +5,7 @@
 
 #include "core/Logger.hpp"
 #include "mod-manager/ModManagerApi.hpp"
+#include "mod-manager/ModManagerConfigFile.hpp"
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
@@ -44,6 +45,8 @@ private:
 
 private:
     Core::Logger m_Logger;
+
+    ModManagerConfigFile m_ModManagerConfigFile;
     
     DetourHookManager m_DetourHookManager;
     ImGuiManager m_ImGuiManager;

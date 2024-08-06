@@ -12,6 +12,7 @@ ModManager ModManager::s_Instance;
 ModManager::ModManager()
     :
     m_Logger(k_Name),
+    m_ModManagerConfigFile(".\\mod-manager-config.yaml", m_Logger),
     m_DetourPresent
     {
         .Target = Core::Pointer(0x00C89F90).GetAddress(),
@@ -68,6 +69,11 @@ void ModManager::Load()
     try
     {
         m_Logger.Info("Loading...");
+
+        // Load mod manager config.
+        {
+            m_ModManagerConfigFile.Load();
+        }
 
         // Wait to be at or past the Start Screen. 
         {
@@ -141,6 +147,11 @@ void ModManager::Unload()
     try
     {
         m_Logger.Info("Unloading...");
+
+        // Save mod manager config.
+        {
+            m_ModManagerConfigFile.Save();
+        }
 
         // Detach UpdateKeyboardState detour.
         {
