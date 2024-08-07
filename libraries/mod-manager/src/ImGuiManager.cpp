@@ -11,7 +11,9 @@
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-ImGuiManager::ImGuiManager()
+ImGuiManager::ImGuiManager(const ImGuiConfig& imguiConfig)
+    :
+    m_ImGuiConfig(imguiConfig)
 {
     InitializeCriticalSection(&m_CriticalSection);   
 }
@@ -71,8 +73,15 @@ void ImGuiManager::Load() const
     ImGui::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    if (m_ImGuiConfig.EnableDocking)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    }
+    if (m_ImGuiConfig.EnableViewports)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.ConfigViewportsNoTaskBarIcon = true;
+    }
 
     ImGui::StyleColorsClassic();
     
@@ -131,6 +140,12 @@ void ImGuiManager::OnRenderFrame()
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+    if (m_ImGuiConfig.EnableViewports)
+    {
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
+    }
 }
 
 bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)

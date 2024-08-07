@@ -13,6 +13,7 @@ ModManager::ModManager()
     :
     m_Logger(k_Name),
     m_ModManagerConfigFile(".\\mod-manager-config.yaml", m_Logger),
+    m_ImGuiManager(m_ModManagerConfigFile.GetImGuiConfig()),
     m_DetourPresent
     {
         .Target = Core::Pointer(0x00C89F90).GetAddress(),

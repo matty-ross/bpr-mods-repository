@@ -6,6 +6,7 @@
 #include <Windows.h>
 
 #include "mod-manager/ModManagerApi.hpp"
+#include "mod-manager/ModManagerConfigFile.hpp"
 
 
 struct ImGuiMenu
@@ -24,7 +25,7 @@ class ImGuiManager
     friend class ModManager;
 
 private:
-    ImGuiManager();
+    ImGuiManager(const ImGuiConfig& imguiConfig);
     ~ImGuiManager();
 
 public:
@@ -50,6 +51,8 @@ private:
     bool WantCaptureKeyboard() const;
 
 private:
+    const ImGuiConfig& m_ImGuiConfig;
+
     std::vector<ImGuiMenu*> m_Menus;
     bool m_MenusVisible = true;
     
