@@ -47,13 +47,13 @@ void BullyRepellent::OnProcessAttach()
         static_cast<BullyRepellent*>(lpThreadParameter)->Load();
         return 0;
     };
-    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
 }
 
 void BullyRepellent::OnProcessDetach()
 {
     Unload();
-    CloseHandle(m_LoadThread);
+    CloseHandle(m_LoadThreadHandle);
 }
 
 void BullyRepellent::Load()

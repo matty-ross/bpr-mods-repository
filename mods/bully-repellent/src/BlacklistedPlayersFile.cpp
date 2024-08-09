@@ -5,6 +5,9 @@
 #include "core/File.hpp"
 
 
+static constexpr char k_Name[] = "blacklisted players";
+
+
 BlacklistedPlayersFile::BlacklistedPlayersFile(const std::string& filePath, const Core::Logger& logger)
     :
     m_FilePath(filePath),
@@ -16,13 +19,14 @@ void BlacklistedPlayersFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading blacklisted players from file '%s' ...", m_FilePath.c_str());
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.c_str());
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
         
         YAML::Node yaml = YAML::Load(file.Read());
         {
             m_BlacklistedPlayers.clear();
+            
             for (const YAML::Node& blacklistedPlayerNode : yaml["BlacklistedPlayers"])
             {
                 BlacklistedPlayer blacklistedPlayer =
@@ -37,11 +41,11 @@ void BlacklistedPlayersFile::Load()
             }
         }
 
-        m_Logger.Info("Loaded blacklisted players.");
+        m_Logger.Info("Loaded %s.", k_Name);
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load blacklisted players - %s", e.what());
+        m_Logger.Warning("Failed to load %s - %s", k_Name, e.what());
     }
 }
 
@@ -49,7 +53,7 @@ void BlacklistedPlayersFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving blacklisted players to file '%s' ...", m_FilePath.c_str());
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.c_str());
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
         
@@ -68,11 +72,11 @@ void BlacklistedPlayersFile::Save() const
         }
         file.Write(YAML::Dump(yaml));
 
-        m_Logger.Info("Saved blacklisted players.");
+        m_Logger.Info("Saved %s.", k_Name);
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save blacklisted players - %s", e.what());
+        m_Logger.Warning("Failed to save %s - %s", k_Name, e.what());
     }
 }
 

@@ -48,5 +48,5 @@ private:
 
     ImGuiMenu m_Menu;
     
-    HANDLE m_LoadThread = NULL;
+    HANDLE m_LoadThreadHandle = NULL;
 };
