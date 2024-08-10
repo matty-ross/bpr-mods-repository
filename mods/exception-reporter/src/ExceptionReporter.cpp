@@ -21,22 +21,22 @@ ExceptionReporter& ExceptionReporter::Get()
     return s_Instance;
 }
 
-void ExceptionReporter::OnProcessAttach(HINSTANCE moduleInstance)
+void ExceptionReporter::OnProcessAttach(HINSTANCE instanceHandle)
 {
-    m_ModuleInstance = moduleInstance;
+    m_InstanceHandle = instanceHandle;
 
     PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
     {
         static_cast<ExceptionReporter*>(lpThreadParameter)->Load();
         return 0;
     };
-    m_LoadThread = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
 }
 
 void ExceptionReporter::OnProcessDetach()
 {
     Unload();
-    CloseHandle(m_LoadThread);
+    CloseHandle(m_LoadThreadHandle);
 }
 
 LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
@@ -68,7 +68,7 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
     ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
 
     DialogBoxParamA(
-        m_ModuleInstance,
+        m_InstanceHandle,
         MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
         NULL,
         dialogProc,
@@ -90,8 +90,8 @@ void ExceptionReporter::Load()
             
             while (true)
             {
-                HANDLE mutex = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
-                if (mutex != NULL)
+                HANDLE exeMutexHandle = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
+                if (exeMutexHandle != NULL)
                 {
                     break;
                 }

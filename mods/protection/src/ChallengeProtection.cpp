@@ -203,6 +203,7 @@ void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
         uint64_t challengeID = entry.at(0xC0).as<uint64_t>();
         bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;
         bool isInFile = m_ChallengesFile.GetChallenge(challengeID) != nullptr;
+        
         if (!isVanilla && !isInFile)
         {
             m_ChallengesFile.GetChallenges().push_back(

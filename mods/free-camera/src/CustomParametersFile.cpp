@@ -25,28 +25,30 @@ void CustomParametersFile::Load()
 
         YAML::Node yaml = YAML::Load(file.Read());
         {
-            m_CustomParameters.clear();
-            
-            for (const YAML::Node& customParametersNode : yaml["CustomParameters"])
             {
-                CustomParameters customParameters =
+                m_CustomParameters.clear();
+            
+                for (const YAML::Node& customParametersNode : yaml["CustomParameters"])
                 {
-                    .Name                     = customParametersNode["Name"].as<std::string>(),
-                    .PitchSpring              = customParametersNode["PitchSpring"].as<float>(),
-                    .YawSpring                = customParametersNode["YawSpring"].as<float>(),
-                    .PivotY                   = customParametersNode["PivotY"].as<float>(),
-                    .PivotZ                   = customParametersNode["PivotZ"].as<float>(),
-                    .PivotZOffset             = customParametersNode["PivotZOffset"].as<float>(),
-                    .FOV                      = customParametersNode["FOV"].as<float>(),
-                    .InFrontFOVMax            = customParametersNode["InFrontFOVMax"].as<float>(),
-                    .FrontInAmount            = customParametersNode["FrontInAmount"].as<float>(),
-                    .DriftYawSpring           = customParametersNode["DriftYawSpring"].as<float>(),
-                    .BoostFOVZoomCompensation = customParametersNode["BoostFOVZoomCompensation"].as<float>(),
-                    .DownAngle                = customParametersNode["DownAngle"].as<float>(),
-                    .DropFactor               = customParametersNode["DropFactor"].as<float>(),
-                };
+                    CustomParameters customParameters =
+                    {
+                        .Name                     = customParametersNode["Name"].as<std::string>(),
+                        .PitchSpring              = customParametersNode["PitchSpring"].as<float>(),
+                        .YawSpring                = customParametersNode["YawSpring"].as<float>(),
+                        .PivotY                   = customParametersNode["PivotY"].as<float>(),
+                        .PivotZ                   = customParametersNode["PivotZ"].as<float>(),
+                        .PivotZOffset             = customParametersNode["PivotZOffset"].as<float>(),
+                        .FOV                      = customParametersNode["FOV"].as<float>(),
+                        .InFrontFOVMax            = customParametersNode["InFrontFOVMax"].as<float>(),
+                        .FrontInAmount            = customParametersNode["FrontInAmount"].as<float>(),
+                        .DriftYawSpring           = customParametersNode["DriftYawSpring"].as<float>(),
+                        .BoostFOVZoomCompensation = customParametersNode["BoostFOVZoomCompensation"].as<float>(),
+                        .DownAngle                = customParametersNode["DownAngle"].as<float>(),
+                        .DropFactor               = customParametersNode["DropFactor"].as<float>(),
+                    };
 
-                m_CustomParameters.push_back(customParameters);
+                    m_CustomParameters.push_back(customParameters);
+                }
             }
         }
 

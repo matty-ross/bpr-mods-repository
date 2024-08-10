@@ -53,27 +53,27 @@ std::string ExceptionInformation::GetCode() const
 
 std::string ExceptionInformation::GetAddress() const
 {
-    auto getModuleName = [](HMODULE module) -> std::string
+    auto getModuleName = [](HMODULE moduleHandle) -> std::string
     {
         char fileName[MAX_PATH] = {};
-        GetModuleFileNameA(module, fileName, sizeof(fileName));
+        GetModuleFileNameA(moduleHandle, fileName, sizeof(fileName));
 
         return PathFindFileNameA(fileName);
     };
 
-    HMODULE module = nullptr;
+    HMODULE moduleHandle = NULL;
     GetModuleHandleExA(
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT | GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
         static_cast<LPCSTR>(m_ExceptionRecord->ExceptionAddress),
-        &module
+        &moduleHandle
     );
 
     char addressBuffer[128] = {};
-    if (module != nullptr)
+    if (moduleHandle != NULL)
     {
-        const void* baseAddress = module;
+        const void* baseAddress = moduleHandle;
         ptrdiff_t rva = static_cast<const uint8_t*>(m_ExceptionRecord->ExceptionAddress) - static_cast<const uint8_t*>(baseAddress);
-        sprintf_s(addressBuffer, "0x%p  [%s + 0x%X]", m_ExceptionRecord->ExceptionAddress, getModuleName(module).c_str(), rva);
+        sprintf_s(addressBuffer, "0x%p  [%s + 0x%X]", m_ExceptionRecord->ExceptionAddress, getModuleName(moduleHandle).c_str(), rva);
     }
     else
     {

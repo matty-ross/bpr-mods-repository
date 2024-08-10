@@ -279,6 +279,7 @@ void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
         bool isVanilla = GetVanillaVehicle(vehicleID) != nullptr;
         bool isInFile = m_VehiclesFile.GetVehicle(vehicleID) != nullptr;
+        
         if (!isVanilla && !isInFile)
         {
             char stringVehicleID[13] = {};

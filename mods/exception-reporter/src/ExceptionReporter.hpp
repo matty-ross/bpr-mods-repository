@@ -15,7 +15,7 @@ public:
     static ExceptionReporter& Get();
 
 public:
-    void OnProcessAttach(HINSTANCE moduleInstance);
+    void OnProcessAttach(HINSTANCE instanceHandle);
     void OnProcessDetach();
 
     LONG OnException(EXCEPTION_POINTERS* ExceptionInfo) const;
@@ -30,7 +30,7 @@ private:
 private:
     Core::Logger m_Logger;
 
-    HANDLE m_LoadThread = NULL;
-    HINSTANCE m_ModuleInstance = NULL;
+    HANDLE m_LoadThreadHandle = NULL;
+    HINSTANCE m_InstanceHandle = NULL;
     PTOP_LEVEL_EXCEPTION_FILTER m_PreviousTopLevelExceptionFilter = nullptr;
 };
