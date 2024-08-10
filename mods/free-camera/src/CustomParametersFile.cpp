@@ -5,6 +5,9 @@
 #include "core/File.hpp"
 
 
+static constexpr char k_Name[] = "custom parameters";
+
+
 CustomParametersFile::CustomParametersFile(const std::string& filePath, const Core::Logger& logger)
     :
     m_FilePath(filePath),
@@ -16,13 +19,14 @@ void CustomParametersFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading custom parameters from file '%s' ...", m_FilePath.c_str());
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.c_str());
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
 
         YAML::Node yaml = YAML::Load(file.Read());
         {
             m_CustomParameters.clear();
+            
             for (const YAML::Node& customParametersNode : yaml["CustomParameters"])
             {
                 CustomParameters customParameters =
@@ -46,11 +50,11 @@ void CustomParametersFile::Load()
             }
         }
 
-        m_Logger.Info("Loaded custom parameters.");
+        m_Logger.Info("Loaded %s.", k_Name);
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load custom parameters - %s", e.what());
+        m_Logger.Warning("Failed to load %s - %s", k_Name, e.what());
     }
 }
 
@@ -58,7 +62,7 @@ void CustomParametersFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving custom parameters to file '%s' ...", m_FilePath.c_str());
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.c_str());
         
         Core::File file(m_FilePath, Core::File::Mode::Write);
 
@@ -86,11 +90,11 @@ void CustomParametersFile::Save() const
         }
         file.Write(YAML::Dump(yaml));
 
-        m_Logger.Info("Saved custom parameters.");
+        m_Logger.Info("Saved %s.", k_Name);
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save custom parameters - %s", e.what());
+        m_Logger.Warning("Failed to save %s - %s", k_Name, e.what());
     }
 }
 
