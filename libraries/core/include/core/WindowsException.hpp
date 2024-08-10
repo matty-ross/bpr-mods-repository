@@ -12,7 +12,7 @@ namespace Core
         WindowsException(const char* message);
 
     public:
-        const char* what() const noexcept override;
+        const char* what() const override;
 
     private:
         char m_Buffer[1024] = {};

@@ -5,6 +5,9 @@
 #include "core/File.hpp"
 
 
+static constexpr char k_Name[] = "mod manager config";
+
+
 ModManagerConfigFile::ModManagerConfigFile(const std::string& filePath, const Core::Logger& logger)
     :
     m_FilePath(filePath),
@@ -16,22 +19,25 @@ void ModManagerConfigFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading mod manager config from file '%s' ...", m_FilePath.c_str());
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.c_str());
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
 
         YAML::Node yaml = YAML::Load(file.Read());
         {
-            const YAML::Node& imguiNode = yaml["ImGui"];
-            m_ImGuiConfig.EnableDocking   = imguiNode["EnableDocking"].as<bool>();
-            m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>();
+            {
+                const YAML::Node& imguiNode = yaml["ImGui"];
+                
+                m_ImGuiConfig.EnableDocking   = imguiNode["EnableDocking"].as<bool>();
+                m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>();
+            }
         }
 
-        m_Logger.Info("Loaded mod manager config.");
+        m_Logger.Info("Loaded %s.", k_Name);
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to load mod manager config - %s", e.what());
+        m_Logger.Warning("Failed to load %s - %s", k_Name, e.what());
     }
 }
 
@@ -39,25 +45,27 @@ void ModManagerConfigFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving mod manager config to file '%s' ...", m_FilePath.c_str());
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.c_str());
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
 
         YAML::Node yaml;
         {
-            YAML::Node imguiNode;
-            imguiNode["EnableDocking"]   = m_ImGuiConfig.EnableDocking;
-            imguiNode["EnableViewports"] = m_ImGuiConfig.EnableViewports;
+            {
+                YAML::Node imguiNode;
+                imguiNode["EnableDocking"]   = m_ImGuiConfig.EnableDocking;
+                imguiNode["EnableViewports"] = m_ImGuiConfig.EnableViewports;
 
-            yaml["ImGui"] = imguiNode;
+                yaml["ImGui"] = imguiNode;
+            }
         }
         file.Write(YAML::Dump(yaml));
 
-        m_Logger.Info("Saved mod manager config.");
+        m_Logger.Info("Saved %s.", k_Name);
     }
     catch (const std::exception& e)
     {
-        m_Logger.Warning("Failed to save mod manager config - %s", e.what());
+        m_Logger.Warning("Failed to save %s - %s", k_Name, e.what());
     }
 }
 

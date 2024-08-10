@@ -12,7 +12,7 @@ namespace Core
         sprintf_s(m_Buffer, "%s. Last error: %lu.", message, lastError);
     }
     
-    const char* WindowsException::what() const noexcept
+    const char* WindowsException::what() const
     {
         return m_Buffer;
     }
