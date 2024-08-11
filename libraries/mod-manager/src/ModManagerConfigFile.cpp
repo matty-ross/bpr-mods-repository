@@ -28,8 +28,10 @@ void ModManagerConfigFile::Load()
             {
                 const YAML::Node& imguiNode = yaml["ImGui"];
                 
-                m_ImGuiConfig.EnableDocking   = imguiNode["EnableDocking"].as<bool>();
-                m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>();
+                m_ImGuiConfig.ToggleMenusVK    = imguiNode["ToggleMenusVK"].as<int>();
+                m_ImGuiConfig.ToggleOverlaysVK = imguiNode["ToggleOverlaysVK"].as<int>();
+                m_ImGuiConfig.EnableDocking    = imguiNode["EnableDocking"].as<bool>();
+                m_ImGuiConfig.EnableViewports  = imguiNode["EnableViewports"].as<bool>();
             }
         }
 
@@ -53,8 +55,10 @@ void ModManagerConfigFile::Save() const
         {
             {
                 YAML::Node imguiNode;
-                imguiNode["EnableDocking"]   = m_ImGuiConfig.EnableDocking;
-                imguiNode["EnableViewports"] = m_ImGuiConfig.EnableViewports;
+                imguiNode["ToggleMenusVK"]    = m_ImGuiConfig.ToggleMenusVK;
+                imguiNode["ToggleOverlaysVK"] = m_ImGuiConfig.ToggleOverlaysVK;
+                imguiNode["EnableDocking"]    = m_ImGuiConfig.EnableDocking;
+                imguiNode["EnableViewports"]  = m_ImGuiConfig.EnableViewports;
 
                 yaml["ImGui"] = imguiNode;
             }

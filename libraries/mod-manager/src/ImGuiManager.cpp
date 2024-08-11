@@ -107,15 +107,6 @@ void ImGuiManager::OnRenderFrame()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    if (ImGui::IsKeyPressed(ImGuiKey_F7, false))
-    {
-        m_MenusVisible = !m_MenusVisible;
-    }
-    if (ImGui::IsKeyPressed(ImGuiKey_F8, false))
-    {
-        m_OverlaysVisible = !m_OverlaysVisible;
-    }
-
     ImGuiIO& io = ImGui::GetIO();
     io.MouseDrawCursor = m_MenusVisible;
 
@@ -151,6 +142,23 @@ void ImGuiManager::OnRenderFrame()
 bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
+
+    switch (Msg)
+    {
+    case WM_KEYDOWN:
+        if (!(HIWORD(lParam) & KF_REPEAT))
+        {
+            if (wParam == m_ImGuiConfig.ToggleMenusVK)
+            {
+                m_MenusVisible = !m_MenusVisible;
+            }
+            else if (wParam == m_ImGuiConfig.ToggleOverlaysVK)
+            {
+                m_OverlaysVisible = !m_OverlaysVisible;
+            }
+        }
+        break;
+    }
 
     // Prevent forwarding messages meant for ImGui.
     ImGuiIO& io = ImGui::GetIO();
