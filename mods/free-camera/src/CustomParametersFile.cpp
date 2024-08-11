@@ -70,24 +70,26 @@ void CustomParametersFile::Save() const
 
         YAML::Node yaml;
         {
-            for (const CustomParameters& customParameters : m_CustomParameters)
             {
-                YAML::Node customParametersNode;
-                customParametersNode["Name"]                     = customParameters.Name;
-                customParametersNode["PitchSpring"]              = customParameters.PitchSpring;
-                customParametersNode["YawSpring"]                = customParameters.YawSpring;
-                customParametersNode["PivotY"]                   = customParameters.PivotY;
-                customParametersNode["PivotZ"]                   = customParameters.PivotZ;
-                customParametersNode["PivotZOffset"]             = customParameters.PivotZOffset;
-                customParametersNode["FOV"]                      = customParameters.FOV;
-                customParametersNode["InFrontFOVMax"]            = customParameters.InFrontFOVMax;
-                customParametersNode["FrontInAmount"]            = customParameters.FrontInAmount;
-                customParametersNode["DriftYawSpring"]           = customParameters.DriftYawSpring;
-                customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
-                customParametersNode["DownAngle"]                = customParameters.DownAngle;
-                customParametersNode["DropFactor"]               = customParameters.DropFactor;
+                for (const CustomParameters& customParameters : m_CustomParameters)
+                {
+                    YAML::Node customParametersNode;
+                    customParametersNode["Name"]                     = customParameters.Name;
+                    customParametersNode["PitchSpring"]              = customParameters.PitchSpring;
+                    customParametersNode["YawSpring"]                = customParameters.YawSpring;
+                    customParametersNode["PivotY"]                   = customParameters.PivotY;
+                    customParametersNode["PivotZ"]                   = customParameters.PivotZ;
+                    customParametersNode["PivotZOffset"]             = customParameters.PivotZOffset;
+                    customParametersNode["FOV"]                      = customParameters.FOV;
+                    customParametersNode["InFrontFOVMax"]            = customParameters.InFrontFOVMax;
+                    customParametersNode["FrontInAmount"]            = customParameters.FrontInAmount;
+                    customParametersNode["DriftYawSpring"]           = customParameters.DriftYawSpring;
+                    customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
+                    customParametersNode["DownAngle"]                = customParameters.DownAngle;
+                    customParametersNode["DropFactor"]               = customParameters.DropFactor;
 
-                yaml["CustomParameters"].push_back(customParametersNode);
+                    yaml["CustomParameters"].push_back(customParametersNode);
+                }
             }
         }
         file.Write(YAML::Dump(yaml));

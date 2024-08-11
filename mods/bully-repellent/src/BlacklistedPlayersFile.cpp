@@ -61,15 +61,17 @@ void BlacklistedPlayersFile::Save() const
         
         YAML::Node yaml;
         {
-            for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
             {
-                YAML::Node blacklistedPlayerNode;
-                blacklistedPlayerNode["ID"]       = blacklistedPlayer.ID;
-                blacklistedPlayerNode["Name"]     = blacklistedPlayer.Name;
-                blacklistedPlayerNode["Autokick"] = blacklistedPlayer.Autokick;
-                blacklistedPlayerNode["Automute"] = blacklistedPlayer.Automute;
+                for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
+                {
+                    YAML::Node blacklistedPlayerNode;
+                    blacklistedPlayerNode["ID"]       = blacklistedPlayer.ID;
+                    blacklistedPlayerNode["Name"]     = blacklistedPlayer.Name;
+                    blacklistedPlayerNode["Autokick"] = blacklistedPlayer.Autokick;
+                    blacklistedPlayerNode["Automute"] = blacklistedPlayer.Automute;
 
-                yaml["BlacklistedPlayers"].push_back(blacklistedPlayerNode);
+                    yaml["BlacklistedPlayers"].push_back(blacklistedPlayerNode);
+                }
             }
         }
         file.Write(YAML::Dump(yaml));
