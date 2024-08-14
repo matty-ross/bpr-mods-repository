@@ -1,23 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.9.34616.47
+VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libraries", "libraries", "{61A8F47C-96B6-4EEE-9CF7-81128468BABB}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mods", "mods", "{56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vendor", "vendor", "{DE346130-6D0E-4DA8-B567-AC1410E41B21}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "core", "libraries\core\core.vcxproj", "{FAA3B443-7FF9-4C2C-A140-1A0600E97539}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mod-manager", "libraries\mod-manager\mod-manager.vcxproj", "{1C27C1FC-950B-453C-8596-69F0FBDC1B11}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "vendor", "vendor", "{DE346130-6D0E-4DA8-B567-AC1410E41B21}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "vendor\imgui\imgui.vcxproj", "{7DC3E603-4726-4242-8AFD-1DABAF9DFEA7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "detours", "vendor\detours\detours.vcxproj", "{95B474DE-77EF-4ECF-9198-451C15A1B392}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "yaml-cpp", "vendor\yaml-cpp\yaml-cpp.vcxproj", "{072109B8-5077-45D6-B04E-018F284FB3E1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mods", "mods", "{56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "exception-reporter", "mods\exception-reporter\exception-reporter.vcxproj", "{9245F051-3444-443E-A1BA-60BCCCEB884F}"
 EndProject

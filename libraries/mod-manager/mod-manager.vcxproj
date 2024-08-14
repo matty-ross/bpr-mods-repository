@@ -97,6 +97,7 @@
       <PreprocessorDefinitions>MOD_MANAGER_API_EXPORT;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)include\mod-manager\;$(SolutionDir)libraries\core\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\detours\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -113,6 +114,7 @@
       <PreprocessorDefinitions>MOD_MANAGER_API_EXPORT;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)include\mod-manager\;$(SolutionDir)libraries\core\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\detours\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -129,6 +131,7 @@
       <PreprocessorDefinitions>MOD_MANAGER_API_EXPORT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)include\mod-manager\;$(SolutionDir)libraries\core\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\detours\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -145,6 +148,7 @@
       <PreprocessorDefinitions>MOD_MANAGER_API_EXPORT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)include\;$(ProjectDir)include\mod-manager\;$(SolutionDir)libraries\core\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\detours\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -155,28 +159,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\ModManager.cpp" />
     <ClCompile Include="src\ModManagerConfigFile.cpp" />
     <ClCompile Include="src\ImGuiManager.cpp" />
     <ClCompile Include="src\DetourHookManager.cpp" />
-    <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\ModManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\mod-manager\ModManagerApi.hpp" />
+    <ClInclude Include="include\mod-manager\ModManager.hpp" />
+    <ClInclude Include="include\mod-manager\ModManagerConfigFile.hpp" />
     <ClInclude Include="include\mod-manager\ImGuiManager.hpp" />
     <ClInclude Include="include\mod-manager\DetourHookManager.hpp" />
-    <ClInclude Include="include\mod-manager\ModManager.hpp" />
-    <ClInclude Include="include\mod-manager\ModManagerApi.hpp" />
-    <ClInclude Include="include\mod-manager\ModManagerConfigFile.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
       <Project>{faa3b443-7ff9-4c2c-a140-1a0600e97539}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\vendor\detours\detours.vcxproj">
-      <Project>{95b474de-77ef-4ecf-9198-451c15a1b392}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\..\vendor\imgui\imgui.vcxproj">
       <Project>{7dc3e603-4726-4242-8afd-1dabaf9dfea7}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\vendor\detours\detours.vcxproj">
+      <Project>{95b474de-77ef-4ecf-9198-451c15a1b392}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\vendor\yaml-cpp\yaml-cpp.vcxproj">
       <Project>{072109b8-5077-45d6-b04e-018f284fb3e1}</Project>

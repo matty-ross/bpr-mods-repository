@@ -29,13 +29,13 @@
     <ClInclude Include="include\core\Logger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\Pointer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\core\File.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\core\WindowsException.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\core\Pointer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
