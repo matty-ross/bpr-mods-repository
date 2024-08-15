@@ -110,6 +110,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\vendor\yaml-cpp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="modules\yaml-cpp\src\contrib\graphbuilderadapter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -285,9 +288,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\yaml.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\vendor\yaml-cpp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

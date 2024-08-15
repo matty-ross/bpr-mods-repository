@@ -38,6 +38,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\vendor\imgui.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="modules\imgui\imconfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -60,9 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="modules\imgui\backends\imgui_impl_win32.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\vendor\imgui.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

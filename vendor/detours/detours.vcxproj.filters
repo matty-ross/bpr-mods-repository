@@ -32,13 +32,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\vendor\detours.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="modules\detours\src\detours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="modules\detours\src\detver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\vendor\detours.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
