@@ -97,6 +97,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -113,6 +114,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -129,6 +131,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -145,6 +148,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -155,15 +159,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\BullyRepellent.cpp" />
     <ClCompile Include="src\BlacklistedPlayersFile.cpp" />
     <ClCompile Include="src\OnlinePlayers.cpp" />
-    <ClCompile Include="src\BullyRepellent.cpp" />
-    <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BullyRepellent.hpp" />
     <ClInclude Include="src\BlacklistedPlayersFile.hpp" />
     <ClInclude Include="src\OnlinePlayers.hpp" />
-    <ClInclude Include="src\BullyRepellent.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">

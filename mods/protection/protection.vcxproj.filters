@@ -15,19 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Protection.cpp">
+    <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Main.cpp">
+    <ClCompile Include="src\Protection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\VehiclesFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\VehicleProtection.cpp">
+    <ClCompile Include="src\ChallengesFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\ChallengesFile.cpp">
+    <ClCompile Include="src\VehicleProtection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\ChallengeProtection.cpp">
@@ -38,19 +38,19 @@
     <ClInclude Include="src\Protection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VehiclesFile.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\VehicleProtection.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Vehicles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Challenges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\VehiclesFile.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\ChallengesFile.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\VehicleProtection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\ChallengeProtection.hpp">

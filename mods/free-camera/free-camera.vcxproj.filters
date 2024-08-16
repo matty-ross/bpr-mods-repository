@@ -21,19 +21,19 @@
     <ClCompile Include="src\FreeCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GameplayExternalCamera.cpp">
+    <ClCompile Include="src\CustomParametersFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Behaviors.cpp">
+    <ClCompile Include="src\Misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\CurrentCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CustomParametersFile.cpp">
+    <ClCompile Include="src\GameplayExternalCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Misc.cpp">
+    <ClCompile Include="src\Behaviors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,19 +41,19 @@
     <ClInclude Include="src\FreeCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GameplayExternalCamera.hpp">
+    <ClInclude Include="src\CustomParametersFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Behaviors.hpp">
+    <ClInclude Include="src\Misc.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\CurrentCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\CustomParametersFile.hpp">
+    <ClInclude Include="src\GameplayExternalCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Misc.hpp">
+    <ClInclude Include="src\Behaviors.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

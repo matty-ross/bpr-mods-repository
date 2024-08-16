@@ -21,10 +21,10 @@
     <ClCompile Include="src\BullyRepellent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\OnlinePlayers.cpp">
+    <ClCompile Include="src\BlacklistedPlayersFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\BlacklistedPlayersFile.cpp">
+    <ClCompile Include="src\OnlinePlayers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +32,10 @@
     <ClInclude Include="src\BullyRepellent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\OnlinePlayers.hpp">
+    <ClInclude Include="src\BlacklistedPlayersFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\BlacklistedPlayersFile.hpp">
+    <ClInclude Include="src\OnlinePlayers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
