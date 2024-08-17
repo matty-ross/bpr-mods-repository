@@ -50,6 +50,12 @@ ImGuiManager& ModManager::GetImGuiManager()
 void ModManager::OnProcessAttach()
 {
     AllocConsole();
+    HANDLE consoleOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    DWORD consoleMode = 0;
+    GetConsoleMode(consoleOutputHandle, &consoleMode);
+    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(consoleOutputHandle, consoleMode);
 
     PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
     {

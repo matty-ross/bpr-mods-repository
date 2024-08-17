@@ -25,7 +25,7 @@ namespace Core
         vsprintf_s(message, format, args);
         va_end(args);
         
-        Log("INFO", message);
+        Log("\x1B[1;32mINFO\x1B[0m", message);
     }
 
     void Logger::Warning(const char* format, ...) const
@@ -37,7 +37,7 @@ namespace Core
         vsprintf_s(message, format, args);
         va_end(args);
         
-        Log("WARNING", message);
+        Log("\x1B[1;33mWARNING\x1B[0m", message);
     }
 
     void Logger::Error(const char* format, ...) const
@@ -49,7 +49,7 @@ namespace Core
         vsprintf_s(message, format, args);
         va_end(args);
         
-        Log("ERROR", message);
+        Log("\x1B[1;31mERROR\x1B[0m", message);
     }
 
     void Logger::Log(const char* level, const char* message) const
@@ -57,10 +57,10 @@ namespace Core
         SYSTEMTIME localTime = {};
         GetLocalTime(&localTime);
 
-        char buffer[70 + k_MessageMaxSize] = {};    
+        char buffer[80 + k_MessageMaxSize] = {};    
         int length = sprintf_s(
             buffer,
-            "[%04d-%02d-%02d %02d:%02d:%02d.%03d]  %-8s  %-20s  :  %s\n",
+            "[%04d-%02d-%02d %02d:%02d:%02d.%03d]  %-20s  %-20s  :  %s\n",
             localTime.wYear,
             localTime.wMonth,
             localTime.wDay,
