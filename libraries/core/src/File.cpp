@@ -14,7 +14,7 @@ namespace Core
         {
         case Mode::Read:
             desiredAccess = GENERIC_READ;
-            creationDisposition = OPEN_ALWAYS;
+            creationDisposition = OPEN_EXISTING;
             break;
 
         case Mode::Write:
