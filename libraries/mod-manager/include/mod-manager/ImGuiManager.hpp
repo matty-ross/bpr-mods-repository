@@ -54,7 +54,7 @@ private:
     const ImGuiConfig& m_ImGuiConfig;
 
     std::vector<ImGuiMenu*> m_Menus;
-    bool m_MenusVisible = true;
+    bool m_MenusVisible = false;
     
     std::vector<ImGuiOverlay*> m_Overlays;
     bool m_OverlaysVisible = true;

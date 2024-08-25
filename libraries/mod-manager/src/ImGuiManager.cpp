@@ -107,9 +107,6 @@ void ImGuiManager::OnRenderFrame()
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    ImGuiIO& io = ImGui::GetIO();
-    io.MouseDrawCursor = m_MenusVisible;
-
     EnterCriticalSection(&m_CriticalSection);
     {
         if (m_MenusVisible)
@@ -151,6 +148,9 @@ bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
             if (wParam == m_ImGuiConfig.ToggleMenusVK)
             {
                 m_MenusVisible = !m_MenusVisible;
+                
+                Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
+                Core::Pointer(0x0139813E).as<bool>() = true;
             }
             else if (wParam == m_ImGuiConfig.ToggleOverlaysVK)
             {
