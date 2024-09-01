@@ -62,6 +62,18 @@ void BullyRepellent::Load()
     {
         m_Logger.Info("Loading...");
 
+        // Check versions
+        {
+            m_Logger.Info("Checking versions...");
+
+            if (strcmp(ModManager::GetVersion(), k_ModVersion) != 0)
+            {
+                throw std::exception("Mod Manager and Mod versions mismatch.");
+            }
+
+            m_Logger.Info("Checked versions.");
+        }
+
         // Create mod directory.
         {
             m_Logger.Info("Creating mod directory '%s' ...", k_ModDirectory);

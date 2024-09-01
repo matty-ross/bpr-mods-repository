@@ -1,10 +1,13 @@
 #include "ExceptionReporter.hpp"
 
+#include "mod-manager/ModManager.hpp"
+
 #include "../resource.h"
 #include "ExceptionInformation.hpp"
 
 
-static constexpr char k_ModName[] = "Exception Reporter";
+static constexpr char k_ModName[]    = "Exception Reporter";
+static constexpr char k_ModVersion[] = "1.0.0";
 
 
 ExceptionReporter ExceptionReporter::s_Instance;
@@ -83,6 +86,18 @@ void ExceptionReporter::Load()
     try
     {
         m_Logger.Info("Loading...");
+
+        // Check versions
+        {
+            m_Logger.Info("Checking versions...");
+
+            if (strcmp(ModManager::GetVersion(), k_ModVersion) != 0)
+            {
+                throw std::exception("Mod Manager and Mod versions mismatch.");
+            }
+
+            m_Logger.Info("Checked versions.");
+        }
 
         // Wait to enter WinMain.
         {

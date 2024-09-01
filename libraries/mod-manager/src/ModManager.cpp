@@ -38,7 +38,7 @@ ModManager& ModManager::Get()
     return s_Instance;
 }
 
-const char* ModManager::GetVersion() const
+const char* ModManager::GetVersion()
 {
     return k_Version;
 }
