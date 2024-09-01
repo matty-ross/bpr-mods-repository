@@ -4,6 +4,7 @@
 
 
 static constexpr char k_Name[] = "Mod Manager";
+static constexpr char k_Version[] = "1.0.0";
 
 
 ModManager ModManager::s_Instance;
@@ -35,6 +36,11 @@ ModManager::ModManager()
 ModManager& ModManager::Get()
 {
     return s_Instance;
+}
+
+const char* ModManager::GetVersion() const
+{
+    return k_Version;
 }
 
 DetourHookManager& ModManager::GetDetourHookManager()

@@ -25,6 +25,8 @@ public:
     MOD_MANAGER_API static ModManager& Get();
 
 public:
+    MOD_MANAGER_API const char* GetVersion() const;
+
     MOD_MANAGER_API DetourHookManager& GetDetourHookManager();
     MOD_MANAGER_API ImGuiManager& GetImGuiManager();
 
