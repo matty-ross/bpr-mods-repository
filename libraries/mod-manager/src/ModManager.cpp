@@ -3,8 +3,8 @@
 #include "core/Pointer.hpp"
 
 
-static constexpr char k_Name[] = "Mod Manager";
-static constexpr char k_Version[] = "1.0.0";
+static constexpr char k_Name[]    = "Mod Manager";
+static constexpr char k_Version[] = "1.1.0";
 
 
 ModManager ModManager::s_Instance;
