@@ -149,7 +149,6 @@ void Dashboard::Unload()
 
 void Dashboard::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
 {
-    printf_s("[dashboard]: distance: %f | vehicle type: %d\n", distance, vehicleType);
 }
 
 void Dashboard::OnRenderOverlay()
@@ -158,18 +157,21 @@ void Dashboard::OnRenderOverlay()
 
 __declspec(naked) void Dashboard::DetourProgressionAddDistanceDriven()
 {
-    // TODO: preserve the xmm1 register
-
     __asm
     {
         pushfd
         pushad
 
-        push esi // vehicle type
         sub esp, 4
-        movss [esp], xmm1 // float
+        movss [esp], xmm1
+
+        push esi // vehicle type
+        push dword ptr [esp + 0x4] // distance
         mov ecx, offset s_Instance
         call Dashboard::OnProgressionAddDistanceDriven
+
+        movss xmm1, [esp]
+        add esp, 4
 
         popad
         popfd
