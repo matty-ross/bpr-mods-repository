@@ -160,6 +160,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Dashboard.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Dashboard.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
