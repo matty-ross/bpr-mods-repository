@@ -7,6 +7,8 @@
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
+#include "DashboardHud.hpp"
+
 
 class Dashboard
 {
@@ -36,6 +38,8 @@ private:
 
 private:
     Core::Logger m_Logger;
+
+    DashboardHud m_DashboardHud;
 
     DetourHook m_DetourProgressionAddDistanceDriven;
 

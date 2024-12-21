@@ -149,10 +149,12 @@ void Dashboard::Unload()
 
 void Dashboard::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
 {
+    m_DashboardHud.OnProgressionAddDistanceDriven(distance, vehicleType);
 }
 
 void Dashboard::OnRenderOverlay()
 {
+    m_DashboardHud.OnRenderOverlay();
 }
 
 __declspec(naked) void Dashboard::DetourProgressionAddDistanceDriven()
