@@ -23,7 +23,7 @@ void VehiclesFile::Load()
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
         
-        YAML::Node yaml = YAML::Load(file.Read());
+        YAML::Node yaml = YAML::Load(file.ReadText());
         {
             {
                 uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>();
@@ -86,7 +86,7 @@ void VehiclesFile::Save() const
                 }
             }
         }
-        file.Write(YAML::Dump(yaml));
+        file.WriteText(YAML::Dump(yaml));
 
         m_Logger.Info("Saved %s.", k_Name);
     }

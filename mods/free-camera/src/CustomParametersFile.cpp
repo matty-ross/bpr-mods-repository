@@ -23,7 +23,7 @@ void CustomParametersFile::Load()
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
 
-        YAML::Node yaml = YAML::Load(file.Read());
+        YAML::Node yaml = YAML::Load(file.ReadText());
         {
             {
                 m_CustomParameters.clear();
@@ -92,7 +92,7 @@ void CustomParametersFile::Save() const
                 }
             }
         }
-        file.Write(YAML::Dump(yaml));
+        file.WriteText(YAML::Dump(yaml));
 
         m_Logger.Info("Saved %s.", k_Name);
     }

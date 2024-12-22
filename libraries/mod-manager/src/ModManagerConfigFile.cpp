@@ -23,7 +23,7 @@ void ModManagerConfigFile::Load()
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
 
-        YAML::Node yaml = YAML::Load(file.Read());
+        YAML::Node yaml = YAML::Load(file.ReadText());
         {
             {
                 const YAML::Node& imguiNode = yaml["ImGui"];
@@ -63,7 +63,7 @@ void ModManagerConfigFile::Save() const
                 yaml["ImGui"] = imguiNode;
             }
         }
-        file.Write(YAML::Dump(yaml));
+        file.WriteText(YAML::Dump(yaml));
 
         m_Logger.Info("Saved %s.", k_Name);
     }

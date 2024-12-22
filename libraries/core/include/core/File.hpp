@@ -2,6 +2,7 @@
 
 
 #include <string>
+#include <vector>
 #include <Windows.h>
 
 
@@ -26,8 +27,16 @@ namespace Core
         File& operator =(File&&) = delete;
 
     public:
-        std::string Read() const;
-        void Write(const std::string& content) const;
+        size_t GetSize() const;
+
+        std::string ReadText() const;
+        std::vector<BYTE> ReadBinary() const;
+        void WriteText(const std::string& content) const;
+        void WriteBinary(const std::vector<BYTE>& content) const;
+
+    private:
+        void Read(void* buffer, size_t size) const;
+        void Write(const void* buffer, size_t size) const;
 
     private:
         HANDLE m_FileHandle = INVALID_HANDLE_VALUE;

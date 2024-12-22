@@ -37,25 +37,49 @@ namespace Core
             CloseHandle(m_FileHandle);
         }
     }
-    
-    std::string File::Read() const
-    {
-        size_t size = GetFileSize(m_FileHandle, nullptr);
-        std::string content(size, '\0');
 
+    size_t File::GetSize() const
+    {
+        return GetFileSize(m_FileHandle, nullptr);
+    }
+
+    std::string File::ReadText() const
+    {
+        std::string content(GetSize(), '\0');
+        Read(content.data(), content.size());
+        return content;
+    }
+
+    std::vector<BYTE> File::ReadBinary() const
+    {
+        std::vector<BYTE> content(GetSize(), 0x00);
+        Read(content.data(), content.size());
+        return content;
+    }
+
+    void File::WriteText(const std::string& content) const
+    {
+        Write(content.data(), content.size());
+    }
+
+    void File::WriteBinary(const std::vector<BYTE>& content) const
+    {
+        Write(content.data(), content.size());
+    }
+    
+    void File::Read(void* buffer, size_t size) const
+    {
         DWORD bytesRead = 0;
-        if (ReadFile(m_FileHandle, content.data(), content.size(), &bytesRead, nullptr) == FALSE)
+        if (ReadFile(m_FileHandle, buffer, size, &bytesRead, nullptr) == FALSE)
         {
             throw WindowsException("Cannot read file");
         }
-
-        return content;
     }
     
-    void File::Write(const std::string& content) const
+    void File::Write(const void* buffer, size_t size) const
     {
         DWORD bytesWritten = 0;
-        if (WriteFile(m_FileHandle, content.data(), content.size(), &bytesWritten, nullptr) == FALSE)
+        if (WriteFile(m_FileHandle, buffer, size, &bytesWritten, nullptr) == FALSE)
         {
             throw WindowsException("Cannot write file");
         }
