@@ -1,65 +1,6 @@
 #include "DashboardHud.hpp"
 
-#include <d3d11.h>
-
-#include "core\Pointer.hpp"
-#include "core\File.hpp"
-
-
-static ID3D11ShaderResourceView* CreateD3D11Texture(Core::Pointer ddsData)
-{
-    // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
-    
-    // TODO: finish this function + error handling
-    
-    constexpr uint32_t ddsMagic = 0x20534444;   // 'DDS '
-    constexpr uint32_t dxt5Format = 0x35545844; // 'DXT5'
-
-    uint32_t magic = ddsData.at(0x0).as<uint32_t>();
-    if (magic != ddsMagic)
-    {
-        throw std::exception("DDS magic number mismatch");
-    }
-
-    uint32_t format = ddsData.at(0x54).as<uint32_t>();
-    if (format != dxt5Format)
-    {
-        throw std::exception("DXT5 format mismatch.");
-    }
-
-    ID3D11Device* device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
-
-    D3D11_TEXTURE2D_DESC textureDesc =
-    {
-        .Width = ddsData.at(0x10).as<uint32_t>(),
-        .Height = ddsData.at(0xC).as<uint32_t>(),
-        .MipLevels = 1,
-        .ArraySize = 1,
-        .Format = DXGI_FORMAT_BC3_UNORM,
-        //.SampleDesc
-        .Usage = D3D11_USAGE_DEFAULT,
-    };
-    D3D11_SUBRESOURCE_DATA subresourceData =
-    {
-        .pSysMem = ddsData.at(0x80).GetAddress(),
-        //.SysMemPitch
-    };
-    ID3D11Texture2D* texture = nullptr;
-    device->CreateTexture2D(&textureDesc, &subresourceData, &texture);
-    
-    D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc =
-    {
-        .Format = DXGI_FORMAT_BC3_UNORM,
-        .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-        //.Texture2D
-    };
-    ID3D11ShaderResourceView* shaderResourceView = nullptr;
-    device->CreateShaderResourceView(texture, &shaderResourceViewDesc, &shaderResourceView);
-
-    texture->Release();
-
-    return shaderResourceView;
-}
+#include "core/File.hpp"
 
 
 DashboardHud::DashboardHud(const Core::Logger& logger)
@@ -76,8 +17,9 @@ void DashboardHud::LoadTexture(const std::string& filePath)
     
     Core::File file(filePath, Core::File::Mode::Read);
     std::vector<BYTE> textureData = file.ReadBinary();
-    
-    CreateD3D11Texture(textureData.data());
+    CreateTexture(textureData.data());
+
+    m_Logger.Info("Loaded %s.", name);
 }
 
 void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
@@ -92,4 +34,70 @@ void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicl
 
 void DashboardHud::OnRenderOverlay()
 {
+}
+
+void DashboardHud::CreateTexture(Core::Pointer ddsData)
+{
+    // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
+
+    /*
+    * DDS texture
+    * DXT5 compression
+    * no mipmaps
+    */
+    
+    uint32_t magic = ddsData.at(0x0).as<uint32_t>();
+    if (magic != MAKEFOURCC('D', 'D', 'S', ' '))
+    {
+        throw std::exception("DDS magic number mismatch.");
+    }
+
+    uint32_t width = ddsData.at(0x10).as<uint32_t>();
+    uint32_t height = ddsData.at(0xC).as<uint32_t>();
+
+    D3D11_TEXTURE2D_DESC textureDesc =
+    {
+        .Width      = width,
+        .Height     = height,
+        .MipLevels  = 1,
+        .ArraySize  = 1,
+        .Format     = DXGI_FORMAT_BC3_UNORM,
+        .SampleDesc =
+        {
+            .Count   = 1,
+            .Quality = 0,
+        },
+        .Usage      = D3D11_USAGE_DEFAULT,
+        .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
+    };
+
+    D3D11_SUBRESOURCE_DATA initialData =
+    {
+        .pSysMem     = ddsData.at(0x80).GetAddress(),
+        .SysMemPitch = ((width + 3) / 4) * 16,
+    };
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc =
+    {
+        .Format        = DXGI_FORMAT_BC3_UNORM,
+        .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
+        .Texture2D     =
+        {
+            .MostDetailedMip = 0,
+            .MipLevels       = 1,
+        },
+    };
+
+    ID3D11Device* device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture = nullptr;
+    if (FAILED(device->CreateTexture2D(&textureDesc, &initialData, &texture)))
+    {
+        throw std::exception("Failed to create D3D11 texture.");
+    }
+    
+    if (FAILED(device->CreateShaderResourceView(texture.Get(), &shaderResourceViewDesc, &m_TextureView)))
+    {
+        throw std::exception("Failed to create D3D11 shader resource view.");
+    }
 }

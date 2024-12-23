@@ -2,8 +2,11 @@
 
 
 #include <string>
+#include <wrl.h>
+#include <d3d11.h>
 
 #include "core/Logger.hpp"
+#include "core/Pointer.hpp"
 
 
 class DashboardHud
@@ -19,7 +22,12 @@ public:
     void OnRenderOverlay();
 
 private:
+    void CreateTexture(Core::Pointer ddsData);
+
+private:
     const Core::Logger& m_Logger;
+    
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_TextureView = nullptr;
     
     float m_DistanceDriven[3] = { 0.0f, 0.0f, 0.0f };
 };
