@@ -1,18 +1,25 @@
 #pragma once
 
 
-#include <cstdint>
+#include <string>
+
+#include "core/Logger.hpp"
 
 
 class DashboardHud
 {
 public:
-    void LoadTexture();
+    DashboardHud(const Core::Logger& logger);
+
+public:
+    void LoadTexture(const std::string& filePath);
 
     void OnProgressionAddDistanceDriven(float distance, int32_t vehicleType);
     
     void OnRenderOverlay();
 
 private:
-    float m_DistanceDriven[3] = { 0.0f, 0.0f, 0.0f, };
+    const Core::Logger& m_Logger;
+    
+    float m_DistanceDriven[3] = { 0.0f, 0.0f, 0.0f };
 };

@@ -4,8 +4,12 @@
 #include "mod-manager/ModManager.hpp"
 
 
-static constexpr char k_ModName[]    = "Dashboard";
-static constexpr char k_ModVersion[] = "1.1.0";
+using namespace std::string_literals;
+
+
+static constexpr char k_ModName[]      = "Dashboard";
+static constexpr char k_ModVersion[]   = "1.1.0";
+static constexpr char k_ModDirectory[] = ".\\mods\\dashboard\\";
 
 
 Dashboard Dashboard::s_Instance;
@@ -14,6 +18,7 @@ Dashboard Dashboard::s_Instance;
 Dashboard::Dashboard()
     :
     m_Logger(k_ModName),
+    m_DashboardHud(m_Logger),
     m_DetourProgressionAddDistanceDriven
     {
         .Target = Core::Pointer(0x06E6B397).GetAddress(),
