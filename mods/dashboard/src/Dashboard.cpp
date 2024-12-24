@@ -92,6 +92,11 @@ void Dashboard::Load()
             m_Logger.Info("In game.");
         }
 
+        // Load dashboard texture.
+        {
+            m_DashboardHud.LoadTexture(k_ModDirectory + "dashboard.dds"s);
+        }
+
         // Attach ProgressionAddDistanceDriven detour.
         {
             m_Logger.Info("Attaching ProgressionAddDistanceDriven detour...");

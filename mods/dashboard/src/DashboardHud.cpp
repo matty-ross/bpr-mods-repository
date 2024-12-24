@@ -1,5 +1,7 @@
 #include "DashboardHud.hpp"
 
+#include "vendor/imgui.hpp"
+
 #include "core/File.hpp"
 
 
@@ -34,6 +36,91 @@ void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicl
 
 void DashboardHud::OnRenderOverlay()
 {
+    // TODO: ImGui window is just here for debugging purposes
+
+    ImGui::Begin("Dashboard debug");
+
+    Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
+
+    ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
+
+    static ImColor textColor(IM_COL32_WHITE);
+    ImGui::ColorEdit4("Text color", reinterpret_cast<float*>(&textColor));
+
+    // Texture
+    {
+        ImGui::SeparatorText("Texture");
+
+        static ImVec2 min;
+        static ImVec2 max;
+        ImGui::DragFloat2("Min##texture", reinterpret_cast<float*>(&min));
+        ImGui::DragFloat2("Max##texture", reinterpret_cast<float*>(&max));
+
+        foregroundDrawList->AddImage(static_cast<ImTextureID>(m_TextureView.Get()), min, max);
+    }
+
+    // Speed text
+    {
+        ImGui::SeparatorText("Speed");
+        
+        int32_t speed = abs(guiPlayerInfo.at(0x30).as<int32_t>());
+        
+        char speedText[16] = {};
+        sprintf_s(speedText, "%d", speed);
+
+        static ImVec2 pos;
+        ImGui::DragFloat2("Pos##speed", reinterpret_cast<float*>(&pos));
+        
+        foregroundDrawList->AddText(pos, textColor, speedText);
+    }
+
+    // RPM text
+    {
+        ImGui::SeparatorText("RPM");
+
+        int32_t rpm = abs(guiPlayerInfo.at(0x34).as<int32_t>());
+
+        char rpmText[16] = {};
+        sprintf_s(rpmText, "%d", rpm);
+        
+        static ImVec2 pos;
+        ImGui::DragFloat2("Pos##rpm", reinterpret_cast<float*>(&pos));
+
+        foregroundDrawList->AddText(pos, textColor, rpmText);
+    }
+
+    // Gear text
+    {
+        ImGui::SeparatorText("Gear");
+
+        int32_t gear = abs(guiPlayerInfo.at(0x38).as<int32_t>());
+
+        char gearText[16] = {};
+        sprintf_s(gearText, "%d", gear);
+
+        static ImVec2 pos;
+        ImGui::DragFloat2("Pos##gear", reinterpret_cast<float*>(&pos));
+
+        foregroundDrawList->AddText(pos, textColor, gearText);
+    }
+
+    // Tripmeter text
+    {
+        ImGui::SeparatorText("Tripmeter");
+
+        int32_t vehicleType = guiPlayerInfo.at(0x20).as<int32_t>();
+        float tripmeter = m_DistanceDriven[vehicleType] / 1000.0f;
+
+        char tripmeterText[32] = {};
+        sprintf_s(tripmeterText, "%.1f", tripmeter);
+
+        static ImVec2 pos;
+        ImGui::DragFloat2("Pos##tripmeter", reinterpret_cast<float*>(&pos));
+
+        foregroundDrawList->AddText(pos, textColor, tripmeterText);
+    }
+
+    ImGui::End();
 }
 
 void DashboardHud::CreateTexture(Core::Pointer ddsData)
@@ -42,7 +129,7 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
 
     /*
     * DDS texture
-    * DXT5 compression
+    * no compression
     * no mipmaps
     */
     
@@ -52,16 +139,13 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
         throw std::exception("DDS magic number mismatch.");
     }
 
-    uint32_t width = ddsData.at(0x10).as<uint32_t>();
-    uint32_t height = ddsData.at(0xC).as<uint32_t>();
-
     D3D11_TEXTURE2D_DESC textureDesc =
     {
-        .Width      = width,
-        .Height     = height,
+        .Width      = ddsData.at(0x10).as<uint32_t>(),
+        .Height     = ddsData.at(0xC).as<uint32_t>(),
         .MipLevels  = 1,
         .ArraySize  = 1,
-        .Format     = DXGI_FORMAT_BC3_UNORM,
+        .Format     = DXGI_FORMAT_B8G8R8A8_UNORM,
         .SampleDesc =
         {
             .Count   = 1,
@@ -74,12 +158,12 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
     D3D11_SUBRESOURCE_DATA initialData =
     {
         .pSysMem     = ddsData.at(0x80).GetAddress(),
-        .SysMemPitch = ((width + 3) / 4) * 16,
+        .SysMemPitch = ddsData.at(0x14).as<uint32_t>(),
     };
 
     D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc =
     {
-        .Format        = DXGI_FORMAT_BC3_UNORM,
+        .Format        = DXGI_FORMAT_B8G8R8A8_UNORM,
         .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
         .Texture2D     =
         {
