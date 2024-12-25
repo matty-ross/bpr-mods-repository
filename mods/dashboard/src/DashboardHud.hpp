@@ -16,6 +16,7 @@ public:
 
 public:
     void LoadTexture(const std::string& filePath);
+    void LoadFonts(const std::string& filePath);
 
     void OnProgressionAddDistanceDriven(float distance, int32_t vehicleType);
     
@@ -28,6 +29,7 @@ private:
     const Core::Logger& m_Logger;
     
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_TextureView = nullptr;
+    struct ImFont* m_Font = nullptr;
     
     float m_DistanceDriven[3] = { 0.0f, 0.0f, 0.0f };
 };

@@ -97,6 +97,13 @@ void Dashboard::Load()
             m_DashboardHud.LoadTexture(k_ModDirectory + "dashboard.dds"s);
         }
 
+        // Load fonts.
+        {
+            // TODO: cannot add fonts in parallel to rendering a frame
+            
+            //m_DashboardHud.LoadFonts(k_ModDirectory + "lucida-console.ttf"s);
+        }
+
         // Attach ProgressionAddDistanceDriven detour.
         {
             m_Logger.Info("Attaching ProgressionAddDistanceDriven detour...");

@@ -24,6 +24,15 @@ void DashboardHud::LoadTexture(const std::string& filePath)
     m_Logger.Info("Loaded %s.", name);
 }
 
+void DashboardHud::LoadFonts(const std::string& filePath)
+{
+    ImGuiIO& io = ImGui::GetIO();
+
+    // TODO: load the font at different sizes
+
+    m_Font = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 20.0f);
+}
+
 void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
 {
     // Distance is in meters.
@@ -38,13 +47,16 @@ void DashboardHud::OnRenderOverlay()
 {
     // TODO: ImGui window is just here for debugging purposes
 
+    ImGui::ShowMetricsWindow();
+
     ImGui::Begin("Dashboard debug");
 
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
 
+    ImGuiViewport* mainViewport = ImGui::GetMainViewport();
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
 
-    static ImColor textColor(IM_COL32_WHITE);
+    static ImColor textColor = IM_COL32_WHITE;
     ImGui::ColorEdit4("Text color", reinterpret_cast<float*>(&textColor));
 
     // Texture
@@ -70,8 +82,10 @@ void DashboardHud::OnRenderOverlay()
 
         static ImVec2 pos;
         ImGui::DragFloat2("Pos##speed", reinterpret_cast<float*>(&pos));
+        static float fontSize = 0.0f;
+        ImGui::DragFloat("Font size##speed", &fontSize);
         
-        foregroundDrawList->AddText(pos, textColor, speedText);
+        foregroundDrawList->AddText(m_Font, fontSize, ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, speedText);
     }
 
     // RPM text
@@ -86,7 +100,7 @@ void DashboardHud::OnRenderOverlay()
         static ImVec2 pos;
         ImGui::DragFloat2("Pos##rpm", reinterpret_cast<float*>(&pos));
 
-        foregroundDrawList->AddText(pos, textColor, rpmText);
+        foregroundDrawList->AddText(ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, rpmText);
     }
 
     // Gear text
@@ -101,7 +115,7 @@ void DashboardHud::OnRenderOverlay()
         static ImVec2 pos;
         ImGui::DragFloat2("Pos##gear", reinterpret_cast<float*>(&pos));
 
-        foregroundDrawList->AddText(pos, textColor, gearText);
+        foregroundDrawList->AddText(ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, gearText);
     }
 
     // Tripmeter text
@@ -117,7 +131,7 @@ void DashboardHud::OnRenderOverlay()
         static ImVec2 pos;
         ImGui::DragFloat2("Pos##tripmeter", reinterpret_cast<float*>(&pos));
 
-        foregroundDrawList->AddText(pos, textColor, tripmeterText);
+        foregroundDrawList->AddText(ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, tripmeterText);
     }
 
     ImGui::End();
