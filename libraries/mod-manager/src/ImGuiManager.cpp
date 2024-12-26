@@ -23,47 +23,52 @@ ImGuiManager::~ImGuiManager()
     DeleteCriticalSection(&m_CriticalSection);
 }
 
+CRITICAL_SECTION& ImGuiManager::GetCriticalSection()
+{
+    return m_CriticalSection;
+}
+
 void ImGuiManager::AddMenu(ImGuiMenu* menu)
 {
     EnterCriticalSection(&m_CriticalSection);
-    {
-        m_Menus.push_back(menu);
-    }
+    
+    m_Menus.push_back(menu);
+    
     LeaveCriticalSection(&m_CriticalSection);
 }
 
 void ImGuiManager::RemoveMenu(ImGuiMenu* menu)
 {
     EnterCriticalSection(&m_CriticalSection);
+    
+    auto it = std::find(m_Menus.begin(), m_Menus.end(), menu);
+    if (it != m_Menus.end())
     {
-        auto it = std::find(m_Menus.begin(), m_Menus.end(), menu);
-        if (it != m_Menus.end())
-        {
-            m_Menus.erase(it);
-        }
+        m_Menus.erase(it);
     }
+    
     LeaveCriticalSection(&m_CriticalSection);
 }
 
 void ImGuiManager::AddOverlay(ImGuiOverlay* overlay)
 {
     EnterCriticalSection(&m_CriticalSection);
-    {
-        m_Overlays.push_back(overlay);
-    }
+    
+    m_Overlays.push_back(overlay);
+    
     LeaveCriticalSection(&m_CriticalSection);
 }
 
 void ImGuiManager::RemoveOverlay(ImGuiOverlay* overlay)
 {
     EnterCriticalSection(&m_CriticalSection);
+    
+    auto it = std::find(m_Overlays.begin(), m_Overlays.end(), overlay);
+    if (it != m_Overlays.end())
     {
-        auto it = std::find(m_Overlays.begin(), m_Overlays.end(), overlay);
-        if (it != m_Overlays.end())
-        {
-            m_Overlays.erase(it);
-        }
+        m_Overlays.erase(it);
     }
+    
     LeaveCriticalSection(&m_CriticalSection);
 }
 
@@ -103,28 +108,26 @@ void ImGuiManager::Unload() const
 
 void ImGuiManager::OnRenderFrame()
 {
+    EnterCriticalSection(&m_CriticalSection);
+    
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
 
-    EnterCriticalSection(&m_CriticalSection);
+    if (m_MenusVisible)
     {
-        if (m_MenusVisible)
+        for (const ImGuiMenu* menu : m_Menus)
         {
-            for (const ImGuiMenu* menu : m_Menus)
-            {
-                menu->OnRenderFunction();
-            }
-        }
-        if (m_OverlaysVisible)
-        {
-            for (const ImGuiOverlay* overlay : m_Overlays)
-            {
-                overlay->OnRenderFunction();
-            }
+            menu->OnRenderFunction();
         }
     }
-    LeaveCriticalSection(&m_CriticalSection);
+    if (m_OverlaysVisible)
+    {
+        for (const ImGuiOverlay* overlay : m_Overlays)
+        {
+            overlay->OnRenderFunction();
+        }
+    }
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
@@ -134,6 +137,8 @@ void ImGuiManager::OnRenderFrame()
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
+    
+    LeaveCriticalSection(&m_CriticalSection);
 }
 
 bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)

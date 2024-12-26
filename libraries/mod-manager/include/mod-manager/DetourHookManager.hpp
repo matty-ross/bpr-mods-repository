@@ -28,6 +28,8 @@ public:
     DetourHookManager& operator =(DetourHookManager&&) = delete;
 
 public:
+    MOD_MANAGER_API CRITICAL_SECTION& GetCriticalSection();
+    
     MOD_MANAGER_API void Attach(DetourHook& detourHook);
     MOD_MANAGER_API void Detach(DetourHook& detourHook);
 
