@@ -26,11 +26,17 @@ void DashboardHud::LoadTexture(const std::string& filePath)
 
 void DashboardHud::LoadFonts(const std::string& filePath)
 {
+    m_Logger.Info("Loading fonts from file '%s' ...", filePath.c_str());
+    
     ImGuiIO& io = ImGui::GetIO();
 
     // TODO: load the font at different sizes
 
     m_Font = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 20.0f);
+
+    ImGui_ImplDX11_InvalidateDeviceObjects();
+
+    m_Logger.Info("Loaded fonts.");
 }
 
 void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
@@ -59,6 +65,17 @@ void DashboardHud::OnRenderOverlay()
     static ImColor textColor = IM_COL32_WHITE;
     ImGui::ColorEdit4("Text color", reinterpret_cast<float*>(&textColor));
 
+    auto drawText = [=](const ImFont* font, ImVec2 position, const char* text)
+    {
+        float x = mainViewport->Pos.x + mainViewport->Size.x * (position.x / 100.0f);
+        float y = mainViewport->Pos.y + mainViewport->Size.y * (position.y / 100.0f);
+
+        // TODO: text is left aligned, adjust the position
+        font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
+        
+        foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), textColor, text);
+    };
+
     // Texture
     {
         ImGui::SeparatorText("Texture");
@@ -81,11 +98,9 @@ void DashboardHud::OnRenderOverlay()
         sprintf_s(speedText, "%d", speed);
 
         static ImVec2 pos;
-        ImGui::DragFloat2("Pos##speed", reinterpret_cast<float*>(&pos));
-        static float fontSize = 0.0f;
-        ImGui::DragFloat("Font size##speed", &fontSize);
-        
-        foregroundDrawList->AddText(m_Font, fontSize, ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, speedText);
+        ImGui::SliderFloat2("Pos##speed", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
+
+        drawText(m_Font, pos, speedText);
     }
 
     // RPM text

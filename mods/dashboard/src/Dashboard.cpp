@@ -99,9 +99,11 @@ void Dashboard::Load()
 
         // Load fonts.
         {
-            // TODO: cannot add fonts in parallel to rendering a frame
+            EnterCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
             
-            //m_DashboardHud.LoadFonts(k_ModDirectory + "lucida-console.ttf"s);
+            m_DashboardHud.LoadFonts(k_ModDirectory + "lucida-console.ttf"s);
+            
+            LeaveCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
         }
 
         // Attach ProgressionAddDistanceDriven detour.
