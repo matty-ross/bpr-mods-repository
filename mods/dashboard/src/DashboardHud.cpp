@@ -65,13 +65,12 @@ void DashboardHud::OnRenderOverlay()
     static ImColor textColor = IM_COL32_WHITE;
     ImGui::ColorEdit4("Text color", reinterpret_cast<float*>(&textColor));
 
-    auto drawText = [=](const ImFont* font, ImVec2 position, const char* text)
+    auto drawText = [=](const ImFont* font, const ImVec2& position, const char* text)
     {
-        float x = mainViewport->Pos.x + mainViewport->Size.x * (position.x / 100.0f);
-        float y = mainViewport->Pos.y + mainViewport->Size.y * (position.y / 100.0f);
-
-        // TODO: text is left aligned, adjust the position
-        font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
+        ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
+        
+        float x = mainViewport->Pos.x + mainViewport->Size.x * (position.x / 100.0f) - textSize.x / 2.0f;
+        float y = mainViewport->Pos.y + mainViewport->Size.y * (position.y / 100.0f) - textSize.y / 2.0f;
         
         foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), textColor, text);
     };
@@ -94,7 +93,7 @@ void DashboardHud::OnRenderOverlay()
         
         int32_t speed = abs(guiPlayerInfo.at(0x30).as<int32_t>());
         
-        char speedText[16] = {};
+        char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
         static ImVec2 pos;
@@ -107,30 +106,30 @@ void DashboardHud::OnRenderOverlay()
     {
         ImGui::SeparatorText("RPM");
 
-        int32_t rpm = abs(guiPlayerInfo.at(0x34).as<int32_t>());
+        int32_t rpm = guiPlayerInfo.at(0x34).as<int32_t>();
 
-        char rpmText[16] = {};
+        char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
         
         static ImVec2 pos;
-        ImGui::DragFloat2("Pos##rpm", reinterpret_cast<float*>(&pos));
+        ImGui::SliderFloat2("Pos##rpm", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
 
-        foregroundDrawList->AddText(ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, rpmText);
+        drawText(m_Font, pos, rpmText);
     }
 
     // Gear text
     {
         ImGui::SeparatorText("Gear");
 
-        int32_t gear = abs(guiPlayerInfo.at(0x38).as<int32_t>());
+        int32_t gear = guiPlayerInfo.at(0x38).as<int32_t>();
 
-        char gearText[16] = {};
+        char gearText[8] = {};
         sprintf_s(gearText, "%d", gear);
 
         static ImVec2 pos;
-        ImGui::DragFloat2("Pos##gear", reinterpret_cast<float*>(&pos));
+        ImGui::SliderFloat2("Pos##gear", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
 
-        foregroundDrawList->AddText(ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, gearText);
+        drawText(m_Font, pos, gearText);
     }
 
     // Tripmeter text
@@ -140,13 +139,13 @@ void DashboardHud::OnRenderOverlay()
         int32_t vehicleType = guiPlayerInfo.at(0x20).as<int32_t>();
         float tripmeter = m_DistanceDriven[vehicleType] / 1000.0f;
 
-        char tripmeterText[32] = {};
+        char tripmeterText[16] = {};
         sprintf_s(tripmeterText, "%.1f", tripmeter);
 
         static ImVec2 pos;
-        ImGui::DragFloat2("Pos##tripmeter", reinterpret_cast<float*>(&pos));
+        ImGui::SliderFloat2("Pos##tripmeter", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
 
-        foregroundDrawList->AddText(ImVec2(mainViewport->Pos.x + pos.x, mainViewport->Pos.y + pos.y), textColor, tripmeterText);
+        drawText(m_Font, pos, tripmeterText);
     }
 
     ImGui::End();
