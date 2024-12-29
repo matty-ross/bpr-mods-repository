@@ -52,9 +52,6 @@ void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicl
 void DashboardHud::OnRenderOverlay()
 {
     // TODO: ImGui window is just here for debugging purposes
-
-    ImGui::ShowMetricsWindow();
-
     ImGui::Begin("Dashboard debug");
 
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
@@ -62,29 +59,29 @@ void DashboardHud::OnRenderOverlay()
     ImGuiViewport* mainViewport = ImGui::GetMainViewport();
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
 
-    static ImColor textColor = IM_COL32_WHITE;
-    ImGui::ColorEdit4("Text color", reinterpret_cast<float*>(&textColor));
+    auto mainViewportPositionX = [=](float position) { return mainViewport->Pos.x + mainViewport->Size.x * (position / 100.0f); };
+    auto mainViewportPositionY = [=](float position) { return mainViewport->Pos.y + mainViewport->Size.y * (position / 100.0f); };
 
     auto drawText = [=](const ImFont* font, const ImVec2& position, const char* text)
     {
+        constexpr ImU32 textColor = IM_COL32(0x24, 0xFF, 0xFC, 0xC8);
+
         ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
-        
-        float x = mainViewport->Pos.x + mainViewport->Size.x * (position.x / 100.0f) - textSize.x / 2.0f;
-        float y = mainViewport->Pos.y + mainViewport->Size.y * (position.y / 100.0f) - textSize.y / 2.0f;
+
+        float x = mainViewportPositionX(position.x) - textSize.x / 2.0f;
+        float y = mainViewportPositionY(position.y) - textSize.y / 2.0f;
         
         foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), textColor, text);
     };
 
     // Texture
     {
-        ImGui::SeparatorText("Texture");
+        float left = mainViewportPositionX(50.0f) - m_TextureWidth / 2.0f;
+        float right = mainViewportPositionX(50.0f) + m_TextureWidth / 2.0f;
+        float top = mainViewportPositionY(100.0f) - m_TextureHeight;
+        float bottom = mainViewportPositionY(100.0f);
 
-        static ImVec2 min;
-        static ImVec2 max;
-        ImGui::DragFloat2("Min##texture", reinterpret_cast<float*>(&min));
-        ImGui::DragFloat2("Max##texture", reinterpret_cast<float*>(&max));
-
-        foregroundDrawList->AddImage(static_cast<ImTextureID>(m_TextureView.Get()), min, max);
+        foregroundDrawList->AddImage(static_cast<ImTextureID>(m_TextureView.Get()), ImVec2(left, top), ImVec2(right, bottom));
     }
 
     // Speed text
@@ -167,10 +164,13 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
         throw std::exception("DDS magic number mismatch.");
     }
 
+    uint32_t width = ddsData.at(0x10).as<uint32_t>();
+    uint32_t height = ddsData.at(0xC).as<uint32_t>();
+
     D3D11_TEXTURE2D_DESC textureDesc =
     {
-        .Width      = ddsData.at(0x10).as<uint32_t>(),
-        .Height     = ddsData.at(0xC).as<uint32_t>(),
+        .Width      = width,
+        .Height     = height,
         .MipLevels  = 1,
         .ArraySize  = 1,
         .Format     = DXGI_FORMAT_B8G8R8A8_UNORM,
@@ -212,4 +212,7 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
     {
         throw std::exception("Failed to create D3D11 shader resource view.");
     }
+
+    m_TextureWidth = width;
+    m_TextureHeight = height;
 }
