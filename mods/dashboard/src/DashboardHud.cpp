@@ -1,5 +1,7 @@
 #include "DashboardHud.hpp"
 
+#include <DirectXMath.h>
+
 #include "vendor/imgui.hpp"
 
 #include "core/File.hpp"
@@ -64,14 +66,35 @@ void DashboardHud::OnRenderOverlay()
 
     auto drawText = [=](const ImFont* font, const ImVec2& position, const char* text)
     {
-        constexpr ImU32 textColor = IM_COL32(0x24, 0xFF, 0xFC, 0xC8);
+        constexpr ImU32 color = IM_COL32(0x24, 0xFF, 0xFC, 0xC8);
 
         ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
 
         float x = mainViewportPositionX(position.x) - textSize.x / 2.0f;
         float y = mainViewportPositionY(position.y) - textSize.y / 2.0f;
         
-        foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), textColor, text);
+        foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
+    };
+
+    auto drawNeedle = [=](const ImVec2& position, float radiusOuter, float radiusInner, float min, float max, float value)
+    {
+        // TODO: radius should be constexpr
+
+        constexpr ImU32 color = IM_COL32(0xFF, 0x26, 0x34, 0xC8);
+
+        constexpr float angleMin = DirectX::XMConvertToRadians(-225);
+        constexpr float angleMax = DirectX::XMConvertToRadians(45);
+
+        float angle = angleMin + (angleMax - angleMin) * ((value - min) / (max - min));
+        float angleSin = 0.0f, angleCos = 0.0f;
+        DirectX::XMScalarSinCos(&angleSin, &angleCos, angle);
+
+        float x1 = mainViewportPositionX(position.x) + angleCos * radiusInner;
+        float y1 = mainViewportPositionY(position.y) + angleSin * radiusInner;
+        float x2 = mainViewportPositionX(position.x) + angleCos * radiusOuter;
+        float y2 = mainViewportPositionY(position.y) + angleSin * radiusOuter;
+        
+        foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, 2.0f);
     };
 
     // Texture
@@ -84,7 +107,7 @@ void DashboardHud::OnRenderOverlay()
         foregroundDrawList->AddImage(static_cast<ImTextureID>(m_TextureView.Get()), ImVec2(left, top), ImVec2(right, bottom));
     }
 
-    // Speed text
+    // Speed
     {
         ImGui::SeparatorText("Speed");
         
@@ -95,8 +118,13 @@ void DashboardHud::OnRenderOverlay()
 
         static ImVec2 pos;
         ImGui::SliderFloat2("Pos##speed", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
+        static float radiusOuter = 0.0f;
+        ImGui::SliderFloat("Radius outer##speed", &radiusOuter, 0.0f, 300.0f);
+        static float radiusInner = 0.0f;
+        ImGui::SliderFloat("Radius inner##speed", &radiusInner, 0.0f, 300.0f);
 
         drawText(m_Font, pos, speedText);
+        drawNeedle(pos, radiusOuter, radiusInner, 0.0f, 360.0f, static_cast<float>(speed));
     }
 
     // RPM text
