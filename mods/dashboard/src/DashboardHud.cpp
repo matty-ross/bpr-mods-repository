@@ -15,15 +15,13 @@ DashboardHud::DashboardHud(const Core::Logger& logger)
 
 void DashboardHud::LoadTexture(const std::string& filePath)
 {
-    static constexpr char name[] = "dashboard texture";
-    
-    m_Logger.Info("Loading %s from file '%s' ...", name, filePath.c_str());
+    m_Logger.Info("Loading texture from file '%s' ...", filePath.c_str());
     
     Core::File file(filePath, Core::File::Mode::Read);
     std::vector<BYTE> textureData = file.ReadBinary();
     CreateTexture(textureData.data());
 
-    m_Logger.Info("Loaded %s.", name);
+    m_Logger.Info("Loaded texture.");
 }
 
 void DashboardHud::LoadFonts(const std::string& filePath)
@@ -64,7 +62,7 @@ void DashboardHud::OnRenderOverlay()
     auto mainViewportPositionX = [=](float position) { return mainViewport->Pos.x + mainViewport->Size.x * (position / 100.0f); };
     auto mainViewportPositionY = [=](float position) { return mainViewport->Pos.y + mainViewport->Size.y * (position / 100.0f); };
 
-    auto drawText = [=](const ImFont* font, const ImVec2& position, const char* text)
+    auto drawText = [=](const ImVec2& position, const char* text, const ImFont* font)
     {
         constexpr ImU32 color = IM_COL32(0x24, 0xFF, 0xFC, 0xC8);
 
@@ -76,35 +74,35 @@ void DashboardHud::OnRenderOverlay()
         foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
     };
 
-    auto drawNeedle = [=](const ImVec2& position, float radiusOuter, float radiusInner, float min, float max, float value)
+    auto drawNeedle = [=](const ImVec2& position, float value, float minValue, float maxValue)
     {
-        // TODO: radius should be constexpr
-
         constexpr ImU32 color = IM_COL32(0xFF, 0x26, 0x34, 0xC8);
+        constexpr float thickness = 2.0f;
+        constexpr float minAngle = DirectX::XMConvertToRadians(-225);
+        constexpr float maxAngle = DirectX::XMConvertToRadians(45);
+        constexpr float innerRadius = 67.0f;
+        constexpr float outerRadius = 104.0f;
 
-        constexpr float angleMin = DirectX::XMConvertToRadians(-225);
-        constexpr float angleMax = DirectX::XMConvertToRadians(45);
-
-        float angle = angleMin + (angleMax - angleMin) * ((value - min) / (max - min));
+        float angle = minAngle + (maxAngle - minAngle) * ((value - minValue) / (maxValue - minValue));
         float angleSin = 0.0f, angleCos = 0.0f;
         DirectX::XMScalarSinCos(&angleSin, &angleCos, angle);
 
-        float x1 = mainViewportPositionX(position.x) + angleCos * radiusInner;
-        float y1 = mainViewportPositionY(position.y) + angleSin * radiusInner;
-        float x2 = mainViewportPositionX(position.x) + angleCos * radiusOuter;
-        float y2 = mainViewportPositionY(position.y) + angleSin * radiusOuter;
+        float x1 = mainViewportPositionX(position.x) + angleCos * innerRadius;
+        float y1 = mainViewportPositionY(position.y) + angleSin * innerRadius;
+        float x2 = mainViewportPositionX(position.x) + angleCos * outerRadius;
+        float y2 = mainViewportPositionY(position.y) + angleSin * outerRadius;
         
-        foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, 2.0f);
+        foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
     };
 
     // Texture
     {
-        float left = mainViewportPositionX(50.0f) - m_TextureWidth / 2.0f;
-        float right = mainViewportPositionX(50.0f) + m_TextureWidth / 2.0f;
-        float top = mainViewportPositionY(100.0f) - m_TextureHeight;
-        float bottom = mainViewportPositionY(100.0f);
+        float l = mainViewportPositionX(50.0f) - m_TextureWidth / 2.0f;
+        float r = mainViewportPositionX(50.0f) + m_TextureWidth / 2.0f;
+        float t = mainViewportPositionY(100.0f) - m_TextureHeight;
+        float b = mainViewportPositionY(100.0f);
 
-        foregroundDrawList->AddImage(static_cast<ImTextureID>(m_TextureView.Get()), ImVec2(left, top), ImVec2(right, bottom));
+        foregroundDrawList->AddImage(m_TextureView.Get(), ImVec2(l, t), ImVec2(r, b));
     }
 
     // Speed
@@ -116,18 +114,16 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
-        static ImVec2 pos;
-        ImGui::SliderFloat2("Pos##speed", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
-        static float radiusOuter = 0.0f;
-        ImGui::SliderFloat("Radius outer##speed", &radiusOuter, 0.0f, 300.0f);
-        static float radiusInner = 0.0f;
-        ImGui::SliderFloat("Radius inner##speed", &radiusInner, 0.0f, 300.0f);
+        static ImVec2 posText(43.33f, 0.0f);
+        static ImVec2 posNeedle(43.33f, 93.33f);
+        ImGui::SliderFloat2("Pos text##speed", reinterpret_cast<float*>(&posText), 0.0f, 100.0f);
+        ImGui::SliderFloat2("Pos needle##speed", reinterpret_cast<float*>(&posNeedle), 0.0f, 100.0f);
 
-        drawText(m_Font, pos, speedText);
-        drawNeedle(pos, radiusOuter, radiusInner, 0.0f, 360.0f, static_cast<float>(speed));
+        drawText(posText, speedText, m_Font);
+        drawNeedle(posNeedle, static_cast<float>(speed), 0.0f, 360.0f);
     }
 
-    // RPM text
+    // RPM
     {
         ImGui::SeparatorText("RPM");
 
@@ -136,13 +132,16 @@ void DashboardHud::OnRenderOverlay()
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
         
-        static ImVec2 pos;
-        ImGui::SliderFloat2("Pos##rpm", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
+        static ImVec2 posText(56.66f, 0.0f);
+        static ImVec2 posNeedle(56.66f, 93.33f);
+        ImGui::SliderFloat2("Pos text##rpm", reinterpret_cast<float*>(&posText), 0.0f, 100.0f);
+        ImGui::SliderFloat2("Pos needle##rpm", reinterpret_cast<float*>(&posNeedle), 0.0f, 100.0f);
 
-        drawText(m_Font, pos, rpmText);
+        drawText(posText, rpmText, m_Font);
+        drawNeedle(posNeedle, static_cast<float>(rpm), 0.0f, 12000.0f);
     }
 
-    // Gear text
+    // Gear
     {
         ImGui::SeparatorText("Gear");
 
@@ -151,13 +150,13 @@ void DashboardHud::OnRenderOverlay()
         char gearText[8] = {};
         sprintf_s(gearText, "%d", gear);
 
-        static ImVec2 pos;
-        ImGui::SliderFloat2("Pos##gear", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
+        static ImVec2 posText(56.66f, 0.0f);
+        ImGui::SliderFloat2("Pos text##gear", reinterpret_cast<float*>(&posText), 0.0f, 100.0f);
 
-        drawText(m_Font, pos, gearText);
+        drawText(posText, gearText, m_Font);
     }
 
-    // Tripmeter text
+    // Tripmeter
     {
         ImGui::SeparatorText("Tripmeter");
 
@@ -167,10 +166,10 @@ void DashboardHud::OnRenderOverlay()
         char tripmeterText[16] = {};
         sprintf_s(tripmeterText, "%.1f", tripmeter);
 
-        static ImVec2 pos;
-        ImGui::SliderFloat2("Pos##tripmeter", reinterpret_cast<float*>(&pos), 0.0f, 100.0f);
+        static ImVec2 posText(43.33f, 0.0f);
+        ImGui::SliderFloat2("Pos text##tripmeter", reinterpret_cast<float*>(&posText), 0.0f, 100.0f);
 
-        drawText(m_Font, pos, tripmeterText);
+        drawText(posText, tripmeterText, m_Font);
     }
 
     ImGui::End();
