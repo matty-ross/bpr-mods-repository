@@ -29,9 +29,9 @@ void DashboardHud::LoadFonts(const std::string& filePath)
     m_Logger.Info("Loading fonts from file '%s' ...", filePath.c_str());
     
     ImGuiIO& io = ImGui::GetIO();
-    m_Font21 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 21.0f);
-    m_Font25 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 25.0f);
-    m_Font33 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 33.0f);
+    m_Font24 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 24.0f);
+    m_Font29 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 29.0f);
+    m_Font37 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 37.0f);
 
     ImGui_ImplDX11_InvalidateDeviceObjects();
 
@@ -76,7 +76,7 @@ void DashboardHud::OnRenderOverlay()
     auto drawNeedle = [=](const ImVec2& position, float value, float minValue, float maxValue) -> void
     {
         constexpr ImU32 color = IM_COL32(0xFF, 0x26, 0x34, 0xC8);
-        constexpr float thickness = 2.0f;
+        constexpr float thickness = 3.0f;
         constexpr float minAngle = DirectX::XMConvertToRadians(-225);
         constexpr float maxAngle = DirectX::XMConvertToRadians(45);
         constexpr float innerRadius = 68.0f;
@@ -113,12 +113,12 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
-        static ImVec2 posText(-128.0f, 105.0f);
+        static ImVec2 posText(-128.0f, 102.0f);
         static ImVec2 posNeedle(-128.0f, 72.0f);
         ImGui::SliderFloat2("Pos text##speed", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
         ImGui::SliderFloat2("Pos needle##speed", reinterpret_cast<float*>(&posNeedle), -300.0f, 300.0f);
 
-        drawText(posText, speedText, m_Font25);
+        drawText(posText, speedText, m_Font29);
         drawNeedle(posNeedle, static_cast<float>(speed), 0.0f, 360.0f);
     }
 
@@ -131,12 +131,12 @@ void DashboardHud::OnRenderOverlay()
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
         
-        static ImVec2 posText(128.0f, 105.0f);
+        static ImVec2 posText(128.0f, 102.0f);
         static ImVec2 posNeedle(128.0f, 72.0f);
         ImGui::SliderFloat2("Pos text##rpm", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
         ImGui::SliderFloat2("Pos needle##rpm", reinterpret_cast<float*>(&posNeedle), -300.0f, 300.0f);
 
-        drawText(posText, rpmText, m_Font25);
+        drawText(posText, rpmText, m_Font29);
         drawNeedle(posNeedle, static_cast<float>(rpm), 0.0f, 12000.0f);
     }
 
@@ -146,13 +146,12 @@ void DashboardHud::OnRenderOverlay()
 
         int32_t gear = guiPlayerInfo.at(0x38).as<int32_t>();
 
-        char gearText[8] = {};
-        sprintf_s(gearText, "%d", gear);
+        static constexpr char gears[][2] = { "R", "1", "2", "3", "4", "5" };
 
-        static ImVec2 posText(128.0f, 72.0f);
+        static ImVec2 posText(128.0f, 70.0f);
         ImGui::SliderFloat2("Pos text##gear", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
 
-        drawText(posText, gearText, m_Font33);
+        drawText(posText, gears[gear], m_Font37);
     }
 
     // Tripmeter
@@ -165,10 +164,10 @@ void DashboardHud::OnRenderOverlay()
         char tripmeterText[16] = {};
         sprintf_s(tripmeterText, "%.1f", tripmeter);
 
-        static ImVec2 posText(-128.0f, 72.0f);
+        static ImVec2 posText(-128.0f, 69.0f);
         ImGui::SliderFloat2("Pos text##tripmeter", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
 
-        drawText(posText, tripmeterText, m_Font21);
+        drawText(posText, tripmeterText, m_Font24);
     }
 
     ImGui::End();
