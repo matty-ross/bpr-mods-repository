@@ -18,6 +18,7 @@ Dashboard Dashboard::s_Instance;
 Dashboard::Dashboard()
     :
     m_Logger(k_ModName),
+    m_DashboardConfigFile(k_ModDirectory + "dashboard-config.yaml"s, m_Logger),
     m_DashboardHud(m_Logger),
     m_DetourProgressionAddDistanceDriven
     {
@@ -68,6 +69,11 @@ void Dashboard::Load()
             }
 
             m_Logger.Info("Checked versions.");
+        }
+
+        // Load dashboard config.
+        {
+            m_DashboardConfigFile.Load();
         }
 
         // Wait to be in game.
@@ -138,6 +144,11 @@ void Dashboard::Unload()
     try
     {
         m_Logger.Info("Unloading...");
+
+        // Save dashboard config.
+        {
+            m_DashboardConfigFile.Save();
+        }
 
         // Remove overlay.
         {

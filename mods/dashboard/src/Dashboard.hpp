@@ -7,6 +7,7 @@
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
+#include "DashboardConfigFile.hpp"
 #include "DashboardHud.hpp"
 
 
@@ -38,6 +39,8 @@ private:
 
 private:
     Core::Logger m_Logger;
+
+    DashboardConfigFile m_DashboardConfigFile;
 
     DashboardHud m_DashboardHud;
 
