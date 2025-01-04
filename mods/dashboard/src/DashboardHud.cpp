@@ -7,8 +7,9 @@
 #include "core/File.hpp"
 
 
-DashboardHud::DashboardHud(const Core::Logger& logger)
+DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger)
     :
+    m_DashboardConfigFile(dashboardConfigFile),
     m_Logger(logger)
 {
 }
@@ -42,9 +43,12 @@ void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicl
 {
     // Distance is in meters.
 
+    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    
     if (vehicleType != -1)
     {
-        m_DistanceDriven[vehicleType] += distance;
+        m_TripMeter += distance;
+        config.DistanceDriven += distance;
     }
 }
 
@@ -52,6 +56,8 @@ void DashboardHud::OnRenderOverlay()
 {
     // TODO: ImGui window is just here for debugging purposes
     ImGui::Begin("Dashboard debug");
+
+    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
 
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
 
@@ -109,6 +115,10 @@ void DashboardHud::OnRenderOverlay()
         ImGui::SeparatorText("Speed");
         
         int32_t speed = abs(guiPlayerInfo.at(0x30).as<int32_t>());
+        if (config.MetricUnits)
+        {
+            speed = static_cast<int32_t>(roundf(speed * 1.609f));
+        }
         
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
@@ -158,8 +168,7 @@ void DashboardHud::OnRenderOverlay()
     {
         ImGui::SeparatorText("Tripmeter");
 
-        int32_t vehicleType = guiPlayerInfo.at(0x20).as<int32_t>();
-        float tripmeter = m_DistanceDriven[vehicleType] / 1000.0f;
+        float tripmeter = config.MetricUnits ? (m_TripMeter / 1000.0f) : (m_TripMeter / 1609.0f);
 
         char tripmeterText[16] = {};
         sprintf_s(tripmeterText, "%.1f", tripmeter);

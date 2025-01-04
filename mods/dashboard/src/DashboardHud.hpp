@@ -8,11 +8,13 @@
 #include "core/Logger.hpp"
 #include "core/Pointer.hpp"
 
+#include "DashboardConfigFile.hpp"
+
 
 class DashboardHud
 {
 public:
-    DashboardHud(const Core::Logger& logger);
+    DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger);
 
 public:
     void LoadTexture(const std::string& filePath);
@@ -26,6 +28,7 @@ private:
     void CreateTexture(Core::Pointer ddsData);
 
 private:
+    DashboardConfigFile& m_DashboardConfigFile;
     const Core::Logger& m_Logger;
     
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_TextureView = nullptr;
@@ -36,5 +39,5 @@ private:
     struct ImFont* m_Font29 = nullptr;
     struct ImFont* m_Font37 = nullptr;
     
-    float m_DistanceDriven[3] = { 0.0f, 0.0f, 0.0f };
+    float m_TripMeter = 0.0f;
 };

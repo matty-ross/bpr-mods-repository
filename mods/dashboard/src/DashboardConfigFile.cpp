@@ -25,7 +25,8 @@ void DashboardConfigFile::Load()
 
         YAML::Node yaml = YAML::Load(file.ReadText());
         {
-            // TODO: load the contents
+            m_DashboardConfig.DistanceDriven = yaml["DistanceDriven"].as<float>();
+            m_DashboardConfig.MetricUnits    = yaml["MetricUnits"].as<bool>();
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -46,7 +47,8 @@ void DashboardConfigFile::Save() const
 
         YAML::Node yaml;
         {
-            // TOOD: save the contents
+            yaml["DistanceDriven"] = m_DashboardConfig.DistanceDriven;
+            yaml["MetricUnits"]    = m_DashboardConfig.MetricUnits;
         }
         file.WriteText(YAML::Dump(yaml));
 
@@ -56,4 +58,9 @@ void DashboardConfigFile::Save() const
     {
         m_Logger.Warning("Failed to save %s - %s", k_Name, e.what());
     }
+}
+
+DashboardConfig& DashboardConfigFile::GetDashboardConfig()
+{
+    return m_DashboardConfig;
 }

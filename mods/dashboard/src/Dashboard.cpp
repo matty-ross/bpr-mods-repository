@@ -19,7 +19,7 @@ Dashboard::Dashboard()
     :
     m_Logger(k_ModName),
     m_DashboardConfigFile(k_ModDirectory + "dashboard-config.yaml"s, m_Logger),
-    m_DashboardHud(m_Logger),
+    m_DashboardHud(m_DashboardConfigFile, m_Logger),
     m_DetourProgressionAddDistanceDriven
     {
         .Target = Core::Pointer(0x06E6B397).GetAddress(),

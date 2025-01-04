@@ -6,6 +6,13 @@
 #include "core/Logger.hpp"
 
 
+struct DashboardConfig
+{
+    float DistanceDriven = 0.0f;
+    bool MetricUnits = true;
+};
+
+
 class DashboardConfigFile
 {
 public:
@@ -15,7 +22,11 @@ public:
     void Load();
     void Save() const;
 
+    DashboardConfig& GetDashboardConfig();
+
 private:
     std::string m_FilePath;
     const Core::Logger& m_Logger;
+
+    DashboardConfig m_DashboardConfig;
 };
