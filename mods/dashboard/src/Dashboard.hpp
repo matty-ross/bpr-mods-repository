@@ -29,6 +29,7 @@ private:
 
     void OnProgressionAddDistanceDriven(float distance, int32_t vehicleType);
 
+    void OnRenderMenu();
     void OnRenderOverlay();
 
 private:
@@ -46,6 +47,7 @@ private:
 
     DetourHook m_DetourProgressionAddDistanceDriven;
 
+    ImGuiMenu m_Menu;
     ImGuiOverlay m_Overlay;
 
     HANDLE m_LoadThreadHandle = NULL;

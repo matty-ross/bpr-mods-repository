@@ -52,6 +52,34 @@ void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicl
     }
 }
 
+void DashboardHud::OnRenderMenu()
+{
+    if (ImGui::CollapsingHeader("Config"))
+    {
+        {
+            if (ImGui::Button("Save##dashboard-config-file"))
+            {
+                m_DashboardConfigFile.Save();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Load##dashboard-config-file"))
+            {
+                m_DashboardConfigFile.Load();
+            }
+        }
+
+        ImGui::Separator();
+
+        {
+            DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+            
+            ImGui::Checkbox("Metric Units", &config.MetricUnits);
+        }
+    }
+}
+
 void DashboardHud::OnRenderOverlay()
 {
     // TODO: ImGui window is just here for debugging purposes

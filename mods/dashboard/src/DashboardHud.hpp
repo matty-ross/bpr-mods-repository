@@ -22,6 +22,7 @@ public:
 
     void OnProgressionAddDistanceDriven(float distance, int32_t vehicleType);
     
+    void OnRenderMenu();
     void OnRenderOverlay();
 
 private:

@@ -1,5 +1,7 @@
 #include "Dashboard.hpp"
 
+#include "vendor/imgui.hpp"
+
 #include "core/Pointer.hpp"
 #include "mod-manager/ModManager.hpp"
 
@@ -9,6 +11,7 @@ using namespace std::string_literals;
 
 static constexpr char k_ModName[]      = "Dashboard";
 static constexpr char k_ModVersion[]   = "1.1.0";
+static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
 static constexpr char k_ModDirectory[] = ".\\mods\\dashboard\\";
 
 
@@ -24,6 +27,10 @@ Dashboard::Dashboard()
     {
         .Target = Core::Pointer(0x06E6B397).GetAddress(),
         .Detour = &Dashboard::DetourProgressionAddDistanceDriven,
+    },
+    m_Menu
+    {
+        .OnRenderFunction = [&]() { OnRenderMenu(); },
     },
     m_Overlay
     {
@@ -121,6 +128,15 @@ void Dashboard::Load()
             m_Logger.Info("Attached ProgressionAddDistanceDriven detour.");
         }
 
+        // Add menu.
+        {
+            m_Logger.Info("Adding menu...");
+
+            ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
+
+            m_Logger.Info("Added menu.");
+        }
+
         // Add overlay.
         {
             m_Logger.Info("Adding overlay...");
@@ -159,6 +175,15 @@ void Dashboard::Unload()
             m_Logger.Info("Removed overlay.");
         }
 
+        // Remove menu.
+        {
+            m_Logger.Info("Removing menu...");
+
+            ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
+
+            m_Logger.Info("Removed menu.");
+        }
+
         // Detach ProgressionAddDistanceDriven detour.
         {
             m_Logger.Info("Detaching ProgressionAddDistanceDriven detour...");
@@ -180,6 +205,24 @@ void Dashboard::Unload()
 void Dashboard::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
 {
     m_DashboardHud.OnProgressionAddDistanceDriven(distance, vehicleType);
+}
+
+void Dashboard::OnRenderMenu()
+{
+    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+    {
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
+
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("Version     %s", k_ModVersion);
+        ImGui::Text("Author      %s", k_ModAuthor);
+        ImGui::Text("Framerate   %.3f", io.Framerate);
+
+        m_DashboardHud.OnRenderMenu();
+
+        ImGui::PopItemWidth();
+    }
+    ImGui::End();
 }
 
 void Dashboard::OnRenderOverlay()
