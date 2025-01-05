@@ -48,7 +48,7 @@ void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicl
     if (vehicleType != -1)
     {
         m_TripMeter += distance;
-        config.DistanceDriven += distance;
+        config.Odometer += distance;
     }
 }
 
@@ -132,6 +132,36 @@ void DashboardHud::OnRenderOverlay()
         drawNeedle(posNeedle, static_cast<float>(speed), 0.0f, 360.0f);
     }
 
+    // Trip meter
+    {
+        ImGui::SeparatorText("Trip Meter");
+
+        float tripMeter = config.MetricUnits ? (m_TripMeter / 1000.0f) : (m_TripMeter / 1609.0f);
+
+        char tripMeterText[16] = {};
+        sprintf_s(tripMeterText, "%.1f", tripMeter);
+
+        static ImVec2 posText(-128.0f, 69.0f);
+        ImGui::SliderFloat2("Pos text##tripmeter", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
+
+        drawText(posText, tripMeterText, m_Font24);
+    }
+
+    // Odometer
+    {
+        ImGui::SeparatorText("Odometer");
+
+        int32_t odometer = config.MetricUnits ? (config.Odometer / 1000.0f) : (config.Odometer / 1609.0f);
+
+        char odometerText[16] = {};
+        sprintf_s(odometerText, "%06d", odometer);
+
+        static ImVec2 posText(-128.0f, 42.0f);
+        ImGui::SliderFloat2("Pos text##odometer", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
+
+        drawText(posText, odometerText, m_Font29);
+    }
+
     // RPM
     {
         ImGui::SeparatorText("RPM");
@@ -164,19 +194,20 @@ void DashboardHud::OnRenderOverlay()
         drawText(posText, gears[gear], m_Font37);
     }
 
-    // Tripmeter
+    // Local Time
     {
-        ImGui::SeparatorText("Tripmeter");
+        ImGui::SeparatorText("Local Time");
 
-        float tripmeter = config.MetricUnits ? (m_TripMeter / 1000.0f) : (m_TripMeter / 1609.0f);
+        SYSTEMTIME localTime = {};
+        GetLocalTime(&localTime);
 
-        char tripmeterText[16] = {};
-        sprintf_s(tripmeterText, "%.1f", tripmeter);
+        char localTimeText[8] = {};
+        sprintf_s(localTimeText, "%02d:%02d", localTime.wHour, localTime.wMinute);
 
-        static ImVec2 posText(-128.0f, 69.0f);
-        ImGui::SliderFloat2("Pos text##tripmeter", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
+        static ImVec2 posText(128.0f, 42.0f);
+        ImGui::SliderFloat2("Pos text##localtime", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
 
-        drawText(posText, tripmeterText, m_Font24);
+        drawText(posText, localTimeText, m_Font29);
     }
 
     ImGui::End();

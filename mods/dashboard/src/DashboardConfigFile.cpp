@@ -25,8 +25,8 @@ void DashboardConfigFile::Load()
 
         YAML::Node yaml = YAML::Load(file.ReadText());
         {
-            m_DashboardConfig.DistanceDriven = yaml["DistanceDriven"].as<float>();
-            m_DashboardConfig.MetricUnits    = yaml["MetricUnits"].as<bool>();
+            m_DashboardConfig.Odometer    = yaml["Odometer"].as<float>();
+            m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>();
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -47,8 +47,8 @@ void DashboardConfigFile::Save() const
 
         YAML::Node yaml;
         {
-            yaml["DistanceDriven"] = m_DashboardConfig.DistanceDriven;
-            yaml["MetricUnits"]    = m_DashboardConfig.MetricUnits;
+            yaml["Odometer"]    = m_DashboardConfig.Odometer;
+            yaml["MetricUnits"] = m_DashboardConfig.MetricUnits;
         }
         file.WriteText(YAML::Dump(yaml));
 

@@ -8,7 +8,7 @@
 
 struct DashboardConfig
 {
-    float DistanceDriven = 0.0f;
+    float Odometer = 0.0f;
     bool MetricUnits = true;
 };
 
