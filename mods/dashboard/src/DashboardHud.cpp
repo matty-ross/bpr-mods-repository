@@ -30,6 +30,7 @@ void DashboardHud::LoadFonts(const std::string& filePath)
     m_Logger.Info("Loading fonts from file '%s' ...", filePath.c_str());
     
     ImGuiIO& io = ImGui::GetIO();
+    m_Font11 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 11.0f);
     m_Font24 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 24.0f);
     m_Font29 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 29.0f);
     m_Font37 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 37.0f);
@@ -82,6 +83,14 @@ void DashboardHud::OnRenderMenu()
 
 void DashboardHud::OnRenderOverlay()
 {
+    Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).deref(); // BrnGui::RaceMainHudState*
+    
+    bool inRaceHud = raceMainHudState.at(0x14C).as<bool>();
+    if (!inRaceHud)
+    {
+        return;
+    }
+    
     // TODO: ImGui window is just here for debugging purposes
     ImGui::Begin("Dashboard debug");
 
@@ -151,11 +160,14 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
+        static ImVec2 posSmallText(-128.0f, 125.0f);
         static ImVec2 posText(-128.0f, 102.0f);
         static ImVec2 posNeedle(-128.0f, 72.0f);
+        ImGui::SliderFloat2("Pos small text##speed", reinterpret_cast<float*>(&posSmallText), -300.0f, 300.0f);
         ImGui::SliderFloat2("Pos text##speed", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
         ImGui::SliderFloat2("Pos needle##speed", reinterpret_cast<float*>(&posNeedle), -300.0f, 300.0f);
 
+        drawText(posSmallText, config.MetricUnits ? "km/h" : "mph", m_Font11);
         drawText(posText, speedText, m_Font29);
         drawNeedle(posNeedle, static_cast<float>(speed), 0.0f, 360.0f);
     }
@@ -179,7 +191,7 @@ void DashboardHud::OnRenderOverlay()
     {
         ImGui::SeparatorText("Odometer");
 
-        int32_t odometer = config.MetricUnits ? (config.Odometer / 1000.0f) : (config.Odometer / 1609.0f);
+        int32_t odometer = static_cast<int32_t>(config.MetricUnits ? (config.Odometer / 1000.0f) : (config.Odometer / 1609.0f));
 
         char odometerText[16] = {};
         sprintf_s(odometerText, "%06d", odometer);
@@ -199,11 +211,14 @@ void DashboardHud::OnRenderOverlay()
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
         
+        static ImVec2 posSmallText(128.0f, 125.0f);
         static ImVec2 posText(128.0f, 102.0f);
         static ImVec2 posNeedle(128.0f, 72.0f);
+        ImGui::SliderFloat2("Pos small text##rpm", reinterpret_cast<float*>(&posSmallText), -300.0f, 300.0f);
         ImGui::SliderFloat2("Pos text##rpm", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
         ImGui::SliderFloat2("Pos needle##rpm", reinterpret_cast<float*>(&posNeedle), -300.0f, 300.0f);
 
+        drawText(posSmallText, "rpm", m_Font11);
         drawText(posText, rpmText, m_Font29);
         drawNeedle(posNeedle, static_cast<float>(rpm), 0.0f, 12000.0f);
     }

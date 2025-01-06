@@ -36,6 +36,7 @@ private:
     uint32_t m_TextureWidth = 0;
     uint32_t m_TextureHeight = 0;
     
+    struct ImFont* m_Font11 = nullptr;
     struct ImFont* m_Font24 = nullptr;
     struct ImFont* m_Font29 = nullptr;
     struct ImFont* m_Font37 = nullptr;
