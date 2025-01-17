@@ -105,16 +105,14 @@ void Dashboard::Load()
             m_Logger.Info("In game.");
         }
 
-        // Load dashboard texture.
-        {
-            m_DashboardHud.LoadTexture(k_ModDirectory + "dashboard.dds"s);
-        }
-
-        // Load fonts.
+        // Load dashboard assets.
         {
             EnterCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
             
+            m_DashboardHud.LoadTexture(k_ModDirectory + "dashboard.dds"s);
             m_DashboardHud.LoadFonts(k_ModDirectory + "lucida-console.ttf"s);
+            
+            ImGui_ImplDX11_InvalidateDeviceObjects();
             
             LeaveCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
         }

@@ -33,8 +33,6 @@ private:
     const Core::Logger& m_Logger;
     
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_TextureView = nullptr;
-    uint32_t m_TextureWidth = 0;
-    uint32_t m_TextureHeight = 0;
     
     struct ImFont* m_Font11 = nullptr;
     struct ImFont* m_Font24 = nullptr;

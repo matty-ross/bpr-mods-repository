@@ -7,6 +7,10 @@
 #include "core/File.hpp"
 
 
+static constexpr float k_TextureWidth = 488.0f;
+static constexpr float k_TextureHeight = 188.0f;
+
+
 DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger)
     :
     m_DashboardConfigFile(dashboardConfigFile),
@@ -34,8 +38,6 @@ void DashboardHud::LoadFonts(const std::string& filePath)
     m_Font24 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 24.0f);
     m_Font29 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 29.0f);
     m_Font37 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 37.0f);
-
-    ImGui_ImplDX11_InvalidateDeviceObjects();
 
     m_Logger.Info("Loaded fonts.");
 }
@@ -83,7 +85,7 @@ void DashboardHud::OnRenderMenu()
 
 void DashboardHud::OnRenderOverlay()
 {
-    Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).deref(); // BrnGui::RaceMainHudState*
+    Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).as<void*>(); // BrnGui::RaceMainHudState*
     
     bool inRaceHud = raceMainHudState.at(0x14C).as<bool>();
     if (!inRaceHud)
@@ -91,9 +93,6 @@ void DashboardHud::OnRenderOverlay()
         return;
     }
     
-    // TODO: ImGui window is just here for debugging purposes
-    ImGui::Begin("Dashboard debug");
-
     DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
 
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
@@ -139,9 +138,9 @@ void DashboardHud::OnRenderOverlay()
 
     // Texture
     {
-        float l = relativePositionX(-(m_TextureWidth / 2.0f));
-        float r = relativePositionX(+(m_TextureWidth / 2.0f));
-        float t = relativePositionY(static_cast<float>(m_TextureHeight));
+        float l = relativePositionX(-(k_TextureWidth / 2.0f));
+        float r = relativePositionX(+(k_TextureWidth / 2.0f));
+        float t = relativePositionY(k_TextureHeight);
         float b = relativePositionY(0.0f);
 
         foregroundDrawList->AddImage(m_TextureView.Get(), ImVec2(l, t), ImVec2(r, b));
@@ -149,8 +148,6 @@ void DashboardHud::OnRenderOverlay()
 
     // Speed
     {
-        ImGui::SeparatorText("Speed");
-        
         int32_t speed = abs(guiPlayerInfo.at(0x30).as<int32_t>());
         if (config.MetricUnits)
         {
@@ -160,100 +157,62 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
-        static ImVec2 posSmallText(-128.0f, 125.0f);
-        static ImVec2 posText(-128.0f, 102.0f);
-        static ImVec2 posNeedle(-128.0f, 72.0f);
-        ImGui::SliderFloat2("Pos small text##speed", reinterpret_cast<float*>(&posSmallText), -300.0f, 300.0f);
-        ImGui::SliderFloat2("Pos text##speed", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
-        ImGui::SliderFloat2("Pos needle##speed", reinterpret_cast<float*>(&posNeedle), -300.0f, 300.0f);
-
-        drawText(posSmallText, config.MetricUnits ? "km/h" : "mph", m_Font11);
-        drawText(posText, speedText, m_Font29);
-        drawNeedle(posNeedle, static_cast<float>(speed), 0.0f, 360.0f);
+        drawText(ImVec2(-128.0f, 125.0f), config.MetricUnits ? "km/h" : "mph", m_Font11);
+        drawText(ImVec2(-128.0f, 102.0f), speedText, m_Font29);
+        drawNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, 360.0f);
     }
 
     // Trip meter
     {
-        ImGui::SeparatorText("Trip Meter");
-
         float tripMeter = config.MetricUnits ? (m_TripMeter / 1000.0f) : (m_TripMeter / 1609.0f);
 
         char tripMeterText[16] = {};
         sprintf_s(tripMeterText, "%.1f", tripMeter);
 
-        static ImVec2 posText(-128.0f, 69.0f);
-        ImGui::SliderFloat2("Pos text##tripmeter", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
-
-        drawText(posText, tripMeterText, m_Font24);
+        drawText(ImVec2(-128.0f, 69.0f), tripMeterText, m_Font24);
     }
 
     // Odometer
     {
-        ImGui::SeparatorText("Odometer");
-
         int32_t odometer = static_cast<int32_t>(config.MetricUnits ? (config.Odometer / 1000.0f) : (config.Odometer / 1609.0f));
 
         char odometerText[16] = {};
         sprintf_s(odometerText, "%06d", odometer);
 
-        static ImVec2 posText(-128.0f, 42.0f);
-        ImGui::SliderFloat2("Pos text##odometer", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
-
-        drawText(posText, odometerText, m_Font29);
+        drawText(ImVec2(-128.0f, 42.0f), odometerText, m_Font29);
     }
 
     // RPM
     {
-        ImGui::SeparatorText("RPM");
-
         int32_t rpm = guiPlayerInfo.at(0x34).as<int32_t>();
 
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
-        
-        static ImVec2 posSmallText(128.0f, 125.0f);
-        static ImVec2 posText(128.0f, 102.0f);
-        static ImVec2 posNeedle(128.0f, 72.0f);
-        ImGui::SliderFloat2("Pos small text##rpm", reinterpret_cast<float*>(&posSmallText), -300.0f, 300.0f);
-        ImGui::SliderFloat2("Pos text##rpm", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
-        ImGui::SliderFloat2("Pos needle##rpm", reinterpret_cast<float*>(&posNeedle), -300.0f, 300.0f);
 
-        drawText(posSmallText, "rpm", m_Font11);
-        drawText(posText, rpmText, m_Font29);
-        drawNeedle(posNeedle, static_cast<float>(rpm), 0.0f, 12000.0f);
+        drawText(ImVec2(128.0f, 125.0f), "rpm", m_Font11);
+        drawText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
+        drawNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
     }
 
     // Gear
     {
-        ImGui::SeparatorText("Gear");
-
         int32_t gear = guiPlayerInfo.at(0x38).as<int32_t>();
 
         static constexpr char gears[][2] = { "R", "1", "2", "3", "4", "5" };
 
-        static ImVec2 posText(128.0f, 70.0f);
-        ImGui::SliderFloat2("Pos text##gear", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
-
-        drawText(posText, gears[gear], m_Font37);
+        drawText(ImVec2(128.0f, 70.0f), gears[gear], m_Font37);
     }
 
     // Local Time
     {
-        ImGui::SeparatorText("Local Time");
-
         SYSTEMTIME localTime = {};
         GetLocalTime(&localTime);
 
         char localTimeText[8] = {};
         sprintf_s(localTimeText, "%02d:%02d", localTime.wHour, localTime.wMinute);
 
-        static ImVec2 posText(128.0f, 42.0f);
-        ImGui::SliderFloat2("Pos text##localtime", reinterpret_cast<float*>(&posText), -300.0f, 300.0f);
-
-        drawText(posText, localTimeText, m_Font29);
+        drawText(ImVec2(128.0f, 42.0f), localTimeText, m_Font29);
     }
-
-    ImGui::End();
 }
 
 void DashboardHud::CreateTexture(Core::Pointer ddsData)
@@ -272,13 +231,10 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
         throw std::exception("DDS magic number mismatch.");
     }
 
-    uint32_t width = ddsData.at(0x10).as<uint32_t>();
-    uint32_t height = ddsData.at(0xC).as<uint32_t>();
-
     D3D11_TEXTURE2D_DESC textureDesc =
     {
-        .Width      = width,
-        .Height     = height,
+        .Width      = ddsData.at(0x10).as<uint32_t>(),
+        .Height     = ddsData.at(0xC).as<uint32_t>(),
         .MipLevels  = 1,
         .ArraySize  = 1,
         .Format     = DXGI_FORMAT_B8G8R8A8_UNORM,
@@ -320,7 +276,4 @@ void DashboardHud::CreateTexture(Core::Pointer ddsData)
     {
         throw std::exception("Failed to create D3D11 shader resource view.");
     }
-
-    m_TextureWidth = width;
-    m_TextureHeight = height;
 }
