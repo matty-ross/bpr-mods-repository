@@ -75,6 +75,8 @@ void DashboardHud::OnRenderMenu()
             DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
             
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
+
+            // TODO: other config
         }
     }
 }
@@ -99,9 +101,8 @@ void DashboardHud::OnRenderOverlay()
     auto relativePositionX = [=](float position) -> float { return mainViewport->Pos.x + mainViewport->Size.x / 2.0f + position; };
     auto relativePositionY = [=](float position) -> float { return mainViewport->Pos.y + mainViewport->Size.y - position; };
 
-    auto drawTextureSegment = [=](const ImVec2& position, DashboardTexture::TextureSegment textureSegment) -> void
+    auto drawTextureSegment = [=](const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor = true) -> void
     {
-        // TODO: color
         constexpr ImVec2 segmentSize = ImVec2(256.0f, 256.0f);
         
         DashboardTexture::TextureSegmentUVs uv = m_DashboardTexture.GetTextureSegmentUVs(textureSegment);
@@ -110,25 +111,28 @@ void DashboardHud::OnRenderOverlay()
         float r = relativePositionX(position.x) + segmentSize.x / 2.0f;
         float t = relativePositionY(position.y) - segmentSize.y / 2.0f;
         float b = relativePositionY(position.y) + segmentSize.y / 2.0f;
+
+        ImColor color = useColor ? config.Colors.Dial : IM_COL32_WHITE;
+        color.Value.w = config.Opacity / 100.0f;
         
-        foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom));
+        foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
     };
 
     auto drawText = [=](const ImVec2& position, const char* text, const ImFont* font) -> void
     {
-        constexpr ImU32 color = IM_COL32(0x24, 0xFF, 0xFC, 0xC8);
-
         ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
 
         float x = relativePositionX(position.x) - textSize.x / 2.0f;
         float y = relativePositionY(position.y) - textSize.y / 2.0f;
+
+        ImColor color = config.Colors.Text;
+        color.Value.w = config.Opacity / 100.0f;
         
         foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
     };
 
     auto drawNeedle = [=](const ImVec2& position, float value, float minValue, float maxValue) -> void
     {
-        constexpr ImU32 color = IM_COL32(0xFF, 0x26, 0x34, 0xC8);
         constexpr float thickness = 3.0f;
         constexpr float minAngle = DirectX::XMConvertToRadians(-225);
         constexpr float maxAngle = DirectX::XMConvertToRadians(45);
@@ -144,6 +148,9 @@ void DashboardHud::OnRenderOverlay()
         float x2 = relativePositionX(position.x) + angleCos * outerRadius;
         float y2 = relativePositionY(position.y) + angleSin * outerRadius;
         
+        ImColor color = config.Colors.Needle;
+        color.Value.w = config.Opacity / 100.0f;
+        
         foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
     };
 
@@ -158,10 +165,10 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
-        drawTextureSegment(ImVec2(-128.0f, 72.0f), DashboardTexture::TextureSegment::Background);
+        drawTextureSegment(ImVec2(-128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
         drawTextureSegment(ImVec2(-128.0f, 72.0f), config.MetricUnits ? DashboardTexture::TextureSegment::KMH : DashboardTexture::TextureSegment::MPH);
-        drawNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, config.MetricUnits ? 360.0f : 240.0f);
         drawText(ImVec2(-128.0f, 102.0f), speedText, m_Font29);
+        drawNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, config.MetricUnits ? 360.0f : 240.0f);
     }
 
     // Trip meter
@@ -191,10 +198,10 @@ void DashboardHud::OnRenderOverlay()
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
 
-        drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::Background);
+        drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
         drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::RPM);
-        drawNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
         drawText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
+        drawNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
     }
 
     // Gear

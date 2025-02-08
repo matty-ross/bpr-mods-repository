@@ -8,8 +8,15 @@
 
 struct DashboardConfig
 {
-    float Odometer = 0.0f;
     bool MetricUnits = true;
+    float Odometer = 0.0f;
+    float Opacity = 78.0;
+    struct
+    {
+        uint32_t Dial = 0xFCFF24;
+        uint32_t Text = 0xFCFF24;
+        uint32_t Needle = 0x3426FF;
+    } Colors;
 };
 
 

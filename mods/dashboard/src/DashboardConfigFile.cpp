@@ -25,8 +25,17 @@ void DashboardConfigFile::Load()
 
         YAML::Node yaml = YAML::Load(file.ReadText());
         {
-            m_DashboardConfig.Odometer    = yaml["Odometer"].as<float>();
             m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>();
+            m_DashboardConfig.Odometer    = yaml["Odometer"].as<float>();
+            m_DashboardConfig.Opacity     = yaml["Opacity"].as<float>();
+
+            {
+                const YAML::Node& colorsNode = yaml["Colors"];
+                
+                m_DashboardConfig.Colors.Dial   = colorsNode["Dial"].as<uint32_t>();
+                m_DashboardConfig.Colors.Text   = colorsNode["Text"].as<uint32_t>();
+                m_DashboardConfig.Colors.Needle = colorsNode["Needle"].as<uint32_t>();
+            }
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -47,8 +56,18 @@ void DashboardConfigFile::Save() const
 
         YAML::Node yaml;
         {
-            yaml["Odometer"]    = m_DashboardConfig.Odometer;
             yaml["MetricUnits"] = m_DashboardConfig.MetricUnits;
+            yaml["Odometer"]    = m_DashboardConfig.Odometer;
+            yaml["Opacity"]     = m_DashboardConfig.Opacity;
+
+            {
+                YAML::Node colorsNode;
+                colorsNode["Dial"]   = m_DashboardConfig.Colors.Dial;
+                colorsNode["Text"]   = m_DashboardConfig.Colors.Text;
+                colorsNode["Needle"] = m_DashboardConfig.Colors.Needle;
+
+                yaml["Colors"] = colorsNode;
+            }
         }
         file.WriteText(YAML::Dump(yaml));
 
