@@ -163,11 +163,13 @@
     <ClCompile Include="src\Dashboard.cpp" />
     <ClCompile Include="src\DashboardConfigFile.cpp" />
     <ClCompile Include="src\DashboardHud.cpp" />
+    <ClCompile Include="src\DashboardTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Dashboard.hpp" />
     <ClInclude Include="src\DashboardConfigFile.hpp" />
     <ClInclude Include="src\DashboardHud.hpp" />
+    <ClInclude Include="src\DashboardTexture.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
