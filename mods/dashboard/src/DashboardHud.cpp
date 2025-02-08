@@ -4,11 +4,8 @@
 
 #include "vendor/imgui.hpp"
 
+#include "core/Pointer.hpp"
 #include "core/File.hpp"
-
-
-static constexpr float k_TextureWidth = 488.0f;
-static constexpr float k_TextureHeight = 188.0f;
 
 
 DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger)
@@ -24,7 +21,7 @@ void DashboardHud::LoadTexture(const std::string& filePath)
     
     Core::File file(filePath, Core::File::Mode::Read);
     std::vector<BYTE> textureData = file.ReadBinary();
-    CreateTexture(textureData.data());
+    m_DashboardTexture.CreateTexture(textureData.data());
 
     m_Logger.Info("Loaded texture.");
 }
@@ -34,7 +31,6 @@ void DashboardHud::LoadFonts(const std::string& filePath)
     m_Logger.Info("Loading fonts from file '%s' ...", filePath.c_str());
     
     ImGuiIO& io = ImGui::GetIO();
-    m_Font11 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 11.0f);
     m_Font24 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 24.0f);
     m_Font29 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 29.0f);
     m_Font37 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 37.0f);
@@ -103,6 +99,21 @@ void DashboardHud::OnRenderOverlay()
     auto relativePositionX = [=](float position) -> float { return mainViewport->Pos.x + mainViewport->Size.x / 2.0f + position; };
     auto relativePositionY = [=](float position) -> float { return mainViewport->Pos.y + mainViewport->Size.y - position; };
 
+    auto drawTextureSegment = [=](const ImVec2& position, DashboardTexture::TextureSegment textureSegment) -> void
+    {
+        // TODO: color
+        constexpr ImVec2 segmentSize = ImVec2(256.0f, 256.0f);
+        
+        DashboardTexture::TextureSegmentUVs uv = m_DashboardTexture.GetTextureSegmentUVs(textureSegment);
+
+        float l = relativePositionX(position.x) - segmentSize.x / 2.0f;
+        float r = relativePositionX(position.x) + segmentSize.x / 2.0f;
+        float t = relativePositionY(position.y) - segmentSize.y / 2.0f;
+        float b = relativePositionY(position.y) + segmentSize.y / 2.0f;
+        
+        foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom));
+    };
+
     auto drawText = [=](const ImVec2& position, const char* text, const ImFont* font) -> void
     {
         constexpr ImU32 color = IM_COL32(0x24, 0xFF, 0xFC, 0xC8);
@@ -136,16 +147,6 @@ void DashboardHud::OnRenderOverlay()
         foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
     };
 
-    // Texture
-    {
-        float l = relativePositionX(-(k_TextureWidth / 2.0f));
-        float r = relativePositionX(+(k_TextureWidth / 2.0f));
-        float t = relativePositionY(k_TextureHeight);
-        float b = relativePositionY(0.0f);
-
-        foregroundDrawList->AddImage(m_TextureView.Get(), ImVec2(l, t), ImVec2(r, b));
-    }
-
     // Speed
     {
         int32_t speed = abs(guiPlayerInfo.at(0x30).as<int32_t>());
@@ -157,9 +158,10 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
-        drawText(ImVec2(-128.0f, 125.0f), config.MetricUnits ? "km/h" : "mph", m_Font11);
+        drawTextureSegment(ImVec2(-128.0f, 72.0f), DashboardTexture::TextureSegment::Background);
+        drawTextureSegment(ImVec2(-128.0f, 72.0f), config.MetricUnits ? DashboardTexture::TextureSegment::KMH : DashboardTexture::TextureSegment::MPH);
+        drawNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, config.MetricUnits ? 360.0f : 240.0f);
         drawText(ImVec2(-128.0f, 102.0f), speedText, m_Font29);
-        drawNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, 360.0f);
     }
 
     // Trip meter
@@ -189,9 +191,10 @@ void DashboardHud::OnRenderOverlay()
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
 
-        drawText(ImVec2(128.0f, 125.0f), "rpm", m_Font11);
-        drawText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
+        drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::Background);
+        drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::RPM);
         drawNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
+        drawText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
     }
 
     // Gear
@@ -212,68 +215,5 @@ void DashboardHud::OnRenderOverlay()
         sprintf_s(localTimeText, "%02d:%02d", localTime.wHour, localTime.wMinute);
 
         drawText(ImVec2(128.0f, 42.0f), localTimeText, m_Font29);
-    }
-}
-
-void DashboardHud::CreateTexture(Core::Pointer ddsData)
-{
-    // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
-
-    /*
-    * DDS texture
-    * no compression
-    * no mipmaps
-    */
-    
-    uint32_t magic = ddsData.at(0x0).as<uint32_t>();
-    if (magic != MAKEFOURCC('D', 'D', 'S', ' '))
-    {
-        throw std::exception("DDS magic number mismatch.");
-    }
-
-    D3D11_TEXTURE2D_DESC textureDesc =
-    {
-        .Width      = ddsData.at(0x10).as<uint32_t>(),
-        .Height     = ddsData.at(0xC).as<uint32_t>(),
-        .MipLevels  = 1,
-        .ArraySize  = 1,
-        .Format     = DXGI_FORMAT_B8G8R8A8_UNORM,
-        .SampleDesc =
-        {
-            .Count   = 1,
-            .Quality = 0,
-        },
-        .Usage      = D3D11_USAGE_DEFAULT,
-        .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
-    };
-
-    D3D11_SUBRESOURCE_DATA initialData =
-    {
-        .pSysMem     = ddsData.at(0x80).GetAddress(),
-        .SysMemPitch = ddsData.at(0x14).as<uint32_t>(),
-    };
-
-    D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc =
-    {
-        .Format        = DXGI_FORMAT_B8G8R8A8_UNORM,
-        .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-        .Texture2D     =
-        {
-            .MostDetailedMip = 0,
-            .MipLevels       = 1,
-        },
-    };
-
-    ID3D11Device* device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
-
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture = nullptr;
-    if (FAILED(device->CreateTexture2D(&textureDesc, &initialData, &texture)))
-    {
-        throw std::exception("Failed to create D3D11 texture.");
-    }
-    
-    if (FAILED(device->CreateShaderResourceView(texture.Get(), &shaderResourceViewDesc, &m_TextureView)))
-    {
-        throw std::exception("Failed to create D3D11 shader resource view.");
     }
 }

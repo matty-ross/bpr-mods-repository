@@ -43,14 +43,14 @@ static constexpr DashboardTexture::TextureSegmentUVs k_TextureSegmentUVs[] =
 };
 
 
-constexpr const DashboardTexture::TextureSegmentUVs& DashboardTexture::GetTextureSegmentUVs(DashboardTexture::TextureSegment textureSegment)
-{
-    return k_TextureSegmentUVs[static_cast<int>(textureSegment)];
-}
-
 ID3D11ShaderResourceView* DashboardTexture::GetTextureView() const
 {
     return m_TextureView.Get();
+}
+
+const DashboardTexture::TextureSegmentUVs& DashboardTexture::GetTextureSegmentUVs(DashboardTexture::TextureSegment textureSegment) const
+{
+    return k_TextureSegmentUVs[static_cast<int>(textureSegment)];
 }
 
 void DashboardTexture::CreateTexture(Core::Pointer dds)

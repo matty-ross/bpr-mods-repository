@@ -10,7 +10,7 @@
 class DashboardTexture
 {
 public:
-    enum TextureSegment
+    enum class TextureSegment
     {
         Background,
         RPM,
@@ -27,10 +27,8 @@ public:
     };
 
 public:
-    static constexpr const TextureSegmentUVs& GetTextureSegmentUVs(TextureSegment textureSegment);
-
-public:
     ID3D11ShaderResourceView* GetTextureView() const;
+    const TextureSegmentUVs& GetTextureSegmentUVs(TextureSegment textureSegment) const;
     
     void CreateTexture(Core::Pointer dds);
 
