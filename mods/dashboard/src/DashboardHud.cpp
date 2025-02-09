@@ -2,10 +2,27 @@
 
 #include <DirectXMath.h>
 
-#include "vendor/imgui.hpp"
-
 #include "core/Pointer.hpp"
 #include "core/File.hpp"
+
+
+static ImVec2 GetAbsolutePosition(const ImVec2& position)
+{
+    ImGuiViewport* mainViewport = ImGui::GetMainViewport();
+
+    float x = mainViewport->Pos.x + mainViewport->Size.x / 2.0f + position.x;
+    float y = mainViewport->Pos.y + mainViewport->Size.y - position.y;
+
+    return ImVec2(x, y);
+}
+
+static ImU32 GetFinalColor(ImU32 color, float opacity)
+{
+    ImColor finalColor = color;
+    finalColor.Value.w = opacity / 100.0f;
+
+    return finalColor;
+}
 
 
 DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger)
@@ -111,65 +128,6 @@ void DashboardHud::OnRenderOverlay()
 
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
 
-    ImGuiViewport* mainViewport = ImGui::GetMainViewport();
-    ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
-
-    auto relativePositionX = [=](float position) -> float { return mainViewport->Pos.x + mainViewport->Size.x / 2.0f + position; };
-    auto relativePositionY = [=](float position) -> float { return mainViewport->Pos.y + mainViewport->Size.y - position; };
-
-    auto drawTextureSegment = [=](const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor = true) -> void
-    {
-        constexpr ImVec2 segmentSize = ImVec2(256.0f, 256.0f);
-        
-        DashboardTexture::TextureSegmentUVs uv = m_DashboardTexture.GetTextureSegmentUVs(textureSegment);
-
-        float l = relativePositionX(position.x) - segmentSize.x / 2.0f;
-        float r = relativePositionX(position.x) + segmentSize.x / 2.0f;
-        float t = relativePositionY(position.y) - segmentSize.y / 2.0f;
-        float b = relativePositionY(position.y) + segmentSize.y / 2.0f;
-
-        ImColor color = useColor ? config.Colors.Dial : IM_COL32_WHITE;
-        color.Value.w = config.Opacity / 100.0f;
-        
-        foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
-    };
-
-    auto drawText = [=](const ImVec2& position, const char* text, const ImFont* font) -> void
-    {
-        ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
-
-        float x = relativePositionX(position.x) - textSize.x / 2.0f;
-        float y = relativePositionY(position.y) - textSize.y / 2.0f;
-
-        ImColor color = config.Colors.Text;
-        color.Value.w = config.Opacity / 100.0f;
-        
-        foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
-    };
-
-    auto drawNeedle = [=](const ImVec2& position, float value, float minValue, float maxValue) -> void
-    {
-        constexpr float thickness = 3.0f;
-        constexpr float minAngle = DirectX::XMConvertToRadians(-225);
-        constexpr float maxAngle = DirectX::XMConvertToRadians(45);
-        constexpr float innerRadius = 68.0f;
-        constexpr float outerRadius = 103.0f;
-
-        float angle = minAngle + (maxAngle - minAngle) * ((value - minValue) / (maxValue - minValue));
-        float angleSin = 0.0f, angleCos = 0.0f;
-        DirectX::XMScalarSinCos(&angleSin, &angleCos, angle);
-
-        float x1 = relativePositionX(position.x) + angleCos * innerRadius;
-        float y1 = relativePositionY(position.y) + angleSin * innerRadius;
-        float x2 = relativePositionX(position.x) + angleCos * outerRadius;
-        float y2 = relativePositionY(position.y) + angleSin * outerRadius;
-        
-        ImColor color = config.Colors.Needle;
-        color.Value.w = config.Opacity / 100.0f;
-        
-        foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
-    };
-
     // Speed
     {
         int32_t speed = abs(guiPlayerInfo.at(0x30).as<int32_t>());
@@ -181,10 +139,10 @@ void DashboardHud::OnRenderOverlay()
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
-        drawTextureSegment(ImVec2(-128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
-        drawTextureSegment(ImVec2(-128.0f, 72.0f), config.MetricUnits ? DashboardTexture::TextureSegment::KMH : DashboardTexture::TextureSegment::MPH);
-        drawText(ImVec2(-128.0f, 102.0f), speedText, m_Font29);
-        drawNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, config.MetricUnits ? 360.0f : 240.0f);
+        RenderTextureSegment(ImVec2(-128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
+        RenderTextureSegment(ImVec2(-128.0f, 72.0f), config.MetricUnits ? DashboardTexture::TextureSegment::KMH : DashboardTexture::TextureSegment::MPH);
+        RenderText(ImVec2(-128.0f, 102.0f), speedText, m_Font29);
+        RenderNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, config.MetricUnits ? 360.0f : 240.0f);
     }
 
     // Trip meter
@@ -194,7 +152,7 @@ void DashboardHud::OnRenderOverlay()
         char tripMeterText[16] = {};
         sprintf_s(tripMeterText, "%.1f", tripMeter);
 
-        drawText(ImVec2(-128.0f, 69.0f), tripMeterText, m_Font24);
+        RenderText(ImVec2(-128.0f, 69.0f), tripMeterText, m_Font24);
     }
 
     // Odometer
@@ -204,7 +162,7 @@ void DashboardHud::OnRenderOverlay()
         char odometerText[16] = {};
         sprintf_s(odometerText, "%06d", odometer);
 
-        drawText(ImVec2(-128.0f, 42.0f), odometerText, m_Font29);
+        RenderText(ImVec2(-128.0f, 42.0f), odometerText, m_Font29);
     }
 
     // RPM
@@ -214,10 +172,10 @@ void DashboardHud::OnRenderOverlay()
         char rpmText[8] = {};
         sprintf_s(rpmText, "%d", rpm);
 
-        drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
-        drawTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::RPM);
-        drawText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
-        drawNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
+        RenderTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
+        RenderTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::RPM);
+        RenderText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
+        RenderNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
     }
 
     // Gear
@@ -226,7 +184,7 @@ void DashboardHud::OnRenderOverlay()
 
         static constexpr char gears[][2] = { "R", "1", "2", "3", "4", "5" };
 
-        drawText(ImVec2(128.0f, 70.0f), gears[gear], m_Font37);
+        RenderText(ImVec2(128.0f, 70.0f), gears[gear], m_Font37);
     }
 
     // Local Time
@@ -237,6 +195,65 @@ void DashboardHud::OnRenderOverlay()
         char localTimeText[8] = {};
         sprintf_s(localTimeText, "%02d:%02d", localTime.wHour, localTime.wMinute);
 
-        drawText(ImVec2(128.0f, 42.0f), localTimeText, m_Font29);
+        RenderText(ImVec2(128.0f, 42.0f), localTimeText, m_Font29);
     }
+}
+
+void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor) const
+{
+    constexpr ImVec2 segmentSize = ImVec2(256.0f, 256.0f);
+
+    DashboardTexture::TextureSegmentUVs uv = m_DashboardTexture.GetTextureSegmentUVs(textureSegment);
+
+    ImVec2 absolutePosition = GetAbsolutePosition(position);
+    float l = absolutePosition.x - segmentSize.x / 2.0f;
+    float r = absolutePosition.x + segmentSize.x / 2.0f;
+    float t = absolutePosition.y - segmentSize.y / 2.0f;
+    float b = absolutePosition.y + segmentSize.y / 2.0f;
+
+    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    ImU32 color = GetFinalColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
+    
+    ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
+    foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
+}
+
+void DashboardHud::RenderText(const ImVec2& position, const char* text, const ImFont* font)
+{
+    ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
+
+    ImVec2 absolutePosition = GetAbsolutePosition(position);
+    float x = absolutePosition.x - textSize.x / 2.0f;
+    float y = absolutePosition.y - textSize.y / 2.0f;
+
+    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    ImU32 color = GetFinalColor(config.Colors.Text, config.Opacity);
+
+    ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
+    foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
+}
+
+void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue)
+{
+    constexpr float thickness = 3.0f;
+    constexpr float minAngle = DirectX::XMConvertToRadians(-225);
+    constexpr float maxAngle = DirectX::XMConvertToRadians(45);
+    constexpr float innerRadius = 68.0f;
+    constexpr float outerRadius = 103.0f;
+
+    float angle = minAngle + (maxAngle - minAngle) * ((value - minValue) / (maxValue - minValue));
+    float angleSin = 0.0f, angleCos = 0.0f;
+    DirectX::XMScalarSinCos(&angleSin, &angleCos, angle);
+
+    ImVec2 absolutePosition = GetAbsolutePosition(position);
+    float x1 = absolutePosition.x + angleCos * innerRadius;
+    float y1 = absolutePosition.y + angleSin * innerRadius;
+    float x2 = absolutePosition.x + angleCos * outerRadius;
+    float y2 = absolutePosition.y + angleSin * outerRadius;
+
+    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    ImU32 color = GetFinalColor(config.Colors.Needle, config.Opacity);
+
+    ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
+    foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
 }

@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "vendor/imgui.hpp"
+
 #include "core/Logger.hpp"
 
 #include "DashboardConfigFile.hpp"
@@ -24,14 +26,19 @@ public:
     void OnRenderOverlay();
 
 private:
+    void RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor = true) const;
+    void RenderText(const ImVec2& position, const char* text, const ImFont* font);
+    void RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue);
+
+private:
     DashboardConfigFile& m_DashboardConfigFile;
     const Core::Logger& m_Logger;
     
     DashboardTexture m_DashboardTexture;
     
-    struct ImFont* m_Font24 = nullptr;
-    struct ImFont* m_Font29 = nullptr;
-    struct ImFont* m_Font37 = nullptr;
+    ImFont* m_Font24 = nullptr;
+    ImFont* m_Font29 = nullptr;
+    ImFont* m_Font37 = nullptr;
     
     float m_TripMeter = 0.0f;
 };

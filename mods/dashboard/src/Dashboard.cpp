@@ -109,8 +109,8 @@ void Dashboard::Load()
         {
             EnterCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
             
-            m_DashboardHud.LoadTexture(k_ModDirectory + "dashboard.dds"s);
-            m_DashboardHud.LoadFonts(k_ModDirectory + "lucida-console.ttf"s);
+            m_DashboardHud.LoadTexture(k_ModDirectory + "texture.dds"s);
+            m_DashboardHud.LoadFonts(k_ModDirectory + "font.ttf"s);
             
             ImGui_ImplDX11_InvalidateDeviceObjects();
             
