@@ -75,8 +75,24 @@ void DashboardHud::OnRenderMenu()
             DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
             
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
+            ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f);
 
-            // TODO: other config
+            {
+                auto renderColorEdit = [](const char* label, uint32_t& configColor)
+                {
+                    ImColor color = configColor;
+                    if (ImGui::ColorEdit3(label, reinterpret_cast<float*>(&color.Value)))
+                    {
+                        configColor = color;
+                    }
+                };
+                
+                ImGui::SeparatorText("Colors");
+
+                renderColorEdit("Dial", config.Colors.Dial);
+                renderColorEdit("Text", config.Colors.Text);
+                renderColorEdit("Needle", config.Colors.Needle);
+            }
         }
     }
 }

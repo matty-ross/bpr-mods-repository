@@ -13,9 +13,9 @@ struct DashboardConfig
     float Opacity = 78.0;
     struct
     {
-        uint32_t Dial = 0xFCFF24;
-        uint32_t Text = 0xFCFF24;
-        uint32_t Needle = 0x3426FF;
+        uint32_t Dial = 0xFFFCFF24;
+        uint32_t Text = 0xFFFCFF24;
+        uint32_t Needle = 0xFF3426FF;
     } Colors;
 };
 
