@@ -26,7 +26,6 @@ void DashboardConfigFile::Load()
         YAML::Node yaml = YAML::Load(file.ReadText());
         {
             m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>();
-            m_DashboardConfig.Odometer    = yaml["Odometer"].as<float>();
             m_DashboardConfig.Opacity     = yaml["Opacity"].as<float>();
 
             {
@@ -57,7 +56,6 @@ void DashboardConfigFile::Save() const
         YAML::Node yaml;
         {
             yaml["MetricUnits"] = m_DashboardConfig.MetricUnits;
-            yaml["Odometer"]    = m_DashboardConfig.Odometer;
             yaml["Opacity"]     = m_DashboardConfig.Opacity;
 
             {

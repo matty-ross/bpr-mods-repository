@@ -5,6 +5,7 @@
 
 #include "vendor/imgui.hpp"
 
+#include "core/Pointer.hpp"
 #include "core/Logger.hpp"
 
 #include "DashboardConfigFile.hpp"
@@ -20,15 +21,15 @@ public:
     void LoadTexture(const std::string& filePath);
     void LoadFonts(const std::string& filePath);
 
-    void OnProgressionAddDistanceDriven(float distance, int32_t vehicleType);
+    void OnProgressionAddDistanceDriven(Core::Pointer progressionManager, float distance, int32_t vehicleType);
     
     void OnRenderMenu();
     void OnRenderOverlay();
 
 private:
     void RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor = true) const;
-    void RenderText(const ImVec2& position, const char* text, const ImFont* font);
-    void RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue);
+    void RenderText(const ImVec2& position, const char* text, const ImFont* font) const;
+    void RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const;
 
 private:
     DashboardConfigFile& m_DashboardConfigFile;
@@ -41,4 +42,5 @@ private:
     ImFont* m_Font37 = nullptr;
     
     float m_TripMeter = 0.0f;
+    float m_Odometer = 0.0f;
 };

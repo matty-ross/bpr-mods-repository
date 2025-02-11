@@ -27,7 +27,7 @@ private:
     void Load();
     void Unload();
 
-    void OnProgressionAddDistanceDriven(float distance, int32_t vehicleType);
+    void OnProgressionAddDistanceDriven(void* progressionManager, float distance, int32_t vehicleType);
 
     void OnRenderMenu();
     void OnRenderOverlay();

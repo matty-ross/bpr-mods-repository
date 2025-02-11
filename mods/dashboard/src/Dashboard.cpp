@@ -200,9 +200,9 @@ void Dashboard::Unload()
     }
 }
 
-void Dashboard::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
+void Dashboard::OnProgressionAddDistanceDriven(void* progressionManager, float distance, int32_t vehicleType)
 {
-    m_DashboardHud.OnProgressionAddDistanceDriven(distance, vehicleType);
+    m_DashboardHud.OnProgressionAddDistanceDriven(progressionManager, distance, vehicleType);
 }
 
 void Dashboard::OnRenderMenu()
@@ -240,6 +240,7 @@ __declspec(naked) void Dashboard::DetourProgressionAddDistanceDriven()
 
         push esi // vehicle type
         push dword ptr [esp + 0x4] // distance
+        push edi // BrnProgression::ProgressionManager*
         mov ecx, offset s_Instance
         call Dashboard::OnProgressionAddDistanceDriven
 

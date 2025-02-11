@@ -9,8 +9,7 @@
 struct DashboardConfig
 {
     bool MetricUnits = true;
-    float Odometer = 0.0f;
-    float Opacity = 78.0;
+    float Opacity = 78.0f;
     struct
     {
         uint32_t Dial = 0xFFFCFF24;

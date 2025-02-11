@@ -2,7 +2,6 @@
 
 #include <DirectXMath.h>
 
-#include "core/Pointer.hpp"
 #include "core/File.hpp"
 
 
@@ -55,17 +54,31 @@ void DashboardHud::LoadFonts(const std::string& filePath)
     m_Logger.Info("Loaded fonts.");
 }
 
-void DashboardHud::OnProgressionAddDistanceDriven(float distance, int32_t vehicleType)
+void DashboardHud::OnProgressionAddDistanceDriven(
+    Core::Pointer progressionManager, // BrnProgression::ProgressionManager*
+    float distance, // In meters.
+    int32_t vehicleType
+)
 {
-    // Distance is in meters.
-
-    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    
-    if (vehicleType != -1)
+    static constexpr ptrdiff_t offsets[] =
     {
-        m_TripMeter += distance;
-        config.Odometer += distance;
+        0x1EC,   // Distance driven online.
+        0x1F8,   // Distance driven offline.
+        0x29314, // Distance driven offline on BSI.
+        0x29320, // Distance driven online on BSI.
+    };
+    
+    float odometer = 0.0f;
+    for (ptrdiff_t offset : offsets)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            odometer += progressionManager.at(offset).as<float[3]>()[i];
+        }
     }
+
+    m_TripMeter += distance;
+    m_Odometer = odometer + distance;
 }
 
 void DashboardHud::OnRenderMenu()
@@ -157,7 +170,7 @@ void DashboardHud::OnRenderOverlay()
 
     // Odometer
     {
-        int32_t odometer = static_cast<int32_t>(config.MetricUnits ? (config.Odometer / 1000.0f) : (config.Odometer / 1609.0f));
+        int32_t odometer = static_cast<int32_t>(config.MetricUnits ? (m_Odometer / 1000.0f) : (m_Odometer / 1609.0f));
 
         char odometerText[16] = {};
         sprintf_s(odometerText, "%06d", odometer);
@@ -218,7 +231,7 @@ void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture
     foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
 }
 
-void DashboardHud::RenderText(const ImVec2& position, const char* text, const ImFont* font)
+void DashboardHud::RenderText(const ImVec2& position, const char* text, const ImFont* font) const
 {
     ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
 
@@ -233,7 +246,7 @@ void DashboardHud::RenderText(const ImVec2& position, const char* text, const Im
     foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
 }
 
-void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue)
+void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const
 {
     constexpr float thickness = 3.0f;
     constexpr float minAngle = DirectX::XMConvertToRadians(-225);
