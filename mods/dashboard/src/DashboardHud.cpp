@@ -1,5 +1,6 @@
 #include "DashboardHud.hpp"
 
+#include <algorithm>
 #include <DirectXMath.h>
 
 #include "core/File.hpp"
@@ -15,12 +16,10 @@ static ImVec2 GetAbsolutePosition(const ImVec2& position)
     return ImVec2(x, y);
 }
 
-static ImU32 GetFinalColor(ImU32 color, float opacity)
+static ImColor ApplyOpacityToColor(ImColor color, float opacity)
 {
-    ImColor finalColor = color;
-    finalColor.Value.w = opacity / 100.0f;
-
-    return finalColor;
+    color.Value.w = opacity / 100.0f;
+    return color;
 }
 
 
@@ -225,7 +224,7 @@ void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture
     float b = absolutePosition.y + segmentSize.y / 2.0f;
 
     DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    ImU32 color = GetFinalColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
+    ImColor color = ApplyOpacityToColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
     
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
@@ -240,7 +239,7 @@ void DashboardHud::RenderText(const ImVec2& position, const char* text, const Im
     float y = absolutePosition.y - textSize.y / 2.0f;
 
     DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    ImU32 color = GetFinalColor(config.Colors.Text, config.Opacity);
+    ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
 
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
@@ -249,11 +248,12 @@ void DashboardHud::RenderText(const ImVec2& position, const char* text, const Im
 void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const
 {
     constexpr float thickness = 3.0f;
-    constexpr float minAngle = DirectX::XMConvertToRadians(-225);
-    constexpr float maxAngle = DirectX::XMConvertToRadians(45);
+    constexpr float minAngle = DirectX::XMConvertToRadians(-225.0f);
+    constexpr float maxAngle = DirectX::XMConvertToRadians(45.0f);
     constexpr float innerRadius = 68.0f;
     constexpr float outerRadius = 103.0f;
 
+    value = std::clamp(value, minValue, maxValue);
     float angle = minAngle + (maxAngle - minAngle) * ((value - minValue) / (maxValue - minValue));
     float angleSin = 0.0f, angleCos = 0.0f;
     DirectX::XMScalarSinCos(&angleSin, &angleCos, angle);
@@ -265,7 +265,7 @@ void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minVa
     float y2 = absolutePosition.y + angleSin * outerRadius;
 
     DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    ImU32 color = GetFinalColor(config.Colors.Needle, config.Opacity);
+    ImColor color = ApplyOpacityToColor(config.Colors.Needle, config.Opacity);
 
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
