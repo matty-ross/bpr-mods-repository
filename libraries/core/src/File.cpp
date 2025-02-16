@@ -5,7 +5,7 @@
 
 namespace Core
 {
-    File::File(const std::string& filePath, Mode mode)
+    File::File(const char* filePath, Mode mode)
     {
         DWORD desiredAccess = 0;
         DWORD creationDisposition = 0;
@@ -23,7 +23,7 @@ namespace Core
             break;
         }
         
-        m_FileHandle = CreateFileA(filePath.c_str(), desiredAccess, FILE_SHARE_READ, nullptr, creationDisposition, 0, NULL);
+        m_FileHandle = CreateFileA(filePath, desiredAccess, FILE_SHARE_READ, nullptr, creationDisposition, 0, NULL);
         if (m_FileHandle == INVALID_HANDLE_VALUE)
         {
             throw WindowsException("Cannot open/create file");
@@ -41,30 +41,6 @@ namespace Core
     size_t File::GetSize() const
     {
         return GetFileSize(m_FileHandle, nullptr);
-    }
-
-    std::string File::ReadText() const
-    {
-        std::string content(GetSize(), '\0');
-        Read(content.data(), content.size());
-        return content;
-    }
-
-    std::vector<BYTE> File::ReadBinary() const
-    {
-        std::vector<BYTE> content(GetSize(), 0x00);
-        Read(content.data(), content.size());
-        return content;
-    }
-
-    void File::WriteText(const std::string& content) const
-    {
-        Write(content.data(), content.size());
-    }
-
-    void File::WriteBinary(const std::vector<BYTE>& content) const
-    {
-        Write(content.data(), content.size());
     }
     
     void File::Read(void* buffer, size_t size) const

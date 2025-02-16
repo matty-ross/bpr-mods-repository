@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <string>
-#include <vector>
 #include <Windows.h>
 
 
@@ -18,7 +16,7 @@ namespace Core
         };
 
     public:
-        File(const std::string& filePath, Mode mode);
+        File(const char* filePath, Mode mode);
         ~File();
 
         File(const File&) = delete;
@@ -29,10 +27,19 @@ namespace Core
     public:
         size_t GetSize() const;
 
-        std::string ReadText() const;
-        std::vector<BYTE> ReadBinary() const;
-        void WriteText(const std::string& content) const;
-        void WriteBinary(const std::vector<BYTE>& content) const;
+        template <typename T>
+        T Read() const
+        {
+            T content(GetSize(), {});
+            Read(content.data(), content.size());
+            return content;
+        }
+
+        template <typename T>
+        void Write(const T& content) const
+        {
+            Write(content.data(), content.size());
+        }
 
     private:
         void Read(void* buffer, size_t size) const;
