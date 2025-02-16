@@ -16,9 +16,9 @@ DetourHookManager::~DetourHookManager()
     DeleteCriticalSection(&m_CriticalSection);
 }
 
-CRITICAL_SECTION& DetourHookManager::GetCriticalSection()
+CRITICAL_SECTION* DetourHookManager::GetCriticalSection()
 {
-    return m_CriticalSection;
+    return &m_CriticalSection;
 }
 
 void DetourHookManager::Attach(DetourHook& detourHook)

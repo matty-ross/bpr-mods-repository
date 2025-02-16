@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include <string>
 #include <Windows.h>
 
 #include "core/Logger.hpp"
@@ -19,7 +18,7 @@ struct ImGuiConfig
 class ModManagerConfigFile
 {
 public:
-    ModManagerConfigFile(const std::string& filePath, const Core::Logger& logger);
+    ModManagerConfigFile(const char* filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -28,7 +27,7 @@ public:
     ImGuiConfig& GetImGuiConfig();
 
 private:
-    std::string m_FilePath;
+    const char* m_FilePath;
     const Core::Logger& m_Logger;
 
     ImGuiConfig m_ImGuiConfig;

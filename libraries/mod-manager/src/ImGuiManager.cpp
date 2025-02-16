@@ -23,9 +23,9 @@ ImGuiManager::~ImGuiManager()
     DeleteCriticalSection(&m_CriticalSection);
 }
 
-CRITICAL_SECTION& ImGuiManager::GetCriticalSection()
+CRITICAL_SECTION* ImGuiManager::GetCriticalSection()
 {
-    return m_CriticalSection;
+    return &m_CriticalSection;
 }
 
 void ImGuiManager::AddMenu(ImGuiMenu* menu)
@@ -93,9 +93,9 @@ void ImGuiManager::Load() const
     HWND windowHandle = Core::Pointer(0x0139815C).as<HWND>();
     ImGui_ImplWin32_Init(windowHandle);
 
-    ID3D11Device* device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
-    ID3D11DeviceContext* deviceContext = Core::Pointer(0x01485ECC).as<ID3D11DeviceContext*>();
-    ImGui_ImplDX11_Init(device, deviceContext);
+    ID3D11Device* d3d11Device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
+    ID3D11DeviceContext* d3d11DeviceContext = Core::Pointer(0x01485ECC).as<ID3D11DeviceContext*>();
+    ImGui_ImplDX11_Init(d3d11Device, d3d11DeviceContext);
 }
 
 void ImGuiManager::Unload() const
@@ -157,7 +157,7 @@ bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
                 Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
                 Core::Pointer(0x0139813E).as<bool>() = true;
             }
-            else if (wParam == m_ImGuiConfig.ToggleOverlaysVK)
+            if (wParam == m_ImGuiConfig.ToggleOverlaysVK)
             {
                 m_OverlaysVisible = !m_OverlaysVisible;
             }

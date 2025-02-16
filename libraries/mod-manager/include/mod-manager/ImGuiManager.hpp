@@ -35,7 +35,7 @@ public:
     ImGuiManager& operator =(ImGuiManager&&) = delete;
 
 public:
-    MOD_MANAGER_API CRITICAL_SECTION& GetCriticalSection();
+    MOD_MANAGER_API CRITICAL_SECTION* GetCriticalSection();
 
     MOD_MANAGER_API void AddMenu(ImGuiMenu* menu);
     MOD_MANAGER_API void RemoveMenu(ImGuiMenu* menu);
