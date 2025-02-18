@@ -28,7 +28,7 @@ struct CustomParameters
 class CustomParametersFile
 {
 public:
-    CustomParametersFile(const std::string& filePath, const Core::Logger& logger);
+    CustomParametersFile(const char* filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -37,7 +37,7 @@ public:
     std::vector<CustomParameters>& GetCustomParameters();
 
 private:
-    std::string m_FilePath;
+    const char* m_FilePath;
     const Core::Logger& m_Logger;
 
     std::vector<CustomParameters> m_CustomParameters;

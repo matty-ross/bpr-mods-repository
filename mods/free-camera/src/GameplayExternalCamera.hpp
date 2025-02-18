@@ -54,6 +54,5 @@ private:
     CustomParametersFile& m_CustomParametersFile;
 
     Parameters m_Parameters;
-
     uint64_t m_PreviousAttribKey = 0;
 };

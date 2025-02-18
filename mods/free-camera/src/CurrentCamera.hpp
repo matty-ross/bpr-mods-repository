@@ -65,8 +65,6 @@ private:
 
 private:
     Properties m_Properties;
-    
     Transformation m_Transformation;
-    
     Effect m_Effect;
 };

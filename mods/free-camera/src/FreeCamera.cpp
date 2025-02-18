@@ -8,13 +8,12 @@
 #include "mod-manager/ModManager.hpp"
 
 
-using namespace std::string_literals;
+#define MOD_DIRECTORY ".\\mods\\free-camera\\"
 
 
-static constexpr char k_ModName[]      = "Free Camera";
-static constexpr char k_ModVersion[]   = "1.1.0";
-static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
-static constexpr char k_ModDirectory[] = ".\\mods\\free-camera\\";
+static constexpr char k_ModName[]    = "Free Camera";
+static constexpr char k_ModVersion[] = "1.1.0";
+static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
 
 
 FreeCamera FreeCamera::s_Instance;
@@ -23,7 +22,7 @@ FreeCamera FreeCamera::s_Instance;
 FreeCamera::FreeCamera()
     :
     m_Logger(k_ModName),
-    m_CustomParamtersFile(k_ModDirectory + "custom-parameters.yaml"s, m_Logger),
+    m_CustomParamtersFile(MOD_DIRECTORY "custom-parameters.yaml", m_Logger),
     m_GameplayExternalCamera(m_CustomParamtersFile),
     m_DetourArbitratorUpdate
     {
@@ -69,7 +68,7 @@ void FreeCamera::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Check versions
+        // Check versions.
         {
             m_Logger.Info("Checking versions...");
 
@@ -83,9 +82,9 @@ void FreeCamera::Load()
 
         // Create mod directory.
         {
-            m_Logger.Info("Creating mod directory '%s' ...", k_ModDirectory);
+            m_Logger.Info("Creating mod directory '%s' ...", MOD_DIRECTORY);
             
-            CreateDirectoryA(k_ModDirectory, nullptr);
+            CreateDirectoryA(MOD_DIRECTORY, nullptr);
 
             m_Logger.Info("Created mod directory.");
         }
@@ -117,7 +116,7 @@ void FreeCamera::Load()
             m_Logger.Info("In game.");
         }
 
-        // Register raw mouse input
+        // Register raw mouse input.
         {
             m_Logger.Info("Registering raw mouse input...");
             
@@ -132,7 +131,7 @@ void FreeCamera::Load()
             m_Logger.Info("Registered raw mouse input.");
         }
 
-        // Set window proc
+        // Set window proc.
         {
             m_Logger.Info("Setting window proc...");
 
@@ -219,7 +218,7 @@ void FreeCamera::Unload()
             m_Logger.Info("Detached ArbitratorUpdate detour.");
         }
 
-        // Set previous window proc
+        // Set previous window proc.
         {
             m_Logger.Info("Setting previous window proc...");
 
