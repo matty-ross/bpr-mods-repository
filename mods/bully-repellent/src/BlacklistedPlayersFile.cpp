@@ -8,7 +8,7 @@
 static constexpr char k_Name[] = "blacklisted players";
 
 
-BlacklistedPlayersFile::BlacklistedPlayersFile(const std::string& filePath, const Core::Logger& logger)
+BlacklistedPlayersFile::BlacklistedPlayersFile(const char* filePath, const Core::Logger& logger)
     :
     m_FilePath(filePath),
     m_Logger(logger)
@@ -19,27 +19,25 @@ void BlacklistedPlayersFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.c_str());
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
         
-        YAML::Node yaml = YAML::Load(file.ReadText());
+        YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
-            {
-                m_BlacklistedPlayers.clear();
+            m_BlacklistedPlayers.clear();
             
-                for (const YAML::Node& blacklistedPlayerNode : yaml["BlacklistedPlayers"])
+            for (const YAML::Node& blacklistedPlayerNode : yaml["BlacklistedPlayers"])
+            {
+                BlacklistedPlayer blacklistedPlayer =
                 {
-                    BlacklistedPlayer blacklistedPlayer =
-                    {
-                        .ID       = blacklistedPlayerNode["ID"].as<uint64_t>(),
-                        .Name     = blacklistedPlayerNode["Name"].as<std::string>(),
-                        .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(),
-                        .Automute = blacklistedPlayerNode["Automute"].as<bool>(),
-                    };
+                    .ID       = blacklistedPlayerNode["ID"].as<uint64_t>(),
+                    .Name     = blacklistedPlayerNode["Name"].as<std::string>(),
+                    .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(),
+                    .Automute = blacklistedPlayerNode["Automute"].as<bool>(),
+                };
 
-                    m_BlacklistedPlayers.push_back(blacklistedPlayer);
-                }
+                m_BlacklistedPlayers.push_back(blacklistedPlayer);
             }
         }
 
@@ -55,26 +53,24 @@ void BlacklistedPlayersFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.c_str());
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
         
         YAML::Node yaml;
         {
+            for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
             {
-                for (const BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayers)
-                {
-                    YAML::Node blacklistedPlayerNode;
-                    blacklistedPlayerNode["ID"]       = blacklistedPlayer.ID;
-                    blacklistedPlayerNode["Name"]     = blacklistedPlayer.Name;
-                    blacklistedPlayerNode["Autokick"] = blacklistedPlayer.Autokick;
-                    blacklistedPlayerNode["Automute"] = blacklistedPlayer.Automute;
+                YAML::Node blacklistedPlayerNode;
+                blacklistedPlayerNode["ID"]       = blacklistedPlayer.ID;
+                blacklistedPlayerNode["Name"]     = blacklistedPlayer.Name;
+                blacklistedPlayerNode["Autokick"] = blacklistedPlayer.Autokick;
+                blacklistedPlayerNode["Automute"] = blacklistedPlayer.Automute;
 
-                    yaml["BlacklistedPlayers"].push_back(blacklistedPlayerNode);
-                }
+                yaml["BlacklistedPlayers"].push_back(blacklistedPlayerNode);
             }
         }
-        file.WriteText(YAML::Dump(yaml));
+        file.Write(YAML::Dump(yaml));
 
         m_Logger.Info("Saved %s.", k_Name);
     }
