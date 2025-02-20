@@ -6,13 +6,12 @@
 #include "mod-manager/ModManager.hpp"
 
 
-using namespace std::string_literals;
+#define MOD_DIRECTORY ".\\mods\\protection\\"
 
 
-static constexpr char k_ModName[]      = "Protection";
-static constexpr char k_ModVersion[]   = "1.1.0";
-static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
-static constexpr char k_ModDirectory[] = ".\\mods\\protection\\";
+static constexpr char k_ModName[]    = "Protection";
+static constexpr char k_ModVersion[] = "1.1.0";
+static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
 
 
 Protection Protection::s_Instance;
@@ -21,8 +20,8 @@ Protection Protection::s_Instance;
 Protection::Protection()
     :    
     m_Logger(k_ModName),
-    m_VehiclesFile(k_ModDirectory + "vehicles.yaml"s, m_Logger),
-    m_ChallengesFile(k_ModDirectory + "challenges.yaml"s, m_Logger),
+    m_VehiclesFile(MOD_DIRECTORY "vehicles.yaml", m_Logger),
+    m_ChallengesFile(MOD_DIRECTORY "challenges.yaml", m_Logger),
     m_VehicleProtection(m_VehiclesFile),
     m_ChallengeProtection(m_ChallengesFile),
     m_DetourPlayerParamsSerialize
@@ -89,7 +88,7 @@ void Protection::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Check versions
+        // Check versions.
         {
             m_Logger.Info("Checking versions...");
 
@@ -103,9 +102,9 @@ void Protection::Load()
 
         // Create mod directory.
         {
-            m_Logger.Info("Creating mod directory '%s' ...", k_ModDirectory);
+            m_Logger.Info("Creating mod directory '%s' ...", MOD_DIRECTORY);
 
-            CreateDirectoryA(k_ModDirectory, nullptr);
+            CreateDirectoryA(MOD_DIRECTORY, nullptr);
 
             m_Logger.Info("Created mod directory.");
         }

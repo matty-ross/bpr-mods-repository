@@ -20,7 +20,7 @@ struct Challenge
 class ChallengesFile
 {
 public:
-    ChallengesFile(const std::string& filePath, const Core::Logger& logger);
+    ChallengesFile(const char* filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -32,7 +32,7 @@ public:
     void SetFallbackChallenge(const VanillaChallenge* fallbackChallenge);
 
 private:
-    std::string m_FilePath;
+    const char* m_FilePath;
     const Core::Logger& m_Logger;
 
     std::vector<Challenge> m_Challenges;
