@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <string>
-
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
@@ -18,8 +16,8 @@ public:
     DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger);
 
 public:
-    void LoadTexture(const std::string& filePath);
-    void LoadFonts(const std::string& filePath);
+    void LoadTexture(const char* filePath);
+    void LoadFonts(const char* filePath);
 
     void OnProgressionAddDistanceDriven(Core::Pointer progressionManager, float distance, int32_t vehicleType);
     

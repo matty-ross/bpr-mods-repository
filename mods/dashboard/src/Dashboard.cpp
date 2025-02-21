@@ -6,13 +6,12 @@
 #include "mod-manager/ModManager.hpp"
 
 
-using namespace std::string_literals;
+#define MOD_DIRECTORY ".\\mods\\dashboard\\"
 
 
-static constexpr char k_ModName[]      = "Dashboard";
-static constexpr char k_ModVersion[]   = "1.1.0";
-static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
-static constexpr char k_ModDirectory[] = ".\\mods\\dashboard\\";
+static constexpr char k_ModName[]    = "Dashboard";
+static constexpr char k_ModVersion[] = "1.1.0";
+static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
 
 
 Dashboard Dashboard::s_Instance;
@@ -21,7 +20,7 @@ Dashboard Dashboard::s_Instance;
 Dashboard::Dashboard()
     :
     m_Logger(k_ModName),
-    m_DashboardConfigFile(k_ModDirectory + "dashboard-config.yaml"s, m_Logger),
+    m_DashboardConfigFile(MOD_DIRECTORY "dashboard-config.yaml", m_Logger),
     m_DashboardHud(m_DashboardConfigFile, m_Logger),
     m_DetourProgressionAddDistanceDriven
     {
@@ -66,7 +65,7 @@ void Dashboard::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Check versions
+        // Check versions.
         {
             m_Logger.Info("Checking versions...");
 
@@ -107,14 +106,14 @@ void Dashboard::Load()
 
         // Load dashboard assets.
         {
-            EnterCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
+            EnterCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
             
-            m_DashboardHud.LoadTexture(k_ModDirectory + "texture.dds"s);
-            m_DashboardHud.LoadFonts(k_ModDirectory + "font.ttf"s);
+            m_DashboardHud.LoadTexture(MOD_DIRECTORY "texture.dds");
+            m_DashboardHud.LoadFonts(MOD_DIRECTORY "font.ttf");
             
             ImGui_ImplDX11_InvalidateDeviceObjects();
             
-            LeaveCriticalSection(&ModManager::Get().GetImGuiManager().GetCriticalSection());
+            LeaveCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
         }
 
         // Attach ProgressionAddDistanceDriven detour.

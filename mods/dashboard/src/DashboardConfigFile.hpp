@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <string>
-
 #include "core/Logger.hpp"
 
 
@@ -22,7 +20,7 @@ struct DashboardConfig
 class DashboardConfigFile
 {
 public:
-    DashboardConfigFile(const std::string& filePath, const Core::Logger& logger);
+    DashboardConfigFile(const char* filePath, const Core::Logger& logger);
 
 public:
     void Load();
@@ -31,7 +29,7 @@ public:
     DashboardConfig& GetDashboardConfig();
 
 private:
-    std::string m_FilePath;
+    const char* m_FilePath;
     const Core::Logger& m_Logger;
 
     DashboardConfig m_DashboardConfig;

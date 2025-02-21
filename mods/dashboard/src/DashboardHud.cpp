@@ -1,5 +1,6 @@
 #include "DashboardHud.hpp"
 
+#include <vector>
 #include <algorithm>
 #include <DirectXMath.h>
 
@@ -30,25 +31,25 @@ DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core:
 {
 }
 
-void DashboardHud::LoadTexture(const std::string& filePath)
+void DashboardHud::LoadTexture(const char* filePath)
 {
-    m_Logger.Info("Loading texture from file '%s' ...", filePath.c_str());
+    m_Logger.Info("Loading texture from file '%s' ...", filePath);
     
     Core::File file(filePath, Core::File::Mode::Read);
-    std::vector<BYTE> textureData = file.ReadBinary();
+    std::vector<BYTE> textureData = file.Read<std::vector<BYTE>>();
     m_DashboardTexture.CreateTexture(textureData.data());
 
     m_Logger.Info("Loaded texture.");
 }
 
-void DashboardHud::LoadFonts(const std::string& filePath)
+void DashboardHud::LoadFonts(const char* filePath)
 {
-    m_Logger.Info("Loading fonts from file '%s' ...", filePath.c_str());
+    m_Logger.Info("Loading fonts from file '%s' ...", filePath);
     
     ImGuiIO& io = ImGui::GetIO();
-    m_Font24 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 24.0f);
-    m_Font29 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 29.0f);
-    m_Font37 = io.Fonts->AddFontFromFileTTF(filePath.c_str(), 37.0f);
+    m_Font24 = io.Fonts->AddFontFromFileTTF(filePath, 24.0f);
+    m_Font29 = io.Fonts->AddFontFromFileTTF(filePath, 29.0f);
+    m_Font37 = io.Fonts->AddFontFromFileTTF(filePath, 37.0f);
 
     m_Logger.Info("Loaded fonts.");
 }

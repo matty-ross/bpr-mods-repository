@@ -8,7 +8,7 @@
 static constexpr char k_Name[] = "dashboard config";
 
 
-DashboardConfigFile::DashboardConfigFile(const std::string& filePath, const Core::Logger& logger)
+DashboardConfigFile::DashboardConfigFile(const char* filePath, const Core::Logger& logger)
     :
     m_FilePath(filePath),
     m_Logger(logger)
@@ -19,22 +19,20 @@ void DashboardConfigFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.c_str());
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
 
-        YAML::Node yaml = YAML::Load(file.ReadText());
+        YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>();
             m_DashboardConfig.Opacity     = yaml["Opacity"].as<float>();
-
-            {
-                const YAML::Node& colorsNode = yaml["Colors"];
-                
-                m_DashboardConfig.Colors.Dial   = colorsNode["Dial"].as<uint32_t>();
-                m_DashboardConfig.Colors.Text   = colorsNode["Text"].as<uint32_t>();
-                m_DashboardConfig.Colors.Needle = colorsNode["Needle"].as<uint32_t>();
-            }
+            
+            const YAML::Node& colorsNode = yaml["Colors"];
+            
+            m_DashboardConfig.Colors.Dial   = colorsNode["Dial"].as<uint32_t>();
+            m_DashboardConfig.Colors.Text   = colorsNode["Text"].as<uint32_t>();
+            m_DashboardConfig.Colors.Needle = colorsNode["Needle"].as<uint32_t>();
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -49,7 +47,7 @@ void DashboardConfigFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.c_str());
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
 
@@ -58,16 +56,14 @@ void DashboardConfigFile::Save() const
             yaml["MetricUnits"] = m_DashboardConfig.MetricUnits;
             yaml["Opacity"]     = m_DashboardConfig.Opacity;
 
-            {
-                YAML::Node colorsNode;
-                colorsNode["Dial"]   = m_DashboardConfig.Colors.Dial;
-                colorsNode["Text"]   = m_DashboardConfig.Colors.Text;
-                colorsNode["Needle"] = m_DashboardConfig.Colors.Needle;
+            YAML::Node colorsNode;
+            colorsNode["Dial"]   = m_DashboardConfig.Colors.Dial;
+            colorsNode["Text"]   = m_DashboardConfig.Colors.Text;
+            colorsNode["Needle"] = m_DashboardConfig.Colors.Needle;
 
-                yaml["Colors"] = colorsNode;
-            }
+            yaml["Colors"] = colorsNode;
         }
-        file.WriteText(YAML::Dump(yaml));
+        file.Write(YAML::Dump(yaml));
 
         m_Logger.Info("Saved %s.", k_Name);
     }
