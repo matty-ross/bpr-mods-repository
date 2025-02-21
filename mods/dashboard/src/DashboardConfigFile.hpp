@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <cstdint>
+
 #include "core/Logger.hpp"
 
 
