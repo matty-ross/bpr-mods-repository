@@ -49,9 +49,6 @@ private:
     void OnRenderFrame();
     bool OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-    bool WantCaptureMouse() const;
-    bool WantCaptureKeyboard() const;
-
 private:
     const ImGuiConfig& m_ImGuiConfig;
 

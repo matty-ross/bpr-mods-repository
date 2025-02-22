@@ -193,13 +193,3 @@ bool ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
     
     return false;
 }
-
-bool ImGuiManager::WantCaptureMouse() const
-{
-    return ImGui::GetIO().WantCaptureMouse;
-}
-
-bool ImGuiManager::WantCaptureKeyboard() const
-{
-    return ImGui::GetIO().WantCaptureKeyboard;
-}

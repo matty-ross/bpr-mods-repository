@@ -1,5 +1,7 @@
 #include "ModManager.hpp"
 
+#include "vendor/imgui.hpp"
+
 #include "core/Pointer.hpp"
 
 
@@ -267,15 +269,14 @@ __declspec(naked) void ModManager::DetourUpdateKeyboardState()
         pushfd
         pushad
 
-        mov ecx, offset s_Instance.m_ImGuiManager
-        call ImGuiManager::WantCaptureKeyboard
-
-        test al, al
-        jz _continue
+        call ImGui::GetIO
+        
+        cmp byte ptr [eax]ImGuiIO.WantCaptureKeyboard, 0
+        je _continue
 
         // Clear all keys.
         mov ecx, 0x100
-        mov al, 0x0
+        mov al, 0
         lea edi, [ebp - 0x100]
         rep stosb
 
