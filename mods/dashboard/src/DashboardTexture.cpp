@@ -103,15 +103,15 @@ void DashboardTexture::CreateTexture(Core::Pointer dds)
         },
     };
 
-    ID3D11Device* device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
+    ID3D11Device* d3d11Device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-    if (FAILED(device->CreateTexture2D(&textureDesc, &initialData, &texture)))
+    if (FAILED(d3d11Device->CreateTexture2D(&textureDesc, &initialData, &texture)))
     {
         throw std::exception("Failed to create D3D11 texture.");
     }
 
-    if (FAILED(device->CreateShaderResourceView(texture.Get(), &shaderResourceViewDesc, &m_TextureView)))
+    if (FAILED(d3d11Device->CreateShaderResourceView(texture.Get(), &shaderResourceViewDesc, &m_TextureView)))
     {
         throw std::exception("Failed to create D3D11 shader resource view.");
     }
