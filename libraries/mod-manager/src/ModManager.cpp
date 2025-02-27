@@ -121,6 +121,21 @@ void ModManager::Load()
             m_Logger.Info("Loaded ImGui manager.");
         }
 
+        // Remove window class cursor.
+        {
+            // ImGui manages the cursor and fights with Windows, therefore we remove it.
+
+            m_Logger.Info("Removing window class cursor...");
+
+            m_PreviousCursorHandle = reinterpret_cast<HCURSOR>(SetClassLongPtrA(
+                Core::Pointer(0x0139815C).as<HWND>(),
+                GCLP_HCURSOR,
+                NULL
+            ));
+
+            m_Logger.Info("Removed window class cursor. Previous cursor handle: 0x%08X.", m_PreviousCursorHandle);
+        }
+
         // Attach Present detour.
         {
             m_Logger.Info("Attaching Present detour...");
@@ -193,6 +208,19 @@ void ModManager::Unload()
             m_DetourHookManager.Detach(m_DetourPresent);
             
             m_Logger.Info("Detached Present detour.");
+        }
+
+        // Restore previous window class cursor.
+        {
+            m_Logger.Info("Restoring previous window class cursor...");
+
+            SetClassLongPtrA(
+                Core::Pointer(0x0139815C).as<HWND>(),
+                GCLP_HCURSOR,
+                reinterpret_cast<LONG_PTR>(m_PreviousCursorHandle)
+            );
+
+            m_Logger.Info("Restored previous window class cursor.");
         }
 
         // Unload ImGui manager.

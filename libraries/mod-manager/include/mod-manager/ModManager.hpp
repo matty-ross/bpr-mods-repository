@@ -57,4 +57,5 @@ private:
     DetourHook m_DetourUpdateKeyboardState;
 
     HANDLE m_LoadThreadHandle = NULL;
+    HCURSOR m_PreviousCursorHandle = NULL;
 };
