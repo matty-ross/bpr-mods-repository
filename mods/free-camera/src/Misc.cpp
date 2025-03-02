@@ -17,9 +17,28 @@ void Misc::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Misc"))
     {
-        Core::Pointer directorModule = Core::Pointer(0x013FC8E0).deref().at(0x6EF240); // BrnDirector::DirectorModule*
-        Core::Pointer arbitrator = Core::Pointer(0x013FC8E0).deref().at(0x6F2AF0); // BrnDirector::Arbitrator*
+        Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
+        Core::Pointer directorModule = gameModule.at(0x6EF240); // BrnDirector::DirectorModule*
+        Core::Pointer arbitrator = gameModule.at(0x6F2AF0); // BrnDirector::Arbitrator*
 
+        {
+            bool isOnline = gameModule.at(0xB6D415).as<bool>();
+            
+            if (isOnline)
+            {
+                ImGui::BeginDisabled();
+            }
+            
+            ImGui::Checkbox("Pause Simulation", &gameModule.at(0xB6D3FF).as<bool>());
+            
+            if (isOnline)
+            {
+                ImGui::EndDisabled();
+            }
+        }
+
+        ImGui::Separator();
+        
         {
             ImGui::Checkbox("Allow Jump Moment", &directorModule.at(0x29F5D).as<bool>());
             ImGui::Checkbox("Allow Slow Motion", &directorModule.at(0x283A8).as<bool>());
