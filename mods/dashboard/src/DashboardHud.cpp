@@ -129,17 +129,17 @@ void DashboardHud::OnRenderMenu()
 
 void DashboardHud::OnRenderOverlay()
 {
+    Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
     Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).as<void*>(); // BrnGui::RaceMainHudState*
     
     bool inRaceHud = raceMainHudState.at(0x14C).as<bool>();
-    if (!inRaceHud)
+    int32_t engineState = guiPlayerInfo.at(0x48).as<int32_t>();
+    if (!inRaceHud || engineState == 0) // BrnGui::GuiPlayerEngineEvent::EEngineState::E_ENGINE_OFF
     {
         return;
     }
     
     DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-
-    Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
 
     // Speed
     {
