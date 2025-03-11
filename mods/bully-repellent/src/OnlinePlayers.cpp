@@ -115,7 +115,7 @@ void OnlinePlayers::OnRenderMenu()
             ImGui::Separator();
 
             {
-                if (ImGui::BeginTable("##current-players", 2, ImGuiTableFlags_None))
+                if (ImGui::BeginTable("##current-players", 2))
                 {
                     ImGui::TableSetupColumn("Name");
                     ImGui::TableSetupColumn("Blacklist");
