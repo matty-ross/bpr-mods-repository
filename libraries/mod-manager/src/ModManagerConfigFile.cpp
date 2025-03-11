@@ -22,11 +22,9 @@ void ModManagerConfigFile::Load()
         m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
-
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
-            const YAML::Node& imguiNode = yaml["ImGui"];
-                
+            YAML::Node imguiNode = yaml["ImGui"];
             m_ImGuiConfig.ToggleMenusVK    = imguiNode["ToggleMenusVK"].as<int>();
             m_ImGuiConfig.ToggleOverlaysVK = imguiNode["ToggleOverlaysVK"].as<int>();
             m_ImGuiConfig.EnableDocking    = imguiNode["EnableDocking"].as<bool>();
@@ -48,7 +46,6 @@ void ModManagerConfigFile::Save() const
         m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
-
         YAML::Node yaml;
         {
             YAML::Node imguiNode;
@@ -56,7 +53,6 @@ void ModManagerConfigFile::Save() const
             imguiNode["ToggleOverlaysVK"] = m_ImGuiConfig.ToggleOverlaysVK;
             imguiNode["EnableDocking"]    = m_ImGuiConfig.EnableDocking;
             imguiNode["EnableViewports"]  = m_ImGuiConfig.EnableViewports;
-
             yaml["ImGui"] = imguiNode;
         }
         file.Write(YAML::Dump(yaml));
