@@ -22,7 +22,6 @@ void VehiclesFile::Load()
         m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
-        
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>();
@@ -30,8 +29,7 @@ void VehiclesFile::Load()
             m_FallbackVehicle = fallbackVehicle != nullptr ? fallbackVehicle : k_LastResortFallbackVehicle;
             
             m_Vehicles.clear();
-            
-            for (const YAML::Node& vehicleNode : yaml["Vehicles"])
+            for (YAML::Node vehicleNode : yaml["Vehicles"])
             {
                 uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>();
                 const VanillaVehicle* replacementVehicle = GetVanillaVehicle(replacementVehicleID);
@@ -42,7 +40,6 @@ void VehiclesFile::Load()
                     .Name        = vehicleNode["Name"].as<std::string>(),
                     .Replacement = replacementVehicle != nullptr ? replacementVehicle : m_FallbackVehicle,
                 };
-
                 m_Vehicles.push_back(vehicle);
             }
         }
@@ -62,7 +59,6 @@ void VehiclesFile::Save() const
         m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
-
         YAML::Node yaml;
         {
             yaml["FallbackID"] = m_FallbackVehicle->ID;
@@ -73,7 +69,6 @@ void VehiclesFile::Save() const
                 vehicleNode["ID"]            = vehicle.ID;
                 vehicleNode["Name"]          = vehicle.Name;
                 vehicleNode["ReplacementID"] = vehicle.Replacement->ID;
-            
                 yaml["Vehicles"].push_back(vehicleNode);
             }
         }

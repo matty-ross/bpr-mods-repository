@@ -22,7 +22,6 @@ void ChallengesFile::Load()
         m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
-        
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>();
@@ -30,8 +29,7 @@ void ChallengesFile::Load()
             m_FallbackChallenge = fallbackChallenge != nullptr ? fallbackChallenge : k_LastResortFallbackChallenge;
             
             m_Challenges.clear();
-            
-            for (const YAML::Node& challengeNode : yaml["Challenges"])
+            for (YAML::Node challengeNode : yaml["Challenges"])
             {
                 uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
                 const VanillaChallenge* replacementChallenge = GetVanillaChallenge(replacementChallengeID);
@@ -42,7 +40,6 @@ void ChallengesFile::Load()
                     .Title       = challengeNode["Title"].as<std::string>(),
                     .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
                 };
-            
                 m_Challenges.push_back(challenge);
             }
         }
@@ -62,7 +59,6 @@ void ChallengesFile::Save() const
         m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Write);
-
         YAML::Node yaml;
         {
             yaml["FallbackID"] = m_FallbackChallenge->ID;
@@ -73,7 +69,6 @@ void ChallengesFile::Save() const
                 challengeNode["ID"]            = challenge.ID;
                 challengeNode["Title"]         = challenge.Title;
                 challengeNode["ReplacementID"] = challenge.Replacement->ID;
-
                 yaml["Challenges"].push_back(challengeNode);
             }
         }
