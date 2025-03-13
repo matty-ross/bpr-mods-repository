@@ -87,7 +87,7 @@ void ExceptionReporter::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Check versions
+        // Check versions.
         {
             m_Logger.Info("Checking versions...");
 
