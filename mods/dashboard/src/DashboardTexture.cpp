@@ -14,7 +14,7 @@ static constexpr DashboardTexture::TextureSegmentUVs k_TextureSegmentUVs[] =
         .Bottom = 0.5f,
     },
     
-    // RMP
+    // RPM
     DashboardTexture::TextureSegmentUVs
     {
         .Left   = 0.5f,
@@ -72,34 +72,34 @@ void DashboardTexture::CreateTexture(Core::Pointer dds)
 
     D3D11_TEXTURE2D_DESC textureDesc =
     {
-        .Width = dds.at(0x10).as<uint32_t>(),
-        .Height = dds.at(0xC).as<uint32_t>(),
-        .MipLevels = 1,
-        .ArraySize = 1,
-        .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
+        .Width      = dds.at(0x10).as<uint32_t>(),
+        .Height     = dds.at(0xC).as<uint32_t>(),
+        .MipLevels  = 1,
+        .ArraySize  = 1,
+        .Format     = DXGI_FORMAT_B8G8R8A8_UNORM,
         .SampleDesc =
         {
-            .Count = 1,
+            .Count   = 1,
             .Quality = 0,
         },
-        .Usage = D3D11_USAGE_DEFAULT,
-        .BindFlags = D3D11_BIND_SHADER_RESOURCE,
+        .Usage      = D3D11_USAGE_DEFAULT,
+        .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
     };
 
     D3D11_SUBRESOURCE_DATA initialData =
     {
-        .pSysMem = dds.at(0x80).GetAddress(),
+        .pSysMem     = dds.at(0x80).GetAddress(),
         .SysMemPitch = dds.at(0x14).as<uint32_t>(),
     };
 
     D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc =
     {
-        .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
+        .Format        = DXGI_FORMAT_B8G8R8A8_UNORM,
         .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-        .Texture2D =
+        .Texture2D     =
         {
             .MostDetailedMip = 0,
-            .MipLevels = 1,
+            .MipLevels       = 1,
         },
     };
 
