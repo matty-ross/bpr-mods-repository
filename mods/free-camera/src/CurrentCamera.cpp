@@ -55,13 +55,13 @@ CurrentCamera::CurrentCamera()
     :
     m_Properties
     {
-        .FOV                 = 0x58,
-        .SimulationTimeScale = 0x100,
-        .CameraLag           = 0x108,
-        .BlackBarAmount      = 0x10C,
-        .MotionBlurVehicle   = 0xA8,
-        .MotionBlurWorld     = 0xAC,
-        .Blurriness          = 0x130,
+        .FOV                 = { .Offset = 0x58  },
+        .SimulationTimeScale = { .Offset = 0x100 },
+        .CameraLag           = { .Offset = 0x108 },
+        .BlackBarAmount      = { .Offset = 0x10C },
+        .MotionBlurVehicle   = { .Offset = 0xA8  },
+        .MotionBlurWorld     = { .Offset = 0xAC  },
+        .Blurriness          = { .Offset = 0x130 },
     }
 {
 }

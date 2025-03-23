@@ -19,14 +19,9 @@ public:
 private:
     struct Parameter
     {
-        ptrdiff_t Offset;
+        ptrdiff_t Offset = 0x0;
         float DefaultValue = 0.0f;
         bool Reset = false;
-
-        Parameter(ptrdiff_t offset)
-        {
-            Offset = offset;
-        }
     };
 
     struct Parameters

@@ -23,14 +23,9 @@ private:
     template <typename T>
     struct Property
     {
-        ptrdiff_t Offset;
+        ptrdiff_t Offset = 0x0;
         T Value = {};
         bool Override = false;
-
-        Property(ptrdiff_t offset)
-        {
-            Offset = offset;
-        }
     };
 
     struct Properties

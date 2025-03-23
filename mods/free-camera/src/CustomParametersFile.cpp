@@ -22,12 +22,10 @@ void CustomParametersFile::Load()
         m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
 
         Core::File file(m_FilePath, Core::File::Mode::Read);
-
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             m_CustomParameters.clear();
-            
-            for (const YAML::Node& customParametersNode : yaml["CustomParameters"])
+            for (YAML::Node customParametersNode : yaml["CustomParameters"])
             {
                 CustomParameters customParameters =
                 {
@@ -45,7 +43,6 @@ void CustomParametersFile::Load()
                     .DownAngle                = customParametersNode["DownAngle"].as<float>(),
                     .DropFactor               = customParametersNode["DropFactor"].as<float>(),
                 };
-
                 m_CustomParameters.push_back(customParameters);
             }
         }
@@ -65,7 +62,6 @@ void CustomParametersFile::Save() const
         m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
         
         Core::File file(m_FilePath, Core::File::Mode::Write);
-
         YAML::Node yaml;
         {
             for (const CustomParameters& customParameters : m_CustomParameters)
@@ -84,7 +80,6 @@ void CustomParametersFile::Save() const
                 customParametersNode["BoostFOVZoomCompensation"] = customParameters.BoostFOVZoomCompensation;
                 customParametersNode["DownAngle"]                = customParameters.DownAngle;
                 customParametersNode["DropFactor"]               = customParameters.DropFactor;
-
                 yaml["CustomParameters"].push_back(customParametersNode);
             }
         }

@@ -8,18 +8,18 @@ GameplayExternalCamera::GameplayExternalCamera(CustomParametersFile& customParam
     m_CustomParametersFile(customParametersFile),
     m_Parameters
     {
-        .PitchSpring              = 0x3C,
-        .YawSpring                = 0x40,
-        .PivotY                   = 0x4C,
-        .PivotZ                   = 0x50,
-        .PivotZOffset             = 0x54,
-        .FOV                      = 0x6C,
-        .InFrontFOVMax            = 0x70,
-        .FrontInAmount            = 0x74,
-        .DriftYawSpring           = 0x8C,
-        .BoostFOVZoomCompensation = 0x90,
-        .DownAngle                = 0x94,
-        .DropFactor               = 0xA8,
+        .PitchSpring              = { .Offset = 0x3C },
+        .YawSpring                = { .Offset = 0x40 },
+        .PivotY                   = { .Offset = 0x4C },
+        .PivotZ                   = { .Offset = 0x50 },
+        .PivotZOffset             = { .Offset = 0x54 },
+        .FOV                      = { .Offset = 0x6C },
+        .InFrontFOVMax            = { .Offset = 0x70 },
+        .FrontInAmount            = { .Offset = 0x74 },
+        .DriftYawSpring           = { .Offset = 0x8C },
+        .BoostFOVZoomCompensation = { .Offset = 0x90 },
+        .DownAngle                = { .Offset = 0x94 },
+        .DropFactor               = { .Offset = 0xA8 },
     }
 {
 }
