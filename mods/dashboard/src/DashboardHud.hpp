@@ -26,7 +26,7 @@ public:
 
 private:
     void RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor = true) const;
-    void RenderText(const ImVec2& position, const char* text, const ImFont* font) const;
+    void RenderText(const ImVec2& position, const char* text, ImFont* font) const;
     void RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const;
 
 private:

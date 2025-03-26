@@ -108,6 +108,9 @@
     <ClCompile Include="modules\yaml-cpp\src\tag.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="modules\yaml-cpp\src\fptostring.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vendor\yaml-cpp.hpp">
@@ -288,6 +291,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\yaml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\fptostring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\yaml-cpp\src\contrib\dragonbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -172,6 +172,7 @@
     <ClCompile Include="modules\yaml-cpp\src\emitterutils.cpp" />
     <ClCompile Include="modules\yaml-cpp\src\exceptions.cpp" />
     <ClCompile Include="modules\yaml-cpp\src\exp.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\fptostring.cpp" />
     <ClCompile Include="modules\yaml-cpp\src\memory.cpp" />
     <ClCompile Include="modules\yaml-cpp\src\node.cpp" />
     <ClCompile Include="modules\yaml-cpp\src\nodebuilder.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\emitterstyle.h" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\eventhandler.h" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\exceptions.h" />
+    <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\fptostring.h" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\mark.h" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\node\convert.h" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\node\detail\impl.h" />
@@ -231,6 +233,7 @@
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\traits.h" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\yaml.h" />
     <ClInclude Include="modules\yaml-cpp\src\collectionstack.h" />
+    <ClInclude Include="modules\yaml-cpp\src\contrib\dragonbox.h" />
     <ClInclude Include="modules\yaml-cpp\src\contrib\graphbuilderadapter.h" />
     <ClInclude Include="modules\yaml-cpp\src\directives.h" />
     <ClInclude Include="modules\yaml-cpp\src\emitterstate.h" />

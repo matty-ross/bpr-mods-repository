@@ -228,10 +228,10 @@ void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture
     ImColor color = ApplyOpacityToColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
     
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
-    foregroundDrawList->AddImage(m_DashboardTexture.GetTextureView(), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
+    foregroundDrawList->AddImage(reinterpret_cast<ImTextureID>(m_DashboardTexture.GetTextureView()), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
 }
 
-void DashboardHud::RenderText(const ImVec2& position, const char* text, const ImFont* font) const
+void DashboardHud::RenderText(const ImVec2& position, const char* text, ImFont* font) const
 {
     ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
 
