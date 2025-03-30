@@ -24,8 +24,9 @@ void DashboardConfigFile::Load()
         Core::File file(m_FilePath, Core::File::Mode::Read);
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
-            m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>();
-            m_DashboardConfig.Opacity     = yaml["Opacity"].as<float>();
+            m_DashboardConfig.AlwaysVisible = yaml["AlwaysVisible"].as<bool>();
+            m_DashboardConfig.MetricUnits   = yaml["MetricUnits"].as<bool>();
+            m_DashboardConfig.Opacity       = yaml["Opacity"].as<float>();
             
             YAML::Node colorsNode = yaml["Colors"];
             m_DashboardConfig.Colors.Dial   = colorsNode["Dial"].as<uint32_t>();
@@ -50,8 +51,9 @@ void DashboardConfigFile::Save() const
         Core::File file(m_FilePath, Core::File::Mode::Write);
         YAML::Node yaml;
         {
-            yaml["MetricUnits"] = m_DashboardConfig.MetricUnits;
-            yaml["Opacity"]     = m_DashboardConfig.Opacity;
+            yaml["AlwaysVisible"] = m_DashboardConfig.AlwaysVisible;
+            yaml["MetricUnits"]   = m_DashboardConfig.MetricUnits;
+            yaml["Opacity"]       = m_DashboardConfig.Opacity;
 
             YAML::Node colorsNode;
             colorsNode["Dial"]   = m_DashboardConfig.Colors.Dial;

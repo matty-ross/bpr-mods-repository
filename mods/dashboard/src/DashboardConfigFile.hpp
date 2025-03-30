@@ -8,6 +8,7 @@
 
 struct DashboardConfig
 {
+    bool AlwaysVisible = false;
     bool MetricUnits = true;
     float Opacity = 78.0f;
     struct

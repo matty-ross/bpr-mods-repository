@@ -104,6 +104,7 @@ void DashboardHud::OnRenderMenu()
         {
             DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
             
+            ImGui::Checkbox("Always Visible", &config.AlwaysVisible);
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
             ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f);
 
@@ -129,17 +130,20 @@ void DashboardHud::OnRenderMenu()
 
 void DashboardHud::OnRenderOverlay()
 {
+    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
     Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).as<void*>(); // BrnGui::RaceMainHudState*
     
-    bool inRaceHud = raceMainHudState.at(0x14C).as<bool>();
-    int32_t engineState = guiPlayerInfo.at(0x48).as<int32_t>();
-    if (!inRaceHud || engineState == 0) // BrnGui::GuiPlayerEngineEvent::EEngineState::E_ENGINE_OFF
+    if (!config.AlwaysVisible)
     {
-        return;
+        bool inRaceHud = raceMainHudState.at(0x14C).as<bool>();
+        int32_t engineState = guiPlayerInfo.at(0x48).as<int32_t>();
+        if (!inRaceHud || engineState == 0) // BrnGui::GuiPlayerEngineEvent::EEngineState::E_ENGINE_OFF
+        {
+            return;
+        }
     }
-    
-    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
 
     // Speed
     {
