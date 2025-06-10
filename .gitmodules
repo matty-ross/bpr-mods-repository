@@ -7,3 +7,6 @@
 [submodule "vendor/yaml-cpp/modules/yaml-cpp"]
 	path = vendor/yaml-cpp/modules/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "libraries/bpr-sdk"]
+	path = libraries/bpr-sdk
+	url = https://github.com/matty-ross/bpr-sdk.git
