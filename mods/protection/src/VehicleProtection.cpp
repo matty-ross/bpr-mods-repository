@@ -2,24 +2,12 @@
 
 #include "vendor/imgui.hpp"
 
+#include "bpr-sdk/CgsID.hpp"
+#include "bpr-sdk/CgsResource.hpp"
+
 
 namespace BPR
 {
-    // void CgsIDConvertToString(CgsID, char*)
-    static void CgsID_ConvertToString(uint64_t id, char* string)
-    {
-        __asm
-        {
-            mov ecx, dword ptr [string]
-            push dword ptr [id + 0x4]
-            push dword ptr [id + 0x0]
-
-            mov eax, 0x0086CE00
-            call eax
-            add esp, 0x8
-        }
-    }
-    
     // void __thiscall BrnNetwork::PlayerParamsBase::GetFreeBurnCarID(CgsID*)
     static void PlayerParamsBase_GetFreeburnVehicleID(void* playerParams, uint64_t* vehicleID)
     {
@@ -264,17 +252,12 @@ void VehicleProtection::OnRenderMenu()
 
 void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
 {
-    Core::Pointer vehicleList = Core::Pointer(0x013FC8E0).deref().at(0x68C350); // BrnResource::VehicleList*
+    Core::Pointer vehicleList = BPR::PoolModule_FindResource("B5VehicleList")->Memory[0]; // BrnResource::VehicleListResource*
 
-    int32_t vehiclesCount = vehicleList.at(0x3400).as<int32_t>();
-    for (int32_t i = 0; i < vehiclesCount; ++i)
+    uint32_t vehiclesCount = vehicleList.at(0x0).as<uint32_t>();
+    for (uint32_t i = 0; i < vehiclesCount; ++i)
     {
-        Core::Pointer vehicleSlot = vehicleList.at(0x400 + i * 0xC); // BrnResource::VehicleSlot*
-        int32_t listIndex = vehicleSlot.at(0x4).as<int32_t>();
-        int32_t entryIndex = vehicleSlot.at(0x8).as<int32_t>();
-
-        Core::Pointer list = vehicleList.at(0x0 + listIndex * 0x20).as<void*>(); // BrnResource::VehicleListResource*
-        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0x108); // BrnResource::VehicleListEntry*
+        Core::Pointer entry = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
 
         uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
         bool isVanilla = GetVanillaVehicle(vehicleID) != nullptr;

@@ -2,6 +2,8 @@
 
 #include "vendor/imgui.hpp"
 
+#include "bpr-sdk/CgsResource.hpp"
+
 
 ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
     :
@@ -188,17 +190,12 @@ void ChallengeProtection::OnRenderMenu()
 
 void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
 {
-    Core::Pointer challengeList = Core::Pointer(0x013FC8E0).deref().at(0x690B70); // BrnResource::ChallengeList*
+    Core::Pointer challengeList = BPR::PoolModule_FindResource("B5ChallengeList")->Memory[0]; // BrnResource::ChallengeListResource*
 
-    int32_t challengesCount = challengeList.at(0x32E0).as<int32_t>();
-    for (int32_t i = 0; i < challengesCount; ++i)
+    uint32_t challengesCount = challengeList.at(0x0).as<uint32_t>();
+    for (uint32_t i = 0; i < challengesCount; ++i)
     {
-        Core::Pointer challengeSlot = challengeList.at(0x400 + i * 0xC); // BrnResource::ChallengeSlot*
-        int32_t listIndex = challengeSlot.at(0x4).as<int32_t>();
-        int32_t entryIndex = challengeSlot.at(0x8).as<int32_t>();
-
-        Core::Pointer list = challengeList.at(0x0 + listIndex * 0x20).as<void*>(); // BrnResource::ChallengeListResource*
-        Core::Pointer entry = list.at(0x4).deref().at(entryIndex * 0xD8); // BrnResource::ChallengeListEntry*
+        Core::Pointer entry = challengeList.at(0x4).deref().at(i * 0xD8); // BrnResource::ChallengeListEntry*
 
         uint64_t challengeID = entry.at(0xC0).as<uint64_t>();
         bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;
