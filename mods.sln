@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "protection", "mods\protecti
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dashboard", "mods\dashboard\dashboard.vcxproj", "{D7F1FA71-AC39-4094-AE76-07B6E751159A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mod-menu", "mods\mod-menu\mod-menu.vcxproj", "{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -117,6 +119,14 @@ Global
 		{D7F1FA71-AC39-4094-AE76-07B6E751159A}.Release|x64.Build.0 = Release|x64
 		{D7F1FA71-AC39-4094-AE76-07B6E751159A}.Release|x86.ActiveCfg = Release|Win32
 		{D7F1FA71-AC39-4094-AE76-07B6E751159A}.Release|x86.Build.0 = Release|Win32
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Debug|x64.ActiveCfg = Debug|x64
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Debug|x64.Build.0 = Debug|x64
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Debug|x86.ActiveCfg = Debug|Win32
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Debug|x86.Build.0 = Debug|Win32
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x64.ActiveCfg = Release|x64
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x64.Build.0 = Release|x64
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x86.ActiveCfg = Release|Win32
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -132,6 +142,7 @@ Global
 		{D7D7740B-D605-4CD3-A3D4-E4FC923E4F23} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 		{0B9B6E57-8F0E-4F5B-B8E3-C121D29FA4CF} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 		{D7F1FA71-AC39-4094-AE76-07B6E751159A} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
+		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63053E1A-A653-4F57-8900-6B5CF4291722}
