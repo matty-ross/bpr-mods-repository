@@ -1,5 +1,7 @@
 #include <Windows.h>
 
+#include "ModMenu.hpp"
+
 
 BOOL WINAPI DllMain(
     _In_ HINSTANCE hinstDLL,
@@ -10,9 +12,11 @@ BOOL WINAPI DllMain(
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
+        ModMenu::Get().OnProcessAttach();
         break;
 
     case DLL_PROCESS_DETACH:
+        ModMenu::Get().OnProcessDetach();
         break;
     }
 
