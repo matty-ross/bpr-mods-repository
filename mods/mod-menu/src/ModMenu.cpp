@@ -150,6 +150,8 @@ void ModMenu::OnRenderMenu()
         ImGui::Text("Author      %s", k_ModAuthor);
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
+        m_Environment.OnRenderMenu();
+
         ImGui::PopItemWidth();
     }
     ImGui::End();

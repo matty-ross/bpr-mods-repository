@@ -161,9 +161,11 @@
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\ModMenu.cpp" />
+    <ClCompile Include="src\Environment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ModMenu.hpp" />
+    <ClInclude Include="src\Environment.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">

@@ -21,9 +21,15 @@
     <ClCompile Include="src\ModMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Environment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ModMenu.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Environment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

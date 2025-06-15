@@ -6,6 +6,8 @@
 #include "core/Logger.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
+#include "Environment.hpp"
+
 
 class ModMenu
 {
@@ -30,6 +32,8 @@ private:
 
 private:
     Core::Logger m_Logger;
+
+    Environment m_Environment;
 
     ImGuiMenu m_Menu;
 
