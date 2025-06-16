@@ -7,6 +7,6 @@ public:
     void OnRenderMenu();
 
 private:
-    bool m_OverrideTrafficDensity = false;
-    bool m_OverrideWeather = false;
+    int m_TimeOfDayHours = 0;
+    int m_TimeOfDayMinutes = 0;
 };
