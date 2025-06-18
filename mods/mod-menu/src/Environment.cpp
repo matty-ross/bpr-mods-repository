@@ -25,28 +25,28 @@ void Environment::OnRenderMenu()
 
             if (ImGui::Button("Change##time-of-day"))
             {
-                // TODO
+                gameModule.at(0x6E477C).as<uint32_t>() = m_TimeOfDayHours * 3600 + m_TimeOfDayMinutes * 60;
+                gameModule.at(0x6E4780).as<float>() = 0.0f;
+                gameModule.at(0x6E478C).as<uint32_t>() = 5;
+                gameModule.at(0x6E4790).as<float>() = 0.0f;
+                gameModule.at(0x6E47BE).as<bool>() = true;
+                gameModule.at(0x6E47B4).as<int32_t>() = 5;
+                gameModule.at(0x6E47A8).as<int32_t>() = 1;
             }
             ImGui::SameLine();
             if (ImGui::Button("Reset##time-of-day"))
             {
-                // TODO
+                gameModule.at(0x6E47BD).as<bool>() = false;
             }
 
-            // TODO: better widget - spacing, no buttons, ...
-            ImGui::PushItemWidth(68.f);
-            if (ImGui::InputInt("##time-of-day-hours", &m_TimeOfDayHours))
+            if (ImGui::InputInt("Hours", &m_TimeOfDayHours))
             {
                 m_TimeOfDayHours = std::clamp(m_TimeOfDayHours, 0, 23);
             }
-            ImGui::SameLine();
-            ImGui::TextUnformatted(":");
-            ImGui::SameLine();
-            if (ImGui::InputInt("##time-of-day-minutes", &m_TimeOfDayMinutes))
+            if (ImGui::InputInt("Minutes", &m_TimeOfDayMinutes))
             {
                 m_TimeOfDayMinutes = std::clamp(m_TimeOfDayMinutes, 0, 59);
             }
-            ImGui::PopItemWidth();
         }
 
         {
