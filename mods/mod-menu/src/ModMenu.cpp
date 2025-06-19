@@ -20,6 +20,11 @@ ModMenu ModMenu::s_Instance;
 ModMenu::ModMenu()
     :
     m_Logger(k_ModName),
+    m_DetourPreWorldUpdate
+    {
+        .Target = Core::Pointer(0x00A2A512).GetAddress(),
+        .Detour = &ModMenu::DetourPreWorldUpdate,
+    },
     m_Menu
     {
         .OnRenderFunction = [&]() { OnRenderMenu(); },
@@ -97,6 +102,15 @@ void ModMenu::Load()
             m_Logger.Info("In game.");
         }
 
+        // Attach PreWorldUpdate detour.
+        {
+            m_Logger.Info("Attaching PreWorldUpdate detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourPreWorldUpdate);
+
+            m_Logger.Info("Attached PreWorldUpdate detour.");
+        }
+
         // Add menu.
         {
             m_Logger.Info("Adding menu...");
@@ -130,6 +144,15 @@ void ModMenu::Unload()
             m_Logger.Info("Removed menu.");
         }
 
+        // Detach PreWorldUpdate detour.
+        {
+            m_Logger.Info("Detaching PreWorldUpdate detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourPreWorldUpdate);
+
+            m_Logger.Info("Detached PreWorldUpdate detour.");
+        }
+
         m_Logger.Info("Unloaded.");
     }
     catch (const std::exception& e)
@@ -137,6 +160,11 @@ void ModMenu::Unload()
         m_Logger.Error("%s", e.what());
         MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
+}
+
+void ModMenu::OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue)
+{
+    m_Vehicle.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
 }
 
 void ModMenu::OnRenderMenu()
@@ -151,8 +179,28 @@ void ModMenu::OnRenderMenu()
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
         m_Environment.OnRenderMenu();
+        m_Vehicle.OnRenderMenu();
 
         ImGui::PopItemWidth();
     }
     ImGui::End();
+}
+
+__declspec(naked) void ModMenu::DetourPreWorldUpdate()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        push esi // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>*
+        push eax // BrnGameState::GameStateModuleIO::GameEventQueue*
+        mov ecx, offset s_Instance
+        call ModMenu::OnPreWorldUpdate
+
+        popad
+        popfd
+
+        jmp dword ptr [s_Instance.m_DetourPreWorldUpdate.Target]
+    }
 }

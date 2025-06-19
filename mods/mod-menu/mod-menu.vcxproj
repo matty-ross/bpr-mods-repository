@@ -162,10 +162,12 @@
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\ModMenu.cpp" />
     <ClCompile Include="src\Environment.cpp" />
+    <ClCompile Include="src\Vehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ModMenu.hpp" />
     <ClInclude Include="src\Environment.hpp" />
+    <ClInclude Include="src\Vehicle.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">
