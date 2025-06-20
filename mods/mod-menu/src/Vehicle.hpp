@@ -14,4 +14,7 @@ public:
 private:
     bool m_ChangeVehicle = false;
     uint64_t m_NewVehicleID = 0;
+
+    bool m_ChangeWheel = false;
+    uint64_t m_NewWheelID = 0;
 };
