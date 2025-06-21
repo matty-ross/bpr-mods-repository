@@ -102,6 +102,33 @@ void ModMenu::Load()
             m_Logger.Info("In game.");
         }
 
+        // Load vehicle list.
+        {
+            m_Logger.Info("Loading vehicle list...");
+
+            m_Vehicle.LoadVehicleList();
+
+            m_Logger.Info("Vehicle list loaded.");
+        }
+        
+        // Load wheel list.
+        {
+            m_Logger.Info("Loading wheel list...");
+
+            m_Vehicle.LoadWheelList();
+
+            m_Logger.Info("Wheel list loaded.");
+        }
+
+        // Load color palettes.
+        {
+            m_Logger.Info("Loading color palettes...");
+
+            m_Vehicle.LoadColorPalettes();
+
+            m_Logger.Info("Color palettes loaded.");
+        }
+
         // Attach PreWorldUpdate detour.
         {
             m_Logger.Info("Attaching PreWorldUpdate detour...");

@@ -1,7 +1,10 @@
 #include "Vehicle.hpp"
 
+#include <algorithm>
+
 #include "vendor/imgui.hpp"
 
+#include "bpr-sdk/CgsID.hpp"
 #include "bpr-sdk/CgsResource.hpp"
 #include "bpr-sdk/GameEvents.hpp"
 #include "core/Pointer.hpp"
@@ -59,32 +62,24 @@ void Vehicle::OnRenderMenu()
         {
             ImGui::SeparatorText("Vehicle List");
 
-            uint64_t currentVehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
+            uint64_t vehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
             
             static ImGuiTextFilter vehicleFilter;
             vehicleFilter.Draw("Filter##vehicle-list");
         
             if (ImGui::BeginListBox("##vehicle-list", ImVec2(-FLT_MIN, 0.0f)))
             {
-                Core::Pointer vehicleList = BPR::PoolModule_FindResource("B5VehicleList")->Memory[0]; // BrnResource::VehicleListResource*
-
-                uint32_t vehiclesCount = vehicleList.at(0x0).as<uint32_t>();
-                for (uint32_t i = 0; i < vehiclesCount; ++i)
+                for (const VehicleData& vehicle : m_VehicleList)
                 {
-                    Core::Pointer entry = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
-
-                    uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
-                    const char* vehicleName = entry.at(0x30).as<char[64]>();
-                
-                    if (vehicleFilter.PassFilter(vehicleName))
+                    if (vehicleFilter.PassFilter(vehicle.Name))
                     {
-                        ImGui::PushID(entry.GetAddress());
+                        ImGui::PushID(&vehicle);
 
-                        bool selected = vehicleID == currentVehicleID;
-                        if (ImGui::Selectable(vehicleName, selected))
+                        bool selected = vehicle.ID == vehicleID;
+                        if (ImGui::Selectable(vehicle.Name, selected))
                         {
                             m_ChangeVehicle = true;
-                            m_NewVehicleID = vehicleID;
+                            m_NewVehicleID = vehicle.ID;
                         }
                         if (selected)
                         {
@@ -94,7 +89,7 @@ void Vehicle::OnRenderMenu()
                         ImGui::PopID();
                     }
                 }
-            
+                
                 ImGui::EndListBox();
             }
         }
@@ -102,29 +97,21 @@ void Vehicle::OnRenderMenu()
         {
             ImGui::SeparatorText("Wheel List");
 
-            uint64_t currentWheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
+            uint64_t wheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
 
             static ImGuiTextFilter wheelFilter;
             wheelFilter.Draw("Filter##wheel-list");
 
             if (ImGui::BeginListBox("##wheel-list", ImVec2(-FLT_MIN, 0.0f)))
             {
-                Core::Pointer wheelList = BPR::PoolModule_FindResource("B5WheelList")->Memory[0]; // BrnResource::WheelListResource*
-
-                uint32_t wheelsCount = wheelList.at(0x0).as<uint32_t>();
-                for (uint32_t i = 0; i < wheelsCount; ++i)
+                for (const WheelData& wheel : m_WheelList)
                 {
-                    Core::Pointer entry = wheelList.at(0x4).deref().at(i * 0x48); // BrnResource::WheelListEntry*
-
-                    uint64_t wheelID = entry.at(0x0).as<uint64_t>();
-                    const char* wheelName = entry.at(0x8).as<char[64]>();
-
-                    if (wheelFilter.PassFilter(wheelName))
+                    if (wheelFilter.PassFilter(wheel.Name))
                     {
-                        ImGui::PushID(entry.GetAddress());
+                        ImGui::PushID(&wheel);
 
-                        bool selected = wheelID == currentWheelID;
-                        if (ImGui::Selectable(wheelName, selected))
+                        bool selected = wheel.ID == wheelID;
+                        if (ImGui::Selectable(wheel.Name, selected))
                         {
                             m_ChangeWheel = true;
                             m_NewWheelID = wheelID;
@@ -137,34 +124,82 @@ void Vehicle::OnRenderMenu()
                         ImGui::PopID();
                     }
                 }
-
+                
                 ImGui::EndListBox();
             }
         }
 
         {
-            ImGui::SeparatorText("Color Palettes");
+            ImGui::SeparatorText("Color");
 
-            int32_t currentColorIndex = playerRaceVehicle.at(0x94).as<int32_t>();
-            int32_t currentColorPaletteIndex = playerRaceVehicle.at(0x98).as<int32_t>();
-
-            // TODO: PoC, completely refactor, perhaps just add a combo and edit int...
-
-            Core::Pointer colorPalettes = BPR::PoolModule_FindResource("CarColours")->Memory[0]; // BrnWorld::GlobalColourPalette*
-
-            for (int i = 0; i < 5; ++i)
+            static constexpr const char* colorPaletteTypes[] =
             {
-                ImGui::Separator();
+                "Gloss",
+                "Metallic",
+                "Pearlescent",
+                "Special",
+                "Team",
+            };
+            int32_t& colorPaletteType = playerRaceVehicle.at(0x98).as<int32_t>();
+            ImGui::Combo("Color Palette Type", &colorPaletteType, colorPaletteTypes, IM_ARRAYSIZE(colorPaletteTypes));
 
-                ImColor* paintColors = colorPalettes.at(i * 0xC + 0x0).as<ImColor*>();
-                ImColor* pearlColors = colorPalettes.at(i * 0xC + 0x4).as<ImColor*>();
-                int32_t colorsCount = colorPalettes.at(i * 0xC + 0x8).as<int32_t>();
-
-                for (int j = 0; j < colorsCount; ++j)
-                {
-                    ImGui::ColorButton("##color", paintColors[j]);
-                }
+            int32_t& colorIndex = playerRaceVehicle.at(0x94).as<int32_t>();
+            if (ImGui::InputInt("Color Index", &colorIndex))
+            {
+                colorIndex = std::clamp(colorIndex, 0, m_ColorPalettes[colorPaletteType].colorsCount - 1);
             }
         }
+    }
+}
+
+void Vehicle::LoadVehicleList()
+{
+    Core::Pointer vehicleList = BPR::PoolModule_FindResource("B5VehicleList")->Memory[0]; // BrnResource::VehicleListResource*
+
+    uint32_t vehiclesCount = vehicleList.at(0x0).as<uint32_t>();
+    for (uint32_t i = 0; i < vehiclesCount; ++i)
+    {
+        Core::Pointer entry = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
+
+        uint64_t vehicleID = entry.at(0x0).as<uint64_t>();
+        char stringVehicleID[13] = {};
+        BPR::CgsID_ConvertToString(vehicleID, stringVehicleID);
+
+        VehicleData vehicleData = {};
+        vehicleData.ID = vehicleID;
+        sprintf_s(vehicleData.Name, "%13s - %s", stringVehicleID, entry.at(0x30).as<char[64]>());
+
+        m_VehicleList.push_back(vehicleData);
+    }
+}
+
+void Vehicle::LoadWheelList()
+{
+    Core::Pointer wheelList = BPR::PoolModule_FindResource("B5WheelList")->Memory[0]; // BrnResource::WheelListResource*
+
+    uint32_t wheelsCount = wheelList.at(0x0).as<uint32_t>();
+    for (uint32_t i = 0; i < wheelsCount; ++i)
+    {
+        Core::Pointer entry = wheelList.at(0x4).deref().at(i * 0x48); // BrnResource::WheelListEntry*
+
+        uint64_t wheelID = entry.at(0x0).as<uint64_t>();
+        char stringWheelID[13] = {};
+        BPR::CgsID_ConvertToString(wheelID, stringWheelID);
+
+        WheelData wheelData = {};
+        wheelData.ID = wheelID;
+        sprintf_s(wheelData.Name, "%13s - %s", stringWheelID, entry.at(0x8).as<char[64]>());
+
+        m_WheelList.push_back(wheelData);
+    }
+}
+
+void Vehicle::LoadColorPalettes()
+{
+    Core::Pointer colorPalettes = BPR::PoolModule_FindResource("CarColours")->Memory[0]; // BrnWorld::GlobalColourPalette*
+
+    for (int i = 0; i < 5; ++i)
+    {
+        m_ColorPalettes[i].colorsCount = colorPalettes.at(i * 0xC + 0x8).as<int32_t>();
     }
 }
