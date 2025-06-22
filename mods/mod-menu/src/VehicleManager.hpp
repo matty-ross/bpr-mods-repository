@@ -56,4 +56,6 @@ private:
     DirectX::XMFLOAT3A m_OverridenPaintColorIntensity = { 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT3A m_OverridenPearlColor = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3A m_OverridenPearlColorIntensity = { 1.0f, 1.0f, 1.0f };
+
+    bool m_ChangeBoost = false;
 };

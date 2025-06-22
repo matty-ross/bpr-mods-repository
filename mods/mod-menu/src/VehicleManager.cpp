@@ -24,7 +24,9 @@ void VehicleManager::OnPreWorldUpdate(
     void* gameActionQueue // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>*
 )
 {
-    Core::Pointer playerRaceVehicle = GetPlayerActiveRaceVehicle().at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
+    Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
+    Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
+    Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
     
     if (m_ChangeVehicle)
     {
@@ -66,6 +68,22 @@ void VehicleManager::OnPreWorldUpdate(
 
         m_ResetOnTrack = false;
     }
+
+    if (m_ChangeBoost)
+    {
+        BPR::GameAction_UpdateVehicleStats gameAction =
+        {
+            .Speed = 0, // TODO: read from vehicle list
+            .Strength = 0, // TODO: read from vehicle list
+            .BoostLossLevel = gameModule.at(0x40758).as<int32_t>(),
+            .BoostLevel = gameModule.at(0x40754).as<int32_t>(),
+            .DamageLimit = 1.0f, // TOOD: read from vehicle list
+            .BoostType = static_cast<decltype(BPR::GameAction_UpdateVehicleStats::BoostType::Speed)>(gameModule.at(0x3FFD4).as<int32_t>() - 1), // TODO: fix this bullshit
+        };
+        BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
+
+        m_ChangeBoost = false;
+    }
 }
 
 void VehicleManager::OnUpdateActiveRaceVehicleColors()
@@ -91,6 +109,7 @@ void VehicleManager::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Vehicle Manager"))
     {
+        Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
         Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
         Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
 
@@ -242,6 +261,30 @@ void VehicleManager::OnRenderMenu()
             ImGui::DragFloat3("Paint Color Intensity", reinterpret_cast<float*>(&m_OverridenPaintColorIntensity));
             ImGui::ColorEdit3("Pearl Color", reinterpret_cast<float*>(&m_OverridenPearlColor));
             ImGui::DragFloat3("Pearl Color Intensity", reinterpret_cast<float*>(&m_OverridenPearlColorIntensity));
+        }
+
+        {
+            ImGui::SeparatorText("Boost");
+
+            // TODO: remove button and chaneg it whenever any parameter changes
+            if (ImGui::Button("Change##boost"))
+            {
+                m_ChangeBoost = true;
+            }
+            
+            static constexpr const char* boostTypes[] =
+            {
+                "???", // TODO: remove
+                "Speed",
+                "Aggression",
+                "Stunt",
+                "None",
+                "Locked",
+            };
+            ImGui::Combo("Boost Type", &gameModule.at(0x3FFD4).as<int32_t>(), boostTypes, IM_ARRAYSIZE(boostTypes));
+
+            ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 0, 10);
+            ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 10);
         }
     }
 }
