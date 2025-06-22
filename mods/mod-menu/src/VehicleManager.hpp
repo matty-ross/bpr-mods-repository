@@ -2,33 +2,35 @@
 
 
 #include <vector>
+#include <DirectXMath.h>
 
 
-class Vehicle
+class VehicleManager
 {
 public:
     void OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue);
+    void OnUpdateActiveRaceVehicleColors();
 
     void OnRenderMenu();
 
-    void LoadVehicleList();
-    void LoadWheelList();
+    void LoadVehicles();
+    void LoadWheels();
     void LoadColorPalettes();
 
 private:
-    struct VehicleData
+    struct Vehicle
     {
         uint64_t ID;
         const char* Name;
     };
 
-    struct WheelData
+    struct Wheel
     {
         uint64_t ID;
         const char* Name;
     };
 
-    struct ColorPaletteData
+    struct ColorPalette
     {
         int32_t ColorsCount;
     };
@@ -38,18 +40,20 @@ private:
     const char* GetWheelName(uint64_t wheelID) const;
 
 private:
-    std::vector<VehicleData> m_VehicleList;
+    std::vector<Vehicle> m_Vehicles;
     bool m_ChangeVehicle = false;
     uint64_t m_NewVehicleID = 0;
     
-    std::vector<WheelData> m_WheelList;
+    std::vector<Wheel> m_Wheels;
     bool m_ChangeWheel = false;
     uint64_t m_NewWheelID = 0;
 
     bool m_ResetOnTrack = false;
 
-    ColorPaletteData m_ColorPalettes[5];
+    ColorPalette m_ColorPalettes[5] = {};
     bool m_OverrideColor = false;
-    alignas(16) float m_OverridenPaintColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    alignas(16) float m_OverridenPearlescentColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3A m_OverridenPaintColor = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3A m_OverridenPaintColorIntensity = { 1.0f, 1.0f, 1.0f };
+    DirectX::XMFLOAT3A m_OverridenPearlColor = { 0.0f, 0.0f, 0.0f };
+    DirectX::XMFLOAT3A m_OverridenPearlColorIntensity = { 1.0f, 1.0f, 1.0f };
 };

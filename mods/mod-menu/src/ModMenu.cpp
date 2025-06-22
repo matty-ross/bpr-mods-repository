@@ -25,6 +25,11 @@ ModMenu::ModMenu()
         .Target = Core::Pointer(0x00A2A512).GetAddress(),
         .Detour = &ModMenu::DetourPreWorldUpdate,
     },
+    m_DetourUpdateActiveRaceVehicleColors
+    {
+        .Target = Core::Pointer(0x06A6DFFD).GetAddress(),
+        .Detour = &ModMenu::DetourUpdateActiveRaceVehicleColors,
+    },
     m_Menu
     {
         .OnRenderFunction = [&]() { OnRenderMenu(); },
@@ -102,29 +107,29 @@ void ModMenu::Load()
             m_Logger.Info("In game.");
         }
 
-        // Load vehicle list.
+        // Load vehicles.
         {
-            m_Logger.Info("Loading vehicle list...");
+            m_Logger.Info("Loading vehicles...");
 
-            m_Vehicle.LoadVehicleList();
+            m_VehicleManager.LoadVehicles();
 
-            m_Logger.Info("Vehicle list loaded.");
+            m_Logger.Info("Vehicles loaded.");
         }
         
-        // Load wheel list.
+        // Load wheels.
         {
-            m_Logger.Info("Loading wheel list...");
+            m_Logger.Info("Loading wheels...");
 
-            m_Vehicle.LoadWheelList();
+            m_VehicleManager.LoadWheels();
 
-            m_Logger.Info("Wheel list loaded.");
+            m_Logger.Info("Wheels loaded.");
         }
 
         // Load color palettes.
         {
             m_Logger.Info("Loading color palettes...");
 
-            m_Vehicle.LoadColorPalettes();
+            m_VehicleManager.LoadColorPalettes();
 
             m_Logger.Info("Color palettes loaded.");
         }
@@ -136,6 +141,15 @@ void ModMenu::Load()
             ModManager::Get().GetDetourHookManager().Attach(m_DetourPreWorldUpdate);
 
             m_Logger.Info("Attached PreWorldUpdate detour.");
+        }
+
+        // Attach UpdateActiveRaceVehicleColors detour.
+        {
+            m_Logger.Info("Attaching UpdateActiveRaceVehicleColors detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourUpdateActiveRaceVehicleColors);
+
+            m_Logger.Info("Attached UpdateActiveRaceVehicleColors detour.");
         }
 
         // Add menu.
@@ -171,6 +185,15 @@ void ModMenu::Unload()
             m_Logger.Info("Removed menu.");
         }
 
+        // Detach UpdateActiveRaceVehicleColors detour.
+        {
+            m_Logger.Info("Detaching UpdateActiveRaceVehicleColors detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourUpdateActiveRaceVehicleColors);
+
+            m_Logger.Info("Detached UpdateActiveRaceVehicleColors detour.");
+        }
+
         // Detach PreWorldUpdate detour.
         {
             m_Logger.Info("Detaching PreWorldUpdate detour...");
@@ -191,7 +214,12 @@ void ModMenu::Unload()
 
 void ModMenu::OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue)
 {
-    m_Vehicle.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
+    m_VehicleManager.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
+}
+
+void ModMenu::OnUpdateActiveRaceVehicleColors()
+{
+    m_VehicleManager.OnUpdateActiveRaceVehicleColors();
 }
 
 void ModMenu::OnRenderMenu()
@@ -206,7 +234,7 @@ void ModMenu::OnRenderMenu()
         ImGui::Text("Framerate   %.3f", io.Framerate);
 
         m_Environment.OnRenderMenu();
-        m_Vehicle.OnRenderMenu();
+        m_VehicleManager.OnRenderMenu();
 
         ImGui::PopItemWidth();
     }
@@ -229,5 +257,22 @@ __declspec(naked) void ModMenu::DetourPreWorldUpdate()
         popfd
 
         jmp dword ptr [s_Instance.m_DetourPreWorldUpdate.Target]
+    }
+}
+
+__declspec(naked) void ModMenu::DetourUpdateActiveRaceVehicleColors()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        mov ecx, offset s_Instance
+        call ModMenu::OnUpdateActiveRaceVehicleColors
+
+        popad
+        popfd
+
+        jmp dword ptr [s_Instance.m_DetourUpdateActiveRaceVehicleColors.Target]
     }
 }
