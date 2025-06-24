@@ -10,6 +10,31 @@
 #include "core/Pointer.hpp"
 
 
+namespace BPR
+{
+    // BrnResource::VehicleListEntry* __thiscall BrnResource::VehicleList::GetVehicleData(CgsID)
+    static void* VehicleList_GetVehicleData(uint64_t vehicleID)
+    {
+        void* vehicleData = nullptr;
+        
+        __asm
+        {
+            push dword ptr [vehicleID + 0x4]
+            push dword ptr [vehicleID + 0x0]
+            mov ecx, dword ptr ds:[0x013FC8E0]
+            add ecx, 0x68C350
+            
+            mov eax, 0x004B7080
+            call eax
+
+            mov dword ptr [vehicleData], eax
+        }
+
+        return vehicleData;
+    }
+}
+
+
 static Core::Pointer GetPlayerActiveRaceVehicle()
 {
     int32_t playerVehicleIndex = Core::Pointer(0x013FC8E0).deref().at(0x40C28).as<int32_t>();
@@ -27,6 +52,7 @@ void VehicleManager::OnPreWorldUpdate(
     Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
     Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
     Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
+    Core::Pointer vehicleData = BPR::VehicleList_GetVehicleData(playerRaceVehicle.at(0x68).as<uint64_t>()); // BrnResource::VehicleListEntry*
     
     if (m_ChangeVehicle)
     {
@@ -47,7 +73,7 @@ void VehicleManager::OnPreWorldUpdate(
     {
         BPR::GameEvent_ChangePlayerVehicle gameEvent =
         {
-            .VehicleID         = playerRaceVehicle.at(0x68).as<uint64_t>(),
+            .VehicleID         = vehicleData.at(0x0).as<uint64_t>(),
             .WheelID           = m_NewWheelID,
             .ResetPlayerCamera = true,
             .KeepResetSection  = true,
@@ -73,12 +99,12 @@ void VehicleManager::OnPreWorldUpdate(
     {
         BPR::GameAction_UpdateVehicleStats gameAction =
         {
-            .Speed = 0, // TODO: read from vehicle list
-            .Strength = 0, // TODO: read from vehicle list
+            .Speed = vehicleData.at(0x99).as<uint8_t>(),
+            .Strength = vehicleData.at(0x9B).as<uint8_t>(),
             .BoostLossLevel = gameModule.at(0x40758).as<int32_t>(),
             .BoostLevel = gameModule.at(0x40754).as<int32_t>(),
-            .DamageLimit = 1.0f, // TOOD: read from vehicle list
-            .BoostType = static_cast<decltype(BPR::GameAction_UpdateVehicleStats::BoostType::Speed)>(gameModule.at(0x3FFD4).as<int32_t>() - 1), // TODO: fix this bullshit
+            .DamageLimit = vehicleData.at(0x90).as<float>(),
+            .BoostType = static_cast<BPR::BoostType>(gameModule.at(0x3FFD4).as<int32_t>() - 1),
         };
         BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
 
@@ -265,12 +291,6 @@ void VehicleManager::OnRenderMenu()
 
         {
             ImGui::SeparatorText("Boost");
-
-            // TODO: remove button and chaneg it whenever any parameter changes
-            if (ImGui::Button("Change##boost"))
-            {
-                m_ChangeBoost = true;
-            }
             
             static constexpr const char* boostTypes[] =
             {
@@ -281,10 +301,19 @@ void VehicleManager::OnRenderMenu()
                 "None",
                 "Locked",
             };
-            ImGui::Combo("Boost Type", &gameModule.at(0x3FFD4).as<int32_t>(), boostTypes, IM_ARRAYSIZE(boostTypes));
+            if (ImGui::Combo("Boost Type", &gameModule.at(0x3FFD4).as<int32_t>(), boostTypes, IM_ARRAYSIZE(boostTypes)))
+            {
+                m_ChangeBoost = true;
+            }
 
-            ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 0, 10);
-            ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 10);
+            if (ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 1, 20))
+            {
+                m_ChangeBoost = true;
+            }
+            if (ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 20))
+            {
+                m_ChangeBoost = true;
+            }
         }
     }
 }
