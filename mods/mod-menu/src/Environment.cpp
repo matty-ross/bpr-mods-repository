@@ -33,7 +33,9 @@ void Environment::OnRenderMenu()
                 gameModule.at(0x6E47B4).as<int32_t>() = 5;
                 gameModule.at(0x6E47A8).as<int32_t>() = 1;
             }
+            
             ImGui::SameLine();
+            
             if (ImGui::Button("Reset##time-of-day"))
             {
                 gameModule.at(0x6E47BD).as<bool>() = false;
@@ -57,7 +59,9 @@ void Environment::OnRenderMenu()
                 gameModule.at(0x6E4834).as<float>() = 5.0f;
                 gameModule.at(0x6E4828).as<int32_t>() = 4;
             }
+            
             ImGui::SameLine();
+            
             if (ImGui::Button("Reset##weather"))
             {
                 gameModule.at(0x6E4828).as<int32_t>() = 2;

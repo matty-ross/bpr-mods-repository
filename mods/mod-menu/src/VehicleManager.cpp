@@ -52,7 +52,7 @@ void VehicleManager::OnPreWorldUpdate(
     Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
     Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
     Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
-    Core::Pointer vehicleData = BPR::VehicleList_GetVehicleData(playerRaceVehicle.at(0x68).as<uint64_t>()); // BrnResource::VehicleListEntry*
+    Core::Pointer vehicleListEntry = BPR::VehicleList_GetVehicleData(playerRaceVehicle.at(0x68).as<uint64_t>()); // BrnResource::VehicleListEntry*
     
     if (m_ChangeVehicle)
     {
@@ -73,7 +73,7 @@ void VehicleManager::OnPreWorldUpdate(
     {
         BPR::GameEvent_ChangePlayerVehicle gameEvent =
         {
-            .VehicleID         = vehicleData.at(0x0).as<uint64_t>(),
+            .VehicleID         = vehicleListEntry.at(0x0).as<uint64_t>(),
             .WheelID           = m_NewWheelID,
             .ResetPlayerCamera = true,
             .KeepResetSection  = true,
@@ -99,11 +99,11 @@ void VehicleManager::OnPreWorldUpdate(
     {
         BPR::GameAction_UpdateVehicleStats gameAction =
         {
-            .Speed = vehicleData.at(0x99).as<uint8_t>(),
-            .Strength = vehicleData.at(0x9B).as<uint8_t>(),
+            .Speed = vehicleListEntry.at(0x99).as<uint8_t>(),
+            .Strength = vehicleListEntry.at(0x9B).as<uint8_t>(),
             .BoostLossLevel = gameModule.at(0x40758).as<int32_t>(),
             .BoostLevel = gameModule.at(0x40754).as<int32_t>(),
-            .DamageLimit = vehicleData.at(0x90).as<float>(),
+            .DamageLimit = vehicleListEntry.at(0x90).as<float>(),
             .BoostType = static_cast<BPR::BoostType>(gameModule.at(0x3FFD4).as<int32_t>() - 1),
         };
         BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
@@ -114,21 +114,26 @@ void VehicleManager::OnPreWorldUpdate(
 
 void VehicleManager::OnUpdateActiveRaceVehicleColors()
 {
-    if (!m_OverrideColor)
-    {
-        return;
-    }
-
     Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
 
-    DirectX::XMStoreFloat3A(
-        &playerActiveRaceVehicle.at(0x1480).as<DirectX::XMFLOAT3A>(),
-        DirectX::XMColorModulate(DirectX::XMLoadFloat3A(&m_OverridenPaintColor), DirectX::XMLoadFloat3A(&m_OverridenPaintColorIntensity))
-    );
-    DirectX::XMStoreFloat3A(
-        &playerActiveRaceVehicle.at(0x1490).as<DirectX::XMFLOAT3A>(),
-        DirectX::XMColorModulate(DirectX::XMLoadFloat3A(&m_OverridenPearlColor), DirectX::XMLoadFloat3A(&m_OverridenPearlColorIntensity))
-    );
+    if (m_OverrideColor)
+    {
+        DirectX::XMStoreFloat3A(
+            &playerActiveRaceVehicle.at(0x1480).as<DirectX::XMFLOAT3A>(),
+            DirectX::XMColorModulate(DirectX::XMLoadFloat3A(&m_OverridenPaintColor), DirectX::XMLoadFloat3A(&m_OverridenPaintColorIntensity))
+        );
+        DirectX::XMStoreFloat3A(
+            &playerActiveRaceVehicle.at(0x1490).as<DirectX::XMFLOAT3A>(),
+            DirectX::XMColorModulate(DirectX::XMLoadFloat3A(&m_OverridenPearlColor), DirectX::XMLoadFloat3A(&m_OverridenPearlColorIntensity))
+        );
+    }
+    else
+    {
+        m_OverridenPaintColor = playerActiveRaceVehicle.at(0x1480).as<DirectX::XMFLOAT3A>();
+        m_OverridenPaintColorIntensity = { 1.0f, 1.0f, 1.0f };
+        m_OverridenPearlColor = playerActiveRaceVehicle.at(0x1490).as<DirectX::XMFLOAT3A>();
+        m_OverridenPearlColorIntensity = { 1.0f, 1.0f, 1.0f };
+    }
 }
 
 void VehicleManager::OnRenderMenu()
@@ -140,115 +145,115 @@ void VehicleManager::OnRenderMenu()
         Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
 
         {
-            ImGui::SeparatorText("General");
+            uint64_t vehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
+            
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Vehicle   %s", GetVehicleName(vehicleID));
 
+            ImGui::SameLine(0.0f, 20.0f);
+            
+            if (ImGui::Button("Change...##vehicle"))
             {
-                uint64_t vehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
-            
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Vehicle   %s", GetVehicleName(vehicleID));
-
-                ImGui::SameLine(0.0f, 20.0f);
-            
-                if (ImGui::Button("Change...##vehicle"))
-                {
-                    ImGui::OpenPopup("vehicle-list");
-                }
-
-                {
-                    ImGui::SetNextWindowSize(ImVec2(400.0f, 500.0f));
-
-                    if (ImGui::BeginPopup("vehicle-list"))
-                    {
-                        ImGui::SeparatorText("Vehicle List");
-
-                        static ImGuiTextFilter vehicleFilter;
-                        vehicleFilter.Draw("Filter##vehicle-list");
-
-                        if (ImGui::BeginListBox("##vehicle-list", ImVec2(-FLT_MIN, -FLT_MIN)))
-                        {
-                            for (const Vehicle& vehicle : m_Vehicles)
-                            {
-                                if (vehicleFilter.PassFilter(vehicle.Name))
-                                {
-                                    ImGui::PushID(&vehicle);
-
-                                    bool selected = vehicle.ID == vehicleID;
-                                    if (ImGui::Selectable(vehicle.Name, selected))
-                                    {
-                                        m_ChangeVehicle = true;
-                                        m_NewVehicleID = vehicle.ID;
-                                    }
-                                    if (selected)
-                                    {
-                                        ImGui::SetItemDefaultFocus();
-                                    }
-
-                                    ImGui::PopID();
-                                }
-                            }
-
-                            ImGui::EndListBox();
-                        }
-
-                        ImGui::EndPopup();
-                    }
-                }
+                ImGui::OpenPopup("vehicle-list");
             }
 
             {
-                uint64_t wheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
+                ImGui::SetNextWindowSize(ImVec2(400.0f, 500.0f));
 
-                ImGui::AlignTextToFramePadding();
-                ImGui::Text("Wheel     %s", GetWheelName(wheelID));
-
-                ImGui::SameLine(0.0f, 20.0f);
-
-                if (ImGui::Button("Change...##wheel"))
+                if (ImGui::BeginPopup("vehicle-list"))
                 {
-                    ImGui::OpenPopup("wheel-list");
-                }
+                    ImGui::SeparatorText("Vehicle List");
 
-                {
-                    ImGui::SetNextWindowSize(ImVec2(400.0f, 500.0f));
+                    static ImGuiTextFilter vehicleFilter;
+                    vehicleFilter.Draw("Filter##vehicle-list");
 
-                    if (ImGui::BeginPopup("wheel-list"))
+                    if (ImGui::BeginListBox("##vehicle-list", ImVec2(-FLT_MIN, -FLT_MIN)))
                     {
-                        ImGui::SeparatorText("Wheel List");
-
-                        static ImGuiTextFilter wheelFilter;
-                        wheelFilter.Draw("Filter##wheel-list");
-
-                        if (ImGui::BeginListBox("##wheel-list", ImVec2(-FLT_MIN, -FLT_MIN)))
+                        for (const Vehicle& vehicle : m_Vehicles)
                         {
-                            for (const Wheel& wheel : m_Wheels)
+                            if (vehicleFilter.PassFilter(vehicle.Name))
                             {
-                                if (wheelFilter.PassFilter(wheel.Name))
+                                ImGui::PushID(&vehicle);
+
+                                bool selected = vehicle.ID == vehicleID;
+                                if (ImGui::Selectable(vehicle.Name, selected))
                                 {
-                                    ImGui::PushID(&wheel);
-
-                                    bool selected = wheel.ID == wheelID;
-                                    if (ImGui::Selectable(wheel.Name, selected))
-                                    {
-                                        m_ChangeWheel = true;
-                                        m_NewWheelID = wheel.ID;
-                                    }
-                                    if (selected)
-                                    {
-                                        ImGui::SetItemDefaultFocus();
-                                    }
-
-                                    ImGui::PopID();
+                                    m_ChangeVehicle = true;
+                                    m_NewVehicleID = vehicle.ID;
                                 }
-                            }
+                                if (selected)
+                                {
+                                    ImGui::SetItemDefaultFocus();
+                                }
 
-                            ImGui::EndListBox();
+                                ImGui::PopID();
+                            }
                         }
 
-                        ImGui::EndPopup();
+                        ImGui::EndListBox();
                     }
+
+                    ImGui::EndPopup();
                 }
             }
+        }
+        
+        {
+            uint64_t wheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
+
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("Wheel     %s", GetWheelName(wheelID));
+
+            ImGui::SameLine(0.0f, 20.0f);
+
+            if (ImGui::Button("Change...##wheel"))
+            {
+                ImGui::OpenPopup("wheel-list");
+            }
+
+            {
+                ImGui::SetNextWindowSize(ImVec2(400.0f, 500.0f));
+
+                if (ImGui::BeginPopup("wheel-list"))
+                {
+                    ImGui::SeparatorText("Wheel List");
+
+                    static ImGuiTextFilter wheelFilter;
+                    wheelFilter.Draw("Filter##wheel-list");
+
+                    if (ImGui::BeginListBox("##wheel-list", ImVec2(-FLT_MIN, -FLT_MIN)))
+                    {
+                        for (const Wheel& wheel : m_Wheels)
+                        {
+                            if (wheelFilter.PassFilter(wheel.Name))
+                            {
+                                ImGui::PushID(&wheel);
+
+                                bool selected = wheel.ID == wheelID;
+                                if (ImGui::Selectable(wheel.Name, selected))
+                                {
+                                    m_ChangeWheel = true;
+                                    m_NewWheelID = wheel.ID;
+                                }
+                                if (selected)
+                                {
+                                    ImGui::SetItemDefaultFocus();
+                                }
+
+                                ImGui::PopID();
+                            }
+                        }
+
+                        ImGui::EndListBox();
+                    }
+
+                    ImGui::EndPopup();
+                }
+            }
+        }
+        
+        {
+            ImGui::SeparatorText("Misc");
 
             if (ImGui::Button("Reset on Track"))
             {
@@ -268,7 +273,7 @@ void VehicleManager::OnRenderMenu()
                 "Metallic",
                 "Pearlescent",
                 "Special",
-                "Team",
+                "Party",
             };    
             if (ImGui::Combo("Color Palette Type", &colorPaletteType, colorPaletteTypes, IM_ARRAYSIZE(colorPaletteTypes)))
             {
@@ -291,19 +296,30 @@ void VehicleManager::OnRenderMenu()
 
         {
             ImGui::SeparatorText("Boost");
+
+            int32_t& boostType = gameModule.at(0x3FFD4).as<int32_t>();
             
             static constexpr const char* boostTypes[] =
             {
-                "???", // TODO: remove
                 "Speed",
                 "Aggression",
                 "Stunt",
                 "None",
                 "Locked",
             };
-            if (ImGui::Combo("Boost Type", &gameModule.at(0x3FFD4).as<int32_t>(), boostTypes, IM_ARRAYSIZE(boostTypes)))
+            if (ImGui::BeginCombo("Boost Type", boostTypes[boostType - 1]))
             {
-                m_ChangeBoost = true;
+                for (int i = 0; i < IM_ARRAYSIZE(boostTypes); ++i)
+                {
+                    bool selected = i == (boostType - 1);
+                    if (ImGui::Selectable(boostTypes[i], selected))
+                    {
+                        boostType = i + 1;
+                        m_ChangeBoost = true;
+                    }
+                }
+                
+                ImGui::EndCombo();
             }
 
             if (ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 1, 20))
