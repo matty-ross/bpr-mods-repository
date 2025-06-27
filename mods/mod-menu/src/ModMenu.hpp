@@ -7,6 +7,7 @@
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
+#include "Misc.hpp"
 #include "Environment.hpp"
 #include "VehicleManager.hpp"
 
@@ -42,6 +43,7 @@ private:
 private:
     Core::Logger m_Logger;
 
+    Misc m_Misc;
     Environment m_Environment;
     VehicleManager m_VehicleManager;
 
