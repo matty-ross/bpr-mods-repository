@@ -48,6 +48,8 @@ private:
     bool m_ChangeWheel = false;
     uint64_t m_NewWheelID = 0;
 
+    bool m_ChangeDeformation = false;
+    
     bool m_ResetOnTrack = false;
 
     ColorPalette m_ColorPalettes[5] = {};

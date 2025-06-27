@@ -73,7 +73,7 @@ void VehicleManager::OnPreWorldUpdate(
     {
         BPR::GameEvent_ChangePlayerVehicle gameEvent =
         {
-            .VehicleID         = vehicleListEntry.at(0x0).as<uint64_t>(),
+            .VehicleID         = playerRaceVehicle.at(0x68).as<uint64_t>(),
             .WheelID           = m_NewWheelID,
             .ResetPlayerCamera = true,
             .KeepResetSection  = true,
@@ -82,6 +82,29 @@ void VehicleManager::OnPreWorldUpdate(
 
         m_ChangeWheel = false;
         m_NewWheelID = 0;
+    }
+
+    if (m_ChangeDeformation)
+    {
+        BPR::GameAction_ResetPlayerVehicle gameAction =
+        {
+            .Position                     = { 0.0f, 0.0f, 0.0f, 0.0f },
+            .Direction                    = { 0.0f, 0.0f, 0.0f, 0.0f },
+            .VehicleID                    = playerRaceVehicle.at(0x68).as<uint64_t>(),
+            .WheelID                      = 0,
+            .PlayerScoringIndex           = 8,
+            .DeformationAmount            = playerActiveRaceVehicle.at(0x8AC).as<float>(),
+            .DeformationType              = BPR::DeformationType::VehicleSelect,
+            .VehicleSelectType            = BPR::VehicleSelectType::DontDrop,
+            .VehicleType                  = playerRaceVehicle.at(0xA4).as<BPR::VehicleType>(),
+            .InVehicleSelect              = false,
+            .VehicleSelectDontStreamAudio = false,
+            .ResetPlayerCamera            = true,
+            .KeepResetSection             = true,
+        };
+        BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
+
+        m_ChangeDeformation = false;
     }
 
     if (m_ResetOnTrack)
@@ -254,6 +277,11 @@ void VehicleManager::OnRenderMenu()
         
         {
             ImGui::SeparatorText("Misc");
+
+            if (ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f))
+            {
+                m_ChangeDeformation = true;
+            }
 
             if (ImGui::Button("Reset on Track"))
             {
