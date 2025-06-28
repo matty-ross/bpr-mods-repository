@@ -101,6 +101,8 @@ void VehicleManager::OnPreWorldUpdate(
             .VehicleSelectDontStreamAudio = false,
             .ResetPlayerCamera            = true,
             .KeepResetSection             = true,
+            .Unknown1                     = false,
+            .Unknown2                     = 0,
         };
         BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
 
@@ -278,10 +280,14 @@ void VehicleManager::OnRenderMenu()
         {
             ImGui::SeparatorText("Misc");
 
-            if (ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f))
+            if (ImGui::Button("Change##deformation"))
             {
                 m_ChangeDeformation = true;
             }
+            
+            ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f);
+
+            ImGui::Separator();
 
             if (ImGui::Button("Reset on Track"))
             {
