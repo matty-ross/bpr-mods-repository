@@ -30,6 +30,11 @@ ModMenu::ModMenu()
         .Target = Core::Pointer(0x06A6DFFD).GetAddress(),
         .Detour = &ModMenu::DetourUpdateActiveRaceVehicleColors,
     },
+    m_DetourUpdateBoostFlames
+    {
+        .Target = Core::Pointer(0x0692915F).GetAddress(),
+        .Detour = &ModMenu::DetourUpdateBoostFlames,
+    },
     m_Menu
     {
         .OnRenderFunction = [&]() { OnRenderMenu(); },
@@ -151,6 +156,15 @@ void ModMenu::Load()
 
             m_Logger.Info("Attached UpdateActiveRaceVehicleColors detour.");
         }
+        
+        // Attach UpdateBoostFlames detour.
+        {
+            m_Logger.Info("Attaching UpdateBoostFlames detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourUpdateBoostFlames);
+
+            m_Logger.Info("Attached UpdateBoostFlames detour.");
+        }
 
         // Add menu.
         {
@@ -183,6 +197,15 @@ void ModMenu::Unload()
             ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
 
             m_Logger.Info("Removed menu.");
+        }
+
+        // Detach UpdateBoostFlames detour.
+        {
+            m_Logger.Info("Detaching UpdateBoostFlames detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourUpdateBoostFlames);
+
+            m_Logger.Info("Detached UpdateBoostFlames detour.");
         }
 
         // Detach UpdateActiveRaceVehicleColors detour.
@@ -275,5 +298,33 @@ __declspec(naked) void ModMenu::DetourUpdateActiveRaceVehicleColors()
         popfd
 
         jmp dword ptr [s_Instance.m_DetourUpdateActiveRaceVehicleColors.Target]
+    }
+}
+
+__declspec(naked) void ModMenu::DetourUpdateBoostFlames()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        mov ecx, offset s_Instance.m_VehicleManager
+        call VehicleManager::OverrideBoostFlames
+        
+        test al, al
+        jz _continue
+
+        popad
+        popfd
+
+        // Skip the if statement.
+        mov eax, 0x0692917F
+        jmp eax
+    
+    _continue:
+        popad
+        popfd
+
+        jmp dword ptr [s_Instance.m_DetourUpdateBoostFlames.Target]
     }
 }

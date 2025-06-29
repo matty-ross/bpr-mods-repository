@@ -293,6 +293,10 @@ void VehicleManager::OnRenderMenu()
             {
                 m_ResetOnTrack = true;
             }
+
+            ImGui::Separator();
+
+            ImGui::Checkbox("Boost Flames", &m_OverrideBoostFlames);
         }
 
         {
@@ -414,6 +418,11 @@ void VehicleManager::LoadColorPalettes()
     {
         m_ColorPalettes[i].ColorsCount = colorPalettes.at(i * 0xC + 0x8).as<int32_t>();
     }
+}
+
+bool VehicleManager::OverrideBoostFlames() const
+{
+    return m_OverrideBoostFlames;
 }
 
 const char* VehicleManager::GetVehicleName(uint64_t vehicleID) const
