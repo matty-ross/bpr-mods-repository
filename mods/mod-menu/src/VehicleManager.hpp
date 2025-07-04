@@ -17,8 +17,6 @@ public:
     void LoadWheels();
     void LoadColorPalettes();
 
-    bool OverrideBoostFlames() const;
-
 private:
     struct Vehicle
     {
@@ -54,7 +52,9 @@ private:
     
     bool m_ResetOnTrack = false;
 
-    bool m_OverrideBoostFlames = false;
+    bool m_OverrideBoostTrails = false;
+
+    bool m_OverrideSwitchableBoost = false;
 
     ColorPalette m_ColorPalettes[5] = {};
     bool m_OverrideColor = false;

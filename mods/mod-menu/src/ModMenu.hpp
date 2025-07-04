@@ -36,7 +36,8 @@ private:
 private:
     static void DetourPreWorldUpdate();
     static void DetourUpdateActiveRaceVehicleColors();
-    static void DetourUpdateBoostFlames();
+    static void DetourCheckBoostTrails();
+    static void DetourCheckSwitchableBoost();
 
 private:
     static ModMenu s_Instance;
@@ -50,7 +51,8 @@ private:
 
     DetourHook m_DetourPreWorldUpdate;
     DetourHook m_DetourUpdateActiveRaceVehicleColors;
-    DetourHook m_DetourUpdateBoostFlames;
+    DetourHook m_DetourCheckBoostTrails;
+    DetourHook m_DetourCheckSwitchableBoost;
 
     ImGuiMenu m_Menu;
 

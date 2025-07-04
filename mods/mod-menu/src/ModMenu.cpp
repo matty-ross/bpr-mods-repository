@@ -30,10 +30,15 @@ ModMenu::ModMenu()
         .Target = Core::Pointer(0x06A6DFFD).GetAddress(),
         .Detour = &ModMenu::DetourUpdateActiveRaceVehicleColors,
     },
-    m_DetourUpdateBoostFlames
+    m_DetourCheckBoostTrails
     {
         .Target = Core::Pointer(0x0692915F).GetAddress(),
-        .Detour = &ModMenu::DetourUpdateBoostFlames,
+        .Detour = &ModMenu::DetourCheckBoostTrails,
+    },
+    m_DetourCheckSwitchableBoost
+    {
+        .Target = Core::Pointer(0x0099CF04).GetAddress(),
+        .Detour = &ModMenu::DetourCheckSwitchableBoost,
     },
     m_Menu
     {
@@ -157,13 +162,22 @@ void ModMenu::Load()
             m_Logger.Info("Attached UpdateActiveRaceVehicleColors detour.");
         }
         
-        // Attach UpdateBoostFlames detour.
+        // Attach CheckBoostTrails detour.
         {
-            m_Logger.Info("Attaching UpdateBoostFlames detour...");
+            m_Logger.Info("Attaching CheckBoostTrails detour...");
 
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourUpdateBoostFlames);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourCheckBoostTrails);
 
-            m_Logger.Info("Attached UpdateBoostFlames detour.");
+            m_Logger.Info("Attached CheckBoostTrails detour.");
+        }
+
+        // Attach CheckSwitchableBoost detour.
+        {
+            m_Logger.Info("Attaching CheckSwitchableBoost detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourCheckSwitchableBoost);
+
+            m_Logger.Info("Attached CheckSwitchableBoost detour.");
         }
 
         // Add menu.
@@ -199,13 +213,22 @@ void ModMenu::Unload()
             m_Logger.Info("Removed menu.");
         }
 
-        // Detach UpdateBoostFlames detour.
+        // Detach CheckSwitchableBoost detour.
         {
-            m_Logger.Info("Detaching UpdateBoostFlames detour...");
+            m_Logger.Info("Detaching CheckSwitchableBoost detour...");
 
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourUpdateBoostFlames);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourCheckSwitchableBoost);
 
-            m_Logger.Info("Detached UpdateBoostFlames detour.");
+            m_Logger.Info("Detached CheckSwitchableBoost detour.");
+        }
+
+        // Detach CheckBoostTrails detour.
+        {
+            m_Logger.Info("Detaching CheckBoostTrails detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourCheckBoostTrails);
+
+            m_Logger.Info("Detached CheckBoostTrails detour.");
         }
 
         // Detach UpdateActiveRaceVehicleColors detour.
@@ -301,30 +324,33 @@ __declspec(naked) void ModMenu::DetourUpdateActiveRaceVehicleColors()
     }
 }
 
-__declspec(naked) void ModMenu::DetourUpdateBoostFlames()
+__declspec(naked) void ModMenu::DetourCheckBoostTrails()
 {
     __asm
     {
-        pushfd
-        pushad
-
-        mov ecx, offset s_Instance.m_VehicleManager
-        call VehicleManager::OverrideBoostFlames
+        cmp byte ptr [s_Instance.m_VehicleManager.m_OverrideBoostTrails], 0
+        je _continue
         
-        test al, al
-        jz _continue
-
-        popad
-        popfd
-
         // Skip the if statement.
-        mov eax, 0x0692917F
-        jmp eax
+        push 0x0692917F
+        ret
     
     _continue:
-        popad
-        popfd
+        jmp dword ptr [s_Instance.m_DetourCheckBoostTrails.Target]
+    }
+}
 
-        jmp dword ptr [s_Instance.m_DetourUpdateBoostFlames.Target]
+__declspec(naked) void ModMenu::DetourCheckSwitchableBoost()
+{
+    __asm
+    {
+        cmp byte ptr [s_Instance.m_VehicleManager.m_OverrideSwitchableBoost], 0
+        je _continue
+
+        // Set switchable boost flag.
+        or ecx, 0x100
+
+    _continue:
+        jmp dword ptr [s_Instance.m_DetourCheckSwitchableBoost.Target]
     }
 }

@@ -296,7 +296,8 @@ void VehicleManager::OnRenderMenu()
 
             ImGui::Separator();
 
-            ImGui::Checkbox("Boost Flames", &m_OverrideBoostFlames);
+            ImGui::Checkbox("Boost Trails", &m_OverrideBoostTrails);
+            ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost);
         }
 
         {
@@ -418,11 +419,6 @@ void VehicleManager::LoadColorPalettes()
     {
         m_ColorPalettes[i].ColorsCount = colorPalettes.at(i * 0xC + 0x8).as<int32_t>();
     }
-}
-
-bool VehicleManager::OverrideBoostFlames() const
-{
-    return m_OverrideBoostFlames;
 }
 
 const char* VehicleManager::GetVehicleName(uint64_t vehicleID) const
