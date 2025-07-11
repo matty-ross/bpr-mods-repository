@@ -4,6 +4,8 @@
 
 #include "vendor/imgui.hpp"
 
+#include "bpr-sdk/CgsID.hpp"
+#include "bpr-sdk/CgsLanguage.hpp"
 #include "bpr-sdk/CgsResource.hpp"
 #include "bpr-sdk/GameEvents.hpp"
 #include "bpr-sdk/GameActions.hpp"
@@ -32,8 +34,95 @@ namespace BPR
 
         return vehicleData;
     }
+
+    static int32_t ManufacturersIcon_GetVehicleManufacturer(uint64_t vehicleID)
+    {
+        int32_t vehicleManufacturer = 9;
+        
+        __asm
+        {
+            push dword ptr [vehicleID + 0x4]
+            push dword ptr [vehicleID + 0x0]
+
+            mov eax, 0x00A69A20
+            call eax
+            add esp, 0x8
+
+            mov dword ptr [vehicleManufacturer], eax
+        }
+
+        return vehicleManufacturer;
+    }
 }
 
+
+static std::string CreateVehicleName(
+    Core::Pointer vehicleData // BrnResource::VehicleListEntry*
+)
+{
+    uint64_t vehicleID = vehicleData.at(0x0).as<uint64_t>();
+    uint64_t parentVehicleID = vehicleData.at(0x8).as<uint64_t>();
+    uint8_t liveryType = vehicleData.at(0xFD).as<uint8_t>();
+
+    auto getVehicleManufacturer = [=]() -> const char*
+    {
+        int32_t vehicleManufacturerType = BPR::ManufacturersIcon_GetVehicleManufacturer((parentVehicleID != 0) ? parentVehicleID : vehicleID);
+        switch (vehicleManufacturerType)
+        {
+        case 0: return "Carson";
+        case 1: return "Hunter";
+        case 2: return "Jansen";
+        case 3: return "Krieger";
+        case 4: return "Kitano";
+        case 5: return "Montgomery";
+        case 6: return "Nakamura";
+        case 7: return "Rossolini";
+        case 8: return "Watson";
+        }
+
+        char vehicleManufacturerStringID[32] = "CAR_MAN_CAPS_";
+        BPR::CgsID_ConvertToString((parentVehicleID != 0) ? parentVehicleID : vehicleID, vehicleManufacturerStringID + 12);
+        const char* vehicleManufacturer = BPR::LanguageManager_FindString(vehicleManufacturerStringID);
+        if (vehicleManufacturer != nullptr)
+        {
+            return vehicleManufacturer;
+        }
+
+        return vehicleData.at(0x70).as<char[32]>();
+    };
+    
+    auto getVehicleName = [=]() -> const char*
+    {
+        char vehicleNameStringID[32] = "CAR_CAPS_";
+        BPR::CgsID_ConvertToString((liveryType == 2 || parentVehicleID == 0) ? vehicleID : parentVehicleID, vehicleNameStringID + 9);
+        const char* vehicleName = BPR::LanguageManager_FindString(vehicleNameStringID);
+        if (vehicleName != nullptr)
+        {
+            return vehicleName;
+        }
+
+        return vehicleData.at(0x30).as<char[64]>();
+    };
+
+    auto getVehicleLivery = [=]() -> const char*
+    {
+        switch (liveryType)
+        {
+        case 0: return "Finish 1";
+        case 1: return "Color"; // TODO: number
+        case 2: return "Finish 1";
+        case 3: return "Platinum";
+        case 4: return "Gold";
+        case 5: return "Community"; // TODO: number
+        }
+
+        return "";
+    };
+
+    char vehicleNameBuffer[1024] = {};
+    sprintf_s(vehicleNameBuffer, "%s %s %s", getVehicleManufacturer(), getVehicleName(), getVehicleLivery());
+    return vehicleNameBuffer;
+}
 
 static Core::Pointer GetPlayerActiveRaceVehicle()
 {
@@ -52,7 +141,7 @@ void VehicleManager::OnPreWorldUpdate(
     Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
     Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
     Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
-    Core::Pointer vehicleListEntry = BPR::VehicleList_GetVehicleData(playerRaceVehicle.at(0x68).as<uint64_t>()); // BrnResource::VehicleListEntry*
+    Core::Pointer vehicleData = BPR::VehicleList_GetVehicleData(playerRaceVehicle.at(0x68).as<uint64_t>()); // BrnResource::VehicleListEntry*
     
     if (m_ChangeVehicle)
     {
@@ -124,12 +213,12 @@ void VehicleManager::OnPreWorldUpdate(
     {
         BPR::GameAction_UpdateVehicleStats gameAction =
         {
-            .Speed = vehicleListEntry.at(0x99).as<uint8_t>(),
-            .Strength = vehicleListEntry.at(0x9B).as<uint8_t>(),
+            .Speed          = vehicleData.at(0x99).as<uint8_t>(),
+            .Strength       = vehicleData.at(0x9B).as<uint8_t>(),
             .BoostLossLevel = gameModule.at(0x40758).as<int32_t>(),
-            .BoostLevel = gameModule.at(0x40754).as<int32_t>(),
-            .DamageLimit = vehicleListEntry.at(0x90).as<float>(),
-            .BoostType = static_cast<BPR::BoostType>(gameModule.at(0x3FFD4).as<int32_t>() - 1),
+            .BoostLevel     = gameModule.at(0x40754).as<int32_t>(),
+            .DamageLimit    = vehicleData.at(0x90).as<float>(),
+            .BoostType      = static_cast<BPR::BoostType>(gameModule.at(0x3FFD4).as<int32_t>() - 1),
         };
         BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
 
@@ -196,12 +285,12 @@ void VehicleManager::OnRenderMenu()
                     {
                         for (const Vehicle& vehicle : m_Vehicles)
                         {
-                            if (vehicleFilter.PassFilter(vehicle.Name))
+                            if (vehicleFilter.PassFilter(vehicle.Name.c_str()))
                             {
                                 ImGui::PushID(&vehicle);
 
                                 bool selected = vehicle.ID == vehicleID;
-                                if (ImGui::Selectable(vehicle.Name, selected))
+                                if (ImGui::Selectable(vehicle.Name.c_str(), selected))
                                 {
                                     m_ChangeVehicle = true;
                                     m_NewVehicleID = vehicle.ID;
@@ -250,12 +339,12 @@ void VehicleManager::OnRenderMenu()
                     {
                         for (const Wheel& wheel : m_Wheels)
                         {
-                            if (wheelFilter.PassFilter(wheel.Name))
+                            if (wheelFilter.PassFilter(wheel.Name.c_str()))
                             {
                                 ImGui::PushID(&wheel);
 
                                 bool selected = wheel.ID == wheelID;
-                                if (ImGui::Selectable(wheel.Name, selected))
+                                if (ImGui::Selectable(wheel.Name.c_str(), selected))
                                 {
                                     m_ChangeWheel = true;
                                     m_NewWheelID = wheel.ID;
@@ -380,13 +469,13 @@ void VehicleManager::LoadVehicles()
     uint32_t vehiclesCount = vehicleList.at(0x0).as<uint32_t>();
     for (uint32_t i = 0; i < vehiclesCount; ++i)
     {
-        Core::Pointer entry = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
+        Core::Pointer vehicleData = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
 
         m_Vehicles.push_back(
             Vehicle
             {
-                .ID   = entry.at(0x0).as<uint64_t>(),
-                .Name = entry.at(0x30).as<char[64]>(),
+                .ID   = vehicleData.at(0x0).as<uint64_t>(),
+                .Name = CreateVehicleName(vehicleData),
             }
         );
     }
@@ -399,13 +488,13 @@ void VehicleManager::LoadWheels()
     uint32_t wheelsCount = wheelList.at(0x0).as<uint32_t>();
     for (uint32_t i = 0; i < wheelsCount; ++i)
     {
-        Core::Pointer entry = wheelList.at(0x4).deref().at(i * 0x48); // BrnResource::WheelListEntry*
+        Core::Pointer wheelData = wheelList.at(0x4).deref().at(i * 0x48); // BrnResource::WheelListEntry*
 
         m_Wheels.push_back(
             Wheel
             {
-                .ID   = entry.at(0x0).as<uint64_t>(),
-                .Name = entry.at(0x8).as<char[64]>(),
+                .ID   = wheelData.at(0x0).as<uint64_t>(),
+                .Name = wheelData.at(0x8).as<char[64]>(),
             }
         );
     }
@@ -427,7 +516,7 @@ const char* VehicleManager::GetVehicleName(uint64_t vehicleID) const
     {
         if (vehicle.ID == vehicleID)
         {
-            return vehicle.Name;
+            return vehicle.Name.c_str();
         }
     }
 
@@ -440,7 +529,7 @@ const char* VehicleManager::GetWheelName(uint64_t wheelID) const
     {
         if (wheel.ID == wheelID)
         {
-            return wheel.Name;
+            return wheel.Name.c_str();
         }
     }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include <string>
 #include <vector>
 #include <DirectXMath.h>
 
@@ -21,13 +22,13 @@ private:
     struct Vehicle
     {
         uint64_t ID;
-        const char* Name;
+        std::string Name;
     };
 
     struct Wheel
     {
         uint64_t ID;
-        const char* Name;
+        std::string Name;
     };
 
     struct ColorPalette
