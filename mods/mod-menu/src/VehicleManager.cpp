@@ -1,5 +1,6 @@
 #include "VehicleManager.hpp"
 
+#include <map>
 #include <algorithm>
 
 #include "vendor/imgui.hpp"
@@ -57,44 +58,39 @@ namespace BPR
 
 
 static std::string CreateVehicleName(
-    Core::Pointer vehicleData // BrnResource::VehicleListEntry*
+    Core::Pointer vehicleData, // BrnResource::VehicleListEntry*
+    std::map<uint64_t, int>& colorLiveries,
+    std::map<uint64_t, int>& communityLiveries
 )
 {
     uint64_t vehicleID = vehicleData.at(0x0).as<uint64_t>();
     uint64_t parentVehicleID = vehicleData.at(0x8).as<uint64_t>();
     uint8_t liveryType = vehicleData.at(0xFD).as<uint8_t>();
 
-    auto getVehicleManufacturer = [=]() -> const char*
+    auto getVehicleManufacturer = [&]() -> std::string
     {
-        int32_t vehicleManufacturerType = BPR::ManufacturersIcon_GetVehicleManufacturer((parentVehicleID != 0) ? parentVehicleID : vehicleID);
-        switch (vehicleManufacturerType)
+        int32_t vehicleManufacturer = BPR::ManufacturersIcon_GetVehicleManufacturer((parentVehicleID != 0) ? parentVehicleID : vehicleID);
+        switch (vehicleManufacturer)
         {
-        case 0: return "Carson";
-        case 1: return "Hunter";
-        case 2: return "Jansen";
-        case 3: return "Krieger";
-        case 4: return "Kitano";
-        case 5: return "Montgomery";
-        case 6: return "Nakamura";
-        case 7: return "Rossolini";
-        case 8: return "Watson";
+        case 0: return "Carson ";
+        case 1: return "Hunter ";
+        case 2: return "Jansen ";
+        case 3: return "Krieger ";
+        case 4: return "Kitano ";
+        case 5: return "Montgomery ";
+        case 6: return "Nakamura ";
+        case 7: return "Rossolini ";
+        case 8: return "Watson ";
         }
 
-        char vehicleManufacturerStringID[32] = "CAR_MAN_CAPS_";
-        BPR::CgsID_ConvertToString((parentVehicleID != 0) ? parentVehicleID : vehicleID, vehicleManufacturerStringID + 12);
-        const char* vehicleManufacturer = BPR::LanguageManager_FindString(vehicleManufacturerStringID);
-        if (vehicleManufacturer != nullptr)
-        {
-            return vehicleManufacturer;
-        }
-
-        return vehicleData.at(0x70).as<char[32]>();
+        return "";
     };
     
-    auto getVehicleName = [=]() -> const char*
+    auto getVehicleName = [&]() -> std::string
     {
         char vehicleNameStringID[32] = "CAR_CAPS_";
         BPR::CgsID_ConvertToString((liveryType == 2 || parentVehicleID == 0) ? vehicleID : parentVehicleID, vehicleNameStringID + 9);
+        
         const char* vehicleName = BPR::LanguageManager_FindString(vehicleNameStringID);
         if (vehicleName != nullptr)
         {
@@ -104,24 +100,61 @@ static std::string CreateVehicleName(
         return vehicleData.at(0x30).as<char[64]>();
     };
 
-    auto getVehicleLivery = [=]() -> const char*
+    auto getVehicleLivery = [&]() -> std::string
     {
         switch (liveryType)
         {
-        case 0: return "Finish 1";
-        case 1: return "Color"; // TODO: number
-        case 2: return "Finish 1";
-        case 3: return "Platinum";
-        case 4: return "Gold";
-        case 5: return "Community"; // TODO: number
+        case 0:
+            colorLiveries[vehicleID] = 1;
+            communityLiveries[vehicleID] = 0;
+            return " Finish 1";
+        
+        case 1:
+            {
+                char buffer[32] = {};
+                int finish = ++colorLiveries[parentVehicleID];
+                sprintf_s(buffer, " Finish %d", finish);
+                return buffer;
+            }
+        
+        case 2:
+            colorLiveries[vehicleID] = 1;
+            communityLiveries[vehicleID] = 0;
+            return " Finish 1";
+        
+        case 3:
+            return " Platinum";
+        
+        case 4:
+            return " Gold";
+        
+        case 5:
+            {
+                char buffer[32] = {};
+                int finish = ++communityLiveries[parentVehicleID];
+                sprintf_s(buffer, " Community %d", finish);
+                return buffer;
+            }
         }
 
         return "";
     };
 
-    char vehicleNameBuffer[1024] = {};
-    sprintf_s(vehicleNameBuffer, "%s %s %s", getVehicleManufacturer(), getVehicleName(), getVehicleLivery());
-    return vehicleNameBuffer;
+    std::string vehicleManufacturer = getVehicleManufacturer();
+    std::string vehicleLivery = getVehicleLivery();
+
+    std::string vehicleName;
+    if (!vehicleManufacturer.empty())
+    {
+        vehicleName += vehicleManufacturer;
+    }
+    vehicleName += getVehicleName();
+    if (!vehicleLivery.empty())
+    {
+        vehicleName += vehicleLivery;
+    }
+
+    return vehicleName;
 }
 
 static Core::Pointer GetPlayerActiveRaceVehicle()
@@ -466,6 +499,9 @@ void VehicleManager::LoadVehicles()
 {
     Core::Pointer vehicleList = BPR::PoolModule_FindResource("B5VehicleList")->Memory[0]; // BrnResource::VehicleListResource*
 
+    std::map<uint64_t, int> colorLiveries;
+    std::map<uint64_t, int> communityLiveries;
+
     uint32_t vehiclesCount = vehicleList.at(0x0).as<uint32_t>();
     for (uint32_t i = 0; i < vehiclesCount; ++i)
     {
@@ -475,7 +511,7 @@ void VehicleManager::LoadVehicles()
             Vehicle
             {
                 .ID   = vehicleData.at(0x0).as<uint64_t>(),
-                .Name = CreateVehicleName(vehicleData),
+                .Name = CreateVehicleName(vehicleData, colorLiveries, communityLiveries),
             }
         );
     }
