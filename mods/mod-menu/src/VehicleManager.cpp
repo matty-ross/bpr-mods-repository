@@ -90,14 +90,9 @@ static std::string CreateVehicleName(
     {
         char vehicleNameStringID[32] = "CAR_CAPS_";
         BPR::CgsID_ConvertToString((liveryType == 2 || parentVehicleID == 0) ? vehicleID : parentVehicleID, vehicleNameStringID + 9);
-        
         const char* vehicleName = BPR::LanguageManager_FindString(vehicleNameStringID);
-        if (vehicleName != nullptr)
-        {
-            return vehicleName;
-        }
-
-        return vehicleData.at(0x30).as<char[64]>();
+        
+        return (vehicleName != nullptr) ? vehicleName : vehicleData.at(0x30).as<char[64]>();
     };
 
     auto getVehicleLivery = [&]() -> std::string
@@ -105,22 +100,18 @@ static std::string CreateVehicleName(
         switch (liveryType)
         {
         case 0:
+        case 2:
             colorLiveries[vehicleID] = 1;
             communityLiveries[vehicleID] = 0;
             return " Finish 1";
         
         case 1:
             {
-                char buffer[32] = {};
-                int finish = ++colorLiveries[parentVehicleID];
-                sprintf_s(buffer, " Finish %d", finish);
+                char buffer[16] = {};
+                int number = ++colorLiveries[parentVehicleID];
+                sprintf_s(buffer, " Finish %d", number);
                 return buffer;
             }
-        
-        case 2:
-            colorLiveries[vehicleID] = 1;
-            communityLiveries[vehicleID] = 0;
-            return " Finish 1";
         
         case 3:
             return " Platinum";
@@ -130,9 +121,9 @@ static std::string CreateVehicleName(
         
         case 5:
             {
-                char buffer[32] = {};
-                int finish = ++communityLiveries[parentVehicleID];
-                sprintf_s(buffer, " Community %d", finish);
+                char buffer[16] = {};
+                int number = ++communityLiveries[parentVehicleID];
+                sprintf_s(buffer, " Community %d", number);
                 return buffer;
             }
         }
@@ -140,21 +131,7 @@ static std::string CreateVehicleName(
         return "";
     };
 
-    std::string vehicleManufacturer = getVehicleManufacturer();
-    std::string vehicleLivery = getVehicleLivery();
-
-    std::string vehicleName;
-    if (!vehicleManufacturer.empty())
-    {
-        vehicleName += vehicleManufacturer;
-    }
-    vehicleName += getVehicleName();
-    if (!vehicleLivery.empty())
-    {
-        vehicleName += vehicleLivery;
-    }
-
-    return vehicleName;
+    return getVehicleManufacturer() + getVehicleName() + getVehicleLivery();
 }
 
 static Core::Pointer GetPlayerActiveRaceVehicle()
@@ -292,110 +269,72 @@ void VehicleManager::OnRenderMenu()
         Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
 
         {
-            uint64_t vehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
-            
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Vehicle   %s", GetVehicleName(vehicleID));
+            ImGui::SeparatorText("Vehicle List");
 
-            ImGui::SameLine(0.0f, 20.0f);
-            
-            if (ImGui::Button("Change...##vehicle"))
+            static ImGuiTextFilter vehicleFilter;
+            vehicleFilter.Draw("Filter##vehicle-list");
+
+            if (ImGui::BeginListBox("##vehicle-list", ImVec2(-FLT_MIN, 0.0f)))
             {
-                ImGui::OpenPopup("vehicle-list");
-            }
-
-            {
-                ImGui::SetNextWindowSize(ImVec2(400.0f, 500.0f));
-
-                if (ImGui::BeginPopup("vehicle-list"))
+                uint64_t vehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
+                
+                for (const Vehicle& vehicle : m_Vehicles)
                 {
-                    ImGui::SeparatorText("Vehicle List");
-
-                    static ImGuiTextFilter vehicleFilter;
-                    vehicleFilter.Draw("Filter##vehicle-list");
-
-                    if (ImGui::BeginListBox("##vehicle-list", ImVec2(-FLT_MIN, -FLT_MIN)))
+                    if (vehicleFilter.PassFilter(vehicle.Name.c_str()))
                     {
-                        for (const Vehicle& vehicle : m_Vehicles)
+                        ImGui::PushID(&vehicle);
+
+                        bool selected = vehicle.ID == vehicleID;
+                        if (ImGui::Selectable(vehicle.Name.c_str(), selected))
                         {
-                            if (vehicleFilter.PassFilter(vehicle.Name.c_str()))
-                            {
-                                ImGui::PushID(&vehicle);
-
-                                bool selected = vehicle.ID == vehicleID;
-                                if (ImGui::Selectable(vehicle.Name.c_str(), selected))
-                                {
-                                    m_ChangeVehicle = true;
-                                    m_NewVehicleID = vehicle.ID;
-                                }
-                                if (selected)
-                                {
-                                    ImGui::SetItemDefaultFocus();
-                                }
-
-                                ImGui::PopID();
-                            }
+                            m_ChangeVehicle = true;
+                            m_NewVehicleID = vehicle.ID;
+                        }
+                        if (selected)
+                        {
+                            ImGui::SetItemDefaultFocus();
                         }
 
-                        ImGui::EndListBox();
+                        ImGui::PopID();
                     }
-
-                    ImGui::EndPopup();
                 }
+
+                ImGui::EndListBox();
             }
         }
         
         {
-            uint64_t wheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
+            ImGui::SeparatorText("Wheel List");
 
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Wheel     %s", GetWheelName(wheelID));
+            static ImGuiTextFilter wheelFilter;
+            wheelFilter.Draw("Filter##wheel-list");
 
-            ImGui::SameLine(0.0f, 20.0f);
-
-            if (ImGui::Button("Change...##wheel"))
+            if (ImGui::BeginListBox("##wheel-list", ImVec2(-FLT_MIN, 0.0f)))
             {
-                ImGui::OpenPopup("wheel-list");
-            }
-
-            {
-                ImGui::SetNextWindowSize(ImVec2(400.0f, 500.0f));
-
-                if (ImGui::BeginPopup("wheel-list"))
+                uint64_t wheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
+                
+                for (const Wheel& wheel : m_Wheels)
                 {
-                    ImGui::SeparatorText("Wheel List");
-
-                    static ImGuiTextFilter wheelFilter;
-                    wheelFilter.Draw("Filter##wheel-list");
-
-                    if (ImGui::BeginListBox("##wheel-list", ImVec2(-FLT_MIN, -FLT_MIN)))
+                    if (wheelFilter.PassFilter(wheel.Name.c_str()))
                     {
-                        for (const Wheel& wheel : m_Wheels)
+                        ImGui::PushID(&wheel);
+
+                        bool selected = wheel.ID == wheelID;
+                        if (ImGui::Selectable(wheel.Name.c_str(), selected))
                         {
-                            if (wheelFilter.PassFilter(wheel.Name.c_str()))
-                            {
-                                ImGui::PushID(&wheel);
-
-                                bool selected = wheel.ID == wheelID;
-                                if (ImGui::Selectable(wheel.Name.c_str(), selected))
-                                {
-                                    m_ChangeWheel = true;
-                                    m_NewWheelID = wheel.ID;
-                                }
-                                if (selected)
-                                {
-                                    ImGui::SetItemDefaultFocus();
-                                }
-
-                                ImGui::PopID();
-                            }
+                            m_ChangeWheel = true;
+                            m_NewWheelID = wheel.ID;
+                        }
+                        if (selected)
+                        {
+                            ImGui::SetItemDefaultFocus();
                         }
 
-                        ImGui::EndListBox();
+                        ImGui::PopID();
                     }
-
-                    ImGui::EndPopup();
                 }
+
+                ImGui::EndListBox();
             }
         }
         
@@ -544,30 +483,4 @@ void VehicleManager::LoadColorPalettes()
     {
         m_ColorPalettes[i].ColorsCount = colorPalettes.at(i * 0xC + 0x8).as<int32_t>();
     }
-}
-
-const char* VehicleManager::GetVehicleName(uint64_t vehicleID) const
-{
-    for (const Vehicle& vehicle : m_Vehicles)
-    {
-        if (vehicle.ID == vehicleID)
-        {
-            return vehicle.Name.c_str();
-        }
-    }
-
-    return "???";
-}
-
-const char* VehicleManager::GetWheelName(uint64_t wheelID) const
-{
-    for (const Wheel& wheel : m_Wheels)
-    {
-        if (wheel.ID == wheelID)
-        {
-            return wheel.Name.c_str();
-        }
-    }
-
-    return "???";
 }

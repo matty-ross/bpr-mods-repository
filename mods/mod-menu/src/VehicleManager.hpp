@@ -37,10 +37,6 @@ private:
     };
 
 private:
-    const char* GetVehicleName(uint64_t vehicleID) const;
-    const char* GetWheelName(uint64_t wheelID) const;
-
-private:
     std::vector<Vehicle> m_Vehicles;
     bool m_ChangeVehicle = false;
     uint64_t m_NewVehicleID = 0;
