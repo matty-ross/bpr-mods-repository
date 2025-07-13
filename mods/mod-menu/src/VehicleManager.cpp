@@ -97,35 +97,28 @@ static std::string CreateVehicleName(
 
     auto getVehicleLivery = [&]() -> std::string
     {
+        char buffer[16] = {};
+        
         switch (liveryType)
         {
         case 0:
         case 2:
-            colorLiveries[vehicleID] = 1;
-            communityLiveries[vehicleID] = 0;
-            return " Finish 1";
-        
+            sprintf_s(buffer, " Finish %d", ++colorLiveries[vehicleID]);
+            return buffer;
+            
         case 1:
-            {
-                char buffer[16] = {};
-                int number = ++colorLiveries[parentVehicleID];
-                sprintf_s(buffer, " Finish %d", number);
-                return buffer;
-            }
+            sprintf_s(buffer, " Finish %d", ++colorLiveries[parentVehicleID]);
+            return buffer;
+
+        case 5:
+            sprintf_s(buffer, " Community %d", ++communityLiveries[parentVehicleID]);
+            return buffer;
         
         case 3:
             return " Platinum";
         
         case 4:
             return " Gold";
-        
-        case 5:
-            {
-                char buffer[16] = {};
-                int number = ++communityLiveries[parentVehicleID];
-                sprintf_s(buffer, " Community %d", number);
-                return buffer;
-            }
         }
 
         return "";
@@ -422,11 +415,11 @@ void VehicleManager::OnRenderMenu()
                 ImGui::EndCombo();
             }
 
-            if (ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 1, 20))
+            if (ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 1, 20, "%d", ImGuiSliderFlags_ClampOnInput))
             {
                 m_ChangeBoost = true;
             }
-            if (ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 20))
+            if (ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 20, "%d", ImGuiSliderFlags_ClampOnInput))
             {
                 m_ChangeBoost = true;
             }
