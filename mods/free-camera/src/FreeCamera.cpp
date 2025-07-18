@@ -50,10 +50,10 @@ void FreeCamera::OnProcessAttach()
 {
     PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
     {
-        static_cast<FreeCamera*>(lpThreadParameter)->Load();
+        s_Instance.Load();
         return 0;
     };
-    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, this, 0, nullptr);
+    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
 }
 
 void FreeCamera::OnProcessDetach()

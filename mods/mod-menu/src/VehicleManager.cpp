@@ -435,6 +435,8 @@ void VehicleManager::LoadVehicles()
     std::map<uint64_t, int> communityLiveries;
 
     uint32_t vehiclesCount = vehicleList.at(0x0).as<uint32_t>();
+    m_Vehicles.reserve(vehiclesCount);
+    
     for (uint32_t i = 0; i < vehiclesCount; ++i)
     {
         Core::Pointer vehicleData = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
@@ -454,6 +456,8 @@ void VehicleManager::LoadWheels()
     Core::Pointer wheelList = BPR::PoolModule_FindResource("B5WheelList")->Memory[0]; // BrnResource::WheelListResource*
 
     uint32_t wheelsCount = wheelList.at(0x0).as<uint32_t>();
+    m_Wheels.reserve(wheelsCount);
+    
     for (uint32_t i = 0; i < wheelsCount; ++i)
     {
         Core::Pointer wheelData = wheelList.at(0x4).deref().at(i * 0x48); // BrnResource::WheelListEntry*
