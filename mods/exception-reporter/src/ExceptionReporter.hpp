@@ -18,11 +18,11 @@ public:
     void OnProcessAttach(HINSTANCE instanceHandle);
     void OnProcessDetach();
 
-    LONG OnException(EXCEPTION_POINTERS* ExceptionInfo) const;
-
 private:
     void Load();
     void Unload();
+    
+    LONG OnException(EXCEPTION_POINTERS* ExceptionInfo) const;
 
 private:
     static ExceptionReporter s_Instance;

@@ -42,45 +42,6 @@ void ExceptionReporter::OnProcessDetach()
     CloseHandle(m_LoadThreadHandle);
 }
 
-LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
-{
-    DLGPROC dialogProc = [](HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) -> INT_PTR
-    {
-        switch (Msg)
-        {
-        case WM_INITDIALOG:
-            {
-                const ExceptionInformation* exceptionInformation = reinterpret_cast<ExceptionInformation*>(lParam);
-                SetDlgItemTextA(hDlg, IDC_VALUE_CODE, exceptionInformation->GetCode().c_str());
-                SetDlgItemTextA(hDlg, IDC_VALUE_ADDRESS, exceptionInformation->GetAddress().c_str());
-                SetDlgItemTextA(hDlg, IDC_VALUE_FLAGS, exceptionInformation->GetFlags().c_str());
-                SetDlgItemTextA(hDlg, IDC_VALUE_PARAMETERS, exceptionInformation->GetParameters().c_str());
-                SetDlgItemTextA(hDlg, IDC_VALUE_REGISTERS, exceptionInformation->GetRegisters().c_str());
-                SetDlgItemTextA(hDlg, IDC_VALUE_STACK_TRACE, exceptionInformation->GetStackTrace().c_str());
-            }
-            return TRUE;
-
-        case WM_CLOSE:
-            EndDialog(hDlg, 0);
-            return TRUE;
-        }
-
-        return FALSE;
-    };
-
-    ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
-
-    DialogBoxParamA(
-        m_InstanceHandle,
-        MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
-        NULL,
-        dialogProc,
-        reinterpret_cast<LPARAM>(&exceptionInformation)
-    );
-
-    return m_PreviousTopLevelExceptionFilter != nullptr ? m_PreviousTopLevelExceptionFilter(ExceptionInfo) : EXCEPTION_CONTINUE_SEARCH;
-}
-
 void ExceptionReporter::Load()
 {
     try
@@ -161,4 +122,43 @@ void ExceptionReporter::Unload()
         m_Logger.Error("%s", e.what());
         MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
+}
+
+LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
+{
+    DLGPROC dialogProc = [](HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) -> INT_PTR
+    {
+        switch (Msg)
+        {
+        case WM_INITDIALOG:
+            {
+                const ExceptionInformation* exceptionInformation = reinterpret_cast<ExceptionInformation*>(lParam);
+                SetDlgItemTextA(hDlg, IDC_VALUE_CODE, exceptionInformation->GetCode().c_str());
+                SetDlgItemTextA(hDlg, IDC_VALUE_ADDRESS, exceptionInformation->GetAddress().c_str());
+                SetDlgItemTextA(hDlg, IDC_VALUE_FLAGS, exceptionInformation->GetFlags().c_str());
+                SetDlgItemTextA(hDlg, IDC_VALUE_PARAMETERS, exceptionInformation->GetParameters().c_str());
+                SetDlgItemTextA(hDlg, IDC_VALUE_REGISTERS, exceptionInformation->GetRegisters().c_str());
+                SetDlgItemTextA(hDlg, IDC_VALUE_STACK_TRACE, exceptionInformation->GetStackTrace().c_str());
+            }
+            return TRUE;
+
+        case WM_CLOSE:
+            EndDialog(hDlg, 0);
+            return TRUE;
+        }
+
+        return FALSE;
+    };
+
+    ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
+
+    DialogBoxParamA(
+        m_InstanceHandle,
+        MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
+        NULL,
+        dialogProc,
+        reinterpret_cast<LPARAM>(&exceptionInformation)
+    );
+
+    return m_PreviousTopLevelExceptionFilter != nullptr ? m_PreviousTopLevelExceptionFilter(ExceptionInfo) : EXCEPTION_CONTINUE_SEARCH;
 }
