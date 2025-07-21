@@ -7,12 +7,12 @@
 #include "core/File.hpp"
 
 
-static ImVec2 GetAbsolutePosition(const ImVec2& position)
+static ImVec2 GetAbsolutePosition(const ImVec2& position, float scale)
 {
     ImGuiViewport* mainViewport = ImGui::GetMainViewport();
 
-    float x = mainViewport->Pos.x + mainViewport->Size.x / 2.0f + position.x;
-    float y = mainViewport->Pos.y + mainViewport->Size.y - position.y;
+    float x = mainViewport->Pos.x + mainViewport->Size.x / 2.0f + position.x * scale;
+    float y = mainViewport->Pos.y + mainViewport->Size.y - position.y * scale;
 
     return ImVec2(x, y);
 }
@@ -107,6 +107,7 @@ void DashboardHud::OnRenderMenu()
             ImGui::Checkbox("Always Visible", &config.AlwaysVisible);
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
             ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f);
+            ImGui::SliderFloat("Scale", &config.Scale, 0.0f, 5.0f);
 
             {
                 auto renderColorEdit = [](const char* label, uint32_t& configColor)
@@ -130,7 +131,7 @@ void DashboardHud::OnRenderMenu()
 
 void DashboardHud::OnRenderOverlay()
 {
-    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
     
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
     Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).as<void*>(); // BrnGui::RaceMainHudState*
@@ -218,18 +219,18 @@ void DashboardHud::OnRenderOverlay()
 
 void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor) const
 {
-    constexpr ImVec2 segmentSize = ImVec2(256.0f, 256.0f);
+    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    
+    ImVec2 segmentSize = ImVec2(256.0f * config.Scale, 256.0f * config.Scale);
+    ImColor color = ApplyOpacityToColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
 
     DashboardTexture::TextureSegmentUVs uv = m_DashboardTexture.GetTextureSegmentUVs(textureSegment);
 
-    ImVec2 absolutePosition = GetAbsolutePosition(position);
+    ImVec2 absolutePosition = GetAbsolutePosition(position, config.Scale);
     float l = absolutePosition.x - segmentSize.x / 2.0f;
     float r = absolutePosition.x + segmentSize.x / 2.0f;
     float t = absolutePosition.y - segmentSize.y / 2.0f;
     float b = absolutePosition.y + segmentSize.y / 2.0f;
-
-    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    ImColor color = ApplyOpacityToColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
     
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddImage(reinterpret_cast<ImTextureID>(m_DashboardTexture.GetTextureView()), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
@@ -237,40 +238,42 @@ void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture
 
 void DashboardHud::RenderText(const ImVec2& position, const char* text, ImFont* font) const
 {
-    ImVec2 textSize = font->CalcTextSizeA(font->FontSize, FLT_MAX, 0.0f, text);
+    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    
+    float fontSize = font->FontSize * config.Scale;
+    ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
 
-    ImVec2 absolutePosition = GetAbsolutePosition(position);
+    ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+    
+    ImVec2 absolutePosition = GetAbsolutePosition(position, config.Scale);
     float x = absolutePosition.x - textSize.x / 2.0f;
     float y = absolutePosition.y - textSize.y / 2.0f;
 
-    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
-
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
-    foregroundDrawList->AddText(font, font->FontSize, ImVec2(x, y), color, text);
+    foregroundDrawList->AddText(font, fontSize, ImVec2(x, y), color, text);
 }
 
 void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const
 {
-    constexpr float thickness = 3.0f;
+    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+    
     constexpr float minAngle = DirectX::XMConvertToRadians(-225.0f);
     constexpr float maxAngle = DirectX::XMConvertToRadians(45.0f);
-    constexpr float innerRadius = 68.0f;
-    constexpr float outerRadius = 103.0f;
+    float thickness = 3.0f * config.Scale;
+    float innerRadius = 68.0f * config.Scale;
+    float outerRadius = 103.0f * config.Scale;
+    ImColor color = ApplyOpacityToColor(config.Colors.Needle, config.Opacity);
 
     value = std::clamp(value, minValue, maxValue);
     float angle = minAngle + (maxAngle - minAngle) * ((value - minValue) / (maxValue - minValue));
     float angleSin = 0.0f, angleCos = 0.0f;
     DirectX::XMScalarSinCos(&angleSin, &angleCos, angle);
 
-    ImVec2 absolutePosition = GetAbsolutePosition(position);
+    ImVec2 absolutePosition = GetAbsolutePosition(position, config.Scale);
     float x1 = absolutePosition.x + angleCos * innerRadius;
     float y1 = absolutePosition.y + angleSin * innerRadius;
     float x2 = absolutePosition.x + angleCos * outerRadius;
     float y2 = absolutePosition.y + angleSin * outerRadius;
-
-    DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    ImColor color = ApplyOpacityToColor(config.Colors.Needle, config.Opacity);
 
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);

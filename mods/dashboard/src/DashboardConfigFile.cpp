@@ -27,6 +27,7 @@ void DashboardConfigFile::Load()
             m_DashboardConfig.AlwaysVisible = yaml["AlwaysVisible"].as<bool>();
             m_DashboardConfig.MetricUnits   = yaml["MetricUnits"].as<bool>();
             m_DashboardConfig.Opacity       = yaml["Opacity"].as<float>();
+            m_DashboardConfig.Scale         = yaml["Scale"].as<float>();
             
             YAML::Node colorsNode = yaml["Colors"];
             m_DashboardConfig.Colors.Dial   = colorsNode["Dial"].as<uint32_t>();
@@ -54,6 +55,7 @@ void DashboardConfigFile::Save() const
             yaml["AlwaysVisible"] = m_DashboardConfig.AlwaysVisible;
             yaml["MetricUnits"]   = m_DashboardConfig.MetricUnits;
             yaml["Opacity"]       = m_DashboardConfig.Opacity;
+            yaml["Scale"]         = m_DashboardConfig.Scale;
 
             YAML::Node colorsNode;
             colorsNode["Dial"]   = m_DashboardConfig.Colors.Dial;

@@ -11,6 +11,7 @@ struct DashboardConfig
     bool AlwaysVisible = false;
     bool MetricUnits = true;
     float Opacity = 78.0f;
+    float Scale = 1.0f;
     struct
     {
         uint32_t Dial = 0xFFFCFF24;
