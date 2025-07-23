@@ -45,12 +45,9 @@ private:
     bool m_ChangeWheel = false;
     uint64_t m_NewWheelID = 0;
 
-    bool m_ChangeDeformation = false;
-    
-    bool m_ResetOnTrack = false;
+    bool m_ReloadVehicle = false;
 
     bool m_OverrideBoostTrails = false;
-
     bool m_OverrideSwitchableBoost = false;
 
     ColorPalette m_ColorPalettes[5] = {};

@@ -176,14 +176,14 @@ void VehicleManager::OnPreWorldUpdate(
         m_NewWheelID = 0;
     }
 
-    if (m_ChangeDeformation)
+    if (m_ReloadVehicle)
     {
         BPR::GameAction_ResetPlayerVehicle gameAction =
         {
             .Position                     = { 0.0f, 0.0f, 0.0f, 0.0f },
             .Direction                    = { 0.0f, 0.0f, 0.0f, 0.0f },
             .VehicleID                    = playerRaceVehicle.at(0x68).as<uint64_t>(),
-            .WheelID                      = 0,
+            .WheelID                      = playerRaceVehicle.at(0x70).as<uint64_t>(),
             .PlayerScoringIndex           = 8,
             .DeformationAmount            = playerActiveRaceVehicle.at(0x8AC).as<float>(),
             .DeformationType              = BPR::DeformationType::VehicleSelect,
@@ -198,18 +198,7 @@ void VehicleManager::OnPreWorldUpdate(
         };
         BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
 
-        m_ChangeDeformation = false;
-    }
-
-    if (m_ResetOnTrack)
-    {
-        BPR::GameAction_ResetPlayerVehicleOnTrack gameAction =
-        {
-            .Speed = 0.0f,
-        };
-        BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
-
-        m_ResetOnTrack = false;
+        m_ReloadVehicle = false;
     }
 
     if (m_ChangeBoost)
@@ -334,19 +323,12 @@ void VehicleManager::OnRenderMenu()
         {
             ImGui::SeparatorText("Misc");
 
-            if (ImGui::Button("Change##deformation"))
+            if (ImGui::Button("Reload Vehicle"))
             {
-                m_ChangeDeformation = true;
+                m_ReloadVehicle = true;
             }
             
             ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f);
-
-            ImGui::Separator();
-
-            if (ImGui::Button("Reset on Track"))
-            {
-                m_ResetOnTrack = true;
-            }
 
             ImGui::Separator();
 
