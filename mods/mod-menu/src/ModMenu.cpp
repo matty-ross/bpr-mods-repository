@@ -277,7 +277,7 @@ void ModMenu::OnRenderMenu()
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Version     %s", k_ModVersion);
         ImGui::Text("Author      %s", k_ModAuthor);
-        ImGui::Text("Framerate   %.3f", io.Framerate);
+        ImGui::Text("Framerate   %.1f", io.Framerate);
 
         m_Misc.OnRenderMenu();
         m_Environment.OnRenderMenu();
