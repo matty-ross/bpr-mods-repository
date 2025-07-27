@@ -135,6 +135,40 @@ static Core::Pointer GetPlayerActiveRaceVehicle()
     return playerActiveRaceVehicle;
 }
 
+static bool CanResetPlayerVehicle()
+{
+    static constexpr int32_t disallowedGameModeTypes[] =
+    {
+        10, // Online Race
+        12, // Online Stunt Run
+        14, // Online Stunt Run Free-For-All
+        17, // Online Stunt Run Co-Op
+    };
+
+    int32_t currentGameModeType = Core::Pointer(0x013FC8E0).deref().at(0x69D58C).as<int32_t>();
+    for (int32_t disallowedGameModeType : disallowedGameModeTypes)
+    {
+        if (currentGameModeType == disallowedGameModeType)
+        {
+            return false;
+        }
+    }
+
+    bool isChallengeTimerRunning = Core::Pointer(0x013FC8E0).deref().at(0x6A4104).as<bool>();
+    if (isChallengeTimerRunning)
+    {
+        return false;
+    }
+
+    void* currentFreeburnGame = Core::Pointer(0x013FC8E0).deref().at(0x6EBE50).as<void*>();
+    if (currentFreeburnGame != nullptr)
+    {
+        return false;
+    }
+
+    return true;
+}
+
 
 void VehicleManager::OnPreWorldUpdate(
     void* gameEventQueue, // BrnGameState::GameStateModuleIO::GameEventQueue*
@@ -250,11 +284,18 @@ void VehicleManager::OnRenderMenu()
         Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
         Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
 
+        bool canResetPlayerVehicle = CanResetPlayerVehicle();
+
         {
             ImGui::SeparatorText("Vehicle List");
 
             static ImGuiTextFilter vehicleFilter;
             vehicleFilter.Draw("Filter##vehicle-list");
+
+            if (!canResetPlayerVehicle)
+            {
+                ImGui::BeginDisabled();
+            }
 
             if (ImGui::BeginListBox("##vehicle-list", ImVec2(-FLT_MIN, 0.0f)))
             {
@@ -283,6 +324,11 @@ void VehicleManager::OnRenderMenu()
 
                 ImGui::EndListBox();
             }
+
+            if (!canResetPlayerVehicle)
+            {
+                ImGui::EndDisabled();
+            }
         }
         
         {
@@ -291,6 +337,11 @@ void VehicleManager::OnRenderMenu()
             static ImGuiTextFilter wheelFilter;
             wheelFilter.Draw("Filter##wheel-list");
 
+            if (!canResetPlayerVehicle)
+            {
+                ImGui::BeginDisabled();
+            }
+            
             if (ImGui::BeginListBox("##wheel-list", ImVec2(-FLT_MIN, 0.0f)))
             {
                 uint64_t wheelID = playerRaceVehicle.at(0x70).as<uint64_t>();
@@ -318,16 +369,31 @@ void VehicleManager::OnRenderMenu()
 
                 ImGui::EndListBox();
             }
+
+            if (!canResetPlayerVehicle)
+            {
+                ImGui::EndDisabled();
+            }
         }
         
         {
             ImGui::SeparatorText("Misc");
 
+            if (!canResetPlayerVehicle)
+            {
+                ImGui::BeginDisabled();
+            }
+            
             if (ImGui::Button("Reload Vehicle"))
             {
                 m_ReloadVehicle = true;
             }
-            
+
+            if (!canResetPlayerVehicle)
+            {
+                ImGui::EndDisabled();
+            }
+
             ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f);
 
             ImGui::Separator();
