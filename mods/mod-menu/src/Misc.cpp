@@ -6,6 +6,36 @@
 #include "core/Pointer.hpp"
 
 
+namespace BPR
+{
+    // void __thiscall BrnGui::RaceMainHudState::OnEnter()
+    static void RaceMainHudState_OnEnter()
+    {
+        __asm
+        {
+            mov ecx, dword ptr ds:[0x013FC8E0]
+            mov ecx, dword ptr [ecx + 0x7FABBC]
+            
+            mov eax, 0x00ABC890
+            call eax
+        }
+    }
+
+    // void __thiscall BrnGui::RaceMainHudState::OnLeave()
+    static void RaceMainHudState_OnLeave()
+    {
+        __asm
+        {
+            mov ecx, dword ptr ds:[0x013FC8E0]
+            mov ecx, dword ptr [ecx + 0x7FABBC]
+            
+            mov eax, 0x00ABC4D0
+            call eax
+        }
+    }
+}
+
+
 void Misc::OnPreWorldUpdate(
     void* gameEventQueue, // BrnGameState::GameStateModuleIO::GameEventQueue*
     void* gameActionQueue // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>*
@@ -28,6 +58,21 @@ void Misc::OnPreWorldUpdate(
     }
 }
 
+void Misc::OnUpdateHudFlow()
+{
+    if (m_HideHUD)
+    {
+        BPR::RaceMainHudState_OnLeave();
+        m_HideHUD = false;
+    }
+    
+    if (m_ShowHUD)
+    {
+        BPR::RaceMainHudState_OnEnter();
+        m_ShowHUD = false;
+    }
+}
+
 void Misc::OnRenderMenu()
 {
     if (ImGui::CollapsingHeader("Misc"))
@@ -36,23 +81,22 @@ void Misc::OnRenderMenu()
 
         {
             bool isOnline = gameModule.at(0xB6D415).as<bool>();
-            bool& simulationPaused = gameModule.at(0xB6D3FF).as<bool>();
 
             if (isOnline)
             {
                 ImGui::BeginDisabled();
             }
 
-            if (ImGui::Checkbox("Pause Simulation", &simulationPaused))
+            if (ImGui::Button("Pause Simulation"))
             {
-                if (simulationPaused)
-                {
-                    m_PauseSimulation = true;
-                }
-                else
-                {
-                    m_UnpauseSimulation = true;
-                }
+                m_PauseSimulation = true;
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Unpause Simulation"))
+            {
+                m_UnpauseSimulation = true;
             }
 
             if (isOnline)
@@ -60,6 +104,24 @@ void Misc::OnRenderMenu()
                 ImGui::EndDisabled();
             }
         }
+
+        ImGui::Separator();
+
+        {
+            if (ImGui::Button("Hide HUD"))
+            {
+                m_HideHUD = true;
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Show HUD"))
+            {
+                m_ShowHUD = true;
+            }
+        }
+
+        ImGui::Separator();
 
         {
             ImGui::Checkbox("Crash when Off-Road", &gameModule.at(0x1E1364).as<bool>());

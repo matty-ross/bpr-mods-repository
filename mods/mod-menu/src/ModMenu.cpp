@@ -9,9 +9,9 @@
 #define MOD_DIRECTORY ".\\mods\\mod-menu\\"
 
 
-static constexpr char k_ModName[] = "Mod Menu";
+static constexpr char k_ModName[]    = "Mod Menu";
 static constexpr char k_ModVersion[] = "1.2.0";
-static constexpr char k_ModAuthor[] = "PISros0724 (Matty)";
+static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
 
 
 ModMenu ModMenu::s_Instance;
@@ -24,6 +24,11 @@ ModMenu::ModMenu()
     {
         .Target = Core::Pointer(0x00A2A512).GetAddress(),
         .Detour = &ModMenu::DetourPreWorldUpdate,
+    },
+    m_DetourUpdateHudFlow
+    {
+        .Target = Core::Pointer(0x066ECB48).GetAddress(),
+        .Detour = &ModMenu::DetourUpdateHudFlow,
     },
     m_DetourUpdateActiveRaceVehicleColors
     {
@@ -153,6 +158,15 @@ void ModMenu::Load()
             m_Logger.Info("Attached PreWorldUpdate detour.");
         }
 
+        // Attach UpdateHudFlow detour.
+        {
+            m_Logger.Info("Attaching UpdateHudFlow detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourUpdateHudFlow);
+
+            m_Logger.Info("Attached UpdateHudFlow detour.");
+        }
+
         // Attach UpdateActiveRaceVehicleColors detour.
         {
             m_Logger.Info("Attaching UpdateActiveRaceVehicleColors detour...");
@@ -240,6 +254,15 @@ void ModMenu::Unload()
             m_Logger.Info("Detached UpdateActiveRaceVehicleColors detour.");
         }
 
+        // Detach UpdateHudFlow detour.
+        {
+            m_Logger.Info("Detaching UpdateHudFlow detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourUpdateHudFlow);
+
+            m_Logger.Info("Detached UpdateHudFlow detour.");
+        }
+
         // Detach PreWorldUpdate detour.
         {
             m_Logger.Info("Detaching PreWorldUpdate detour...");
@@ -262,6 +285,11 @@ void ModMenu::OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue)
 {
     m_Misc.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
     m_VehicleManager.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
+}
+
+void ModMenu::OnUpdateHudFlow()
+{
+    m_Misc.OnUpdateHudFlow();
 }
 
 void ModMenu::OnUpdateActiveRaceVehicleColors()
@@ -305,6 +333,23 @@ __declspec(naked) void ModMenu::DetourPreWorldUpdate()
         popfd
 
         jmp dword ptr [s_Instance.m_DetourPreWorldUpdate.Target]
+    }
+}
+
+__declspec(naked) void ModMenu::DetourUpdateHudFlow()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        mov ecx, offset s_Instance
+        call ModMenu::OnUpdateHudFlow
+
+        popad
+        popfd
+
+        jmp dword ptr [s_Instance.m_DetourUpdateHudFlow.Target]
     }
 }
 
