@@ -260,6 +260,7 @@ void ModMenu::Unload()
 
 void ModMenu::OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue)
 {
+    m_Misc.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
     m_VehicleManager.OnPreWorldUpdate(gameEventQueue, gameActionQueue);
 }
 
