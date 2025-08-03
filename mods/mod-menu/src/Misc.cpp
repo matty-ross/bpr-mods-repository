@@ -80,6 +80,8 @@ void Misc::OnRenderMenu()
         Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
 
         {
+            ImGui::SeparatorText("Simulation");
+            
             bool isOnline = gameModule.at(0xB6D415).as<bool>();
 
             if (isOnline)
@@ -87,14 +89,14 @@ void Misc::OnRenderMenu()
                 ImGui::BeginDisabled();
             }
 
-            if (ImGui::Button("Pause Simulation"))
+            if (ImGui::Button("Pause##simulation"))
             {
                 m_PauseSimulation = true;
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button("Unpause Simulation"))
+            if (ImGui::Button("Unpause##simulation"))
             {
                 m_UnpauseSimulation = true;
             }
@@ -105,26 +107,27 @@ void Misc::OnRenderMenu()
             }
         }
 
-        ImGui::Separator();
-
         {
-            if (ImGui::Button("Hide HUD"))
+            ImGui::SeparatorText("HUD");
+            
+            if (ImGui::Button("Hide##hud"))
             {
                 m_HideHUD = true;
             }
 
             ImGui::SameLine();
 
-            if (ImGui::Button("Show HUD"))
+            if (ImGui::Button("Show##hud"))
             {
                 m_ShowHUD = true;
             }
         }
 
-        ImGui::Separator();
-
         {
+            ImGui::SeparatorText("Crashes");
+            
             ImGui::Checkbox("Crash when Off-Road", &gameModule.at(0x1E1364).as<bool>());
+            ImGui::Checkbox("Crash in Water", &Core::Pointer(0x0140AA9F).as<bool>());
         }
     }
 }
