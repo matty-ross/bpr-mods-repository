@@ -20,10 +20,10 @@ void Misc::OnRenderMenu()
         Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
         Core::Pointer directorModule = gameModule.at(0x6EF240); // BrnDirector::DirectorModule*
         Core::Pointer arbitrator = gameModule.at(0x6F2AF0); // BrnDirector::Arbitrator*
+        Core::Pointer gameState = gameModule.at(0x7174F0); // BrnDirector::GameState*
         
         {
             ImGui::Checkbox("Allow Jump Moment", &directorModule.at(0x29F5D).as<bool>());
-            ImGui::Checkbox("Allow Slow Motion", &directorModule.at(0x283A8).as<bool>());
             ImGui::Checkbox("Disable Depth of Field", &directorModule.at(0x29F68).as<bool>());
         }
 
@@ -33,6 +33,14 @@ void Misc::OnRenderMenu()
             ImGui::Checkbox("Disable Picture Paradise", &arbitrator.at(0x16FF).as<bool>());
             ImGui::Checkbox("Play Race End Effect", &arbitrator.at(0x1700).as<bool>());
             ImGui::Checkbox("Do Attract Mode", &arbitrator.at(0x3DCD).as<bool>());
+        }
+
+        ImGui::Separator();
+
+        {
+            ImGui::Checkbox("Drive Thru Active", &gameState.at(0xD0).as<bool>());
+            ImGui::Checkbox("Can Use Slow Motion", &gameState.at(0xF8).as<bool>());
+            ImGui::Checkbox("Crash Nav Shown", &gameState.at(0xF9).as<bool>());
         }
 
         ImGui::Separator();
