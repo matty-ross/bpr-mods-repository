@@ -41,6 +41,25 @@ void Misc::OnRenderMenu()
             ImGui::Checkbox("Drive Thru Active", &gameState.at(0xD0).as<bool>());
             ImGui::Checkbox("Can Use Slow Motion", &gameState.at(0xF8).as<bool>());
             ImGui::Checkbox("Crash Nav Shown", &gameState.at(0xF9).as<bool>());
+
+            {
+                Core::Pointer roadRunnerCameraBehaviorHandle = arbitrator.at(0x3A04); // BrnDirector::Camera::BehaviourManager::BehaviourHandle<BrnDirector::Camera::BehaviourRoadRunner>*
+                bool allocated = roadRunnerCameraBehaviorHandle.at(0x0).as<bool>();
+                
+                if (!allocated)
+                {
+                    ImGui::BeginDisabled();
+                }
+
+                Core::Pointer roadRunnerCameraBehavior = roadRunnerCameraBehaviorHandle.at(0x10).as<void*>(); // BrnDirector::Camera::BehaviourRoadRunner*
+                static bool dummy = false;
+                ImGui::Checkbox("Focus Crash Nav on Player", allocated ? &roadRunnerCameraBehavior.at(0x9).as<bool>() : &dummy);
+
+                if (!allocated)
+                {
+                    ImGui::EndDisabled();
+                }
+            }
         }
 
         ImGui::Separator();
