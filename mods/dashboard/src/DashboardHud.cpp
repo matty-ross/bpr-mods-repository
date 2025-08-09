@@ -240,7 +240,7 @@ void DashboardHud::RenderText(const ImVec2& position, const char* text, ImFont* 
 {
     const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
     
-    float fontSize = font->FontSize * config.Scale;
+    float fontSize = font->LegacySize * config.Scale;
     ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
 
     ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
