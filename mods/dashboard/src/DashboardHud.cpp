@@ -42,16 +42,14 @@ void DashboardHud::LoadTexture(const char* filePath)
     m_Logger.Info("Loaded texture.");
 }
 
-void DashboardHud::LoadFonts(const char* filePath)
+void DashboardHud::LoadFont(const char* filePath)
 {
-    m_Logger.Info("Loading fonts from file '%s' ...", filePath);
+    m_Logger.Info("Loading font from file '%s' ...", filePath);
     
     ImGuiIO& io = ImGui::GetIO();
-    m_Font24 = io.Fonts->AddFontFromFileTTF(filePath, 24.0f);
-    m_Font29 = io.Fonts->AddFontFromFileTTF(filePath, 29.0f);
-    m_Font37 = io.Fonts->AddFontFromFileTTF(filePath, 37.0f);
+    m_Font = io.Fonts->AddFontFromFileTTF(filePath);
 
-    m_Logger.Info("Loaded fonts.");
+    m_Logger.Info("Loaded font.");
 }
 
 void DashboardHud::OnProgressionAddDistanceDriven(
@@ -106,8 +104,8 @@ void DashboardHud::OnRenderMenu()
             
             ImGui::Checkbox("Always Visible", &config.AlwaysVisible);
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
-            ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f);
-            ImGui::SliderFloat("Scale", &config.Scale, 0.0f, 5.0f);
+            ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("Scale", &config.Scale, 0.1f, 5.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
             {
                 auto renderColorEdit = [](const char* label, uint32_t& configColor)
@@ -159,7 +157,7 @@ void DashboardHud::OnRenderOverlay()
 
         RenderTextureSegment(ImVec2(-128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
         RenderTextureSegment(ImVec2(-128.0f, 72.0f), config.MetricUnits ? DashboardTexture::TextureSegment::KMH : DashboardTexture::TextureSegment::MPH);
-        RenderText(ImVec2(-128.0f, 102.0f), speedText, m_Font29);
+        RenderText(ImVec2(-128.0f, 102.0f), speedText, 29.0f);
         RenderNeedle(ImVec2(-128.0f, 72.0f), static_cast<float>(speed), 0.0f, config.MetricUnits ? 360.0f : 240.0f);
     }
 
@@ -170,7 +168,7 @@ void DashboardHud::OnRenderOverlay()
         char tripMeterText[16] = {};
         sprintf_s(tripMeterText, "%.1f", tripMeter);
 
-        RenderText(ImVec2(-128.0f, 69.0f), tripMeterText, m_Font24);
+        RenderText(ImVec2(-128.0f, 69.0f), tripMeterText, 24.0f);
     }
 
     // Odometer
@@ -180,7 +178,7 @@ void DashboardHud::OnRenderOverlay()
         char odometerText[16] = {};
         sprintf_s(odometerText, "%06d", odometer);
 
-        RenderText(ImVec2(-128.0f, 42.0f), odometerText, m_Font29);
+        RenderText(ImVec2(-128.0f, 42.0f), odometerText, 29.0f);
     }
 
     // RPM
@@ -192,7 +190,7 @@ void DashboardHud::OnRenderOverlay()
 
         RenderTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::Background, false);
         RenderTextureSegment(ImVec2(128.0f, 72.0f), DashboardTexture::TextureSegment::RPM);
-        RenderText(ImVec2(128.0f, 102.0f), rpmText, m_Font29);
+        RenderText(ImVec2(128.0f, 102.0f), rpmText, 29.0f);
         RenderNeedle(ImVec2(128.0f, 72.0f), static_cast<float>(rpm), 0.0f, 12000.0f);
     }
 
@@ -202,7 +200,7 @@ void DashboardHud::OnRenderOverlay()
 
         static constexpr char gears[][2] = { "R", "1", "2", "3", "4", "5" };
 
-        RenderText(ImVec2(128.0f, 70.0f), gears[gear], m_Font37);
+        RenderText(ImVec2(128.0f, 70.0f), gears[gear], 37.0f);
     }
 
     // Local Time
@@ -213,7 +211,7 @@ void DashboardHud::OnRenderOverlay()
         char localTimeText[8] = {};
         sprintf_s(localTimeText, "%02d:%02d", localTime.wHour, localTime.wMinute);
 
-        RenderText(ImVec2(128.0f, 42.0f), localTimeText, m_Font29);
+        RenderText(ImVec2(128.0f, 42.0f), localTimeText, 29.0f);
     }
 }
 
@@ -236,21 +234,21 @@ void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture
     foregroundDrawList->AddImage(reinterpret_cast<ImTextureID>(m_DashboardTexture.GetTextureView()), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
 }
 
-void DashboardHud::RenderText(const ImVec2& position, const char* text, ImFont* font) const
+void DashboardHud::RenderText(const ImVec2& position, const char* text, float size) const
 {
     const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
     
-    float fontSize = font->LegacySize * config.Scale;
+    float fontSize = size * config.Scale;
     ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
 
-    ImVec2 textSize = font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
+    ImVec2 textSize = m_Font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
     
     ImVec2 absolutePosition = GetAbsolutePosition(position, config.Scale);
     float x = absolutePosition.x - textSize.x / 2.0f;
     float y = absolutePosition.y - textSize.y / 2.0f;
 
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
-    foregroundDrawList->AddText(font, fontSize, ImVec2(x, y), color, text);
+    foregroundDrawList->AddText(m_Font, fontSize, ImVec2(x, y), color, text);
 }
 
 void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const

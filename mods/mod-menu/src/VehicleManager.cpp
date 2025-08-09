@@ -463,11 +463,11 @@ void VehicleManager::OnRenderMenu()
                 ImGui::EndCombo();
             }
 
-            if (ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 1, 20, "%d", ImGuiSliderFlags_ClampOnInput))
+            if (ImGui::SliderInt("Boost Level", &gameModule.at(0x40754).as<int32_t>(), 1, 20, "%d", ImGuiSliderFlags_AlwaysClamp))
             {
                 m_ChangeBoost = true;
             }
-            if (ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 20, "%d", ImGuiSliderFlags_ClampOnInput))
+            if (ImGui::SliderInt("Boost Loss Level", &gameModule.at(0x40758).as<int32_t>(), 0, 20, "%d", ImGuiSliderFlags_AlwaysClamp))
             {
                 m_ChangeBoost = true;
             }

@@ -109,9 +109,7 @@ void Dashboard::Load()
             EnterCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
             
             m_DashboardHud.LoadTexture(MOD_DIRECTORY "texture.dds");
-            m_DashboardHud.LoadFonts(MOD_DIRECTORY "font.ttf");
-            
-            ImGui_ImplDX11_InvalidateDeviceObjects();
+            m_DashboardHud.LoadFont(MOD_DIRECTORY "font.ttf");
             
             LeaveCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
         }

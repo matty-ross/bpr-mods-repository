@@ -17,7 +17,7 @@ public:
 
 public:
     void LoadTexture(const char* filePath);
-    void LoadFonts(const char* filePath);
+    void LoadFont(const char* filePath);
 
     void OnProgressionAddDistanceDriven(Core::Pointer progressionManager, float distance, int32_t vehicleType);
     
@@ -26,7 +26,7 @@ public:
 
 private:
     void RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor = true) const;
-    void RenderText(const ImVec2& position, const char* text, ImFont* font) const;
+    void RenderText(const ImVec2& position, const char* text, float size) const;
     void RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const;
 
 private:
@@ -35,9 +35,7 @@ private:
     
     DashboardTexture m_DashboardTexture;
     
-    ImFont* m_Font24 = nullptr;
-    ImFont* m_Font29 = nullptr;
-    ImFont* m_Font37 = nullptr;
+    ImFont* m_Font = nullptr;
     
     float m_TripMeter = 0.0f;
     float m_Odometer = 0.0f;
