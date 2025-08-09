@@ -10,7 +10,7 @@
 
 
 static constexpr char k_ModName[]    = "Dashboard";
-static constexpr char k_ModVersion[] = "1.2.0";
+static constexpr char k_ModVersion[] = "1.3.0";
 static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
 
 

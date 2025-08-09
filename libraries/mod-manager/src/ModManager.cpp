@@ -6,7 +6,7 @@
 
 
 static constexpr char k_Name[]    = "Mod Manager";
-static constexpr char k_Version[] = "1.2.0";
+static constexpr char k_Version[] = "1.3.0";
 
 
 ModManager ModManager::s_Instance;

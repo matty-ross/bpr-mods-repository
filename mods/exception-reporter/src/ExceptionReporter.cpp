@@ -7,7 +7,7 @@
 
 
 static constexpr char k_ModName[]    = "Exception Reporter";
-static constexpr char k_ModVersion[] = "1.2.0";
+static constexpr char k_ModVersion[] = "1.3.0";
 
 
 ExceptionReporter ExceptionReporter::s_Instance;
