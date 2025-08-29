@@ -4,7 +4,7 @@
 ![](https://img.shields.io/badge/Visual%20Studio-5C2D91?style=for-the-badge&logo=visual-studio&logoColor=white)
 ![](https://img.shields.io/badge/C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
 
-This is a repository of my mods for the PC version of Burnout Paradise Remastered.
+A repository of my mods for the PC version of Burnout Paradise Remastered.
 
 
 ## Building
@@ -14,7 +14,7 @@ This is a repository of my mods for the PC version of Burnout Paradise Remastere
 4. Hit `Build Solution`
 
 ## Usage
-Currently, you must use Bo98's Mod Loader found [here](https://bpr.bo98.uk/).  
+Currently, you must use [Bo98's Mod Loader](https://bpr.bo98.uk/).  
 After installing it, run the `install.ps1` script to copy the built DLL files into correct directories.
 
 ## Dependencies
