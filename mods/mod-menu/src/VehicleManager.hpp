@@ -16,7 +16,6 @@ public:
 
     void LoadVehicles();
     void LoadWheels();
-    void LoadColorPalettes();
 
 private:
     struct Vehicle
@@ -29,11 +28,6 @@ private:
     {
         uint64_t ID;
         std::string Name;
-    };
-
-    struct ColorPalette
-    {
-        int32_t ColorsCount;
     };
 
 private:
@@ -50,7 +44,6 @@ private:
     bool m_OverrideBoostTrails = false;
     bool m_OverrideSwitchableBoost = false;
 
-    ColorPalette m_ColorPalettes[5] = {};
     bool m_OverrideColor = false;
     DirectX::XMFLOAT3A m_OverridenPaintColor = { 0.0f, 0.0f, 0.0f };
     DirectX::XMFLOAT3A m_OverridenPaintColorIntensity = { 1.0f, 1.0f, 1.0f };

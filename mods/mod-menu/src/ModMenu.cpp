@@ -140,15 +140,6 @@ void ModMenu::Load()
             m_Logger.Info("Wheels loaded.");
         }
 
-        // Load color palettes.
-        {
-            m_Logger.Info("Loading color palettes...");
-
-            m_VehicleManager.LoadColorPalettes();
-
-            m_Logger.Info("Color palettes loaded.");
-        }
-
         // Attach PreWorldUpdate detour.
         {
             m_Logger.Info("Attaching PreWorldUpdate detour...");

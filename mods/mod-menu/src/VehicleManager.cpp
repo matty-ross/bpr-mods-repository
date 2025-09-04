@@ -405,9 +405,6 @@ void VehicleManager::OnRenderMenu()
         {
             ImGui::SeparatorText("Color");
 
-            int32_t& colorPaletteType = playerRaceVehicle.at(0x98).as<int32_t>();
-            int32_t& colorIndex = playerRaceVehicle.at(0x94).as<int32_t>();
-
             static constexpr const char* colorPaletteTypes[] =
             {
                 "Gloss",
@@ -416,15 +413,8 @@ void VehicleManager::OnRenderMenu()
                 "Special",
                 "Party",
             };    
-            if (ImGui::Combo("Color Palette Type", &colorPaletteType, colorPaletteTypes, IM_ARRAYSIZE(colorPaletteTypes)))
-            {
-                colorIndex = std::clamp(colorIndex, 0, m_ColorPalettes[colorPaletteType].ColorsCount - 1);
-            }
-
-            if (ImGui::InputInt("Color Index", &colorIndex))
-            {
-                colorIndex = std::clamp(colorIndex, 0, m_ColorPalettes[colorPaletteType].ColorsCount - 1);
-            }
+            ImGui::Combo("Color Palette Type", &playerRaceVehicle.at(0x98).as<int32_t>(), colorPaletteTypes, IM_ARRAYSIZE(colorPaletteTypes));
+            ImGui::InputInt("Color Index", &playerRaceVehicle.at(0x94).as<int32_t>());
 
             ImGui::Separator();
 
@@ -517,15 +507,5 @@ void VehicleManager::LoadWheels()
                 .Name = wheelData.at(0x8).as<char[64]>(),
             }
         );
-    }
-}
-
-void VehicleManager::LoadColorPalettes()
-{
-    Core::Pointer colorPalettes = BPR::PoolModule_FindResource("CarColours")->Memory[0]; // BrnWorld::GlobalColourPalette*
-
-    for (int i = 0; i < 5; ++i)
-    {
-        m_ColorPalettes[i].ColorsCount = colorPalettes.at(i * 0xC + 0x8).as<int32_t>();
     }
 }
