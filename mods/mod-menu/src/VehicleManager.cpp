@@ -467,6 +467,11 @@ void VehicleManager::OnRenderMenu()
 
 void VehicleManager::LoadVehicles()
 {
+    static constexpr uint64_t disallowedVehicleIDs[] =
+    {
+        0xA5939AE858360000, // P_EU_AstonMartin_01
+    };
+    
     Core::Pointer vehicleList = BPR::PoolModule_FindResource("B5VehicleList")->Memory[0]; // BrnResource::VehicleListResource*
 
     std::map<uint64_t, int> colorLiveries;
@@ -479,13 +484,17 @@ void VehicleManager::LoadVehicles()
     {
         Core::Pointer vehicleData = vehicleList.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
 
-        m_Vehicles.push_back(
-            Vehicle
-            {
-                .ID   = vehicleData.at(0x0).as<uint64_t>(),
-                .Name = CreateVehicleName(vehicleData, colorLiveries, communityLiveries),
-            }
-        );
+        auto it = std::find(std::begin(disallowedVehicleIDs), std::end(disallowedVehicleIDs), vehicleData.at(0x0).as<uint64_t>());
+        if (it == std::end(disallowedVehicleIDs))
+        {
+            m_Vehicles.push_back(
+                Vehicle
+                {
+                    .ID   = vehicleData.at(0x0).as<uint64_t>(),
+                    .Name = CreateVehicleName(vehicleData, colorLiveries, communityLiveries),
+                }
+            );
+        }
     }
 }
 
