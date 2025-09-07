@@ -67,6 +67,17 @@ static std::string CreateVehicleName(
     uint64_t parentVehicleID = vehicleData.at(0x8).as<uint64_t>();
     uint8_t liveryType = vehicleData.at(0xFD).as<uint8_t>();
 
+    auto getVehicleID = [&]() -> std::string
+    {
+        char stringVehicleID[13] = {};
+        BPR::CgsID_ConvertToString(vehicleID, stringVehicleID);
+
+        char id[16] = {};
+        sprintf_s(id, "%-8s - ", stringVehicleID);
+
+        return id;
+    };
+    
     auto getVehicleManufacturer = [&]() -> std::string
     {
         int32_t vehicleManufacturer = BPR::ManufacturersIcon_GetVehicleManufacturer((parentVehicleID != 0) ? parentVehicleID : vehicleID);
@@ -97,22 +108,22 @@ static std::string CreateVehicleName(
 
     auto getVehicleLivery = [&]() -> std::string
     {
-        char buffer[16] = {};
+        char livery[16] = {};
         
         switch (liveryType)
         {
         case 0:
         case 2:
-            sprintf_s(buffer, " Finish %d", ++colorLiveries[vehicleID]);
-            return buffer;
+            sprintf_s(livery, " Finish %d", ++colorLiveries[vehicleID]);
+            return livery;
             
         case 1:
-            sprintf_s(buffer, " Finish %d", ++colorLiveries[parentVehicleID]);
-            return buffer;
+            sprintf_s(livery, " Finish %d", ++colorLiveries[parentVehicleID]);
+            return livery;
 
         case 5:
-            sprintf_s(buffer, " Community %d", ++communityLiveries[parentVehicleID]);
-            return buffer;
+            sprintf_s(livery, " Community %d", ++communityLiveries[parentVehicleID]);
+            return livery;
         
         case 3:
             return " Platinum";
@@ -124,7 +135,32 @@ static std::string CreateVehicleName(
         return "";
     };
 
-    return getVehicleManufacturer() + getVehicleName() + getVehicleLivery();
+    return getVehicleID() + getVehicleManufacturer() + getVehicleName() + getVehicleLivery();
+}
+
+static std::string CreateWheelName(
+    Core::Pointer wheelData // BrnResource::WheelListEntry*
+)
+{
+    uint64_t wheelID = wheelData.at(0x0).as<uint64_t>();
+    
+    auto getWheelID = [&]() -> std::string
+    {
+        char stringWheelID[13] = {};
+        BPR::CgsID_ConvertToString(wheelID, stringWheelID);
+
+        char id[16] = {};
+        sprintf_s(id, "%-8s - ", stringWheelID);
+
+        return id;
+    };
+
+    auto getWheelName = [&]() -> std::string
+    {
+        return wheelData.at(0x8).as<char[64]>();
+    };
+    
+    return getWheelID() + getWheelName();
 }
 
 static Core::Pointer GetPlayerActiveRaceVehicle()
@@ -513,7 +549,7 @@ void VehicleManager::LoadWheels()
             Wheel
             {
                 .ID   = wheelData.at(0x0).as<uint64_t>(),
-                .Name = wheelData.at(0x8).as<char[64]>(),
+                .Name = CreateWheelName(wheelData),
             }
         );
     }
