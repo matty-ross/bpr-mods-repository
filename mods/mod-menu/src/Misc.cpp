@@ -80,25 +80,24 @@ void Misc::OnRenderMenu()
         Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
 
         {
-            ImGui::SeparatorText("Simulation");
-            
             bool isOnline = gameModule.at(0xB6D415).as<bool>();
+            bool& simulationPaused = gameModule.at(0xB6D3FF).as<bool>();
 
             if (isOnline)
             {
                 ImGui::BeginDisabled();
             }
 
-            if (ImGui::Button("Pause##simulation"))
+            if (ImGui::Checkbox("Simulation Paused", &simulationPaused))
             {
-                m_PauseSimulation = true;
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Unpause##simulation"))
-            {
-                m_UnpauseSimulation = true;
+                if (simulationPaused)
+                {
+                    m_PauseSimulation = true;
+                }
+                else
+                {
+                    m_UnpauseSimulation = true;
+                }
             }
 
             if (isOnline)
@@ -108,26 +107,28 @@ void Misc::OnRenderMenu()
         }
 
         {
-            ImGui::SeparatorText("HUD");
-            
-            if (ImGui::Button("Hide##hud"))
-            {
-                m_HideHUD = true;
-            }
+            bool& inHUD = gameModule.at(0x7FABBC).deref().at(0x14C).as<bool>();
 
-            ImGui::SameLine();
-
-            if (ImGui::Button("Show##hud"))
+            if (ImGui::Checkbox("HUD Visible", &inHUD))
             {
-                m_ShowHUD = true;
+                if (inHUD)
+                {
+                    m_ShowHUD = true;
+                }
+                else
+                {
+                    m_HideHUD = true;
+                }
             }
         }
 
         {
-            ImGui::SeparatorText("Crashes");
+            bool& crashWhenFatal = gameModule.at(0x1E1364).as<bool>();
             
-            ImGui::Checkbox("Crash when Off-Road", &gameModule.at(0x1E1364).as<bool>());
-            ImGui::Checkbox("Crash in Water", &Core::Pointer(0x0140AA9F).as<bool>());
+            if (ImGui::Checkbox("Crash when Off-Road", &crashWhenFatal))
+            {
+                Core::Pointer(0x0140AA9F).as<bool>() = crashWhenFatal;
+            }
         }
     }
 }
