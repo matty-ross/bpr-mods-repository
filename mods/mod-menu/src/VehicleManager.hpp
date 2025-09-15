@@ -9,6 +9,7 @@
 class VehicleManager
 {
 public:
+    void OnDoUpdate();
     void OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue);
     void OnUpdateActiveRaceVehicleColors();
 
@@ -41,8 +42,8 @@ private:
 
     bool m_ReloadVehicle = false;
 
-    bool m_OverrideBoostTrails = false;
     bool m_OverrideSwitchableBoost = false;
+    bool m_OverrideHoverMode = false;
 
     bool m_OverrideColor = false;
     DirectX::XMFLOAT3A m_OverridenPaintColor = { 0.0f, 0.0f, 0.0f };

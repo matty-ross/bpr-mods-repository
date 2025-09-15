@@ -28,6 +28,7 @@ private:
     void Load();
     void Unload();
 
+    void OnDoUpdate();
     void OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue);
     void OnUpdateHudFlow();
     void OnUpdateActiveRaceVehicleColors();
@@ -35,10 +36,10 @@ private:
     void OnRenderMenu();
 
 private:
+    static void DetourDoUpdate();
     static void DetourPreWorldUpdate();
     static void DetourUpdateHudFlow();
     static void DetourUpdateActiveRaceVehicleColors();
-    static void DetourCheckBoostTrails();
     static void DetourCheckSwitchableBoost();
 
 private:
@@ -51,10 +52,10 @@ private:
     Environment m_Environment;
     VehicleManager m_VehicleManager;
 
+    DetourHook m_DetourDoUpdate;
     DetourHook m_DetourPreWorldUpdate;
     DetourHook m_DetourUpdateHudFlow;
     DetourHook m_DetourUpdateActiveRaceVehicleColors;
-    DetourHook m_DetourCheckBoostTrails;
     DetourHook m_DetourCheckSwitchableBoost;
 
     ImGuiMenu m_Menu;

@@ -206,6 +206,19 @@ static bool CanResetPlayerVehicle()
 }
 
 
+void VehicleManager::OnDoUpdate()
+{
+    Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
+    Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
+
+    constexpr uint64_t originalVehicleID = 0xA56601CB30510000; // Jansen P12 88 Special
+    uint64_t vehicleID = playerRaceVehicle.at(0x68).as<uint64_t>();
+
+    Core::Pointer(0x01490588).as<uint64_t>() = m_OverrideHoverMode ? vehicleID : originalVehicleID;
+    Core::Pointer(0x0148EC20).as<uint64_t>() = m_OverrideHoverMode ? vehicleID : originalVehicleID;
+    Core::Pointer(0x014A08D0).as<uint64_t>() = m_OverrideHoverMode ? vehicleID : originalVehicleID;
+}
+
 void VehicleManager::OnPreWorldUpdate(
     void* gameEventQueue, // BrnGameState::GameStateModuleIO::GameEventQueue*
     void* gameActionQueue // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>*
@@ -434,8 +447,8 @@ void VehicleManager::OnRenderMenu()
 
             ImGui::Separator();
 
-            ImGui::Checkbox("Boost Trails", &m_OverrideBoostTrails);
             ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost);
+            ImGui::Checkbox("Hover Mode", &m_OverrideHoverMode);
         }
 
         {

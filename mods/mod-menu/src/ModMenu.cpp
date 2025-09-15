@@ -20,6 +20,11 @@ ModMenu ModMenu::s_Instance;
 ModMenu::ModMenu()
     :
     m_Logger(k_ModName),
+    m_DetourDoUpdate
+    {
+        .Target = Core::Pointer(0x00A41B95).GetAddress(),
+        .Detour = &ModMenu::DetourDoUpdate,
+    },
     m_DetourPreWorldUpdate
     {
         .Target = Core::Pointer(0x00A2A512).GetAddress(),
@@ -34,11 +39,6 @@ ModMenu::ModMenu()
     {
         .Target = Core::Pointer(0x06A6DFFD).GetAddress(),
         .Detour = &ModMenu::DetourUpdateActiveRaceVehicleColors,
-    },
-    m_DetourCheckBoostTrails
-    {
-        .Target = Core::Pointer(0x0692915F).GetAddress(),
-        .Detour = &ModMenu::DetourCheckBoostTrails,
     },
     m_DetourCheckSwitchableBoost
     {
@@ -140,6 +140,15 @@ void ModMenu::Load()
             m_Logger.Info("Wheels loaded.");
         }
 
+        // Attach DoUpdate detour.
+        {
+            m_Logger.Info("Attaching DoUpdate detour...");
+
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourDoUpdate);
+
+            m_Logger.Info("Attached DoUpdate detour.");
+        }
+
         // Attach PreWorldUpdate detour.
         {
             m_Logger.Info("Attaching PreWorldUpdate detour...");
@@ -165,15 +174,6 @@ void ModMenu::Load()
             ModManager::Get().GetDetourHookManager().Attach(m_DetourUpdateActiveRaceVehicleColors);
 
             m_Logger.Info("Attached UpdateActiveRaceVehicleColors detour.");
-        }
-        
-        // Attach CheckBoostTrails detour.
-        {
-            m_Logger.Info("Attaching CheckBoostTrails detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourCheckBoostTrails);
-
-            m_Logger.Info("Attached CheckBoostTrails detour.");
         }
 
         // Attach CheckSwitchableBoost detour.
@@ -227,15 +227,6 @@ void ModMenu::Unload()
             m_Logger.Info("Detached CheckSwitchableBoost detour.");
         }
 
-        // Detach CheckBoostTrails detour.
-        {
-            m_Logger.Info("Detaching CheckBoostTrails detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourCheckBoostTrails);
-
-            m_Logger.Info("Detached CheckBoostTrails detour.");
-        }
-
         // Detach UpdateActiveRaceVehicleColors detour.
         {
             m_Logger.Info("Detaching UpdateActiveRaceVehicleColors detour...");
@@ -263,6 +254,15 @@ void ModMenu::Unload()
             m_Logger.Info("Detached PreWorldUpdate detour.");
         }
 
+        // Detach DoUpdate detour.
+        {
+            m_Logger.Info("Detaching DoUpdate detour...");
+
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourDoUpdate);
+
+            m_Logger.Info("Detached DoUpdate detour.");
+        }
+
         m_Logger.Info("Unloaded.");
     }
     catch (const std::exception& e)
@@ -270,6 +270,11 @@ void ModMenu::Unload()
         m_Logger.Error("%s", e.what());
         MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
     }
+}
+
+void ModMenu::OnDoUpdate()
+{
+    m_VehicleManager.OnDoUpdate();
 }
 
 void ModMenu::OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue)
@@ -306,6 +311,23 @@ void ModMenu::OnRenderMenu()
         ImGui::PopItemWidth();
     }
     ImGui::End();
+}
+
+__declspec(naked) void ModMenu::DetourDoUpdate()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        mov ecx, offset s_Instance
+        call ModMenu::OnDoUpdate
+
+        popad
+        popfd
+
+        jmp dword ptr [s_Instance.m_DetourDoUpdate.Target]
+    }
 }
 
 __declspec(naked) void ModMenu::DetourPreWorldUpdate()
@@ -358,22 +380,6 @@ __declspec(naked) void ModMenu::DetourUpdateActiveRaceVehicleColors()
         popfd
 
         jmp dword ptr [s_Instance.m_DetourUpdateActiveRaceVehicleColors.Target]
-    }
-}
-
-__declspec(naked) void ModMenu::DetourCheckBoostTrails()
-{
-    __asm
-    {
-        cmp byte ptr [s_Instance.m_VehicleManager.m_OverrideBoostTrails], 0
-        je _continue
-        
-        // Skip the if statement.
-        push 0x0692917F
-        ret
-    
-    _continue:
-        jmp dword ptr [s_Instance.m_DetourCheckBoostTrails.Target]
     }
 }
 
