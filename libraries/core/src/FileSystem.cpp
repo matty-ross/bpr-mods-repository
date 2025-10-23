@@ -24,7 +24,7 @@ namespace Core
         }
     }
 
-    void FileSystem::ReadFileContent(const char* path, void* buffer, size_t size)
+    void FileSystem::ReadFileContent(const char* path, FileContent& content)
     {
         char expandedPath[MAX_PATH] = {};
         if (ExpandEnvironmentStringsA(path, expandedPath, sizeof(expandedPath)) == 0)
@@ -38,18 +38,18 @@ namespace Core
             throw WindowsException("Failed to open file");
         }
 
+        DWORD fileSize = GetFileSize(fileHandle, nullptr);
+        content.m_Buffer = new BYTE[fileSize];
+        content.m_Size = fileSize;
+        content.m_OwnsBuffer = true;
+
         DWORD bytesRead = 0;
-        BOOL result = ReadFile(fileHandle, buffer, size, &bytesRead, nullptr);
+        ReadFile(fileHandle, content.m_Buffer, content.m_Size, &bytesRead, nullptr);
         
         CloseHandle(fileHandle);
-
-        if (result == FALSE || bytesRead != size)
-        {
-            throw WindowsException("Failed to read file content");
-        }
     }
 
-    void FileSystem::WriteFileContent(const char* path, const void* buffer, size_t size)
+    void FileSystem::WriteFileContent(const char* path, const FileContent& content)
     {
         char expandedPath[MAX_PATH] = {};
         if (ExpandEnvironmentStringsA(path, expandedPath, sizeof(expandedPath)) == 0)
@@ -64,13 +64,8 @@ namespace Core
         }
 
         DWORD bytesWritten = 0;
-        BOOL result = WriteFile(fileHandle, buffer, size, &bytesWritten, nullptr);
+        WriteFile(fileHandle, content.m_Buffer, content.m_Size, &bytesWritten, nullptr);
         
         CloseHandle(fileHandle);
-
-        if (result == FALSE || bytesWritten != size)
-        {
-            throw WindowsException("Failed to write file content");
-        }
     }
 }
