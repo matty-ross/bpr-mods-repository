@@ -21,7 +21,7 @@
     <ClCompile Include="src\File.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\FileSystem.cpp">
+    <ClCompile Include="src\Path.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\WindowsException.cpp">
@@ -35,7 +35,7 @@
     <ClInclude Include="include\core\File.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\core\FileSystem.hpp">
+    <ClInclude Include="include\core\Path.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\core\WindowsException.hpp">
