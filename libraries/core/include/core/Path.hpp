@@ -14,7 +14,7 @@ namespace Core
     public:
         const char* GetPath() const;
 
-        void Append(const char* path);
+        Path& Append(const char* path);
         void Create() const;
 
     private:

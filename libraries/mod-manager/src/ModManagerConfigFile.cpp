@@ -8,9 +8,9 @@
 static constexpr char k_Name[] = "mod manager config";
 
 
-ModManagerConfigFile::ModManagerConfigFile(const char* filePath, const Core::Logger& logger)
+ModManagerConfigFile::ModManagerConfigFile(Core::Path directory, const Core::Logger& logger)
     :
-    m_FilePath(filePath),
+    m_FilePath(directory.Append("mod-manager-config.yaml")),
     m_Logger(logger)
 {
 }
@@ -19,9 +19,9 @@ void ModManagerConfigFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Read);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Read);
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             YAML::Node imguiNode = yaml["ImGui"];
@@ -43,9 +43,9 @@ void ModManagerConfigFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Write);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Write);
         YAML::Node yaml;
         {
             YAML::Node imguiNode;

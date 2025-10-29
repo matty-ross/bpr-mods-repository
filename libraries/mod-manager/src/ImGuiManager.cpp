@@ -11,11 +11,12 @@
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-ImGuiManager::ImGuiManager(const ImGuiConfig& imguiConfig)
+ImGuiManager::ImGuiManager(Core::Path directory, const ImGuiConfig& imguiConfig)
     :
+    m_IniFilePath(directory.Append("imgui.ini")),
     m_ImGuiConfig(imguiConfig)
 {
-    InitializeCriticalSection(&m_CriticalSection);   
+    InitializeCriticalSection(&m_CriticalSection);
 }
 
 ImGuiManager::~ImGuiManager()
@@ -78,6 +79,7 @@ void ImGuiManager::Load() const
     ImGui::CreateContext();
 
     ImGuiIO& io = ImGui::GetIO();
+    io.IniFilename = m_IniFilePath.GetPath();
     if (m_ImGuiConfig.EnableDocking)
     {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

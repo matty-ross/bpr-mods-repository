@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 #include "mod-manager/ModManagerApi.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
@@ -26,6 +27,7 @@ public:
     MOD_MANAGER_API static const char* GetVersion();
 
 public:
+    MOD_MANAGER_API Core::Path GetConfigDirectory() const;
     MOD_MANAGER_API DetourHookManager& GetDetourHookManager();
     MOD_MANAGER_API ImGuiManager& GetImGuiManager();
 
@@ -45,6 +47,7 @@ private:
     static ModManager s_Instance;
 
 private:
+    Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
 
     ModManagerConfigFile m_ModManagerConfigFile;

@@ -18,9 +18,10 @@ namespace Core
         return m_Path;
     }
 
-    void Path::Append(const char* path)
+    Path& Path::Append(const char* path)
     {
         PathAppendA(m_Path, path);
+        return *this;
     }
     
     void Path::Create() const

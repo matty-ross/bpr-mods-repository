@@ -14,9 +14,10 @@ ModManager ModManager::s_Instance;
 
 ModManager::ModManager()
     :
+    m_ConfigDirectory("%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\"),
     m_Logger(k_Name),
-    m_ModManagerConfigFile(".\\mod-manager-config.yaml", m_Logger),
-    m_ImGuiManager(m_ModManagerConfigFile.GetImGuiConfig()),
+    m_ModManagerConfigFile(m_ConfigDirectory, m_Logger),
+    m_ImGuiManager(m_ConfigDirectory, m_ModManagerConfigFile.GetImGuiConfig()),
     m_DetourPresent
     {
         .Target = Core::Pointer(0x00C89F90).GetAddress(),
@@ -43,6 +44,11 @@ ModManager& ModManager::Get()
 const char* ModManager::GetVersion()
 {
     return k_Version;
+}
+
+Core::Path ModManager::GetConfigDirectory() const
+{
+    return m_ConfigDirectory;
 }
 
 DetourHookManager& ModManager::GetDetourHookManager()
@@ -84,6 +90,15 @@ void ModManager::Load()
     try
     {
         m_Logger.Info("Loading...");
+
+        // Create config directory.
+        {
+            m_Logger.Info("Creating config directory '%s' ...", m_ConfigDirectory.GetPath());
+
+            m_ConfigDirectory.Create();
+
+            m_Logger.Info("Created config directory.");
+        }
 
         // Load mod manager config.
         {

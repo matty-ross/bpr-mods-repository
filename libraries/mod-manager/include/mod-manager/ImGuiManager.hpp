@@ -5,6 +5,7 @@
 #include <functional>
 #include <Windows.h>
 
+#include "core/Path.hpp"
 #include "mod-manager/ModManagerApi.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
 
@@ -25,7 +26,7 @@ class ImGuiManager
     friend class ModManager;
 
 private:
-    ImGuiManager(const ImGuiConfig& imguiConfig);
+    ImGuiManager(Core::Path directory, const ImGuiConfig& imguiConfig);
     ~ImGuiManager();
 
 public:
@@ -50,6 +51,7 @@ private:
     bool OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 private:
+    Core::Path m_IniFilePath;
     const ImGuiConfig& m_ImGuiConfig;
 
     std::vector<ImGuiMenu*> m_Menus;

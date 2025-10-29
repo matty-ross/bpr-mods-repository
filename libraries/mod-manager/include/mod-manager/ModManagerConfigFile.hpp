@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 
 
@@ -18,7 +19,7 @@ struct ImGuiConfig
 class ModManagerConfigFile
 {
 public:
-    ModManagerConfigFile(const char* filePath, const Core::Logger& logger);
+    ModManagerConfigFile(Core::Path directory, const Core::Logger& logger);
 
 public:
     void Load();
@@ -27,7 +28,7 @@ public:
     ImGuiConfig& GetImGuiConfig();
 
 private:
-    const char* m_FilePath;
+    Core::Path m_FilePath;
     const Core::Logger& m_Logger;
 
     ImGuiConfig m_ImGuiConfig;
