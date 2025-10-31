@@ -8,12 +8,10 @@
 #include "mod-manager/ModManager.hpp"
 
 
-#define MOD_DIRECTORY ".\\mods\\free-camera\\"
-
-
-static constexpr char k_ModName[]    = "Free Camera";
-static constexpr char k_ModVersion[] = "1.3.0";
-static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
+static constexpr char k_ModName[]      = "Free Camera";
+static constexpr char k_ModVersion[]   = "1.3.0";
+static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
+static constexpr char k_ModDirectory[] = "free-camera\\";
 
 
 FreeCamera FreeCamera::s_Instance;
@@ -21,8 +19,9 @@ FreeCamera FreeCamera::s_Instance;
 
 FreeCamera::FreeCamera()
     :
+    m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
-    m_CustomParamtersFile(MOD_DIRECTORY "custom-parameters.yaml", m_Logger),
+    m_CustomParamtersFile(m_ConfigDirectory, m_Logger),
     m_GameplayExternalCamera(m_CustomParamtersFile),
     m_DetourArbitratorUpdate
     {
@@ -80,13 +79,13 @@ void FreeCamera::Load()
             m_Logger.Info("Checked versions.");
         }
 
-        // Create mod directory.
+        // Create mod config directory.
         {
-            m_Logger.Info("Creating mod directory '%s' ...", MOD_DIRECTORY);
+            m_Logger.Info("Creating mod config directory '%s' ...", m_ConfigDirectory.GetPath());
             
-            CreateDirectoryA(MOD_DIRECTORY, nullptr);
+            m_ConfigDirectory.Create();
 
-            m_Logger.Info("Created mod directory.");
+            m_Logger.Info("Created mod config directory.");
         }
 
         // Load custom parameters.

@@ -8,9 +8,9 @@
 static constexpr char k_Name[] = "custom parameters";
 
 
-CustomParametersFile::CustomParametersFile(const char* filePath, const Core::Logger& logger)
+CustomParametersFile::CustomParametersFile(Core::Path directory, const Core::Logger& logger)
     :
-    m_FilePath(filePath),
+    m_FilePath(directory.Append("custom-parameters.yaml")),
     m_Logger(logger)
 {
 }
@@ -19,9 +19,9 @@ void CustomParametersFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Read);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Read);
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             m_CustomParameters.clear();
@@ -59,9 +59,9 @@ void CustomParametersFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.GetPath());
         
-        Core::File file(m_FilePath, Core::File::Mode::Write);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Write);
         YAML::Node yaml;
         {
             for (const CustomParameters& customParameters : m_CustomParameters)

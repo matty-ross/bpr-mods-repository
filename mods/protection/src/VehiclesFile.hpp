@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 
 #include "Vehicles.hpp"
@@ -20,7 +21,7 @@ struct Vehicle
 class VehiclesFile
 {
 public:
-    VehiclesFile(const char* filePath, const Core::Logger& logger);
+    VehiclesFile(Core::Path directory, const Core::Logger& logger);
 
 public:
     void Load();
@@ -32,7 +33,7 @@ public:
     void SetFallbackVehicle(const VanillaVehicle* fallbackVehicle);
 
 private:
-    const char* m_FilePath;
+    Core::Path m_FilePath;
     const Core::Logger& m_Logger;
 
     std::vector<Vehicle> m_Vehicles;

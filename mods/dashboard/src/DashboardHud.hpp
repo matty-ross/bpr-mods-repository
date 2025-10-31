@@ -4,6 +4,7 @@
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 
 #include "DashboardConfigFile.hpp"
@@ -13,11 +14,11 @@
 class DashboardHud
 {
 public:
-    DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger);
+    DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Path& assetsDirectory, const Core::Logger& logger);
 
 public:
-    void LoadTexture(const char* filePath);
-    void LoadFont(const char* filePath);
+    void LoadTexture();
+    void LoadFont();
 
     void OnProgressionAddDistanceDriven(Core::Pointer progressionManager, float distance, int32_t vehicleType);
     
@@ -31,6 +32,7 @@ private:
 
 private:
     DashboardConfigFile& m_DashboardConfigFile;
+    const Core::Path& m_AssetsDirectory;
     const Core::Logger& m_Logger;
     
     DashboardTexture m_DashboardTexture;

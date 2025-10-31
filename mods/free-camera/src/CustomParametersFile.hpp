@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 
 
@@ -28,7 +29,7 @@ struct CustomParameters
 class CustomParametersFile
 {
 public:
-    CustomParametersFile(const char* filePath, const Core::Logger& logger);
+    CustomParametersFile(Core::Path directory, const Core::Logger& logger);
 
 public:
     void Load();
@@ -37,7 +38,7 @@ public:
     std::vector<CustomParameters>& GetCustomParameters();
 
 private:
-    const char* m_FilePath;
+    Core::Path m_FilePath;
     const Core::Logger& m_Logger;
 
     std::vector<CustomParameters> m_CustomParameters;

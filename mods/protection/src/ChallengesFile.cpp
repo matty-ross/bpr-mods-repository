@@ -8,9 +8,9 @@
 static constexpr char k_Name[] = "challenges";
 
 
-ChallengesFile::ChallengesFile(const char* filePath, const Core::Logger& logger)
+ChallengesFile::ChallengesFile(Core::Path directory, const Core::Logger& logger)
     :
-    m_FilePath(filePath),
+    m_FilePath(directory.Append("challenges.yaml")),
     m_Logger(logger)
 {
 }
@@ -19,9 +19,9 @@ void ChallengesFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Read);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Read);
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>();
@@ -56,9 +56,9 @@ void ChallengesFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Write);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Write);
         YAML::Node yaml;
         {
             yaml["FallbackID"] = m_FallbackChallenge->ID;

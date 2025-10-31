@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
@@ -50,6 +51,7 @@ private:
     static Protection s_Instance;
 
 private:
+    Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
 
     VehiclesFile m_VehiclesFile;

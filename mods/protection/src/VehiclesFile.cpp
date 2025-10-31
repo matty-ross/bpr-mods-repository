@@ -8,9 +8,9 @@
 static constexpr char k_Name[] = "vehicles";
 
 
-VehiclesFile::VehiclesFile(const char* filePath, const Core::Logger& logger)
+VehiclesFile::VehiclesFile(Core::Path directory, const Core::Logger& logger)
     :
-    m_FilePath(filePath),
+    m_FilePath(directory.Append("vehicles.yaml")),
     m_Logger(logger)
 {
 }
@@ -19,9 +19,9 @@ void VehiclesFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Read);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Read);
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>();
@@ -56,9 +56,9 @@ void VehiclesFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Write);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Write);
         YAML::Node yaml;
         {
             yaml["FallbackID"] = m_FallbackVehicle->ID;

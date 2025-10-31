@@ -8,9 +8,9 @@
 static constexpr char k_Name[] = "dashboard config";
 
 
-DashboardConfigFile::DashboardConfigFile(const char* filePath, const Core::Logger& logger)
+DashboardConfigFile::DashboardConfigFile(Core::Path directory, const Core::Logger& logger)
     :
-    m_FilePath(filePath),
+    m_FilePath(directory.Append("dashboard-config.yaml")),
     m_Logger(logger)
 {
 }
@@ -19,9 +19,9 @@ void DashboardConfigFile::Load()
 {
     try
     {
-        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Read);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Read);
         YAML::Node yaml = YAML::Load(file.Read<std::string>());
         {
             m_DashboardConfig.AlwaysVisible = yaml["AlwaysVisible"].as<bool>();
@@ -47,9 +47,9 @@ void DashboardConfigFile::Save() const
 {
     try
     {
-        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath);
+        m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath, Core::File::Mode::Write);
+        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Write);
         YAML::Node yaml;
         {
             yaml["AlwaysVisible"] = m_DashboardConfig.AlwaysVisible;

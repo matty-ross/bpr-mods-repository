@@ -6,12 +6,10 @@
 #include "mod-manager/ModManager.hpp"
 
 
-#define MOD_DIRECTORY ".\\mods\\mod-menu\\"
-
-
-static constexpr char k_ModName[]    = "Mod Menu";
-static constexpr char k_ModVersion[] = "1.3.0";
-static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
+static constexpr char k_ModName[]      = "Mod Menu";
+static constexpr char k_ModVersion[]   = "1.3.0";
+static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
+static constexpr char k_ModDirectory[] = "mod-menu\\";
 
 
 ModMenu ModMenu::s_Instance;
@@ -19,6 +17,7 @@ ModMenu ModMenu::s_Instance;
 
 ModMenu::ModMenu()
     :
+    m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
     m_DetourDoUpdate
     {
@@ -91,13 +90,13 @@ void ModMenu::Load()
             m_Logger.Info("Checked versions.");
         }
 
-        // Create mod directory.
+        // Create mod config directory.
         {
-            m_Logger.Info("Creating mod directory '%s' ...", MOD_DIRECTORY);
+            m_Logger.Info("Creating mod config directory '%s' ...", m_ConfigDirectory.GetPath());
 
-            CreateDirectoryA(MOD_DIRECTORY, nullptr);
+            m_ConfigDirectory.Create();
 
-            m_Logger.Info("Created mod directory.");
+            m_Logger.Info("Created mod config directory.");
         }
 
         // Wait to be in game.

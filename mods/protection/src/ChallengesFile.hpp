@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "core/Path.hpp"
 #include "core/Logger.hpp"
 
 #include "Challenges.hpp"
@@ -20,7 +21,7 @@ struct Challenge
 class ChallengesFile
 {
 public:
-    ChallengesFile(const char* filePath, const Core::Logger& logger);
+    ChallengesFile(Core::Path directory, const Core::Logger& logger);
 
 public:
     void Load();
@@ -32,7 +33,7 @@ public:
     void SetFallbackChallenge(const VanillaChallenge* fallbackChallenge);
 
 private:
-    const char* m_FilePath;
+    Core::Path m_FilePath;
     const Core::Logger& m_Logger;
 
     std::vector<Challenge> m_Challenges;

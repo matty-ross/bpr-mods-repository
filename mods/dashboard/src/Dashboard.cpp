@@ -6,12 +6,10 @@
 #include "mod-manager/ModManager.hpp"
 
 
-#define MOD_DIRECTORY ".\\mods\\dashboard\\"
-
-
-static constexpr char k_ModName[]    = "Dashboard";
-static constexpr char k_ModVersion[] = "1.3.0";
-static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
+static constexpr char k_ModName[]      = "Dashboard";
+static constexpr char k_ModVersion[]   = "1.3.0";
+static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
+static constexpr char k_ModDirectory[] = "dashboard\\";
 
 
 Dashboard Dashboard::s_Instance;
@@ -19,9 +17,11 @@ Dashboard Dashboard::s_Instance;
 
 Dashboard::Dashboard()
     :
+    m_AssetsDirectory(ModManager::Get().GetAssetsDirectory().Append(k_ModDirectory)),
+    m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
-    m_DashboardConfigFile(MOD_DIRECTORY "dashboard-config.yaml", m_Logger),
-    m_DashboardHud(m_DashboardConfigFile, m_Logger),
+    m_DashboardConfigFile(m_ConfigDirectory, m_Logger),
+    m_DashboardHud(m_DashboardConfigFile, m_AssetsDirectory, m_Logger),
     m_DetourProgressionAddDistanceDriven
     {
         .Target = Core::Pointer(0x06E6B397).GetAddress(),
@@ -77,6 +77,15 @@ void Dashboard::Load()
             m_Logger.Info("Checked versions.");
         }
 
+        // Create mod config directory.
+        {
+            m_Logger.Info("Creating mod config directory '%s' ...", m_ConfigDirectory.GetPath());
+
+            m_ConfigDirectory.Create();
+
+            m_Logger.Info("Created mod config directory.");
+        }
+
         // Load dashboard config.
         {
             m_DashboardConfigFile.Load();
@@ -108,8 +117,8 @@ void Dashboard::Load()
         {
             EnterCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
             
-            m_DashboardHud.LoadTexture(MOD_DIRECTORY "texture.dds");
-            m_DashboardHud.LoadFont(MOD_DIRECTORY "font.ttf");
+            m_DashboardHud.LoadTexture();
+            m_DashboardHud.LoadFont();
             
             LeaveCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
         }

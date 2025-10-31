@@ -6,12 +6,10 @@
 #include "mod-manager/ModManager.hpp"
 
 
-#define MOD_DIRECTORY ".\\mods\\bully-repellent\\"
-
-
-static constexpr char k_ModName[]    = "Bully Repellent";
-static constexpr char k_ModVersion[] = "1.3.0";
-static constexpr char k_ModAuthor[]  = "PISros0724 (Matty)";
+static constexpr char k_ModName[]      = "Bully Repellent";
+static constexpr char k_ModVersion[]   = "1.3.0";
+static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
+static constexpr char k_ModDirectory[] = "bully-repellent\\";
 
 
 BullyRepellent BullyRepellent::s_Instance;
@@ -19,8 +17,9 @@ BullyRepellent BullyRepellent::s_Instance;
 
 BullyRepellent::BullyRepellent()
     :
+    m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
-    m_BlacklistedPlayersFile(MOD_DIRECTORY "blacklisted-players.yaml", m_Logger),
+    m_BlacklistedPlayersFile(m_ConfigDirectory, m_Logger),
     m_OnlinePlayers(m_BlacklistedPlayersFile),
     m_DetourOnGuiEventNetworkPlayerStatus
     {
@@ -73,13 +72,13 @@ void BullyRepellent::Load()
             m_Logger.Info("Checked versions.");
         }
 
-        // Create mod directory.
+        // Create mod config directory.
         {
-            m_Logger.Info("Creating mod directory '%s' ...", MOD_DIRECTORY);
+            m_Logger.Info("Creating mod config directory '%s' ...", m_ConfigDirectory.GetPath());
 
-            CreateDirectoryA(MOD_DIRECTORY, nullptr);
+            m_ConfigDirectory.Create();
 
-            m_Logger.Info("Created mod directory.");
+            m_Logger.Info("Created mod config directory.");
         }
 
         // Load blacklisted players.

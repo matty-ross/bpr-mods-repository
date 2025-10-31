@@ -24,30 +24,35 @@ static ImColor ApplyOpacityToColor(ImColor color, float opacity)
 }
 
 
-DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Logger& logger)
+DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Path& assetsDirectory, const Core::Logger& logger)
     :
     m_DashboardConfigFile(dashboardConfigFile),
+    m_AssetsDirectory(assetsDirectory),
     m_Logger(logger)
 {
 }
 
-void DashboardHud::LoadTexture(const char* filePath)
+void DashboardHud::LoadTexture()
 {
-    m_Logger.Info("Loading texture from file '%s' ...", filePath);
+    Core::Path filePath = Core::Path(m_AssetsDirectory).Append("texture.dds");
+
+    m_Logger.Info("Loading texture from file '%s' ...", filePath.GetPath());
     
-    Core::File file(filePath, Core::File::Mode::Read);
+    Core::File file(filePath.GetPath(), Core::File::Mode::Read);
     std::vector<BYTE> textureData = file.Read<std::vector<BYTE>>();
     m_DashboardTexture.CreateTexture(textureData.data());
 
     m_Logger.Info("Loaded texture.");
 }
 
-void DashboardHud::LoadFont(const char* filePath)
+void DashboardHud::LoadFont()
 {
-    m_Logger.Info("Loading font from file '%s' ...", filePath);
+    Core::Path filePath = Core::Path(m_AssetsDirectory).Append("font.ttf");
+    
+    m_Logger.Info("Loading font from file '%s' ...", filePath.GetPath());
     
     ImGuiIO& io = ImGui::GetIO();
-    m_Font = io.Fonts->AddFontFromFileTTF(filePath);
+    m_Font = io.Fonts->AddFontFromFileTTF(filePath.GetPath());
 
     m_Logger.Info("Loaded font.");
 }
