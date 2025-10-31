@@ -27,6 +27,7 @@ public:
     MOD_MANAGER_API static const char* GetVersion();
 
 public:
+    MOD_MANAGER_API Core::Path GetAssetsDirectory() const;
     MOD_MANAGER_API Core::Path GetConfigDirectory() const;
     MOD_MANAGER_API DetourHookManager& GetDetourHookManager();
     MOD_MANAGER_API ImGuiManager& GetImGuiManager();
@@ -47,6 +48,7 @@ private:
     static ModManager s_Instance;
 
 private:
+    Core::Path m_AssetsDirectory;
     Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
 

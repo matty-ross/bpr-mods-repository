@@ -14,6 +14,7 @@ ModManager ModManager::s_Instance;
 
 ModManager::ModManager()
     :
+    m_AssetsDirectory(".\\mods\\"),
     m_ConfigDirectory("%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\"),
     m_Logger(k_Name),
     m_ModManagerConfigFile(m_ConfigDirectory, m_Logger),
@@ -44,6 +45,11 @@ ModManager& ModManager::Get()
 const char* ModManager::GetVersion()
 {
     return k_Version;
+}
+
+Core::Path ModManager::GetAssetsDirectory() const
+{
+    return m_AssetsDirectory;
 }
 
 Core::Path ModManager::GetConfigDirectory() const
