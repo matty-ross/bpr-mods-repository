@@ -65,16 +65,16 @@ void Dashboard::Load()
     {
         m_Logger.Info("Loading...");
 
-        // Check versions.
+        // Check mod version.
         {
-            m_Logger.Info("Checking versions...");
+            m_Logger.Info("Checking mod version...");
 
-            if (strcmp(ModManager::GetVersion(), k_ModVersion) != 0)
+            if (!ModManager::Get().CheckModVersion(k_ModVersion))
             {
                 throw std::exception("Mod Manager and Mod versions mismatch.");
             }
 
-            m_Logger.Info("Checked versions.");
+            m_Logger.Info("Checked mod version.");
         }
 
         // Create mod config directory.

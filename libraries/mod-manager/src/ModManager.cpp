@@ -42,9 +42,9 @@ ModManager& ModManager::Get()
     return s_Instance;
 }
 
-const char* ModManager::GetVersion()
+bool ModManager::CheckModVersion(const char* modVersion) const
 {
-    return k_Version;
+    return strcmp(modVersion, k_Version) == 0;
 }
 
 Core::Path ModManager::GetAssetsDirectory() const
