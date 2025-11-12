@@ -8,16 +8,19 @@ A repository of my mods for the PC version of Burnout Paradise Remastered.
 
 
 ## Building
-1. Clone this repository
-2. Open it in Visual Studio 2022
-3. Set the platform to `x86`
-4. Hit `Build Solution`
+
+1. Clone this repository recursively (with submodules)
+1. Open it in Visual Studio 2022
+1. Set the platform to `x86`
+1. Hit `Build Solution`
 
 ## Usage
-Currently, you must use [Bo98's Mod Loader](https://bpr.bo98.uk/).  
+
+Currently, you must use [Bo98's Mod Loader](https://bpr.bo98.uk).  
 After installing it, run the `install.ps1` script to copy the built DLL files into correct directories.
 
 ## Dependencies
+
 - [Dear ImGui](https://github.com/ocornut/imgui) (docking branch)
 - [Microsoft Detours](https://github.com/microsoft/Detours)
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp)
