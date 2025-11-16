@@ -19,6 +19,8 @@ ModMenu::ModMenu()
     :
     m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
+    m_CustomColorsFile(m_ConfigDirectory, m_Logger),
+    m_VehicleManager(m_CustomColorsFile),
     m_DetourDoUpdate
     {
         .Target = Core::Pointer(0x00A41B95).GetAddress(),
@@ -97,6 +99,11 @@ void ModMenu::Load()
             m_ConfigDirectory.Create();
 
             m_Logger.Info("Created mod config directory.");
+        }
+
+        // Load custom colors.
+        {
+            m_CustomColorsFile.Load();
         }
 
         // Wait to be in game.
@@ -207,6 +214,11 @@ void ModMenu::Unload()
     try
     {
         m_Logger.Info("Unloading...");
+
+        // Save custom colors.
+        {
+            m_CustomColorsFile.Save();
+        }
 
         // Remove menu.
         {

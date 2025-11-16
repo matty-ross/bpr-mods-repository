@@ -5,9 +5,14 @@
 #include <vector>
 #include <DirectXMath.h>
 
+#include "CustomColorsFile.hpp"
+
 
 class VehicleManager
 {
+public:
+    VehicleManager(CustomColorsFile& customColorsFile);
+
 public:
     void OnDoUpdate();
     void OnPreWorldUpdate(void* gameEventQueue, void* gameActionQueue);
@@ -32,6 +37,8 @@ private:
     };
 
 private:
+    CustomColorsFile& m_CustomColorsFile;
+
     std::vector<Vehicle> m_Vehicles;
     bool m_ChangeVehicle = false;
     uint64_t m_NewVehicleID = 0;

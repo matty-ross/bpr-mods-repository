@@ -8,6 +8,7 @@
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
+#include "CustomColorsFile.hpp"
 #include "Misc.hpp"
 #include "Environment.hpp"
 #include "VehicleManager.hpp"
@@ -49,6 +50,8 @@ private:
 private:
     Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
+
+    CustomColorsFile m_CustomColorsFile;
 
     Misc m_Misc;
     Environment m_Environment;

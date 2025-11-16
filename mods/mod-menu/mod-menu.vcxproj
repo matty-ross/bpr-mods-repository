@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CustomColorsFile.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\ModMenu.cpp" />
     <ClCompile Include="src\Misc.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="src\VehicleManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CustomColorsFile.hpp" />
     <ClInclude Include="src\ModMenu.hpp" />
     <ClInclude Include="src\Misc.hpp" />
     <ClInclude Include="src\Environment.hpp" />

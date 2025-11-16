@@ -206,6 +206,12 @@ static bool CanResetPlayerVehicle()
 }
 
 
+VehicleManager::VehicleManager(CustomColorsFile& customColorsFile)
+    :
+    m_CustomColorsFile(customColorsFile)
+{
+}
+
 void VehicleManager::OnDoUpdate()
 {
     Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
