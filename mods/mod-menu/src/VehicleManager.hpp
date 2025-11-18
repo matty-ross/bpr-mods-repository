@@ -37,6 +37,10 @@ private:
     };
 
 private:
+    void OverrideCurrentColorFromCustomColor(const CustomColor& customColor);
+    void AddCurrentColorToCustomColorsFile(const char* name);
+
+private:
     CustomColorsFile& m_CustomColorsFile;
 
     std::vector<Vehicle> m_Vehicles;

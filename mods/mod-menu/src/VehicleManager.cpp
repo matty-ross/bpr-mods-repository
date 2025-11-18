@@ -481,6 +481,70 @@ void VehicleManager::OnRenderMenu()
         }
 
         {
+            ImGui::SeparatorText("Custom Colors");
+            
+            {
+                if (ImGui::Button("Save##custom-colors-file"))
+                {
+                    m_CustomColorsFile.Save();
+                }
+
+                ImGui::SameLine();
+
+                if (ImGui::Button("Load##custom-colors-file"))
+                {
+                    m_CustomColorsFile.Load();
+                }
+            }
+
+            ImGui::Separator();
+
+            {
+                static char name[64] = {};
+                if (ImGui::Button("Add Current Color"))
+                {
+                    if (name[0] != '\0')
+                    {
+                        AddCurrentColorToCustomColorsFile(name);
+                        name[0] = '\0';
+                    }
+                }
+
+                ImGui::SameLine();
+
+                ImGui::InputText("Name", name, IM_ARRAYSIZE(name));
+            }
+
+            ImGui::Separator();
+
+            {
+                static ImGuiTextFilter customColorsFilter;
+                customColorsFilter.Draw("Filter##custom-colors");
+
+                if (ImGui::BeginListBox("##custom-colors", ImVec2(-FLT_MIN, 0.0f)))
+                {
+                    for (const CustomColor& customColor : m_CustomColorsFile.GetCustomColors())
+                    {
+                        if (customColorsFilter.PassFilter(customColor.Name.c_str()))
+                        {
+                            ImGui::PushID(&customColor);
+
+                            if (ImGui::Selectable(customColor.Name.c_str()))
+                            {
+                                OverrideCurrentColorFromCustomColor(customColor);
+                                m_OverrideColor = true;
+                            }
+
+                            ImGui::PopID();
+                        }
+                    }
+
+                    ImGui::EndListBox();
+                }
+            }
+        }
+
+        {
             ImGui::SeparatorText("Boost");
 
             int32_t& boostType = gameModule.at(0x3FFD4).as<int32_t>();
@@ -572,4 +636,44 @@ void VehicleManager::LoadWheels()
             }
         );
     }
+}
+
+void VehicleManager::OverrideCurrentColorFromCustomColor(const CustomColor& customColor)
+{
+    auto convert = [](const std::array<float, 3> input) -> DirectX::XMFLOAT3A
+    {
+        DirectX::XMFLOAT3A output = {};
+        output.x = input[0];
+        output.y = input[1];
+        output.z = input[2];
+        return output;
+    };
+
+    m_OverridenPaintColor = convert(customColor.PaintColor);
+    m_OverridenPaintColorIntensity = convert(customColor.PaintColorIntensity);
+    m_OverridenPearlColor = convert(customColor.PearlColor);
+    m_OverridenPearlColorIntensity = convert(customColor.PearlColorIntensity);
+}
+
+void VehicleManager::AddCurrentColorToCustomColorsFile(const char* name)
+{
+    auto convert = [](const DirectX::XMFLOAT3A& input) -> std::array<float, 3>
+    {
+        std::array<float, 3> output = {};
+        output[0] = input.x;
+        output[1] = input.y;
+        output[2] = input.z;
+        return output;
+    };
+    
+    m_CustomColorsFile.GetCustomColors().push_back(
+        CustomColor
+        {
+            .Name                = name,
+            .PaintColor          = convert(m_OverridenPaintColor),
+            .PaintColorIntensity = convert(m_OverridenPaintColorIntensity),
+            .PearlColor          = convert(m_OverridenPearlColor),
+            .PearlColorIntensity = convert(m_OverridenPearlColorIntensity),
+        }
+    );
 }
