@@ -163,6 +163,7 @@
     <ClCompile Include="src\File.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\WindowsException.cpp" />
+    <ClCompile Include="src\Patch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\core\Logger.hpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="include\core\Path.hpp" />
     <ClInclude Include="include\core\WindowsException.hpp" />
     <ClInclude Include="include\core\Pointer.hpp" />
+    <ClInclude Include="include\core\Patch.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
