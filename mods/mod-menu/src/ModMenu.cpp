@@ -21,6 +21,7 @@ ModMenu::ModMenu()
     m_Logger(k_ModName),
     m_CustomColorsFile(m_ConfigDirectory, m_Logger),
     m_VehicleManager(m_CustomColorsFile),
+    m_PatchOnEventUpdateWeather(Core::Pointer(0x00A290DC).GetAddress(), 4),
     m_DetourDoUpdate
     {
         .Target = Core::Pointer(0x00A41B95).GetAddress(),
@@ -144,6 +145,15 @@ void ModMenu::Load()
             m_VehicleManager.LoadWheels();
 
             m_Logger.Info("Wheels loaded.");
+        }
+
+        // Apply OnEventUpdateWeather patch.
+        {
+            m_Logger.Info("Applying OnEventUpdateWeather patch...");
+
+            m_PatchOnEventUpdateWeather.Apply("\xAC\x8D\xA2\x00");
+
+            m_Logger.Info("Applyed OnEventUpdateWeather patch.");
         }
 
         // Attach DoUpdate detour.
@@ -272,6 +282,15 @@ void ModMenu::Unload()
             ModManager::Get().GetDetourHookManager().Detach(m_DetourDoUpdate);
 
             m_Logger.Info("Detached DoUpdate detour.");
+        }
+        
+        // Remove OnEventUpdateWeather patch.
+        {
+            m_Logger.Info("Removing OnEventUpdateWeather patch...");
+
+            m_PatchOnEventUpdateWeather.Remove();
+
+            m_Logger.Info("Removed OnEventUpdateWeather patch.");
         }
 
         m_Logger.Info("Unloaded.");

@@ -5,6 +5,7 @@
 
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
+#include "core/Patch.hpp"
 #include "mod-manager/DetourHookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
@@ -57,6 +58,7 @@ private:
     Environment m_Environment;
     VehicleManager m_VehicleManager;
 
+    Core::Patch m_PatchOnEventUpdateWeather;
     DetourHook m_DetourDoUpdate;
     DetourHook m_DetourPreWorldUpdate;
     DetourHook m_DetourUpdateHudFlow;
