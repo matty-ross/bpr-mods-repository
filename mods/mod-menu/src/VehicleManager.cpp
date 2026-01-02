@@ -453,7 +453,15 @@ void VehicleManager::OnRenderMenu()
 
             ImGui::Separator();
 
-            ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost);
+            if (ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost))
+            {
+                if (m_OverrideSwitchableBoost)
+                {
+                    gameModule.at(0x3FFD4).as<int32_t>() = 3; // Stunt boost
+                    m_ChangeBoost = true;
+                }
+            }
+            
             ImGui::Checkbox("Hover Mode", &m_OverrideHoverMode);
         }
 
