@@ -53,6 +53,8 @@ private:
 
     bool m_ReloadVehicle = false;
 
+    bool m_ChangeVehicleDriver = false;
+
     bool m_OverrideSwitchableBoost = false;
     bool m_OverrideHoverMode = false;
 

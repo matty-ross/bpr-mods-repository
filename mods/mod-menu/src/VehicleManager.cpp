@@ -234,6 +234,7 @@ void VehicleManager::OnPreWorldUpdate(
     Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
     Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
     Core::Pointer vehicleData = BPR::VehicleList_GetVehicleData(playerRaceVehicle.at(0x68).as<uint64_t>()); // BrnResource::VehicleListEntry*
+    int32_t playerVehicleIndex = gameModule.at(0x40C28).as<int32_t>();
     
     if (m_ChangeVehicle)
     {
@@ -290,6 +291,20 @@ void VehicleManager::OnPreWorldUpdate(
         m_ReloadVehicle = false;
     }
 
+    if (m_ChangeVehicleDriver)
+    {
+        BPR::GameAction_SetPlayerVehicleDriver gameAction =
+        {
+            .PlayerVehicleDriver = gameModule.at(0x61BCD8 + playerVehicleIndex * 0x4).as<BPR::PlayerVehicleDriver>(),
+            .DriveThruBoxRegion  = {},
+            .MaxResetSpeed       = 0.0f,
+            .IsDriveThru         = false,
+        };
+        BPR::GameActionQueue_AddGameAction(gameActionQueue, &gameAction, gameAction.ID, sizeof(gameAction));
+        
+        m_ChangeVehicleDriver = false;
+    }
+
     if (m_ChangeBoost)
     {
         BPR::GameAction_UpdateVehicleStats gameAction =
@@ -338,7 +353,7 @@ void VehicleManager::OnRenderMenu()
         Core::Pointer gameModule = Core::Pointer(0x013FC8E0).deref(); // BrnGame::BrnGameModule*
         Core::Pointer playerActiveRaceVehicle = GetPlayerActiveRaceVehicle(); // BrnWorld::ActiveRaceCar*
         Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
-
+        int32_t playerVehicleIndex = gameModule.at(0x40C28).as<int32_t>();
         bool canResetPlayerVehicle = CanResetPlayerVehicle();
 
         {
@@ -434,35 +449,50 @@ void VehicleManager::OnRenderMenu()
         {
             ImGui::SeparatorText("Misc");
 
-            if (!canResetPlayerVehicle)
             {
-                ImGui::BeginDisabled();
-            }
+                if (!canResetPlayerVehicle)
+                {
+                    ImGui::BeginDisabled();
+                }
             
-            if (ImGui::Button("Reload Vehicle"))
-            {
-                m_ReloadVehicle = true;
-            }
+                if (ImGui::Button("Reload Vehicle"))
+                {
+                    m_ReloadVehicle = true;
+                }
 
-            if (!canResetPlayerVehicle)
-            {
-                ImGui::EndDisabled();
-            }
+                if (!canResetPlayerVehicle)
+                {
+                    ImGui::EndDisabled();
+                }
 
-            ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f);
+                ImGui::SliderFloat("Deformation", &playerActiveRaceVehicle.at(0x8AC).as<float>(), 0.0f, 2.0f);
+            }
 
             ImGui::Separator();
 
-            if (ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost))
             {
-                if (m_OverrideSwitchableBoost)
+                static constexpr const char* vehicleDriverTypes[] =
                 {
-                    gameModule.at(0x3FFD4).as<int32_t>() = 3; // Stunt boost
-                    m_ChangeBoost = true;
+                    "None",
+                    "Player",
+                    "AI",
+                };
+                if (ImGui::Combo("Vehicle Driver", &gameModule.at(0x61BCD8 + playerVehicleIndex * 0x4).as<int32_t>(), vehicleDriverTypes, IM_ARRAYSIZE(vehicleDriverTypes)))
+                {
+                    m_ChangeVehicleDriver = true;
                 }
+                
+                if (ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost))
+                {
+                    if (m_OverrideSwitchableBoost)
+                    {
+                        gameModule.at(0x3FFD4).as<int32_t>() = 3; // Stunt boost
+                        m_ChangeBoost = true;
+                    }
+                }
+
+                ImGui::Checkbox("Hover Mode", &m_OverrideHoverMode);
             }
-            
-            ImGui::Checkbox("Hover Mode", &m_OverrideHoverMode);
         }
 
         {
