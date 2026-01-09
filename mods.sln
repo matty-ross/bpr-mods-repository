@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libraries", "libraries", "{61A8F47C-96B6-4EEE-9CF7-81128468BABB}"
 EndProject
@@ -30,6 +30,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dashboard", "mods\dashboard\dashboard.vcxproj", "{D7F1FA71-AC39-4094-AE76-07B6E751159A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mod-menu", "mods\mod-menu\mod-menu.vcxproj", "{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "quality-of-life", "mods\quality-of-life\quality-of-life.vcxproj", "{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -127,6 +129,14 @@ Global
 		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x64.Build.0 = Release|x64
 		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x86.ActiveCfg = Release|Win32
 		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D}.Release|x86.Build.0 = Release|Win32
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Debug|x64.ActiveCfg = Debug|x64
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Debug|x64.Build.0 = Debug|x64
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Debug|x86.ActiveCfg = Debug|Win32
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Debug|x86.Build.0 = Debug|Win32
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Release|x64.ActiveCfg = Release|x64
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Release|x64.Build.0 = Release|x64
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Release|x86.ActiveCfg = Release|Win32
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,6 +153,7 @@ Global
 		{0B9B6E57-8F0E-4F5B-B8E3-C121D29FA4CF} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 		{D7F1FA71-AC39-4094-AE76-07B6E751159A} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 		{C48A2D7F-966E-4164-91F1-6DDDDADEFC3D} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
+		{B5F7C771-B33C-43B7-8A78-331A0A53FB0D} = {56C3B5C4-6C9E-4B28-BEF7-5B7BC36021C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {63053E1A-A653-4F57-8900-6B5CF4291722}
