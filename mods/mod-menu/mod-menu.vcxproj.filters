@@ -21,6 +21,9 @@
     <ClCompile Include="src\ModMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\CustomColorsFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\Misc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,12 +33,12 @@
     <ClCompile Include="src\VehicleManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\CustomColorsFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ModMenu.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\CustomColorsFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Misc.hpp">
@@ -45,9 +48,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VehicleManager.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CustomColorsFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
