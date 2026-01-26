@@ -153,7 +153,7 @@ void ModMenu::Load()
 
             m_PatchOnEventUpdateWeather.Apply("\xAC\x8D\xA2\x00");
 
-            m_Logger.Info("Applyed OnEventUpdateWeather patch.");
+            m_Logger.Info("Applied OnEventUpdateWeather patch.");
         }
 
         // Attach DoUpdate detour.

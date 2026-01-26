@@ -18,4 +18,5 @@ private:
     const Core::Logger& m_Logger;
     
     Core::Patch m_PatchUnknownLiveryVehicleIDs;
+    Core::Patch m_PatchDisabledWindow;
 };
