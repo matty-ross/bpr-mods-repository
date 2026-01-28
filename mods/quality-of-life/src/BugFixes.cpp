@@ -7,6 +7,7 @@ BugFixes::BugFixes(const Core::Logger& logger)
     :
     m_Logger(logger),
     m_PatchUnknownLiveryVehicleIDs(Core::Pointer(0x06E5C0AF).GetAddress(), 2),
+    m_PatchIncorrectLobbyDeletedPopup(Core::Pointer(0x00B27BE0).GetAddress(), 4),
     m_PatchDisabledWindow(Core::Pointer(0x008FB6A3).GetAddress(), 7)
 {
 }
@@ -20,6 +21,15 @@ void BugFixes::Load()
         m_PatchUnknownLiveryVehicleIDs.Apply("\x78\x70");
 
         m_Logger.Info("Applied unknown livery vehicle IDs patch.");
+    }
+
+    // Apply incorrect lobby deleted popup patch.
+    {
+        m_Logger.Info("Applying incorrect lobby deleted popup patch...");
+
+        m_PatchIncorrectLobbyDeletedPopup.Apply("\x04\x78\xB2\x00");
+
+        m_Logger.Info("Applied incorrect lobby deleted popup patch.");
     }
 
     // Apply disabled window patch.
@@ -41,6 +51,15 @@ void BugFixes::Unload()
         m_PatchDisabledWindow.Remove();
 
         m_Logger.Info("Removed disabled window patch.");
+    }
+
+    // Remove incorrect lobby deleted popup patch.
+    {
+        m_Logger.Info("Removing incorrect lobby deleted popup patch...");
+
+        m_PatchIncorrectLobbyDeletedPopup.Remove();
+
+        m_Logger.Info("Removed incorrect lobby deleted popup patch.");
     }
     
     // Remove unknown livery vehicle IDs patch.
