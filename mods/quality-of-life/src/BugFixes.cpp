@@ -7,6 +7,7 @@ BugFixes::BugFixes(const Core::Logger& logger)
     :
     m_Logger(logger),
     m_PatchUnknownLiveryVehicleIDs(Core::Pointer(0x06E5C0AF).GetAddress(), 2),
+    m_PatchIncorrectBikeRoadRules(Core::Pointer(0x009E193A).GetAddress(), 2),
     m_PatchIncorrectLobbyDeletedPopup(Core::Pointer(0x00B27BE0).GetAddress(), 4),
     m_PatchDisabledWindow(Core::Pointer(0x008FB6A3).GetAddress(), 7)
 {
@@ -21,6 +22,15 @@ void BugFixes::Load()
         m_PatchUnknownLiveryVehicleIDs.Apply("\x78\x70");
 
         m_Logger.Info("Applied unknown livery vehicle IDs patch.");
+    }
+
+    // Apply incorrect bike Road Rules patch.
+    {
+        m_Logger.Info("Applying incorrect bike Road Rules patch...");
+
+        m_PatchIncorrectBikeRoadRules.Apply("\xEB\x16");
+
+        m_Logger.Info("Applied incorrect bike Road Rules patch.");
     }
 
     // Apply incorrect lobby deleted popup patch.
@@ -60,6 +70,15 @@ void BugFixes::Unload()
         m_PatchIncorrectLobbyDeletedPopup.Remove();
 
         m_Logger.Info("Removed incorrect lobby deleted popup patch.");
+    }
+
+    // Remove incorrect bike Road Rules patch.
+    {
+        m_Logger.Info("Removing incorrect bike Road Rules patch...");
+
+        m_PatchIncorrectBikeRoadRules.Remove();
+
+        m_Logger.Info("Removed incorrect bike Road Rules patch.");
     }
     
     // Remove unknown livery vehicle IDs patch.
