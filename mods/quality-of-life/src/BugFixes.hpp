@@ -18,6 +18,7 @@ private:
     const Core::Logger& m_Logger;
     
     Core::Patch m_PatchUnknownLiveryVehicleIDs;
+    Core::Patch m_PatchReloadingVehicleAfterLeavingJunkyard[2];
     Core::Patch m_PatchIncorrectBikeRoadRules;
     Core::Patch m_PatchIncorrectLobbyDeletedPopup;
     Core::Patch m_PatchDisabledWindow;

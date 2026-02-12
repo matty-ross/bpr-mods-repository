@@ -7,6 +7,11 @@ BugFixes::BugFixes(const Core::Logger& logger)
     :
     m_Logger(logger),
     m_PatchUnknownLiveryVehicleIDs(Core::Pointer(0x06E5C0AF).GetAddress(), 2),
+    m_PatchReloadingVehicleAfterLeavingJunkyard
+    {
+        Core::Patch(Core::Pointer(0x06F4B673).GetAddress(), 3),
+        Core::Patch(Core::Pointer(0x06F4B693).GetAddress(), 3),
+    },
     m_PatchIncorrectBikeRoadRules(Core::Pointer(0x009E193A).GetAddress(), 2),
     m_PatchIncorrectLobbyDeletedPopup(Core::Pointer(0x00B27BE0).GetAddress(), 4),
     m_PatchDisabledWindow(Core::Pointer(0x008FB6A3).GetAddress(), 7)
@@ -22,6 +27,16 @@ void BugFixes::Load()
         m_PatchUnknownLiveryVehicleIDs.Apply("\x78\x70");
 
         m_Logger.Info("Applied unknown livery vehicle IDs patch.");
+    }
+
+    // Apply reloading vehicle after leaving Junkyard patch.
+    {
+        m_Logger.Info("Applying reloading vehicle after leaving Junkyard patch...");
+
+        m_PatchReloadingVehicleAfterLeavingJunkyard[0].Apply("\x31\xC9\x90");
+        m_PatchReloadingVehicleAfterLeavingJunkyard[1].Apply("\x31\xC9\x90");
+
+        m_Logger.Info("Applied reloading vehicle after leaving Junkyard patch.");
     }
 
     // Apply incorrect bike Road Rules patch.
@@ -79,6 +94,16 @@ void BugFixes::Unload()
         m_PatchIncorrectBikeRoadRules.Remove();
 
         m_Logger.Info("Removed incorrect bike Road Rules patch.");
+    }
+
+    // Remove reloading vehicle after leaving Junkyard patch.
+    {
+        m_Logger.Info("Removing reloading vehicle after leaving Junkyard patch...");
+
+        m_PatchReloadingVehicleAfterLeavingJunkyard[0].Remove();
+        m_PatchReloadingVehicleAfterLeavingJunkyard[1].Remove();
+
+        m_Logger.Info("Removed reloading vehicle after leaving Junkyard patch.");
     }
     
     // Remove unknown livery vehicle IDs patch.
