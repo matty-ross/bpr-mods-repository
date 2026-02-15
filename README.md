@@ -10,7 +10,7 @@ A repository of my mods for the PC version of Burnout Paradise Remastered.
 ## Building
 
 1. Clone this repository recursively (with submodules)
-1. Open it in Visual Studio 2022
+1. Open it in Visual Studio 2026
 1. Set the platform to `x86`
 1. Hit `Build Solution`
 

@@ -20,4 +20,3 @@ Copy-Item -Path ".\vendor\imgui\bin\$Configuration\imgui.dll" -Destination $BprD
 Copy-Item -Path ".\mods\*\bin\$Configuration\*.dll" -Destination $BprModsDirectory
 
 Write-Host -Object "Installation finished."
-Read-Host -Prompt "Press Enter to quit..." | Out-Null

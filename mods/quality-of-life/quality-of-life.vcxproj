@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>17.0</VCProjectVersion>
+    <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{b5f7c771-b33c-43b7-8a78-331a0a53fb0d}</ProjectGuid>
     <RootNamespace>qualityoflife</RootNamespace>

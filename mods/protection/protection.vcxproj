@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>17.0</VCProjectVersion>
+    <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{0b9b6e57-8f0e-4f5b-b8e3-c121d29fa4cf}</ProjectGuid>
     <RootNamespace>protection</RootNamespace>
