@@ -1,0 +1,24 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/libraries/">
+    <Project Path="libraries/core/core.vcxproj" Id="faa3b443-7ff9-4c2c-a140-1a0600e97539" />
+    <Project Path="libraries/mod-manager/mod-manager.vcxproj" Id="1c27c1fc-950b-453c-8596-69f0fbdc1b11" />
+  </Folder>
+  <Folder Name="/mods/">
+    <Project Path="mods/bully-repellent/bully-repellent.vcxproj" Id="d7d7740b-d605-4cd3-a3d4-e4fc923e4f23" />
+    <Project Path="mods/dashboard/dashboard.vcxproj" Id="d7f1fa71-ac39-4094-ae76-07b6e751159a" />
+    <Project Path="mods/exception-reporter/exception-reporter.vcxproj" Id="9245f051-3444-443e-a1ba-60bccceb884f" />
+    <Project Path="mods/free-camera/free-camera.vcxproj" Id="d81726eb-7550-4901-aea7-27dfecfbfcfd" />
+    <Project Path="mods/mod-menu/mod-menu.vcxproj" Id="c48a2d7f-966e-4164-91f1-6ddddadefc3d" />
+    <Project Path="mods/protection/protection.vcxproj" Id="0b9b6e57-8f0e-4f5b-b8e3-c121d29fa4cf" />
+    <Project Path="mods/quality-of-life/quality-of-life.vcxproj" Id="b5f7c771-b33c-43b7-8a78-331a0a53fb0d" />
+  </Folder>
+  <Folder Name="/vendor/">
+    <Project Path="vendor/detours/detours.vcxproj" Id="95b474de-77ef-4ecf-9198-451c15a1b392" />
+    <Project Path="vendor/imgui/imgui.vcxproj" Id="7dc3e603-4726-4242-8afd-1dabaf9dfea7" />
+    <Project Path="vendor/yaml-cpp/yaml-cpp.vcxproj" Id="072109b8-5077-45d6-b04e-018f284fb3e1" />
+  </Folder>
+</Solution>
