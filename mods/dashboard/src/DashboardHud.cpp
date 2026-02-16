@@ -111,6 +111,7 @@ void DashboardHud::OnRenderMenu()
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
             ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
             ImGui::SliderFloat("Scale", &config.Scale, 0.1f, 5.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::SliderFloat("Font Scale", &config.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
             {
                 auto renderColorEdit = [](const char* label, uint32_t& configColor)
@@ -243,7 +244,7 @@ void DashboardHud::RenderText(const ImVec2& position, const char* text, float si
 {
     const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
     
-    float fontSize = size * config.Scale;
+    float fontSize = size * config.FontScale * config.Scale;
     ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
 
     ImVec2 textSize = m_Font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
