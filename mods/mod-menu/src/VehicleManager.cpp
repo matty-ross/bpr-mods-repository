@@ -355,6 +355,7 @@ void VehicleManager::OnRenderMenu()
         Core::Pointer playerRaceVehicle = playerActiveRaceVehicle.at(0x7C0).as<void*>(); // BrnWorld::RaceCar*
         int32_t playerVehicleIndex = gameModule.at(0x40C28).as<int32_t>();
         bool canResetPlayerVehicle = CanResetPlayerVehicle();
+        bool isOnline = gameModule.at(0xB6D415).as<bool>();
 
         {
             ImGui::SeparatorText("Vehicle List");
@@ -471,6 +472,11 @@ void VehicleManager::OnRenderMenu()
             ImGui::Separator();
 
             {
+                if (isOnline)
+                {
+                    ImGui::BeginDisabled();
+                }
+
                 static constexpr const char* vehicleDriverTypes[] =
                 {
                     "None",
@@ -480,6 +486,11 @@ void VehicleManager::OnRenderMenu()
                 if (ImGui::Combo("Vehicle Driver", &gameModule.at(0x61BCD8 + playerVehicleIndex * 0x4).as<int32_t>(), vehicleDriverTypes, IM_ARRAYSIZE(vehicleDriverTypes)))
                 {
                     m_ChangeVehicleDriver = true;
+                }
+
+                if (isOnline)
+                {
+                    ImGui::EndDisabled();
                 }
                 
                 if (ImGui::Checkbox("Switchable Boost", &m_OverrideSwitchableBoost))
