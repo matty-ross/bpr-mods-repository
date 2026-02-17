@@ -1,6 +1,9 @@
 #include "BugFixes.hpp"
 
 #include "core/Pointer.hpp"
+#include "mod-manager/ModManager.hpp"
+
+#include "QualityOfLife.hpp"
 
 
 BugFixes::BugFixes(const Core::Logger& logger)
@@ -11,6 +14,11 @@ BugFixes::BugFixes(const Core::Logger& logger)
     {
         Core::Patch(Core::Pointer(0x06F4B673).GetAddress(), 3),
         Core::Patch(Core::Pointer(0x06F4B693).GetAddress(), 3),
+    },
+    m_DetourHudTextSpacing
+    {
+        .Target = Core::Pointer(0x0088FA1C).GetAddress(),
+        .Detour = &BugFixes::DetourHudTextSpacing,
     },
     m_PatchIncorrectBikeRoadRules(Core::Pointer(0x009E193A).GetAddress(), 2),
     m_PatchIncorrectLobbyDeletedPopup(Core::Pointer(0x00B27BE0).GetAddress(), 4),
@@ -37,6 +45,15 @@ void BugFixes::Load()
         m_PatchReloadingVehicleAfterLeavingJunkyard[1].Apply("\x31\xC9\x90");
 
         m_Logger.Info("Applied reloading vehicle after leaving Junkyard patch.");
+    }
+
+    // Attach HUD text spacing detour.
+    {
+        m_Logger.Info("Attaching HUD text spacing detour...");
+
+        ModManager::Get().GetDetourHookManager().Attach(m_DetourHudTextSpacing);
+
+        m_Logger.Info("Attached HUD text spacing detour.");
     }
 
     // Apply incorrect bike Road Rules patch.
@@ -96,6 +113,15 @@ void BugFixes::Unload()
         m_Logger.Info("Removed incorrect bike Road Rules patch.");
     }
 
+    // Detach HUD text spacing detour.
+    {
+        m_Logger.Info("Detaching HUD text spacing detour...");
+
+        ModManager::Get().GetDetourHookManager().Detach(m_DetourHudTextSpacing);
+
+        m_Logger.Info("Detached HUD text spacing detour.");
+    }
+
     // Remove reloading vehicle after leaving Junkyard patch.
     {
         m_Logger.Info("Removing reloading vehicle after leaving Junkyard patch...");
@@ -113,5 +139,16 @@ void BugFixes::Unload()
         m_PatchUnknownLiveryVehicleIDs.Remove();
 
         m_Logger.Info("Removed unknown livery vehicle IDs patch.");
+    }
+}
+
+__declspec(naked) void BugFixes::DetourHudTextSpacing()
+{
+    __asm
+    {
+        mov eax, dword ptr [edi + 0x28]
+        mov dword ptr [edi + 0x30], eax
+
+        jmp dword ptr [QualityOfLife::s_Instance.m_BugFixes.m_DetourHudTextSpacing.Target]
     }
 }
