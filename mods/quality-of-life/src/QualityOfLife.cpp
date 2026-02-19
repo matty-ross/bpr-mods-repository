@@ -16,7 +16,8 @@ QualityOfLife::QualityOfLife()
     :
     m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
-    m_BugFixes(m_Logger)
+    m_FeaturesFile(m_ConfigDirectory, m_Logger),
+    m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures())
 {
 }
 
@@ -68,6 +69,11 @@ void QualityOfLife::Load()
             m_Logger.Info("Created mod config directory.");
         }
 
+        // Load features.
+        {
+            m_FeaturesFile.Load();
+        }
+
         // Load bug fixes.
         {
             m_Logger.Info("Loading bug fixes...");
@@ -91,6 +97,11 @@ void QualityOfLife::Unload()
     try
     {
         m_Logger.Info("Unloading...");
+
+        // Save features.
+        {
+            m_FeaturesFile.Save();
+        }
 
         // Unload bug fixes.
         {

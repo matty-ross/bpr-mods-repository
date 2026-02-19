@@ -6,9 +6,10 @@
 #include "QualityOfLife.hpp"
 
 
-BugFixes::BugFixes(const Core::Logger& logger)
+BugFixes::BugFixes(const Core::Logger& logger, BugFixesFeatures& bugFixesFeatures)
     :
     m_Logger(logger),
+    m_BugFixesFeatures(bugFixesFeatures),
     m_PatchUnknownLiveryVehicleIDs(Core::Pointer(0x06E5C0AF).GetAddress(), 2),
     m_PatchReloadingVehicleAfterLeavingJunkyard
     {
@@ -28,117 +29,153 @@ BugFixes::BugFixes(const Core::Logger& logger)
 
 void BugFixes::Load()
 {
-    // Apply unknown livery vehicle IDs patch.
+    if (m_BugFixesFeatures.UnknownLiveryVehicleIDs)
     {
-        m_Logger.Info("Applying unknown livery vehicle IDs patch...");
+        // Apply unknown livery vehicle IDs patch.
+        {
+            m_Logger.Info("Applying unknown livery vehicle IDs patch...");
 
-        m_PatchUnknownLiveryVehicleIDs.Apply("\x78\x70");
+            m_PatchUnknownLiveryVehicleIDs.Apply("\x78\x70");
 
-        m_Logger.Info("Applied unknown livery vehicle IDs patch.");
+            m_Logger.Info("Applied unknown livery vehicle IDs patch.");
+        }
     }
 
-    // Apply reloading vehicle after leaving Junkyard patch.
+    if (m_BugFixesFeatures.ReloadingVehicleAfterLeavingJunkyard)
     {
-        m_Logger.Info("Applying reloading vehicle after leaving Junkyard patch...");
+        // Apply reloading vehicle after leaving Junkyard patch.
+        {
+            m_Logger.Info("Applying reloading vehicle after leaving Junkyard patch...");
 
-        m_PatchReloadingVehicleAfterLeavingJunkyard[0].Apply("\x31\xC9\x90");
-        m_PatchReloadingVehicleAfterLeavingJunkyard[1].Apply("\x31\xC9\x90");
+            m_PatchReloadingVehicleAfterLeavingJunkyard[0].Apply("\x31\xC9\x90");
+            m_PatchReloadingVehicleAfterLeavingJunkyard[1].Apply("\x31\xC9\x90");
 
-        m_Logger.Info("Applied reloading vehicle after leaving Junkyard patch.");
+            m_Logger.Info("Applied reloading vehicle after leaving Junkyard patch.");
+        }
     }
 
-    // Attach HUD text spacing detour.
+    if (m_BugFixesFeatures.HudTextSpacing)
     {
-        m_Logger.Info("Attaching HUD text spacing detour...");
+        // Attach HUD text spacing detour.
+        {
+            m_Logger.Info("Attaching HUD text spacing detour...");
 
-        ModManager::Get().GetDetourHookManager().Attach(m_DetourHudTextSpacing);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourHudTextSpacing);
 
-        m_Logger.Info("Attached HUD text spacing detour.");
+            m_Logger.Info("Attached HUD text spacing detour.");
+        }
     }
 
-    // Apply incorrect bike Road Rules patch.
+    if (m_BugFixesFeatures.IncorrectBikeRoadRules)
     {
-        m_Logger.Info("Applying incorrect bike Road Rules patch...");
+        // Apply incorrect bike Road Rules patch.
+        {
+            m_Logger.Info("Applying incorrect bike Road Rules patch...");
 
-        m_PatchIncorrectBikeRoadRules.Apply("\xEB\x16");
+            m_PatchIncorrectBikeRoadRules.Apply("\xEB\x16");
 
-        m_Logger.Info("Applied incorrect bike Road Rules patch.");
+            m_Logger.Info("Applied incorrect bike Road Rules patch.");
+        }
     }
 
-    // Apply incorrect lobby deleted popup patch.
+    if (m_BugFixesFeatures.IncorrectLobbyDeletedPopup)
     {
-        m_Logger.Info("Applying incorrect lobby deleted popup patch...");
+        // Apply incorrect lobby deleted popup patch.
+        {
+            m_Logger.Info("Applying incorrect lobby deleted popup patch...");
 
-        m_PatchIncorrectLobbyDeletedPopup.Apply("\x04\x78\xB2\x00");
+            m_PatchIncorrectLobbyDeletedPopup.Apply("\x04\x78\xB2\x00");
 
-        m_Logger.Info("Applied incorrect lobby deleted popup patch.");
+            m_Logger.Info("Applied incorrect lobby deleted popup patch.");
+        }
     }
 
-    // Apply disabled window patch.
+    if (m_BugFixesFeatures.DisabledWindow)
     {
-        m_Logger.Info("Applying disabled window patch...");
+        // Apply disabled window patch.
+        {
+            m_Logger.Info("Applying disabled window patch...");
 
-        m_PatchDisabledWindow.Apply("\xEB\x19\x90\x90\x90\x90\x90");
+            m_PatchDisabledWindow.Apply("\xEB\x19\x90\x90\x90\x90\x90");
 
-        m_Logger.Info("Applied disabled window patch.");
+            m_Logger.Info("Applied disabled window patch.");
+        }
     }
 }
 
 void BugFixes::Unload()
 {
-    // Remove disabled window patch.
+    if (m_BugFixesFeatures.DisabledWindow)
     {
-        m_Logger.Info("Removing disabled window patch...");
+        // Remove disabled window patch.
+        {
+            m_Logger.Info("Removing disabled window patch...");
 
-        m_PatchDisabledWindow.Remove();
+            m_PatchDisabledWindow.Remove();
 
-        m_Logger.Info("Removed disabled window patch.");
+            m_Logger.Info("Removed disabled window patch.");
+        }
     }
 
-    // Remove incorrect lobby deleted popup patch.
+    if (m_BugFixesFeatures.IncorrectLobbyDeletedPopup)
     {
-        m_Logger.Info("Removing incorrect lobby deleted popup patch...");
+        // Remove incorrect lobby deleted popup patch.
+        {
+            m_Logger.Info("Removing incorrect lobby deleted popup patch...");
 
-        m_PatchIncorrectLobbyDeletedPopup.Remove();
+            m_PatchIncorrectLobbyDeletedPopup.Remove();
 
-        m_Logger.Info("Removed incorrect lobby deleted popup patch.");
+            m_Logger.Info("Removed incorrect lobby deleted popup patch.");
+        }
     }
 
-    // Remove incorrect bike Road Rules patch.
+    if (m_BugFixesFeatures.IncorrectBikeRoadRules)
     {
-        m_Logger.Info("Removing incorrect bike Road Rules patch...");
+        // Remove incorrect bike Road Rules patch.
+        {
+            m_Logger.Info("Removing incorrect bike Road Rules patch...");
 
-        m_PatchIncorrectBikeRoadRules.Remove();
+            m_PatchIncorrectBikeRoadRules.Remove();
 
-        m_Logger.Info("Removed incorrect bike Road Rules patch.");
+            m_Logger.Info("Removed incorrect bike Road Rules patch.");
+        }
     }
 
-    // Detach HUD text spacing detour.
+    if (m_BugFixesFeatures.HudTextSpacing)
     {
-        m_Logger.Info("Detaching HUD text spacing detour...");
+        // Detach HUD text spacing detour.
+        {
+            m_Logger.Info("Detaching HUD text spacing detour...");
 
-        ModManager::Get().GetDetourHookManager().Detach(m_DetourHudTextSpacing);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourHudTextSpacing);
 
-        m_Logger.Info("Detached HUD text spacing detour.");
+            m_Logger.Info("Detached HUD text spacing detour.");
+        }
     }
 
-    // Remove reloading vehicle after leaving Junkyard patch.
+    if (m_BugFixesFeatures.ReloadingVehicleAfterLeavingJunkyard)
     {
-        m_Logger.Info("Removing reloading vehicle after leaving Junkyard patch...");
+        // Remove reloading vehicle after leaving Junkyard patch.
+        {
+            m_Logger.Info("Removing reloading vehicle after leaving Junkyard patch...");
 
-        m_PatchReloadingVehicleAfterLeavingJunkyard[0].Remove();
-        m_PatchReloadingVehicleAfterLeavingJunkyard[1].Remove();
+            m_PatchReloadingVehicleAfterLeavingJunkyard[0].Remove();
+            m_PatchReloadingVehicleAfterLeavingJunkyard[1].Remove();
 
-        m_Logger.Info("Removed reloading vehicle after leaving Junkyard patch.");
+            m_Logger.Info("Removed reloading vehicle after leaving Junkyard patch.");
+        }
     }
     
-    // Remove unknown livery vehicle IDs patch.
+    if (m_BugFixesFeatures.UnknownLiveryVehicleIDs)
     {
-        m_Logger.Info("Removing unknown livery vehicle IDs patch...");
+        // Remove unknown livery vehicle IDs patch.
+        {
+            m_Logger.Info("Removing unknown livery vehicle IDs patch...");
 
-        m_PatchUnknownLiveryVehicleIDs.Remove();
+            m_PatchUnknownLiveryVehicleIDs.Remove();
 
-        m_Logger.Info("Removed unknown livery vehicle IDs patch.");
+            m_Logger.Info("Removed unknown livery vehicle IDs patch.");
+        }
     }
 }
 

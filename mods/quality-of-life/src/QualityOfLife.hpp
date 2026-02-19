@@ -6,6 +6,7 @@
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
 
+#include "FeaturesFile.hpp"
 #include "BugFixes.hpp"
 
 
@@ -31,6 +32,8 @@ private:
 private:
     Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
+
+    FeaturesFile m_FeaturesFile;
 
     BugFixes m_BugFixes;
 

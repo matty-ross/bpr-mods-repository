@@ -21,12 +21,18 @@
     <ClCompile Include="src\QualityOfLife.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\FeaturesFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="src\BugFixes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\QualityOfLife.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FeaturesFile.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\BugFixes.hpp">

@@ -98,7 +98,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +116,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +134,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -152,7 +152,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -165,10 +165,12 @@
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\QualityOfLife.cpp" />
+    <ClCompile Include="src\FeaturesFile.cpp" />
     <ClCompile Include="src\BugFixes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\QualityOfLife.hpp" />
+    <ClInclude Include="src\FeaturesFile.hpp" />
     <ClInclude Include="src\BugFixes.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -177,6 +179,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\libraries\mod-manager\mod-manager.vcxproj">
       <Project>{1c27c1fc-950b-453c-8596-69f0fbdc1b11}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\vendor\yaml-cpp\yaml-cpp.vcxproj">
+      <Project>{072109b8-5077-45d6-b04e-018f284fb3e1}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

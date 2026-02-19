@@ -5,11 +5,13 @@
 #include "core/Patch.hpp"
 #include "mod-manager/DetourHookManager.hpp"
 
+#include "FeaturesFile.hpp"
+
 
 class BugFixes
 {
 public:
-    BugFixes(const Core::Logger& logger);
+    BugFixes(const Core::Logger& logger, BugFixesFeatures& bugFixesFeatures);
 
 public:
     void Load();
@@ -20,6 +22,7 @@ private:
 
 private:
     const Core::Logger& m_Logger;
+    const BugFixesFeatures& m_BugFixesFeatures;
     
     Core::Patch m_PatchUnknownLiveryVehicleIDs;
     Core::Patch m_PatchReloadingVehicleAfterLeavingJunkyard[2];
