@@ -8,6 +8,7 @@
 
 #include "FeaturesFile.hpp"
 #include "BugFixes.hpp"
+#include "ExtraSettings.hpp"
 
 
 class QualityOfLife
@@ -36,6 +37,7 @@ private:
     FeaturesFile m_FeaturesFile;
 
     BugFixes m_BugFixes;
+    ExtraSettings m_ExtraSettings;
 
     HANDLE m_LoadThreadHandle = NULL;
 };

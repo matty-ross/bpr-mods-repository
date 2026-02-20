@@ -17,7 +17,8 @@ QualityOfLife::QualityOfLife()
     m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
     m_Logger(k_ModName),
     m_FeaturesFile(m_ConfigDirectory, m_Logger),
-    m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures())
+    m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures()),
+    m_ExtraSettings(m_Logger)
 {
 }
 
@@ -82,6 +83,15 @@ void QualityOfLife::Load()
 
             m_Logger.Info("Loaded bug fixes.");
         }
+        
+        // Load extra settings.
+        {
+            m_Logger.Info("Loading extra settings...");
+
+            m_ExtraSettings.Load();
+
+            m_Logger.Info("Loaded extra settings.");
+        }
 
         m_Logger.Info("Loaded.");
     }
@@ -101,6 +111,15 @@ void QualityOfLife::Unload()
         // Save features.
         {
             m_FeaturesFile.Save();
+        }
+
+        // Unload extra settings.
+        {
+            m_Logger.Info("Unloading extra settings...");
+
+            m_ExtraSettings.Unload();
+
+            m_Logger.Info("Unloaded extra settings.");
         }
 
         // Unload bug fixes.
