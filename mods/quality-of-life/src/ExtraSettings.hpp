@@ -17,5 +17,6 @@ public:
 private:
     const Core::Logger& m_Logger;
 
+    Core::Patch m_Patch24HourTimeFormat;
     Core::Patch m_PatchMetricUnits;
 };
