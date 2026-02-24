@@ -7,7 +7,8 @@ ExtraSettings::ExtraSettings(const Core::Logger& logger)
     :
     m_Logger(logger),
     m_Patch24HourTimeFormat(Core::Pointer(0x0621C64D).GetAddress(), 2),
-    m_PatchMetricUnits(Core::Pointer(0x062178C4).GetAddress(), 2)
+    m_PatchMetricUnits(Core::Pointer(0x062178C4).GetAddress(), 2),
+    m_PatchDisableCursorClipping(Core::Pointer(0x008FB91E).GetAddress(), 3)
 {
 }
 
@@ -30,10 +31,28 @@ void ExtraSettings::Load()
 
         m_Logger.Info("Applied metric units patch.");
     }
+
+    // Apply disable cursor clipping patch.
+    {
+        m_Logger.Info("Applying disable cursor clipping patch...");
+
+        m_PatchDisableCursorClipping.Apply("\xEB\x6A\x90");
+
+        m_Logger.Info("Applied disable cursor clipping patch.");
+    }
 }
 
 void ExtraSettings::Unload()
 {
+    // Remove disable cursor clipping patch.
+    {
+        m_Logger.Info("Removing disable cursor clipping patch...");
+
+        m_PatchDisableCursorClipping.Remove();
+
+        m_Logger.Info("Removed disable cursor clipping patch.");
+    }
+
     // Remove metric units patch.
     {
         m_Logger.Info("Removing metric units patch...");
