@@ -15,6 +15,14 @@ struct BugFixesFeatures
     bool DisabledWindow = true;
 };
 
+struct ExtraSettingsFeatures
+{
+    bool Use24HourTimeFormat = true;
+    bool UseMetricUnits = true;
+    bool DisableWebcam = true;
+    bool DisableCursorClipping = true;
+};
+
 
 class FeaturesFile
 {
@@ -26,10 +34,12 @@ public:
     void Save() const;
 
     BugFixesFeatures& GetBugFixesFeatures();
+    ExtraSettingsFeatures& GetExtraSettingsFeatures();
 
 private:
     Core::Path m_FilePath;
     const Core::Logger& m_Logger;
 
     BugFixesFeatures m_BugFixesFeatures;
+    ExtraSettingsFeatures m_ExtraSettingsFeatures;
 };

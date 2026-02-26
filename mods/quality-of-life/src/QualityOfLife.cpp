@@ -18,7 +18,7 @@ QualityOfLife::QualityOfLife()
     m_Logger(k_ModName),
     m_FeaturesFile(m_ConfigDirectory, m_Logger),
     m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures()),
-    m_ExtraSettings(m_Logger)
+    m_ExtraSettings(m_Logger, m_FeaturesFile.GetExtraSettingsFeatures())
 {
 }
 

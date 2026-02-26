@@ -3,11 +3,12 @@
 #include "core/Pointer.hpp"
 
 
-ExtraSettings::ExtraSettings(const Core::Logger& logger)
+ExtraSettings::ExtraSettings(const Core::Logger& logger, ExtraSettingsFeatures& extraSettingsFeatures)
     :
     m_Logger(logger),
-    m_Patch24HourTimeFormat(Core::Pointer(0x0621C64D).GetAddress(), 2),
-    m_PatchMetricUnits(Core::Pointer(0x062178C4).GetAddress(), 2),
+    m_ExtraSettingsFeatures(extraSettingsFeatures),
+    m_PatchUse24HourTimeFormat(Core::Pointer(0x0621C64D).GetAddress(), 2),
+    m_PatchUseMetricUnits(Core::Pointer(0x062178C4).GetAddress(), 2),
     m_PatchDisableWebcam(Core::Pointer(0x00A3CD84).GetAddress(), 2),
     m_PatchDisableCursorClipping(Core::Pointer(0x008FB91E).GetAddress(), 3)
 {
@@ -15,78 +16,102 @@ ExtraSettings::ExtraSettings(const Core::Logger& logger)
 
 void ExtraSettings::Load()
 {
-    // Apply 24 hour time format patch.
+    if (m_ExtraSettingsFeatures.Use24HourTimeFormat)
     {
-        m_Logger.Info("Applying 24 hour time format patch...");
+        // Apply use 24 hour time format patch.
+        {
+            m_Logger.Info("Applying use 24 hour time format patch...");
 
-        m_Patch24HourTimeFormat.Apply("\xEB\x1F");
+            m_PatchUse24HourTimeFormat.Apply("\xEB\x1F");
 
-        m_Logger.Info("Applied 24 hour time format patch.");
+            m_Logger.Info("Applied use 24 hour time format patch.");
+        }
     }
 
-    // Apply metric units patch.
+    if (m_ExtraSettingsFeatures.UseMetricUnits)
     {
-        m_Logger.Info("Applying metric units patch...");
+        // Apply use metric units patch.
+        {
+            m_Logger.Info("Applying use metric units patch...");
 
-        m_PatchMetricUnits.Apply("\xEB\x63");
+            m_PatchUseMetricUnits.Apply("\xEB\x63");
 
-        m_Logger.Info("Applied metric units patch.");
+            m_Logger.Info("Applied use metric units patch.");
+        }
     }
 
-    // Apply disable webcam patch.
+    if (m_ExtraSettingsFeatures.DisableWebcam)
     {
-        m_Logger.Info("Applying disable webcam patch...");
+        // Apply disable webcam patch.
+        {
+            m_Logger.Info("Applying disable webcam patch...");
 
-        m_PatchDisableWebcam.Apply("\x31\xC0");
+            m_PatchDisableWebcam.Apply("\x31\xC0");
 
-        m_Logger.Info("Applied disable webcam patch.");
+            m_Logger.Info("Applied disable webcam patch.");
+        }
     }
 
-    // Apply disable cursor clipping patch.
+    if (m_ExtraSettingsFeatures.DisableCursorClipping)
     {
-        m_Logger.Info("Applying disable cursor clipping patch...");
+        // Apply disable cursor clipping patch.
+        {
+            m_Logger.Info("Applying disable cursor clipping patch...");
 
-        m_PatchDisableCursorClipping.Apply("\xEB\x6A\x90");
+            m_PatchDisableCursorClipping.Apply("\xEB\x6A\x90");
 
-        m_Logger.Info("Applied disable cursor clipping patch.");
+            m_Logger.Info("Applied disable cursor clipping patch.");
+        }
     }
 }
 
 void ExtraSettings::Unload()
 {
-    // Remove disable cursor clipping patch.
+    if (m_ExtraSettingsFeatures.DisableCursorClipping)
     {
-        m_Logger.Info("Removing disable cursor clipping patch...");
+        // Remove disable cursor clipping patch.
+        {
+            m_Logger.Info("Removing disable cursor clipping patch...");
 
-        m_PatchDisableCursorClipping.Remove();
+            m_PatchDisableCursorClipping.Remove();
 
-        m_Logger.Info("Removed disable cursor clipping patch.");
+            m_Logger.Info("Removed disable cursor clipping patch.");
+        }
     }
 
-    // Remove disable webcam patch.
+    if (m_ExtraSettingsFeatures.DisableWebcam)
     {
-        m_Logger.Info("Removing disable webcam patch...");
+        // Remove disable webcam patch.
+        {
+            m_Logger.Info("Removing disable webcam patch...");
 
-        m_PatchDisableWebcam.Remove();
+            m_PatchDisableWebcam.Remove();
 
-        m_Logger.Info("Removed disable webcam patch.");
+            m_Logger.Info("Removed disable webcam patch.");
+        }
     }
 
-    // Remove metric units patch.
+    if (m_ExtraSettingsFeatures.UseMetricUnits)
     {
-        m_Logger.Info("Removing metric units patch...");
+        // Remove use metric units patch.
+        {
+            m_Logger.Info("Removing use metric units patch...");
 
-        m_PatchMetricUnits.Remove();
+            m_PatchUseMetricUnits.Remove();
 
-        m_Logger.Info("Removed metric units patch.");
+            m_Logger.Info("Removed use metric units patch.");
+        }
     }
 
-    // Remove 24 hour time format patch.
+    if (m_ExtraSettingsFeatures.Use24HourTimeFormat)
     {
-        m_Logger.Info("Removing 24 hour time format patch...");
+        // Remove use 24 hour time format patch.
+        {
+            m_Logger.Info("Removing use 24 hour time format patch...");
 
-        m_Patch24HourTimeFormat.Remove();
+            m_PatchUse24HourTimeFormat.Remove();
 
-        m_Logger.Info("Removed 24 hour time format patch.");
+            m_Logger.Info("Removed use 24 hour time format patch.");
+        }
     }
 }

@@ -31,6 +31,12 @@ void FeaturesFile::Load()
             m_BugFixesFeatures.IncorrectBikeRoadRules               = bugFixesNode["IncorrectBikeRoadRules"].as<bool>();
             m_BugFixesFeatures.IncorrectLobbyDeletedPopup           = bugFixesNode["IncorrectLobbyDeletedPopup"].as<bool>();
             m_BugFixesFeatures.DisabledWindow                       = bugFixesNode["DisabledWindow"].as<bool>();
+
+            YAML::Node extraSettingsNode = yaml["ExtraSettings"];
+            m_ExtraSettingsFeatures.Use24HourTimeFormat   = extraSettingsNode["Use24HourTimeFormat"].as<bool>();
+            m_ExtraSettingsFeatures.UseMetricUnits        = extraSettingsNode["UseMetricUnits"].as<bool>();
+            m_ExtraSettingsFeatures.DisableWebcam         = extraSettingsNode["DisableWebcam"].as<bool>();
+            m_ExtraSettingsFeatures.DisableCursorClipping = extraSettingsNode["DisableCursorClipping"].as<bool>();
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -58,6 +64,13 @@ void FeaturesFile::Save() const
             bugFixesNode["IncorrectLobbyDeletedPopup"]           = m_BugFixesFeatures.IncorrectLobbyDeletedPopup;
             bugFixesNode["DisabledWindow"]                       = m_BugFixesFeatures.DisabledWindow;
             yaml["BugFixes"] = bugFixesNode;
+
+            YAML::Node extraSettingsNode;
+            extraSettingsNode["Use24HourTimeFormat"]   = m_ExtraSettingsFeatures.Use24HourTimeFormat;
+            extraSettingsNode["UseMetricUnits"]        = m_ExtraSettingsFeatures.UseMetricUnits;
+            extraSettingsNode["DisableWebcam"]         = m_ExtraSettingsFeatures.DisableWebcam;
+            extraSettingsNode["DisableCursorClipping"] = m_ExtraSettingsFeatures.DisableCursorClipping;
+            yaml["ExtraSettings"] = extraSettingsNode;
         }
         file.Write(YAML::Dump(yaml));
 
@@ -72,4 +85,9 @@ void FeaturesFile::Save() const
 BugFixesFeatures& FeaturesFile::GetBugFixesFeatures()
 {
     return m_BugFixesFeatures;
+}
+
+ExtraSettingsFeatures& FeaturesFile::GetExtraSettingsFeatures()
+{
+    return m_ExtraSettingsFeatures;
 }

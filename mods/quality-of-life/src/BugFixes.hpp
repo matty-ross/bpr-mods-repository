@@ -22,7 +22,7 @@ private:
 
 private:
     const Core::Logger& m_Logger;
-    const BugFixesFeatures& m_BugFixesFeatures;
+    BugFixesFeatures& m_BugFixesFeatures;
     
     Core::Patch m_PatchUnknownLiveryVehicleIDs;
     Core::Patch m_PatchReloadingVehicleAfterLeavingJunkyard[2];
