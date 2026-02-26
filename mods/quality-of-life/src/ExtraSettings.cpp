@@ -8,6 +8,7 @@ ExtraSettings::ExtraSettings(const Core::Logger& logger)
     m_Logger(logger),
     m_Patch24HourTimeFormat(Core::Pointer(0x0621C64D).GetAddress(), 2),
     m_PatchMetricUnits(Core::Pointer(0x062178C4).GetAddress(), 2),
+    m_PatchDisableWebcam(Core::Pointer(0x00A3CD84).GetAddress(), 2),
     m_PatchDisableCursorClipping(Core::Pointer(0x008FB91E).GetAddress(), 3)
 {
 }
@@ -32,6 +33,15 @@ void ExtraSettings::Load()
         m_Logger.Info("Applied metric units patch.");
     }
 
+    // Apply disable webcam patch.
+    {
+        m_Logger.Info("Applying disable webcam patch...");
+
+        m_PatchDisableWebcam.Apply("\x31\xC0");
+
+        m_Logger.Info("Applied disable webcam patch.");
+    }
+
     // Apply disable cursor clipping patch.
     {
         m_Logger.Info("Applying disable cursor clipping patch...");
@@ -51,6 +61,15 @@ void ExtraSettings::Unload()
         m_PatchDisableCursorClipping.Remove();
 
         m_Logger.Info("Removed disable cursor clipping patch.");
+    }
+
+    // Remove disable webcam patch.
+    {
+        m_Logger.Info("Removing disable webcam patch...");
+
+        m_PatchDisableWebcam.Remove();
+
+        m_Logger.Info("Removed disable webcam patch.");
     }
 
     // Remove metric units patch.

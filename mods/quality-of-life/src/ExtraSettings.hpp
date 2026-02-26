@@ -19,5 +19,6 @@ private:
 
     Core::Patch m_Patch24HourTimeFormat;
     Core::Patch m_PatchMetricUnits;
+    Core::Patch m_PatchDisableWebcam;
     Core::Patch m_PatchDisableCursorClipping;
 };
