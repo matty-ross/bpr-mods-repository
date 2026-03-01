@@ -2,6 +2,7 @@
 
 
 #include "core/Logger.hpp"
+#include "mod-manager/DetourHookManager.hpp"
 
 
 class RemovedStuff
@@ -14,5 +15,10 @@ public:
     void Unload();
 
 private:
+    static void DetourCopsAndIslandPlayerIcons();
+
+private:
     const Core::Logger& m_Logger;
+
+    DetourHook m_DetourCopsAndIslandPlayerIcons;
 };
