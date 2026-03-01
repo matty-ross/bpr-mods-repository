@@ -168,12 +168,14 @@
     <ClCompile Include="src\FeaturesFile.cpp" />
     <ClCompile Include="src\BugFixes.cpp" />
     <ClCompile Include="src\ExtraSettings.cpp" />
+    <ClCompile Include="src\RemovedStuff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\QualityOfLife.hpp" />
     <ClInclude Include="src\FeaturesFile.hpp" />
     <ClInclude Include="src\BugFixes.hpp" />
     <ClInclude Include="src\ExtraSettings.hpp" />
+    <ClInclude Include="src\RemovedStuff.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\libraries\core\core.vcxproj">

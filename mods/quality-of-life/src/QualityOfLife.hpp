@@ -9,6 +9,7 @@
 #include "FeaturesFile.hpp"
 #include "BugFixes.hpp"
 #include "ExtraSettings.hpp"
+#include "RemovedStuff.hpp"
 
 
 class QualityOfLife
@@ -38,6 +39,7 @@ private:
 
     BugFixes m_BugFixes;
     ExtraSettings m_ExtraSettings;
+    RemovedStuff m_RemovedStuff;
 
     HANDLE m_LoadThreadHandle = NULL;
 };

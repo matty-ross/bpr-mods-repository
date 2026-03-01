@@ -18,7 +18,8 @@ QualityOfLife::QualityOfLife()
     m_Logger(k_ModName),
     m_FeaturesFile(m_ConfigDirectory, m_Logger),
     m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures()),
-    m_ExtraSettings(m_Logger, m_FeaturesFile.GetExtraSettingsFeatures())
+    m_ExtraSettings(m_Logger, m_FeaturesFile.GetExtraSettingsFeatures()),
+    m_RemovedStuff(m_Logger)
 {
 }
 
@@ -93,6 +94,15 @@ void QualityOfLife::Load()
             m_Logger.Info("Loaded extra settings.");
         }
 
+        // Load removed stuff.
+        {
+            m_Logger.Info("Loading removed stuff...");
+
+            m_RemovedStuff.Load();
+
+            m_Logger.Info("Loaded removed stuff.");
+        }
+
         m_Logger.Info("Loaded.");
     }
     catch (const std::exception& e)
@@ -111,6 +121,15 @@ void QualityOfLife::Unload()
         // Save features.
         {
             m_FeaturesFile.Save();
+        }
+
+        // Unload removed stuff.
+        {
+            m_Logger.Info("Unloading removed stuff...");
+
+            m_RemovedStuff.Unload();
+
+            m_Logger.Info("Unloaded removed stuff.");
         }
 
         // Unload extra settings.
