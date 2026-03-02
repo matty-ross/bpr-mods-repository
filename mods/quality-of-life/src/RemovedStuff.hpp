@@ -2,6 +2,7 @@
 
 
 #include "core/Logger.hpp"
+#include "core/Patch.hpp"
 #include "mod-manager/DetourHookManager.hpp"
 
 
@@ -21,4 +22,5 @@ private:
     const Core::Logger& m_Logger;
 
     DetourHook m_DetourCopsAndIslandPlayerIcons;
+    Core::Patch m_PatchCarAchievements[2];
 };

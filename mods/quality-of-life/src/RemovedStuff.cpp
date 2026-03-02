@@ -13,6 +13,11 @@ RemovedStuff::RemovedStuff(const Core::Logger& logger)
     {
         .Target = Core::Pointer(0x00A843AE).GetAddress(),
         .Detour = &RemovedStuff::DetourCopsAndIslandPlayerIcons,
+    },
+    m_PatchCarAchievements
+    {
+        Core::Patch(Core::Pointer(0x076ACCA3).GetAddress(), 9),
+        Core::Patch(Core::Pointer(0x032EB8FD).GetAddress(), 2),
     }
 {
 }
@@ -27,10 +32,30 @@ void RemovedStuff::Load()
 
         m_Logger.Info("Attached Cops and Island player icons detour.");
     }
+
+    // Apply car achievements patch.
+    {
+        m_Logger.Info("Applying car achievements patch...");
+
+        m_PatchCarAchievements[0].Apply("\x90\x90\x90\x90\x90\x90\x90\x90\x90");
+        m_PatchCarAchievements[1].Apply("\xEB\x0A");
+
+        m_Logger.Info("Applied car achievements patch.");
+    }
 }
 
 void RemovedStuff::Unload()
 {
+    // Remove car achievements patch.
+    {
+        m_Logger.Info("Removing car achievements patch...");
+
+        m_PatchCarAchievements[0].Remove();
+        m_PatchCarAchievements[1].Remove();
+
+        m_Logger.Info("Removed car achievements patch.");
+    }
+
     // Detach Cops and Island player icons detour.
     {
         m_Logger.Info("Detaching Cops and Island player icons detour...");
