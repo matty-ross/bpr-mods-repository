@@ -17,10 +17,12 @@ public:
 
 private:
     static void DetourCopsAndIslandPlayerIcons();
+    static void DetourCrashCameraEffect();
 
 private:
     const Core::Logger& m_Logger;
 
     DetourHook m_DetourCopsAndIslandPlayerIcons;
     Core::Patch m_PatchCarAchievements[2];
+    DetourHook m_DetourCrashCameraEffect;
 };
