@@ -23,6 +23,13 @@ struct ExtraSettingsFeatures
     bool DisableCursorClipping = true;
 };
 
+struct RemovedStuffFeatures
+{
+    bool CopsAndIslandPlayerIcons = true;
+    bool CarAchievements = true;
+    bool CrashCameraEffect = true;
+};
+
 
 class FeaturesFile
 {
@@ -35,6 +42,7 @@ public:
 
     BugFixesFeatures& GetBugFixesFeatures();
     ExtraSettingsFeatures& GetExtraSettingsFeatures();
+    RemovedStuffFeatures& GetRemovedStuffFeatures();
 
 private:
     Core::Path m_FilePath;
@@ -42,4 +50,5 @@ private:
 
     BugFixesFeatures m_BugFixesFeatures;
     ExtraSettingsFeatures m_ExtraSettingsFeatures;
+    RemovedStuffFeatures m_RemovedStuffFeatures;
 };

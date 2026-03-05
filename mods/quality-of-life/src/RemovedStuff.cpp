@@ -6,9 +6,10 @@
 #include "QualityOfLife.hpp"
 
 
-RemovedStuff::RemovedStuff(const Core::Logger& logger)
+RemovedStuff::RemovedStuff(const Core::Logger& logger, RemovedStuffFeatures& removedStuffFeatures)
     :
     m_Logger(logger),
+    m_RemovedStuffFeatures(removedStuffFeatures),
     m_DetourCopsAndIslandPlayerIcons
     {
         .Target = Core::Pointer(0x00A843AE).GetAddress(),
@@ -29,63 +30,81 @@ RemovedStuff::RemovedStuff(const Core::Logger& logger)
 
 void RemovedStuff::Load()
 {
-    // Attach Cops and Island player icons detour.
+    if (m_RemovedStuffFeatures.CopsAndIslandPlayerIcons)
     {
-        m_Logger.Info("Attaching Cops and Island player icons detour...");
+        // Attach Cops and Island player icons detour.
+        {
+            m_Logger.Info("Attaching Cops and Island player icons detour...");
 
-        ModManager::Get().GetDetourHookManager().Attach(m_DetourCopsAndIslandPlayerIcons);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourCopsAndIslandPlayerIcons);
 
-        m_Logger.Info("Attached Cops and Island player icons detour.");
+            m_Logger.Info("Attached Cops and Island player icons detour.");
+        }
     }
 
-    // Apply car achievements patch.
+    if (m_RemovedStuffFeatures.CarAchievements)
     {
-        m_Logger.Info("Applying car achievements patch...");
+        // Apply car achievements patch.
+        {
+            m_Logger.Info("Applying car achievements patch...");
 
-        m_PatchCarAchievements[0].Apply("\x90\x90\x90\x90\x90\x90\x90\x90\x90");
-        m_PatchCarAchievements[1].Apply("\xEB\x0A");
+            m_PatchCarAchievements[0].Apply("\x90\x90\x90\x90\x90\x90\x90\x90\x90");
+            m_PatchCarAchievements[1].Apply("\xEB\x0A");
 
-        m_Logger.Info("Applied car achievements patch.");
+            m_Logger.Info("Applied car achievements patch.");
+        }
     }
 
-    // Attach crash camera effect detour.
+    if (m_RemovedStuffFeatures.CrashCameraEffect)
     {
-        m_Logger.Info("Attaching crash camera effect detour...");
+        // Attach crash camera effect detour.
+        {
+            m_Logger.Info("Attaching crash camera effect detour...");
 
-        ModManager::Get().GetDetourHookManager().Attach(m_DetourCrashCameraEffect);
+            ModManager::Get().GetDetourHookManager().Attach(m_DetourCrashCameraEffect);
 
-        m_Logger.Info("Attached crash camera effect detour.");
+            m_Logger.Info("Attached crash camera effect detour.");
+        }
     }
 }
 
 void RemovedStuff::Unload()
 {
-    // Detach crash camera effect detour.
+    if (m_RemovedStuffFeatures.CrashCameraEffect)
     {
-        m_Logger.Info("Detaching crash camera effect detour...");
+        // Detach crash camera effect detour.
+        {
+            m_Logger.Info("Detaching crash camera effect detour...");
 
-        ModManager::Get().GetDetourHookManager().Detach(m_DetourCrashCameraEffect);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourCrashCameraEffect);
 
-        m_Logger.Info("Detached crash camera effect detour.");
+            m_Logger.Info("Detached crash camera effect detour.");
+        }
     }
 
-    // Remove car achievements patch.
+    if (m_RemovedStuffFeatures.CarAchievements)
     {
-        m_Logger.Info("Removing car achievements patch...");
+        // Remove car achievements patch.
+        {
+            m_Logger.Info("Removing car achievements patch...");
 
-        m_PatchCarAchievements[0].Remove();
-        m_PatchCarAchievements[1].Remove();
+            m_PatchCarAchievements[0].Remove();
+            m_PatchCarAchievements[1].Remove();
 
-        m_Logger.Info("Removed car achievements patch.");
+            m_Logger.Info("Removed car achievements patch.");
+        }
     }
 
-    // Detach Cops and Island player icons detour.
+    if (m_RemovedStuffFeatures.CopsAndIslandPlayerIcons)
     {
-        m_Logger.Info("Detaching Cops and Island player icons detour...");
+        // Detach Cops and Island player icons detour.
+        {
+            m_Logger.Info("Detaching Cops and Island player icons detour...");
 
-        ModManager::Get().GetDetourHookManager().Detach(m_DetourCopsAndIslandPlayerIcons);
+            ModManager::Get().GetDetourHookManager().Detach(m_DetourCopsAndIslandPlayerIcons);
 
-        m_Logger.Info("Detached Cops and Island player icons detour.");
+            m_Logger.Info("Detached Cops and Island player icons detour.");
+        }
     }
 }
 

@@ -19,7 +19,7 @@ QualityOfLife::QualityOfLife()
     m_FeaturesFile(m_ConfigDirectory, m_Logger),
     m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures()),
     m_ExtraSettings(m_Logger, m_FeaturesFile.GetExtraSettingsFeatures()),
-    m_RemovedStuff(m_Logger)
+    m_RemovedStuff(m_Logger, m_FeaturesFile.GetRemovedStuffFeatures())
 {
 }
 

@@ -37,6 +37,11 @@ void FeaturesFile::Load()
             m_ExtraSettingsFeatures.UseMetricUnits        = extraSettingsNode["UseMetricUnits"].as<bool>();
             m_ExtraSettingsFeatures.DisableWebcam         = extraSettingsNode["DisableWebcam"].as<bool>();
             m_ExtraSettingsFeatures.DisableCursorClipping = extraSettingsNode["DisableCursorClipping"].as<bool>();
+
+            YAML::Node removedStuffNode = yaml["RemovedStuff"];
+            m_RemovedStuffFeatures.CopsAndIslandPlayerIcons = removedStuffNode["CopsAndIslandPlayerIcons"].as<bool>();
+            m_RemovedStuffFeatures.CarAchievements          = removedStuffNode["CarAchievements"].as<bool>();
+            m_RemovedStuffFeatures.CrashCameraEffect        = removedStuffNode["CrashCameraEffect"].as<bool>();
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -71,6 +76,12 @@ void FeaturesFile::Save() const
             extraSettingsNode["DisableWebcam"]         = m_ExtraSettingsFeatures.DisableWebcam;
             extraSettingsNode["DisableCursorClipping"] = m_ExtraSettingsFeatures.DisableCursorClipping;
             yaml["ExtraSettings"] = extraSettingsNode;
+
+            YAML::Node removedStuffNode;
+            removedStuffNode["CopsAndIslandPlayerIcons"] = m_RemovedStuffFeatures.CopsAndIslandPlayerIcons;
+            removedStuffNode["CarAchievements"]          = m_RemovedStuffFeatures.CarAchievements;
+            removedStuffNode["CrashCameraEffect"]        = m_RemovedStuffFeatures.CrashCameraEffect;
+            yaml["RemovedStuff"] = removedStuffNode;
         }
         file.Write(YAML::Dump(yaml));
 
@@ -90,4 +101,9 @@ BugFixesFeatures& FeaturesFile::GetBugFixesFeatures()
 ExtraSettingsFeatures& FeaturesFile::GetExtraSettingsFeatures()
 {
     return m_ExtraSettingsFeatures;
+}
+
+RemovedStuffFeatures& FeaturesFile::GetRemovedStuffFeatures()
+{
+    return m_RemovedStuffFeatures;
 }
