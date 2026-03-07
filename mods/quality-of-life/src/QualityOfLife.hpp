@@ -10,6 +10,7 @@
 #include "BugFixes.hpp"
 #include "ExtraSettings.hpp"
 #include "RemovedStuff.hpp"
+#include "HiddenStuff.hpp"
 
 
 class QualityOfLife
@@ -40,6 +41,7 @@ private:
     BugFixes m_BugFixes;
     ExtraSettings m_ExtraSettings;
     RemovedStuff m_RemovedStuff;
+    HiddenStuff m_HiddenStuff;
 
     HANDLE m_LoadThreadHandle = NULL;
 };

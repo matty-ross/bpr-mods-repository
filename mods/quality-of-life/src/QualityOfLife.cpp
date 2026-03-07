@@ -19,7 +19,8 @@ QualityOfLife::QualityOfLife()
     m_FeaturesFile(m_ConfigDirectory, m_Logger),
     m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures()),
     m_ExtraSettings(m_Logger, m_FeaturesFile.GetExtraSettingsFeatures()),
-    m_RemovedStuff(m_Logger, m_FeaturesFile.GetRemovedStuffFeatures())
+    m_RemovedStuff(m_Logger, m_FeaturesFile.GetRemovedStuffFeatures()),
+    m_HiddenStuff(m_Logger)
 {
 }
 
@@ -103,6 +104,15 @@ void QualityOfLife::Load()
             m_Logger.Info("Loaded removed stuff.");
         }
 
+        // Load hidden stuff.
+        {
+            m_Logger.Info("Loading hidden stuff...");
+
+            m_HiddenStuff.Load();
+
+            m_Logger.Info("Loaded hidden stuff.");
+        }
+
         m_Logger.Info("Loaded.");
     }
     catch (const std::exception& e)
@@ -121,6 +131,15 @@ void QualityOfLife::Unload()
         // Save features.
         {
             m_FeaturesFile.Save();
+        }
+
+        // Unload hidden stuff.
+        {
+            m_Logger.Info("Unloading hidden stuff...");
+
+            m_HiddenStuff.Unload();
+
+            m_Logger.Info("Unloaded hidden stuff.");
         }
 
         // Unload removed stuff.

@@ -33,6 +33,9 @@
     <ClCompile Include="src\RemovedStuff.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HiddenStuff.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\QualityOfLife.hpp">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\RemovedStuff.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\HiddenStuff.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
