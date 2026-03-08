@@ -2,6 +2,7 @@
 
 
 #include "core/Logger.hpp"
+#include "core/Patch.hpp"
 
 
 class HiddenStuff
@@ -15,4 +16,6 @@ public:
 
 private:
     const Core::Logger& m_Logger;
+
+    Core::Patch m_PatchPlaneVehicleType;
 };
