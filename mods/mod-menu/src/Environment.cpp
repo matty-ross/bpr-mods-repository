@@ -25,9 +25,9 @@ void Environment::OnRenderMenu()
 
             if (ImGui::Button("Change##time-of-day"))
             {
-                gameModule.at(0x6E477C).as<uint32_t>() = m_TimeOfDayHours * 3600 + m_TimeOfDayMinutes * 60;
+                gameModule.at(0x6E477C).as<int32_t>() = m_TimeOfDayHours * 3600 + m_TimeOfDayMinutes * 60;
                 gameModule.at(0x6E4780).as<float>() = 0.0f;
-                gameModule.at(0x6E478C).as<uint32_t>() = 5;
+                gameModule.at(0x6E478C).as<int32_t>() = 5;
                 gameModule.at(0x6E4790).as<float>() = 0.0f;
                 gameModule.at(0x6E47BE).as<bool>() = true;
                 gameModule.at(0x6E47B4).as<int32_t>() = 5;
@@ -48,6 +48,19 @@ void Environment::OnRenderMenu()
             if (ImGui::InputInt("Minutes", &m_TimeOfDayMinutes))
             {
                 m_TimeOfDayMinutes = std::clamp(m_TimeOfDayMinutes, 0, 59);
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::SliderInt("In Seconds", &m_TimeOfDayInSeconds, 0, 86400, "%d", ImGuiSliderFlags_AlwaysClamp))
+            {
+                gameModule.at(0x6E477C).as<int32_t>() = m_TimeOfDayInSeconds;
+                gameModule.at(0x6E4780).as<float>() = 0.0f;
+                gameModule.at(0x6E478C).as<int32_t>() = 0;
+                gameModule.at(0x6E4790).as<float>() = 0.0f;
+                gameModule.at(0x6E47BE).as<bool>() = true;
+                gameModule.at(0x6E47B4).as<int32_t>() = 5;
+                gameModule.at(0x6E47A8).as<int32_t>() = 1;
             }
         }
 
@@ -72,6 +85,7 @@ void Environment::OnRenderMenu()
                 "Sunny",
                 "Overcast",
                 "Foggy",
+                "Junkyard",
             };
             ImGui::Combo("Weather Type", &gameModule.at(0x6E4838).as<int32_t>(), weatherTypes, IM_ARRAYSIZE(weatherTypes));
         }
