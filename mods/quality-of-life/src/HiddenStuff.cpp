@@ -12,6 +12,11 @@ HiddenStuff::HiddenStuff(const Core::Logger& logger)
 
 void HiddenStuff::Load()
 {
+    // Enable Sat-Nav rotation
+    {
+        Core::Pointer(0x0135AF0D).as<bool>() = true;
+    }
+
     // Apply plane vehicle type patch.
     {
         m_Logger.Info("Applying plane vehicle type patch...");
@@ -31,5 +36,10 @@ void HiddenStuff::Unload()
         m_PatchPlaneVehicleType.Remove();
 
         m_Logger.Info("Removed plane vehicle type patch.");
+    }
+
+    // Disable Sat-Nav rotation
+    {
+        Core::Pointer(0x0135AF0D).as<bool>() = false;
     }
 }
