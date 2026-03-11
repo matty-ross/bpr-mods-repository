@@ -15,7 +15,11 @@ public:
     void Unload();
 
 private:
+    static void DevLog();
+
+private:
     const Core::Logger& m_Logger;
 
+    Core::Patch m_PatchDevLog;
     Core::Patch m_PatchPlaneVehicleType;
 };
