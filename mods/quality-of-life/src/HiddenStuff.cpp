@@ -5,9 +5,10 @@
 #include "core/Pointer.hpp"
 
 
-HiddenStuff::HiddenStuff(const Core::Logger& logger)
+HiddenStuff::HiddenStuff(const Core::Logger& logger, HiddenStuffFeatures& hiddenStuffFeatures)
     :
     m_Logger(logger),
+    m_HiddenStuffFeatures(hiddenStuffFeatures),
     m_PatchDevLog(Core::Pointer(0x00F0280C).GetAddress(), 4),
     m_PatchPlaneVehicleType(Core::Pointer(0x06A701B0).GetAddress(), 18)
 {
@@ -15,57 +16,75 @@ HiddenStuff::HiddenStuff(const Core::Logger& logger)
 
 void HiddenStuff::Load()
 {
-    // Apply dev log patch.
+    if (m_HiddenStuffFeatures.DevLog)
     {
-        m_Logger.Info("Applying dev log patch...");
+        // Apply dev log patch.
+        {
+            m_Logger.Info("Applying dev log patch...");
 
-        FILE* newStdout;
-        freopen_s(&newStdout, "CONOUT$", "w", stdout);
+            FILE* newStdout;
+            freopen_s(&newStdout, "CONOUT$", "w", stdout);
 
-        void* devLog = &HiddenStuff::DevLog;
-        m_PatchDevLog.Apply(&devLog);
+            void* devLog = &HiddenStuff::DevLog;
+            m_PatchDevLog.Apply(&devLog);
 
-        m_Logger.Info("Applied dev log patch.");
+            m_Logger.Info("Applied dev log patch.");
+        }
     }
 
-    // Enable Sat-Nav rotation.
+    if (m_HiddenStuffFeatures.SatNavRotation)
     {
-        Core::Pointer(0x0135AF0D).as<bool>() = true;
+        // Enable Sat-Nav rotation.
+        {
+            Core::Pointer(0x0135AF0D).as<bool>() = true;
+        }
     }
 
-    // Apply plane vehicle type patch.
+    if (m_HiddenStuffFeatures.PlaneVehicleType)
     {
-        m_Logger.Info("Applying plane vehicle type patch...");
+        // Apply plane vehicle type patch.
+        {
+            m_Logger.Info("Applying plane vehicle type patch...");
 
-        m_PatchPlaneVehicleType.Apply("\x83\xF9\x02\x0F\x96\xC1\x0F\xB6\xC9\x90\x90\x90\x90\x90\x90\x90\x90\x90");
+            m_PatchPlaneVehicleType.Apply("\x83\xF9\x02\x0F\x96\xC1\x0F\xB6\xC9\x90\x90\x90\x90\x90\x90\x90\x90\x90");
 
-        m_Logger.Info("Applied plane vehicle type patch.");
+            m_Logger.Info("Applied plane vehicle type patch.");
+        }
     }
 }
 
 void HiddenStuff::Unload()
 {
-    // Remove plane vehicle type patch.
+    if (m_HiddenStuffFeatures.PlaneVehicleType)
     {
-        m_Logger.Info("Removing plane vehicle type patch...");
+        // Remove plane vehicle type patch.
+        {
+            m_Logger.Info("Removing plane vehicle type patch...");
 
-        m_PatchPlaneVehicleType.Remove();
+            m_PatchPlaneVehicleType.Remove();
 
-        m_Logger.Info("Removed plane vehicle type patch.");
+            m_Logger.Info("Removed plane vehicle type patch.");
+        }
     }
 
-    // Disable Sat-Nav rotation.
+    if (m_HiddenStuffFeatures.SatNavRotation)
     {
-        Core::Pointer(0x0135AF0D).as<bool>() = false;
+        // Disable Sat-Nav rotation.
+        {
+            Core::Pointer(0x0135AF0D).as<bool>() = false;
+        }
     }
 
-    // Remove dev log patch.
+    if (m_HiddenStuffFeatures.DevLog)
     {
-        m_Logger.Info("Removing dev log patch...");
+        // Remove dev log patch.
+        {
+            m_Logger.Info("Removing dev log patch...");
 
-        m_PatchDevLog.Remove();
+            m_PatchDevLog.Remove();
 
-        m_Logger.Info("Removed dev log patch.");
+            m_Logger.Info("Removed dev log patch.");
+        }
     }
 }
 

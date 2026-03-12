@@ -30,6 +30,13 @@ struct RemovedStuffFeatures
     bool CrashCameraEffect = true;
 };
 
+struct HiddenStuffFeatures
+{
+    bool DevLog = true;
+    bool SatNavRotation = true;
+    bool PlaneVehicleType = true;
+};
+
 
 class FeaturesFile
 {
@@ -43,6 +50,7 @@ public:
     BugFixesFeatures& GetBugFixesFeatures();
     ExtraSettingsFeatures& GetExtraSettingsFeatures();
     RemovedStuffFeatures& GetRemovedStuffFeatures();
+    HiddenStuffFeatures& GetHiddenStuffFeatures();
 
 private:
     Core::Path m_FilePath;
@@ -51,4 +59,5 @@ private:
     BugFixesFeatures m_BugFixesFeatures;
     ExtraSettingsFeatures m_ExtraSettingsFeatures;
     RemovedStuffFeatures m_RemovedStuffFeatures;
+    HiddenStuffFeatures m_HiddenStuffFeatures;
 };

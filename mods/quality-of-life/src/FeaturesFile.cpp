@@ -42,6 +42,11 @@ void FeaturesFile::Load()
             m_RemovedStuffFeatures.CopsAndIslandPlayerIcons = removedStuffNode["CopsAndIslandPlayerIcons"].as<bool>();
             m_RemovedStuffFeatures.CarAchievements          = removedStuffNode["CarAchievements"].as<bool>();
             m_RemovedStuffFeatures.CrashCameraEffect        = removedStuffNode["CrashCameraEffect"].as<bool>();
+
+            YAML::Node hiddenStuffNode = yaml["HiddenStuff"];
+            m_HiddenStuffFeatures.DevLog           = hiddenStuffNode["DevLog"].as<bool>();
+            m_HiddenStuffFeatures.SatNavRotation   = hiddenStuffNode["SatNavRotation"].as<bool>();
+            m_HiddenStuffFeatures.PlaneVehicleType = hiddenStuffNode["PlaneVehicleType"].as<bool>();
         }
 
         m_Logger.Info("Loaded %s.", k_Name);
@@ -82,6 +87,12 @@ void FeaturesFile::Save() const
             removedStuffNode["CarAchievements"]          = m_RemovedStuffFeatures.CarAchievements;
             removedStuffNode["CrashCameraEffect"]        = m_RemovedStuffFeatures.CrashCameraEffect;
             yaml["RemovedStuff"] = removedStuffNode;
+
+            YAML::Node hiddenStuffNode;
+            hiddenStuffNode["DevLog"]           = m_HiddenStuffFeatures.DevLog;
+            hiddenStuffNode["SatNavRotation"]   = m_HiddenStuffFeatures.SatNavRotation;
+            hiddenStuffNode["PlaneVehicleType"] = m_HiddenStuffFeatures.PlaneVehicleType;
+            yaml["HiddenStuff"] = hiddenStuffNode;
         }
         file.Write(YAML::Dump(yaml));
 
@@ -106,4 +117,9 @@ ExtraSettingsFeatures& FeaturesFile::GetExtraSettingsFeatures()
 RemovedStuffFeatures& FeaturesFile::GetRemovedStuffFeatures()
 {
     return m_RemovedStuffFeatures;
+}
+
+HiddenStuffFeatures& FeaturesFile::GetHiddenStuffFeatures()
+{
+    return m_HiddenStuffFeatures;
 }
