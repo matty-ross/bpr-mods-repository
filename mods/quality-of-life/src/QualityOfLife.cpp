@@ -19,6 +19,7 @@ QualityOfLife::QualityOfLife()
     m_FeaturesFile(m_ConfigDirectory, m_Logger),
     m_BugFixes(m_Logger, m_FeaturesFile.GetBugFixesFeatures()),
     m_ExtraSettings(m_Logger, m_FeaturesFile.GetExtraSettingsFeatures()),
+    m_Enhancements(m_Logger),
     m_RemovedStuff(m_Logger, m_FeaturesFile.GetRemovedStuffFeatures()),
     m_HiddenStuff(m_Logger, m_FeaturesFile.GetHiddenStuffFeatures())
 {
@@ -95,6 +96,15 @@ void QualityOfLife::Load()
             m_Logger.Info("Loaded extra settings.");
         }
 
+        // Load enhancements.
+        {
+            m_Logger.Info("Loading enhancements...");
+
+            m_Enhancements.Load();
+
+            m_Logger.Info("Loaded enhancements.");
+        }
+
         // Load removed stuff.
         {
             m_Logger.Info("Loading removed stuff...");
@@ -149,6 +159,15 @@ void QualityOfLife::Unload()
             m_RemovedStuff.Unload();
 
             m_Logger.Info("Unloaded removed stuff.");
+        }
+
+        // Unload enhancements.
+        {
+            m_Logger.Info("Unloading enhancements...");
+
+            m_Enhancements.Unload();
+
+            m_Logger.Info("Unloaded enhancements.");
         }
 
         // Unload extra settings.

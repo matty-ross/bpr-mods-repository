@@ -9,6 +9,7 @@
 #include "FeaturesFile.hpp"
 #include "BugFixes.hpp"
 #include "ExtraSettings.hpp"
+#include "Enhancements.hpp"
 #include "RemovedStuff.hpp"
 #include "HiddenStuff.hpp"
 
@@ -40,6 +41,7 @@ private:
 
     BugFixes m_BugFixes;
     ExtraSettings m_ExtraSettings;
+    Enhancements m_Enhancements;
     RemovedStuff m_RemovedStuff;
     HiddenStuff m_HiddenStuff;
 

@@ -168,6 +168,7 @@
     <ClCompile Include="src\FeaturesFile.cpp" />
     <ClCompile Include="src\BugFixes.cpp" />
     <ClCompile Include="src\ExtraSettings.cpp" />
+    <ClCompile Include="src\Enhancements.cpp" />
     <ClCompile Include="src\RemovedStuff.cpp" />
     <ClCompile Include="src\HiddenStuff.cpp" />
   </ItemGroup>
@@ -176,6 +177,7 @@
     <ClInclude Include="src\FeaturesFile.hpp" />
     <ClInclude Include="src\BugFixes.hpp" />
     <ClInclude Include="src\ExtraSettings.hpp" />
+    <ClInclude Include="src\Enhancements.hpp" />
     <ClInclude Include="src\RemovedStuff.hpp" />
     <ClInclude Include="src\HiddenStuff.hpp" />
   </ItemGroup>
