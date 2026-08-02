@@ -71,22 +71,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\$(Configuration) $(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration) $(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\$(Configuration) $(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration) $(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(ProjectDir)bin\$(Configuration) $(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration) $(PlatformShortName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(ProjectDir)bin\$(Configuration) $(PlatformShortName)\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration) $(PlatformShortName)\</IntDir>
   </PropertyGroup>
@@ -94,16 +90,20 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;YAML_CPP_STATIC_DEFINE;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -111,33 +111,39 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;YAML_CPP_STATIC_DEFINE;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;YAML_CPP_STATIC_DEFINE;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -145,53 +151,21 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>YAML_CPP_STATIC_DEFINE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;YAML_CPP_STATIC_DEFINE;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(ProjectDir)modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+    </Manifest>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="modules\yaml-cpp\src\binary.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\contrib\graphbuilder.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\contrib\graphbuilderadapter.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\convert.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\depthguard.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\directives.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\emit.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\emitfromevents.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\emitter.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\emitterstate.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\emitterutils.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\exceptions.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\exp.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\fptostring.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\memory.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\node.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\nodebuilder.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\nodeevents.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\node_data.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\null.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\ostream_wrapper.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\parse.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\parser.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\regex_yaml.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\scanner.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\scanscalar.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\scantag.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\scantoken.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\simplekey.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\singledocparser.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\stream.cpp" />
-    <ClCompile Include="modules\yaml-cpp\src\tag.cpp" />
-  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\vendor\yaml-cpp.hpp" />
     <ClInclude Include="modules\yaml-cpp\include\yaml-cpp\anchor.h" />
@@ -255,6 +229,40 @@
     <ClInclude Include="modules\yaml-cpp\src\stringsource.h" />
     <ClInclude Include="modules\yaml-cpp\src\tag.h" />
     <ClInclude Include="modules\yaml-cpp\src\token.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="modules\yaml-cpp\src\binary.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\contrib\graphbuilder.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\contrib\graphbuilderadapter.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\convert.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\depthguard.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\directives.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\emit.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\emitfromevents.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\emitter.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\emitterstate.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\emitterutils.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\exceptions.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\exp.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\fptostring.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\memory.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\node.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\nodebuilder.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\nodeevents.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\node_data.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\null.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\ostream_wrapper.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\parse.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\parser.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\regex_yaml.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\scanner.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\scanscalar.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\scantag.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\scantoken.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\simplekey.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\singledocparser.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\stream.cpp" />
+    <ClCompile Include="modules\yaml-cpp\src\tag.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
