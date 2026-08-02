@@ -1,12 +1,12 @@
+[submodule "libraries/core-utils"]
+	path = libraries/core-utils
+	url = https://github.com/matty-ross/core-utils.git
+[submodule "libraries/bpr-utils"]
+	path = libraries/bpr-utils
+	url = https://github.com/matty-ross/bpr-utils.git
 [submodule "vendor/imgui/modules/imgui"]
 	path = vendor/imgui/modules/imgui
 	url = https://github.com/ocornut/imgui.git
-[submodule "vendor/detours/modules/detours"]
-	path = vendor/detours/modules/detours
-	url = https://github.com/microsoft/Detours.git
 [submodule "vendor/yaml-cpp/modules/yaml-cpp"]
 	path = vendor/yaml-cpp/modules/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
-[submodule "libraries/bpr-sdk"]
-	path = libraries/bpr-sdk
-	url = https://github.com/matty-ross/bpr-sdk.git
