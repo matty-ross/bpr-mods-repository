@@ -1,6 +1,6 @@
 #include <Windows.h>
 
-#include "ModManager.hpp"
+#include "mod-manager/ModManager.hpp"
 
 
 BOOL WINAPI DllMain(
