@@ -1,8 +1,7 @@
-#include "ModManagerConfigFile.hpp"
-
 #include "vendor/yaml-cpp.hpp"
 
 #include "core/File.hpp"
+#include "mod-manager/ModManagerConfigFile.hpp"
 
 
 static constexpr char k_Name[] = "mod manager config";
@@ -21,8 +20,8 @@ void ModManagerConfigFile::Load()
     {
         m_Logger.Info("Loading %s from file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Read);
-        YAML::Node yaml = YAML::Load(file.Read<std::string>());
+        Core::File file(m_FilePath, Core::File::Mode::Read, m_Logger);
+        YAML::Node yaml = YAML::Load(file.ReadAsText());
         {
             YAML::Node imguiNode = yaml["ImGui"];
             m_ImGuiConfig.ToggleMenusVK    = imguiNode["ToggleMenusVK"].as<int>();
@@ -45,7 +44,7 @@ void ModManagerConfigFile::Save() const
     {
         m_Logger.Info("Saving %s to file '%s' ...", k_Name, m_FilePath.GetPath());
 
-        Core::File file(m_FilePath.GetPath(), Core::File::Mode::Write);
+        Core::File file(m_FilePath, Core::File::Mode::Write, m_Logger);
         YAML::Node yaml;
         {
             YAML::Node imguiNode;
@@ -55,7 +54,7 @@ void ModManagerConfigFile::Save() const
             imguiNode["EnableViewports"]  = m_ImGuiConfig.EnableViewports;
             yaml["ImGui"] = imguiNode;
         }
-        file.Write(YAML::Dump(yaml));
+        file.WriteAsText(YAML::Dump(yaml));
 
         m_Logger.Info("Saved %s.", k_Name);
     }
