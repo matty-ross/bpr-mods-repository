@@ -1,3 +1,4 @@
+#include <vector>
 #include <Windows.h>
 
 #include "vendor/imgui.hpp"
@@ -19,16 +20,35 @@ ImGuiManager::ImGuiManager(Core::Path configDirectory, const ImGuiConfig& imguiC
     m_IniFilePath(configDirectory.Append("imgui.ini")),
     m_ImGuiConfig(imguiConfig)
 {
+    InitializeCriticalSection(&m_CriticalSection);
 }
 
-bool ImGuiManager::AreMenusVisible() const
+ImGuiManager::~ImGuiManager()
 {
-    return m_MenusVisible;
+    DeleteCriticalSection(&m_CriticalSection);
 }
 
-bool ImGuiManager::AreOverlaysVisible() const
+CRITICAL_SECTION* ImGuiManager::GetCriticalSection()
 {
-    return m_OverlaysVisible;
+    return &m_CriticalSection;
+}
+
+void ImGuiManager::AddMenu(RenderImGuiMenu menu)
+{
+    EnterCriticalSection(&m_CriticalSection);
+
+    m_Menus.push_back(menu);
+
+    LeaveCriticalSection(&m_CriticalSection);
+}
+
+void ImGuiManager::AddOverlay(RenderImGuiOverlay overlay)
+{
+    EnterCriticalSection(&m_CriticalSection);
+
+    m_Overlays.push_back(overlay);
+
+    LeaveCriticalSection(&m_CriticalSection);
 }
 
 void ImGuiManager::Load()
@@ -56,25 +76,51 @@ void ImGuiManager::Load()
     ID3D11Device* d3d11Device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
     ID3D11DeviceContext* d3d11DeviceContext = Core::Pointer(0x01485ECC).as<ID3D11DeviceContext*>();
     ImGui_ImplDX11_Init(d3d11Device, d3d11DeviceContext);
+
+    m_Loaded = true;
 }
 
 void ImGuiManager::Unload()
 {
+    if (!m_Loaded)
+    {
+        return;
+    }
+    
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
 
     ImGui::DestroyContext();
 }
 
-void ImGuiManager::NewFrame()
+void ImGuiManager::Render()
 {
+    if (!m_Loaded)
+    {
+        return;
+    }
+    
+    EnterCriticalSection(&m_CriticalSection);
+
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
-}
 
-void ImGuiManager::Render()
-{
+    if (m_MenusVisible)
+    {
+        for (RenderImGuiMenu menu : m_Menus)
+        {
+            menu();
+        }
+    }
+    if (m_OverlaysVisible)
+    {
+        for (RenderImGuiOverlay overlay : m_Overlays)
+        {
+            overlay();
+        }
+    }
+
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -83,9 +129,11 @@ void ImGuiManager::Render()
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
     }
+
+    LeaveCriticalSection(&m_CriticalSection);
 }
 
-void ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+bool ImGuiManager::HandleWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
 
@@ -108,4 +156,32 @@ void ImGuiManager::OnWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lP
         }
         break;
     }
+
+    // Prevent forwarding messages meant for ImGui.
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureMouse)
+    {
+        switch (Msg)
+        {
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MOUSEWHEEL:
+            return true;
+        }
+    }
+    if (io.WantCaptureKeyboard)
+    {
+        switch (Msg)
+        {
+        case WM_KEYDOWN:
+        case WM_CHAR:
+        case WM_SYSKEYDOWN:
+        case WM_MENUCHAR:
+        case WM_COMMAND:
+            return true;
+        }
+    }
+
+    return false;
 }
