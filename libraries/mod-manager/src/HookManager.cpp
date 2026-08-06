@@ -24,24 +24,6 @@ void HookManager::AddUpdateHook(UpdateHook updateHook)
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void HookManager::AddRenderMenuHook(RenderMenuHook renderMenuHook)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    m_RenderMenuHooks.push_back(renderMenuHook);
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-void HookManager::AddRenderOverlayHook(RenderOverlayHook renderOverlayHook)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    m_RenderOverlayHooks.push_back(renderOverlayHook);
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
 void HookManager::AddAddGameEventsHook(AddGameEventsHook addGameEventsHook)
 {
     EnterCriticalSection(&m_CriticalSection);
@@ -60,61 +42,37 @@ void HookManager::AddAddGameActionsHook(AddGameActionsHook addGameActionsHook)
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void HookManager::ExecuteUpdateHooks(Core::Pointer gameModule)
+void HookManager::ExecuteUpdateHooks()
 {
     EnterCriticalSection(&m_CriticalSection);
 
     for (UpdateHook updateHook : m_UpdateHooks)
     {
-        updateHook(gameModule);
+        updateHook();
     }
 
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void HookManager::ExecuteRenderMenuHooks(Core::Pointer gameModule)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    for (RenderMenuHook renderMenuHook : m_RenderMenuHooks)
-    {
-        renderMenuHook(gameModule);
-    }
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-void HookManager::ExecuteRenderOverlayHooks(Core::Pointer gameModule)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    for (RenderOverlayHook renderOverlayHook : m_RenderOverlayHooks)
-    {
-        renderOverlayHook(gameModule);
-    }
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-void HookManager::ExecuteAddGameEventsHooks(Core::Pointer gameModule, Core::Pointer gameEventQueue)
+void HookManager::ExecuteAddGameEventsHooks(Core::Pointer gameEventQueue)
 {
     EnterCriticalSection(&m_CriticalSection);
 
     for (AddGameEventsHook addGameEventsHook : m_AddGameEventsHooks)
     {
-        addGameEventsHook(gameModule, gameEventQueue);
+        addGameEventsHook(gameEventQueue);
     }
 
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void HookManager::ExecuteAddGameActionsHooks(Core::Pointer gameModule, Core::Pointer gameActionQueue)
+void HookManager::ExecuteAddGameActionsHooks(Core::Pointer gameActionQueue)
 {
     EnterCriticalSection(&m_CriticalSection);
 
     for (AddGameActionsHook addGameActionsHook : m_AddGameActionsHooks)
     {
-        addGameActionsHook(gameModule, gameActionQueue);
+        addGameActionsHook(gameActionQueue);
     }
 
     LeaveCriticalSection(&m_CriticalSection);
