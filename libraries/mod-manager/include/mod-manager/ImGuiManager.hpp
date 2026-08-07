@@ -34,7 +34,7 @@ public:
     void Unload();
 
     void Render();
-    bool HandleWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+    void WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 private:
     Core::Path m_IniFilePath;

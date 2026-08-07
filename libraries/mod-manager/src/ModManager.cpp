@@ -1,12 +1,13 @@
-#include "ModManager.hpp"
+#include <exception>
+#include <Windows.h>
 
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
-
-
-static constexpr char k_Name[]    = "Mod Manager";
-static constexpr char k_Version[] = "1.4.0";
+#include "core/Logger.hpp"
+#include "core/Patch.hpp"
+#include "mod-manager/ModManager.hpp"
+#include "mod-manager/HookManager.hpp"
 
 
 ModManager ModManager::s_Instance;
@@ -14,26 +15,10 @@ ModManager ModManager::s_Instance;
 
 ModManager::ModManager()
     :
-    m_AssetsDirectory(".\\mods\\"),
-    m_ConfigDirectory("%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\"),
     m_Logger(k_Name),
+    m_ConfigDirectory("%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\"),
     m_ModManagerConfigFile(m_ConfigDirectory, m_Logger),
-    m_ImGuiManager(m_ConfigDirectory, m_ModManagerConfigFile.GetImGuiConfig()),
-    m_DetourPresent
-    {
-        .Target = Core::Pointer(0x00C89F90).GetAddress(),
-        .Detour = &ModManager::DetourPresent,
-    },
-    m_DetourWindowProc
-    {
-        .Target = Core::Pointer(0x008FB9E2).GetAddress(),
-        .Detour = &ModManager::DetourWindowProc,
-    },
-    m_DetourUpdateKeyboardState
-    {
-        .Target = Core::Pointer(0x0664BB29).GetAddress(),
-        .Detour = &ModManager::DetourUpdateKeyboardState,
-    }
+    m_ImGuiManager(m_ConfigDirectory, m_ModManagerConfigFile.GetImGuiConfig())
 {
 }
 
@@ -47,19 +32,14 @@ bool ModManager::CheckModVersion(const char* modVersion) const
     return strcmp(modVersion, k_Version) == 0;
 }
 
-Core::Path ModManager::GetAssetsDirectory() const
-{
-    return m_AssetsDirectory;
-}
-
 Core::Path ModManager::GetConfigDirectory() const
 {
     return m_ConfigDirectory;
 }
 
-DetourHookManager& ModManager::GetDetourHookManager()
+HookManager& ModManager::GetHookManager()
 {
-    return m_DetourHookManager;
+    return m_HookManager;
 }
 
 ImGuiManager& ModManager::GetImGuiManager()
@@ -67,129 +47,54 @@ ImGuiManager& ModManager::GetImGuiManager()
     return m_ImGuiManager;
 }
 
-void ModManager::OnProcessAttach()
-{
-    AllocConsole();
-    HANDLE consoleOutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    DWORD consoleMode = 0;
-    GetConsoleMode(consoleOutputHandle, &consoleMode);
-    consoleMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    SetConsoleMode(consoleOutputHandle, consoleMode);
-
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        s_Instance.Load();
-        return 0;
-    };
-    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
-}
-
-void ModManager::OnProcessDetach()
-{
-    Unload();
-    CloseHandle(m_LoadThreadHandle);
-}
-
 void ModManager::Load()
 {
     try
     {
-        m_Logger.Info("Loading...");
+        Core::Logger::Initialize();
 
-        // Create config directory.
+        //m_ConfigDirectory.CreateDirectoryTree();
+        //m_Logger.Info("Created config directory.");
+
+        m_ModManagerConfigFile.Load();
+
+        Core::Patch(0x0817E440, 6, m_Logger).WriteJMP(Hook_ImGuiRender);
+        Core::Patch(0x008FB9D9, 5, m_Logger).WriteJMP(Hook_ImGuiWindowProc);
+        Core::Patch(0x00A49235, 5, m_Logger).WriteJMP(Hook_ExecuteUpdateHooks);
+
+        m_ImGuiManager.AddMenu([]()
         {
-            m_Logger.Info("Creating config directory '%s' ...", m_ConfigDirectory.GetPath());
+            ImGui::ShowDemoWindow();
+        });
 
-            m_ConfigDirectory.Create();
-
-            m_Logger.Info("Created config directory.");
-        }
-
-        // Load mod manager config.
+        auto loadThreadProc = [](LPVOID) -> DWORD
         {
-            m_ModManagerConfigFile.Load();
-        }
-
-        // Wait to be at or past the Start Screen. 
-        {
-            m_Logger.Info("Waiting to be at or past the Start Screen...");
-            
             while (true)
             {
-                // BrnGameMainFlowController::GameMainFlowController::meCurrentState
                 Core::Pointer gameModule = 0x013FC8E0;
-                if (
-                    gameModule.as<void*>() != nullptr &&
-                    gameModule.deref().at(0xB6D4C8).as<int32_t>() >= 3 // BrnGameMainFlowController::EMainGameFlowState::E_MGS_START_SCREEN
-                )
+                if (gameModule.as<void*>() != nullptr)
                 {
-                    break;
+                    int32_t gameUpdateStage = gameModule.deref().at(0xB6D464).as<int32_t>();
+                    if (gameUpdateStage == 1) // BrnGame::BrnGameModule::E_GAMEUPDATESTAGE_MAIN
+                    {
+                        break;
+                    }
                 }
-                
+
                 Sleep(1000);
             }
-            
-            m_Logger.Info("At or past the Start Screen.");
-        }
 
-        // Load ImGui manager.
-        {
-            m_Logger.Info("Loading ImGui manager...");
-            
-            m_ImGuiManager.Load();
-            
-            m_Logger.Info("Loaded ImGui manager.");
-        }
+            s_Instance.m_ImGuiManager.Load();
+            s_Instance.m_Logger.Info("Loaded ImGui.");
 
-        // Remove window class cursor.
-        {
-            // ImGui manages the cursor and fights with Windows, therefore we remove it.
-
-            m_Logger.Info("Removing window class cursor...");
-
-            m_PreviousCursorHandle = reinterpret_cast<HCURSOR>(SetClassLongPtrA(
-                Core::Pointer(0x0139815C).as<HWND>(),
-                GCLP_HCURSOR,
-                NULL
-            ));
-
-            m_Logger.Info("Removed window class cursor. Previous cursor handle: 0x%08X.", m_PreviousCursorHandle);
-        }
-
-        // Attach Present detour.
-        {
-            m_Logger.Info("Attaching Present detour...");
-            
-            m_DetourHookManager.Attach(m_DetourPresent);
-            
-            m_Logger.Info("Attached Present detour.");
-        }
-
-        // Attach WindowProc detour.
-        {
-            m_Logger.Info("Attaching WindowProc detour...");
-            
-            m_DetourHookManager.Attach(m_DetourWindowProc);
-            
-            m_Logger.Info("Attached WindowProc detour.");
-        }
-
-        // Attach UpdateKeyboardState detour.
-        {
-            m_Logger.Info("Attaching UpdateKeyboardState detour...");
-            
-            m_DetourHookManager.Attach(m_DetourUpdateKeyboardState);
-            
-            m_Logger.Info("Attached UpdateKeyboardState detour.");
-        }
-
-        m_Logger.Info("Loaded.");
+            return 0;
+        };
+        m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_Name, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
@@ -197,89 +102,44 @@ void ModManager::Unload()
 {
     try
     {
-        m_Logger.Info("Unloading...");
-
-        // Save mod manager config.
-        {
-            m_ModManagerConfigFile.Save();
-        }
-
-        // Detach UpdateKeyboardState detour.
-        {
-            m_Logger.Info("Detaching UpdateKeyboardState detour...");
-            
-            m_DetourHookManager.Detach(m_DetourUpdateKeyboardState);
-            
-            m_Logger.Info("Detached UpdateKeyboardState detour.");
-        }
-
-        // Detach WindowProc detour.
-        {
-            m_Logger.Info("Detaching WindowProc detour...");
-            
-            m_DetourHookManager.Detach(m_DetourWindowProc);
-            
-            m_Logger.Info("Detached WindowProc detour.");
-        }
-
-        // Detach Present detour.
-        {
-            m_Logger.Info("Detaching Present detour...");
-            
-            m_DetourHookManager.Detach(m_DetourPresent);
-            
-            m_Logger.Info("Detached Present detour.");
-        }
-
-        // Restore previous window class cursor.
-        {
-            m_Logger.Info("Restoring previous window class cursor...");
-
-            SetClassLongPtrA(
-                Core::Pointer(0x0139815C).as<HWND>(),
-                GCLP_HCURSOR,
-                reinterpret_cast<LONG_PTR>(m_PreviousCursorHandle)
-            );
-
-            m_Logger.Info("Restored previous window class cursor.");
-        }
-
-        // Unload ImGui manager.
-        {
-            m_Logger.Info("Unloading ImGui manager...");
-            
-            m_ImGuiManager.Unload();
-            
-            m_Logger.Info("Unloaded ImGui manager.");
-        }
-
-        m_Logger.Info("Unloaded.");
+        m_ModManagerConfigFile.Save();
+        
+        CloseHandle(m_LoadThreadHandle);
+        m_ImGuiManager.Unload();
+        s_Instance.m_Logger.Info("Unloaded ImGui.");
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_Name, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
-__declspec(naked) void ModManager::DetourPresent()
+__declspec(naked) void ModManager::Hook_ImGuiRender()
 {
     __asm
     {
         pushfd
         pushad
-
-        mov ecx, offset s_Instance.m_ImGuiManager
-        call ImGuiManager::OnRenderFrame
-
+    
+        mov ecx, offset ModManager::s_Instance.m_ImGuiManager
+        call ImGuiManager::Render
+    
         popad
         popfd
-        
-        jmp dword ptr [s_Instance.m_DetourPresent.Target]
+            
+        // Original code.
+        mov edx, dword ptr [ecx]
+        push esi
+        mov eax, dword ptr [edx + 0x8]
+
+        // Jump back.
+        push 0x0817E446
+        ret
     }
 }
 
-__declspec(naked) void ModManager::DetourWindowProc()
+__declspec(naked) void ModManager::Hook_ImGuiWindowProc()
 {
     __asm
     {
@@ -290,49 +150,70 @@ __declspec(naked) void ModManager::DetourWindowProc()
         push dword ptr [ebp + 0x10]
         push dword ptr [ebp + 0xC]
         push dword ptr [ebp + 0x8]
-        mov ecx, offset s_Instance.m_ImGuiManager
-        call ImGuiManager::OnWindowMessage
-
-        test al, al
-        jz _continue
+        mov ecx, offset ModManager::s_Instance.m_ImGuiManager
+        call ImGuiManager::WindowProc
         
         popad
         popfd
         
-        // Break from the switch statement.
-        mov eax, 0x008FBC01
-        jmp eax
+        // Original code.
+        push ebx
+        mov ebx, dword ptr [ebp + 0xC]
+        push esi
 
-    _continue:
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourWindowProc.Target]
+        // Jump back.
+        push 0x008FB9DE
+        ret
     }
 }
 
-__declspec(naked) void ModManager::DetourUpdateKeyboardState()
+__declspec(naked) void ModManager::Hook_ExecuteUpdateHooks()
 {
     __asm
     {
         pushfd
         pushad
 
-        call ImGui::GetIO
-        
-        cmp byte ptr [eax]ImGuiIO.WantCaptureKeyboard, 0
-        je _continue
+        mov ecx, offset ModManager::s_Instance.m_HookManager
+        call HookManager::ExecuteUpdateHooks
 
-        // Clear all keys.
-        mov ecx, 0x100
-        mov al, 0
-        lea edi, [ebp - 0x100]
-        rep stosb
-
-    _continue:
         popad
         popfd
-        
-        jmp dword ptr [s_Instance.m_DetourUpdateKeyboardState.Target]
+
+        // Original code.
+        mov eax, dword ptr ds:[0x013FC8E0]
+
+        // Jump back.
+        push 0x00A4923A
+        ret
     }
 }
+
+
+
+////0x0664BB29
+//__declspec(naked) void ModManager::DetourUpdateKeyboardState()
+//{
+//    __asm
+//    {
+//        pushfd
+//        pushad
+//
+//        call ImGui::GetIO
+//        
+//        cmp byte ptr [eax]ImGuiIO.WantCaptureKeyboard, 0
+//        je _continue
+//
+//        // Clear all keys.
+//        mov ecx, 0x100
+//        mov al, 0
+//        lea edi, [ebp - 0x100]
+//        rep stosb
+//
+//    _continue:
+//        popad
+//        popfd
+//        
+//        jmp dword ptr [s_Instance.m_DetourUpdateKeyboardState.Target]
+//    }
+//}

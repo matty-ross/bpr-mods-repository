@@ -7,7 +7,7 @@
 #include "core/Logger.hpp"
 #include "mod-manager/ModManagerApi.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
-#include "mod-manager/DetourHookManager.hpp"
+#include "mod-manager/HookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
 
@@ -19,6 +19,7 @@ private:
 public:
     ModManager(const ModManager&) = delete;
     ModManager(ModManager&&) = delete;
+    
     ModManager& operator =(const ModManager&) = delete;
     ModManager& operator =(ModManager&&) = delete;
 
@@ -28,41 +29,35 @@ public:
 public:
     MOD_MANAGER_API bool CheckModVersion(const char* modVersion) const;
     
-    MOD_MANAGER_API Core::Path GetAssetsDirectory() const;
     MOD_MANAGER_API Core::Path GetConfigDirectory() const;
     
-    MOD_MANAGER_API DetourHookManager& GetDetourHookManager();
+    MOD_MANAGER_API HookManager& GetHookManager();
     MOD_MANAGER_API ImGuiManager& GetImGuiManager();
 
-    void OnProcessAttach();
-    void OnProcessDetach();
-
-private:
     void Load();
     void Unload();
     
 private:
-    static void DetourPresent();
-    static void DetourWindowProc();
-    static void DetourUpdateKeyboardState();
+    static void Hook_ImGuiRender();
+    static void Hook_ImGuiWindowProc();
+    static void Hook_ExecuteUpdateHooks();
+    //static void Hook_UpdateKeyboardState();
 
 private:
+    static constexpr char k_Name[] = "Mod Manager";
+    static constexpr char k_Version[] = "2.0.0";
+    
     static ModManager s_Instance;
 
 private:
-    Core::Path m_AssetsDirectory;
-    Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
+
+    Core::Path m_ConfigDirectory;
 
     ModManagerConfigFile m_ModManagerConfigFile;
     
-    DetourHookManager m_DetourHookManager;
+    HookManager m_HookManager;
     ImGuiManager m_ImGuiManager;
 
-    DetourHook m_DetourPresent;
-    DetourHook m_DetourWindowProc;
-    DetourHook m_DetourUpdateKeyboardState;
-
     HANDLE m_LoadThreadHandle = NULL;
-    HCURSOR m_PreviousCursorHandle = NULL;
 };

@@ -58,24 +58,15 @@ void ImGuiManager::Load()
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = m_IniFilePath.GetPath();
-    if (m_ImGuiConfig.EnableDocking)
-    {
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    }
-    if (m_ImGuiConfig.EnableViewports)
-    {
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        io.ConfigViewportsNoTaskBarIcon = true;
-    }
-
-    ImGui::StyleColorsClassic();
 
     HWND windowHandle = Core::Pointer(0x0139815C).as<HWND>();
-    ImGui_ImplWin32_Init(windowHandle);
-
     ID3D11Device* d3d11Device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
     ID3D11DeviceContext* d3d11DeviceContext = Core::Pointer(0x01485ECC).as<ID3D11DeviceContext*>();
+    ImGui_ImplWin32_Init(windowHandle);
     ImGui_ImplDX11_Init(d3d11Device, d3d11DeviceContext);
+
+    // ImGui updates the cursor itself.
+    SetClassLongPtrA(windowHandle, GCLP_HCURSOR, NULL);
 
     m_Loaded = true;
 }
@@ -102,6 +93,17 @@ void ImGuiManager::Render()
     
     EnterCriticalSection(&m_CriticalSection);
 
+    ImGuiIO& io = ImGui::GetIO();
+    if (m_ImGuiConfig.EnableDocking)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    }
+    if (m_ImGuiConfig.EnableViewports)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.ConfigViewportsNoTaskBarIcon = true;
+    }
+
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -124,7 +126,7 @@ void ImGuiManager::Render()
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-    if (m_ImGuiConfig.EnableViewports)
+    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
     {
         ImGui::UpdatePlatformWindows();
         ImGui::RenderPlatformWindowsDefault();
@@ -133,7 +135,7 @@ void ImGuiManager::Render()
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-bool ImGuiManager::HandleWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+void ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
 
@@ -156,32 +158,4 @@ bool ImGuiManager::HandleWindowMessage(HWND hWnd, UINT Msg, WPARAM wParam, LPARA
         }
         break;
     }
-
-    // Prevent forwarding messages meant for ImGui.
-    ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse)
-    {
-        switch (Msg)
-        {
-        case WM_MOUSEMOVE:
-        case WM_LBUTTONDOWN:
-        case WM_LBUTTONUP:
-        case WM_MOUSEWHEEL:
-            return true;
-        }
-    }
-    if (io.WantCaptureKeyboard)
-    {
-        switch (Msg)
-        {
-        case WM_KEYDOWN:
-        case WM_CHAR:
-        case WM_SYSKEYDOWN:
-        case WM_MENUCHAR:
-        case WM_COMMAND:
-            return true;
-        }
-    }
-
-    return false;
 }
