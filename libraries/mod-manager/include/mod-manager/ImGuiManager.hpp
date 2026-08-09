@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 #include "core/Path.hpp"
+#include "core/Logger.hpp"
 #include "mod-manager/ModManagerApi.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
 
@@ -16,7 +17,7 @@ public:
     using RenderImGuiOverlay = void(*)();
 
 public:
-    ImGuiManager(Core::Path configDirectory, const ImGuiConfig& imguiConfig);
+    ImGuiManager(const ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger);
     ImGuiManager(const ImGuiManager&) = delete;
     ImGuiManager(ImGuiManager&&) = delete;
     ~ImGuiManager();
@@ -33,19 +34,25 @@ public:
     void Load();
     void Unload();
 
+private:
     void Render();
     void WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 private:
-    Core::Path m_IniFilePath;
+    static void Hook_Render();
+    static void Hook_WindowProc();
+
+private:
     const ImGuiConfig& m_ImGuiConfig;
+
+    Core::Path m_IniFilePath;
 
     CRITICAL_SECTION m_CriticalSection = {};
 
-    std::vector<RenderImGuiMenu> m_Menus;
-    std::vector<RenderImGuiOverlay> m_Overlays;
     bool m_MenusVisible = false;
+    std::vector<RenderImGuiMenu> m_Menus;
     bool m_OverlaysVisible = true;
+    std::vector<RenderImGuiOverlay> m_Overlays;
 
-    bool m_Loaded = false;
+    const Core::Logger& m_Logger;
 };

@@ -1,10 +1,14 @@
 #include <vector>
 #include <Windows.h>
+#include <d3d11.h>
 
 #include "vendor/imgui.hpp"
 
 #include "core/Pointer.hpp"
 #include "core/Path.hpp"
+#include "core/Logger.hpp"
+#include "core/Patch.hpp"
+#include "mod-manager/ModManager.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
 #include "mod-manager/ImGuiManager.hpp"
 
@@ -15,10 +19,11 @@
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-ImGuiManager::ImGuiManager(Core::Path configDirectory, const ImGuiConfig& imguiConfig)
+ImGuiManager::ImGuiManager(const ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger)
     :
+    m_ImGuiConfig(imguiConfig),
     m_IniFilePath(configDirectory.Append("imgui.ini")),
-    m_ImGuiConfig(imguiConfig)
+    m_Logger(logger)
 {
     InitializeCriticalSection(&m_CriticalSection);
 }
@@ -38,6 +43,7 @@ void ImGuiManager::AddMenu(RenderImGuiMenu menu)
     EnterCriticalSection(&m_CriticalSection);
 
     m_Menus.push_back(menu);
+    m_Logger.Info("Added ImGui menu. address: 0x%p", menu);
 
     LeaveCriticalSection(&m_CriticalSection);
 }
@@ -47,6 +53,7 @@ void ImGuiManager::AddOverlay(RenderImGuiOverlay overlay)
     EnterCriticalSection(&m_CriticalSection);
 
     m_Overlays.push_back(overlay);
+    m_Logger.Info("Added ImGui overlay. address: 0x%p", overlay);
 
     LeaveCriticalSection(&m_CriticalSection);
 }
@@ -68,29 +75,29 @@ void ImGuiManager::Load()
     // ImGui updates the cursor itself.
     SetClassLongPtrA(windowHandle, GCLP_HCURSOR, NULL);
 
-    m_Loaded = true;
+    Core::Patch(0x0817E440, 6, m_Logger).WriteJMP(Hook_Render);
+    Core::Patch(0x008FB9D9, 5, m_Logger).WriteJMP(Hook_WindowProc);
+
+    m_Logger.Info(
+        "Loaded ImGui. window handle: 0x%08X, D3D11 device: 0x%p, D3D11 device context: 0x%p",
+        windowHandle,
+        d3d11Device,
+        d3d11DeviceContext
+    );
 }
 
 void ImGuiManager::Unload()
 {
-    if (!m_Loaded)
-    {
-        return;
-    }
-    
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
 
     ImGui::DestroyContext();
+
+    m_Logger.Info("Unloaded ImGui.");
 }
 
 void ImGuiManager::Render()
 {
-    if (!m_Loaded)
-    {
-        return;
-    }
-    
     EnterCriticalSection(&m_CriticalSection);
 
     ImGuiIO& io = ImGui::GetIO();
@@ -157,5 +164,57 @@ void ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    }
+}
+
+__declspec(naked) void ImGuiManager::Hook_Render()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        mov ecx, offset ModManager::s_Instance.m_ImGuiManager
+        call ImGuiManager::Render
+
+        popad
+        popfd
+
+        // Original code.
+        mov edx, dword ptr [ecx]
+        push esi
+        mov eax, dword ptr [edx + 0x8]
+
+        // Jump back.
+        push 0x0817E446
+        ret
+    }
+}
+
+__declspec(naked) void ImGuiManager::Hook_WindowProc()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        push dword ptr [ebp + 0x14]
+        push dword ptr [ebp + 0x10]
+        push dword ptr [ebp + 0xC]
+        push dword ptr [ebp + 0x8]
+        mov ecx, offset ModManager::s_Instance.m_ImGuiManager
+        call ImGuiManager::WindowProc
+
+        popad
+        popfd
+
+        // Original code.
+        push ebx
+        mov ebx, dword ptr [ebp + 0xC]
+        push esi
+
+        // Jump back.
+        push 0x008FB9DE
+        ret
     }
 }
