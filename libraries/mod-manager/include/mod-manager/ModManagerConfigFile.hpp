@@ -7,29 +7,33 @@
 #include "core/Logger.hpp"
 
 
-struct ImGuiConfig
-{
-    int ToggleMenusVK = VK_F7;
-    int ToggleOverlaysVK = VK_F8;
-    bool EnableDocking = true;
-    bool EnableViewports = false;
-};
-
-
 class ModManagerConfigFile
 {
 public:
-    ModManagerConfigFile(Core::Path directory, const Core::Logger& logger);
+    struct ImGuiConfig
+    {
+        int ToggleMenusVK = VK_F7;
+        int ToggleOverlaysVK = VK_F8;
+        bool EnableDocking = true;
+        bool EnableViewports = false;
+    };
 
 public:
+    ModManagerConfigFile(Core::Path configDirectory, const Core::Logger& logger);
+
+public:
+    ImGuiConfig& GetImGuiConfig();
+
     void Load();
     void Save() const;
 
-    ImGuiConfig& GetImGuiConfig();
+private:
+    static constexpr char k_Name[] = "mod manager config";
 
 private:
     Core::Path m_FilePath;
-    const Core::Logger& m_Logger;
 
     ImGuiConfig m_ImGuiConfig;
+
+    const Core::Logger& m_Logger;
 };

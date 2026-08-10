@@ -17,7 +17,7 @@ public:
     using RenderImGuiOverlay = void(*)();
 
 public:
-    ImGuiManager(const ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger);
+    ImGuiManager(const ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger);
     ImGuiManager(const ImGuiManager&) = delete;
     ImGuiManager(ImGuiManager&&) = delete;
     ~ImGuiManager();
@@ -43,7 +43,7 @@ private:
     static void Hook_WindowProc();
 
 private:
-    const ImGuiConfig& m_ImGuiConfig;
+    const ModManagerConfigFile::ImGuiConfig& m_ImGuiConfig;
 
     Core::Path m_IniFilePath;
 

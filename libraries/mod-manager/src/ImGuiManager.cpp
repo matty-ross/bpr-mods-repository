@@ -19,7 +19,7 @@
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-ImGuiManager::ImGuiManager(const ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger)
+ImGuiManager::ImGuiManager(const ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger)
     :
     m_ImGuiConfig(imguiConfig),
     m_IniFilePath(configDirectory.Append("imgui.ini")),
@@ -79,7 +79,7 @@ void ImGuiManager::Load()
     Core::Patch(0x008FB9D9, 5, m_Logger).WriteJMP(Hook_WindowProc);
 
     m_Logger.Info(
-        "Loaded ImGui. window handle: 0x%08X, D3D11 device: 0x%p, D3D11 device context: 0x%p",
+        "Loaded ImGui manager. window handle: 0x%08X, D3D11 device: 0x%p, D3D11 device context: 0x%p",
         windowHandle,
         d3d11Device,
         d3d11DeviceContext
@@ -93,7 +93,7 @@ void ImGuiManager::Unload()
 
     ImGui::DestroyContext();
 
-    m_Logger.Info("Unloaded ImGui.");
+    m_Logger.Info("Unloaded ImGui manager.");
 }
 
 void ImGuiManager::Render()
