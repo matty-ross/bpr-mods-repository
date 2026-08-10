@@ -19,7 +19,7 @@ private:
 public:
     ModManager(const ModManager&) = delete;
     ModManager(ModManager&&) = delete;
-    
+
     ModManager& operator =(const ModManager&) = delete;
     ModManager& operator =(ModManager&&) = delete;
 
@@ -27,26 +27,24 @@ public:
     MOD_MANAGER_API static ModManager& Get();
 
 public:
-    MOD_MANAGER_API bool CheckModVersion(const char* modVersion) const;
-    
     MOD_MANAGER_API Core::Path GetConfigDirectory() const;
-    
+
     MOD_MANAGER_API HookManager& GetHookManager();
     MOD_MANAGER_API ImGuiManager& GetImGuiManager();
 
+    MOD_MANAGER_API bool CheckModVersion(const char* modVersion) const;
+
+    void OnProcessAttach();
+    void OnProcessDetach();
+
+private:
     void Load();
     void Unload();
-    
-private:
-    static void Hook_ImGuiRender();
-    static void Hook_ImGuiWindowProc();
-    static void Hook_ExecuteUpdateHooks();
-    //static void Hook_UpdateKeyboardState();
 
 private:
     static constexpr char k_Name[] = "Mod Manager";
     static constexpr char k_Version[] = "2.0.0";
-    
+
     static ModManager s_Instance;
 
 private:
@@ -55,7 +53,7 @@ private:
     Core::Path m_ConfigDirectory;
 
     ModManagerConfigFile m_ModManagerConfigFile;
-    
+
     HookManager m_HookManager;
     ImGuiManager m_ImGuiManager;
 
