@@ -5,6 +5,7 @@
 #include <Windows.h>
 
 #include "core/Pointer.hpp"
+#include "core/Logger.hpp"
 #include "mod-manager/ModManagerApi.hpp"
 
 
@@ -16,7 +17,7 @@ public:
     using AddGameActionsHook = void(*)(Core::Pointer);
 
 public:
-    HookManager();
+    HookManager(const Core::Logger& logger);
     HookManager(const HookManager&) = delete;
     HookManager(HookManager&&) = delete;
     ~HookManager();
@@ -29,9 +30,17 @@ public:
     MOD_MANAGER_API void AddAddGameEventsHook(AddGameEventsHook addGameEventsHook);
     MOD_MANAGER_API void AddAddGameActionsHook(AddGameActionsHook addGameActionsHook);
 
+    void Load();
+
+private:
     void ExecuteUpdateHooks();
     void ExecuteAddGameEventsHooks(Core::Pointer gameEventQueue);
     void ExecuteAddGameActionsHooks(Core::Pointer gameActionQueue);
+
+private:
+    static void Hook_ExecuteUpdateHooks();
+    //static void Hook_ExecuteAddGameEventsHooks();
+    //static void Hook_ExecuteAddGameActionsHooks();
 
 private:
     CRITICAL_SECTION m_CriticalSection = {};
@@ -39,4 +48,6 @@ private:
     std::vector<UpdateHook> m_UpdateHooks;
     std::vector<AddGameEventsHook> m_AddGameEventsHooks;
     std::vector<AddGameActionsHook> m_AddGameActionsHooks;
+
+    const Core::Logger& m_Logger;
 };
