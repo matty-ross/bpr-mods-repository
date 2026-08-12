@@ -12,9 +12,7 @@
 class HookManager
 {
 public:
-    using UpdateHook = void(*)();
-    using AddGameEventsHook = void(*)(Core::Pointer);
-    using AddGameActionsHook = void(*)(Core::Pointer);
+    using GameStatePreWorldUpdateHook = void(*)(Core::Pointer gameEventQueue, Core::Pointer gameActionQueue);
 
 public:
     HookManager(const Core::Logger& logger);
@@ -26,28 +24,20 @@ public:
     HookManager& operator =(HookManager&&) = delete;
 
 public:
-    MOD_MANAGER_API void AddUpdateHook(UpdateHook updateHook);
-    MOD_MANAGER_API void AddAddGameEventsHook(AddGameEventsHook addGameEventsHook);
-    MOD_MANAGER_API void AddAddGameActionsHook(AddGameActionsHook addGameActionsHook);
+    MOD_MANAGER_API void AddGameStatePreWorldUpdateHook(GameStatePreWorldUpdateHook gameStatePreWorldUpdateHook);
 
     void Load();
 
 private:
-    void ExecuteUpdateHooks();
-    void ExecuteAddGameEventsHooks(Core::Pointer gameEventQueue);
-    void ExecuteAddGameActionsHooks(Core::Pointer gameActionQueue);
+    void ExecuteGameStatePreWorldUpdateHooks(Core::Pointer gameEventQueue, Core::Pointer gameActionQueue);
 
 private:
-    static void Hook_ExecuteUpdateHooks();
-    //static void Hook_ExecuteAddGameEventsHooks();
-    //static void Hook_ExecuteAddGameActionsHooks();
+    static void Hook_ExecuteGameStatePreWorldUpdateHooks();
 
 private:
     CRITICAL_SECTION m_CriticalSection = {};
 
-    std::vector<UpdateHook> m_UpdateHooks;
-    std::vector<AddGameEventsHook> m_AddGameEventsHooks;
-    std::vector<AddGameActionsHook> m_AddGameActionsHooks;
+    std::vector<GameStatePreWorldUpdateHook> m_GameStatePreWorldUpdateHooks;
 
     const Core::Logger& m_Logger;
 };

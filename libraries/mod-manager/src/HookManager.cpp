@@ -20,97 +20,71 @@ HookManager::~HookManager()
     DeleteCriticalSection(&m_CriticalSection);
 }
 
-void HookManager::AddUpdateHook(UpdateHook updateHook)
+void HookManager::AddGameStatePreWorldUpdateHook(GameStatePreWorldUpdateHook gameStatePreWorldUpdateHook)
 {
     EnterCriticalSection(&m_CriticalSection);
 
-    m_UpdateHooks.push_back(updateHook);
-    m_Logger.Info("Added 'update' hook. address: 0x%p", updateHook);
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-void HookManager::AddAddGameEventsHook(AddGameEventsHook addGameEventsHook)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    m_AddGameEventsHooks.push_back(addGameEventsHook);
-    m_Logger.Info("Added 'add game events' hook. address: 0x%p", addGameEventsHook);
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-void HookManager::AddAddGameActionsHook(AddGameActionsHook addGameActionsHook)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    m_AddGameActionsHooks.push_back(addGameActionsHook);
-    m_Logger.Info("Added 'add game actions' hook. address: 0x%p", addGameActionsHook);
+    m_GameStatePreWorldUpdateHooks.push_back(gameStatePreWorldUpdateHook);
+    m_Logger.Info("Added 'game state pre world update' hook. address: 0x%p", gameStatePreWorldUpdateHook);
 
     LeaveCriticalSection(&m_CriticalSection);
 }
 
 void HookManager::Load()
 {
-    Core::Patch(0x00A49235, 5, m_Logger).WriteJMP(Hook_ExecuteUpdateHooks);
+    Core::Patch(0x00A2A509, 9, m_Logger).WriteJMP(Hook_ExecuteGameStatePreWorldUpdateHooks);
 
     m_Logger.Info("Loaded hook manager.");
 }
 
-void HookManager::ExecuteUpdateHooks()
+void HookManager::ExecuteGameStatePreWorldUpdateHooks(
+    Core::Pointer gameEventQueue, // BrnGameState::GameStateModuleIO::GameEventQueue*
+    Core::Pointer gameActionQueue // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>*
+)
 {
     EnterCriticalSection(&m_CriticalSection);
 
-    for (UpdateHook updateHook : m_UpdateHooks)
+    for (GameStatePreWorldUpdateHook gameStatePreWorldUpdateHook : m_GameStatePreWorldUpdateHooks)
     {
-        updateHook();
+        gameStatePreWorldUpdateHook(gameEventQueue, gameActionQueue);
     }
 
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void HookManager::ExecuteAddGameEventsHooks(Core::Pointer gameEventQueue)
+__declspec(naked) void HookManager::Hook_ExecuteGameStatePreWorldUpdateHooks()
 {
-    EnterCriticalSection(&m_CriticalSection);
+    /*
+        void __thiscall BrnGameState::GameStateModule::PreWorldUpdate(
+            CgsModule::IOBufferStack* lpInputBufferStack,
+            CgsModule::IOBufferStack* lpOutputBufferStack,
+            const BrnGameState::GameStateModuleIO::PreWorldInputBuffer* lpInput,
+            BrnGameState::GameStateModuleIO::OutputBuffer* lpOutput,
+            BrnUpdateSet lUpdateSet
+        );
+    */
 
-    for (AddGameEventsHook addGameEventsHook : m_AddGameEventsHooks)
-    {
-        addGameEventsHook(gameEventQueue);
-    }
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-void HookManager::ExecuteAddGameActionsHooks(Core::Pointer gameActionQueue)
-{
-    EnterCriticalSection(&m_CriticalSection);
-
-    for (AddGameActionsHook addGameActionsHook : m_AddGameActionsHooks)
-    {
-        addGameActionsHook(gameActionQueue);
-    }
-
-    LeaveCriticalSection(&m_CriticalSection);
-}
-
-__declspec(naked) void HookManager::Hook_ExecuteUpdateHooks()
-{
     __asm
     {
         pushfd
         pushad
 
+        lea eax, [ebp - 0x1588] // BrnGameState::GameStateModuleIO::GameEventQueue lGameEventQueue
+
+        push dword ptr [ebp - 0x14] // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>* lpActionQueue
+        push eax
         mov ecx, offset ModManager::s_Instance.m_HookManager
-        call HookManager::ExecuteUpdateHooks
+        call HookManager::ExecuteGameStatePreWorldUpdateHooks
 
         popad
         popfd
 
         // Original code.
-        mov eax, dword ptr ds:[0x013FC8E0]
+        mov esi, dword ptr [ebp - 0x14]
+        lea eax, [ebp - 0x1588]
 
         // Jump back.
-        push 0x00A4923A
+        push 0x00A2A512
         ret
     }
 }
