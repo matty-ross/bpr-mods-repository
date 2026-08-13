@@ -66,12 +66,16 @@ __declspec(naked) void HookManager::Hook_ExecuteGameStatePreWorldUpdateHooks()
 
     __asm
     {
+        // ebp - 0x1588: BrnGameState::GameStateModuleIO::GameEventQueue lGameEventQueue
+        // ebp - 0x14: BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>* lpActionQueue
+
         pushfd
         pushad
 
-        lea eax, [ebp - 0x1588] // BrnGameState::GameStateModuleIO::GameEventQueue lGameEventQueue
+        // &lGameEventQueue
+        lea eax, [ebp - 0x1588]
 
-        push dword ptr [ebp - 0x14] // BrnGameState::GameStateModuleIO::BaseGameActionQueue<13312>* lpActionQueue
+        push dword ptr [ebp - 0x14]
         push eax
         mov ecx, offset ModManager::s_Instance.m_HookManager
         call HookManager::ExecuteGameStatePreWorldUpdateHooks

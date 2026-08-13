@@ -74,8 +74,11 @@ void ModManager::Load()
 {
     try
     {
-        //m_ConfigDirectory.CreateDirectoryTree();
-        //m_Logger.Info("Created config directory.");
+        if (!m_ConfigDirectory.Exists())
+        {
+            m_ConfigDirectory.CreateDirectoryTree();
+            m_Logger.Info("Created config directory. path: '%s'", m_ConfigDirectory.GetPath());
+        }
 
         while (true)
         {
@@ -93,6 +96,7 @@ void ModManager::Load()
         }
 
         m_ModManagerConfigFile.Load();
+        m_HookManager.Load();
         m_ImGuiManager.Load();
 
         m_ImGuiManager.AddMenu([]()

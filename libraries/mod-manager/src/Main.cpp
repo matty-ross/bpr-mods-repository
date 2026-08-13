@@ -16,7 +16,7 @@ BOOL WINAPI DllMain(
         break;
 
     case DLL_PROCESS_DETACH:
-        ModManager::Get().OnProcessAttach();
+        ModManager::Get().OnProcessDetach();
         break;
     }
 
