@@ -19,7 +19,7 @@
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-ImGuiManager::ImGuiManager(const ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger)
+ImGuiManager::ImGuiManager(ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger)
     :
     m_ImGuiConfig(imguiConfig),
     m_IniFilePath(configDirectory.Append("imgui.ini")),
@@ -65,6 +65,7 @@ void ImGuiManager::Load()
 
     ImGuiIO& io = ImGui::GetIO();
     io.IniFilename = m_IniFilePath.GetPath();
+    io.ConfigViewportsNoTaskBarIcon = true;
 
     HWND windowHandle = Core::Pointer(0x0139815C).as<HWND>();
     ID3D11Device* d3d11Device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
@@ -96,19 +97,61 @@ void ImGuiManager::Unload()
     m_Logger.Info("Unloaded ImGui manager.");
 }
 
+void ImGuiManager::RenderMenu()
+{
+    if (ImGui::CollapsingHeader("ImGui Config"))
+    {
+        static constexpr const char* styleColors[] =
+        {
+            "Classic",
+            "Dark",
+            "Light",
+        };
+        ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_ARRAYSIZE(styleColors));
+
+        ImGui::Checkbox("Enable Docking", &m_ImGuiConfig.EnableDocking);
+        ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
+    }
+}
+
 void ImGuiManager::Render()
 {
     EnterCriticalSection(&m_CriticalSection);
 
     ImGuiIO& io = ImGui::GetIO();
+    
     if (m_ImGuiConfig.EnableDocking)
     {
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     }
+    else
+    {
+        io.ConfigFlags &= ~ImGuiConfigFlags_DockingEnable;
+    }
+
     if (m_ImGuiConfig.EnableViewports)
     {
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-        io.ConfigViewportsNoTaskBarIcon = true;
+    }
+    else
+    {
+        io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
+    }
+
+    switch (m_ImGuiConfig.StyleColors)
+    {
+    case ModManagerConfigFile::ImGuiConfig::StyleColors::Dark:
+        ImGui::StyleColorsDark();
+        break;
+
+    case ModManagerConfigFile::ImGuiConfig::StyleColors::Light:
+        ImGui::StyleColorsLight();
+        break;
+
+    case ModManagerConfigFile::ImGuiConfig::StyleColors::Classic:
+    default:
+        ImGui::StyleColorsClassic();
+        break;
     }
 
     ImGui_ImplDX11_NewFrame();

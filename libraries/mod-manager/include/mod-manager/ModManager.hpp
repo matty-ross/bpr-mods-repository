@@ -41,9 +41,12 @@ private:
     void Load();
     void Unload();
 
+    void RenderMenu();
+
 private:
     static constexpr char k_Name[] = "Mod Manager";
     static constexpr char k_Version[] = "2.0.0";
+    static constexpr char k_Author[] = "PISros0724 (Matty)";
 
     static ModManager s_Instance;
 

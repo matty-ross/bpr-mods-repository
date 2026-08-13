@@ -97,7 +97,7 @@ void ModManager::Load()
 
         m_ImGuiManager.AddMenu([]()
         {
-            ImGui::ShowDemoWindow();
+            s_Instance.RenderMenu();
         });
     }
     catch (const std::exception& ex)
@@ -119,6 +119,24 @@ void ModManager::Unload()
         m_Logger.Error("%s", ex.what());
         MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
+}
+
+void ModManager::RenderMenu()
+{
+    if (ImGui::Begin(k_Name, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+    {
+        ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
+
+        ImGuiIO& io = ImGui::GetIO();
+        ImGui::Text("Version     %s", k_Version);
+        ImGui::Text("Author      %s", k_Author);
+        ImGui::Text("Framerate   %.1f", io.Framerate);
+
+        m_ImGuiManager.RenderMenu();
+
+        ImGui::PopItemWidth();
+    }
+    ImGui::End();
 }
 
 ////0x0664BB29
