@@ -1,4 +1,5 @@
 #include <exception>
+#include <Windows.h>
 
 #include "vendor/yaml-cpp.hpp"
 
@@ -29,10 +30,11 @@ void ModManagerConfigFile::Load()
         );
 
         YAML::Node imguiNode = yaml["ImGui"];
-        m_ImGuiConfig.ToggleMenusVK = imguiNode["ToggleMenusVK"].as<int>(m_ImGuiConfig.ToggleMenusVK);
-        m_ImGuiConfig.ToggleOverlaysVK = imguiNode["ToggleOverlaysVK"].as<int>(m_ImGuiConfig.ToggleOverlaysVK);
-        m_ImGuiConfig.EnableDocking = imguiNode["EnableDocking"].as<bool>(m_ImGuiConfig.EnableDocking);
-        m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>(m_ImGuiConfig.EnableViewports);
+        m_ImGuiConfig.ToggleMenusVK = imguiNode["ToggleMenusVK"].as<int>(VK_F7);
+        m_ImGuiConfig.ToggleOverlaysVK = imguiNode["ToggleOverlaysVK"].as<int>(VK_F8);
+        m_ImGuiConfig.StyleColors = static_cast<enum class ImGuiConfig::StyleColors>(imguiNode["StyleColors"].as<int>(static_cast<int>(ImGuiConfig::StyleColors::Classic)));
+        m_ImGuiConfig.EnableDocking = imguiNode["EnableDocking"].as<bool>(true);
+        m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>(false);
 
         m_Logger.Info("Loaded %s.", k_Name);
     }
@@ -51,6 +53,7 @@ void ModManagerConfigFile::Save() const
         YAML::Node imguiNode;
         imguiNode["ToggleMenusVK"] = m_ImGuiConfig.ToggleMenusVK;
         imguiNode["ToggleOverlaysVK"] = m_ImGuiConfig.ToggleOverlaysVK;
+        imguiNode["StyleColors"] = static_cast<int>(m_ImGuiConfig.StyleColors);
         imguiNode["EnableDocking"] = m_ImGuiConfig.EnableDocking;
         imguiNode["EnableViewports"] = m_ImGuiConfig.EnableViewports;
         yaml["ImGui"] = imguiNode;

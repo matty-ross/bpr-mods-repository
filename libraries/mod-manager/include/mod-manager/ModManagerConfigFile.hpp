@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <Windows.h>
-
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
 
@@ -12,10 +10,18 @@ class ModManagerConfigFile
 public:
     struct ImGuiConfig
     {
-        int ToggleMenusVK = VK_F7;
-        int ToggleOverlaysVK = VK_F8;
-        bool EnableDocking = true;
-        bool EnableViewports = false;
+        enum class StyleColors
+        {
+            Classic,
+            Dark,
+            Light,
+        };
+
+        int ToggleMenusVK;
+        int ToggleOverlaysVK;
+        StyleColors StyleColors;
+        bool EnableDocking;
+        bool EnableViewports;
     };
 
 public:
@@ -33,7 +39,7 @@ private:
 private:
     Core::Path m_FilePath;
 
-    ImGuiConfig m_ImGuiConfig;
+    ImGuiConfig m_ImGuiConfig = {};
 
     const Core::Logger& m_Logger;
 };
