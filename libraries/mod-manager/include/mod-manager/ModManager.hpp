@@ -34,12 +34,11 @@ public:
 
     MOD_MANAGER_API bool CheckModVersion(const char* modVersion) const;
 
-    void OnProcessAttach();
-    void OnProcessDetach();
-
-private:
     void Load();
     void Unload();
+
+private:
+    void DeferredLoad();
 
     void RenderMenu();
 
@@ -60,5 +59,5 @@ private:
     HookManager m_HookManager;
     ImGuiManager m_ImGuiManager;
 
-    HANDLE m_LoadThreadHandle = NULL;
+    HANDLE m_DeferredLoadThreadHandle = NULL;
 };

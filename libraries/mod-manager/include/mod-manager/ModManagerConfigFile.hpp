@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <Windows.h>
+
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
 
@@ -17,11 +19,11 @@ public:
             Light,
         };
 
-        int ToggleMenusVK;
-        int ToggleOverlaysVK;
-        StyleColors StyleColors;
-        bool EnableDocking;
-        bool EnableViewports;
+        int ToggleMenusVK = VK_F7;
+        int ToggleOverlaysVK = VK_F8;
+        StyleColors StyleColors = StyleColors::Classic;
+        bool EnableDocking = true;
+        bool EnableViewports = false;
     };
 
 public:
@@ -39,7 +41,7 @@ private:
 private:
     Core::Path m_FilePath;
 
-    ImGuiConfig m_ImGuiConfig = {};
+    ImGuiConfig m_ImGuiConfig;
 
     const Core::Logger& m_Logger;
 };

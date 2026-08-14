@@ -51,35 +51,56 @@ bool ModManager::CheckModVersion(const char* modVersion) const
     return strcmp(modVersion, k_Version) == 0;
 }
 
-void ModManager::OnProcessAttach()
-{
-    Core::Logger::Initialize();
-
-    auto loadThreadProc = [](LPVOID) -> DWORD
-    {
-        s_Instance.Load();
-
-        return 0;
-    };
-    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
-}
-
-void ModManager::OnProcessDetach()
-{
-    CloseHandle(m_LoadThreadHandle);
-    Unload();
-}
-
 void ModManager::Load()
 {
     try
     {
+        Core::Logger::Initialize();
+
         if (!m_ConfigDirectory.Exists())
         {
             m_ConfigDirectory.CreateDirectoryTree();
             m_Logger.Info("Created config directory. path: '%s'", m_ConfigDirectory.GetPath());
         }
 
+        m_ModManagerConfigFile.Load();
+        m_HookManager.Load();
+        
+        auto deferredLoadThreadProc = [](LPVOID) -> DWORD
+        {
+            s_Instance.DeferredLoad();
+
+            return 0;
+        };
+        m_DeferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+    }
+    catch (const std::exception& ex)
+    {
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
+    }
+}
+
+void ModManager::Unload()
+{
+    try
+    {
+        m_ModManagerConfigFile.Save();
+        m_ImGuiManager.Unload();
+
+        CloseHandle(m_DeferredLoadThreadHandle);
+    }
+    catch (const std::exception& ex)
+    {
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
+    }
+}
+
+void ModManager::DeferredLoad()
+{
+    try
+    {
         while (true)
         {
             Core::Pointer gameModule = 0x013FC8E0;
@@ -95,28 +116,14 @@ void ModManager::Load()
             Sleep(1000);
         }
 
-        m_ModManagerConfigFile.Load();
-        m_HookManager.Load();
         m_ImGuiManager.Load();
 
         m_ImGuiManager.AddMenu([]()
         {
+            ImGui::ShowDemoWindow();
+
             s_Instance.RenderMenu();
         });
-    }
-    catch (const std::exception& ex)
-    {
-        m_Logger.Error("%s", ex.what());
-        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
-    }
-}
-
-void ModManager::Unload()
-{
-    try
-    {
-        m_ModManagerConfigFile.Save();
-        m_ImGuiManager.Unload();
     }
     catch (const std::exception& ex)
     {
