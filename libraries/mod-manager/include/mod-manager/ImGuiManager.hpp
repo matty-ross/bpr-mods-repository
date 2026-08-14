@@ -40,6 +40,8 @@ private:
     void Render();
     void WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+    void ApplyConfig();
+
 private:
     static void Hook_Render();
     static void Hook_WindowProc();

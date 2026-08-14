@@ -120,8 +120,6 @@ void ModManager::DeferredLoad()
 
         m_ImGuiManager.AddMenu([]()
         {
-            ImGui::ShowDemoWindow();
-
             s_Instance.RenderMenu();
         });
     }

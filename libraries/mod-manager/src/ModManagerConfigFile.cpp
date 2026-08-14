@@ -33,6 +33,7 @@ void ModManagerConfigFile::Load()
         m_ImGuiConfig.ToggleMenusVK = imguiNode["ToggleMenusVK"].as<int>(VK_F7);
         m_ImGuiConfig.ToggleOverlaysVK = imguiNode["ToggleOverlaysVK"].as<int>(VK_F8);
         m_ImGuiConfig.StyleColors = static_cast<enum class ImGuiConfig::StyleColors>(imguiNode["StyleColors"].as<int>(static_cast<int>(ImGuiConfig::StyleColors::Classic)));
+        m_ImGuiConfig.FontScale = imguiNode["FontScale"].as<float>(1.0f);
         m_ImGuiConfig.EnableDocking = imguiNode["EnableDocking"].as<bool>(true);
         m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>(false);
 
@@ -54,6 +55,7 @@ void ModManagerConfigFile::Save() const
         imguiNode["ToggleMenusVK"] = m_ImGuiConfig.ToggleMenusVK;
         imguiNode["ToggleOverlaysVK"] = m_ImGuiConfig.ToggleOverlaysVK;
         imguiNode["StyleColors"] = static_cast<int>(m_ImGuiConfig.StyleColors);
+        imguiNode["FontScale"] = m_ImGuiConfig.FontScale;
         imguiNode["EnableDocking"] = m_ImGuiConfig.EnableDocking;
         imguiNode["EnableViewports"] = m_ImGuiConfig.EnableViewports;
         yaml["ImGui"] = imguiNode;

@@ -109,6 +109,8 @@ void ImGuiManager::RenderMenu()
         };
         ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_ARRAYSIZE(styleColors));
 
+        ImGui::SliderFloat("Font Scale", &m_ImGuiConfig.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+
         ImGui::Checkbox("Enable Docking", &m_ImGuiConfig.EnableDocking);
         ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
     }
@@ -118,41 +120,7 @@ void ImGuiManager::Render()
 {
     EnterCriticalSection(&m_CriticalSection);
 
-    ImGuiIO& io = ImGui::GetIO();
-    
-    if (m_ImGuiConfig.EnableDocking)
-    {
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-    }
-    else
-    {
-        io.ConfigFlags &= ~ImGuiConfigFlags_DockingEnable;
-    }
-
-    if (m_ImGuiConfig.EnableViewports)
-    {
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-    }
-    else
-    {
-        io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
-    }
-
-    switch (m_ImGuiConfig.StyleColors)
-    {
-    case ModManagerConfigFile::ImGuiConfig::StyleColors::Dark:
-        ImGui::StyleColorsDark();
-        break;
-
-    case ModManagerConfigFile::ImGuiConfig::StyleColors::Light:
-        ImGui::StyleColorsLight();
-        break;
-
-    case ModManagerConfigFile::ImGuiConfig::StyleColors::Classic:
-    default:
-        ImGui::StyleColorsClassic();
-        break;
-    }
+    ApplyConfig();
 
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -176,11 +144,8 @@ void ImGuiManager::Render()
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-    if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-    {
-        ImGui::UpdatePlatformWindows();
-        ImGui::RenderPlatformWindowsDefault();
-    }
+    ImGui::UpdatePlatformWindows();
+    ImGui::RenderPlatformWindowsDefault();
 
     LeaveCriticalSection(&m_CriticalSection);
 }
@@ -207,6 +172,48 @@ void ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+    }
+}
+
+void ImGuiManager::ApplyConfig()
+{
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuiStyle& style = ImGui::GetStyle();
+
+    switch (m_ImGuiConfig.StyleColors)
+    {
+    case ModManagerConfigFile::ImGuiConfig::StyleColors::Dark:
+        ImGui::StyleColorsDark();
+        break;
+
+    case ModManagerConfigFile::ImGuiConfig::StyleColors::Light:
+        ImGui::StyleColorsLight();
+        break;
+
+    case ModManagerConfigFile::ImGuiConfig::StyleColors::Classic:
+    default:
+        ImGui::StyleColorsClassic();
+        break;
+    }
+
+    style.FontScaleMain = m_ImGuiConfig.FontScale;
+
+    if (m_ImGuiConfig.EnableDocking)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    }
+    else
+    {
+        io.ConfigFlags &= ~ImGuiConfigFlags_DockingEnable;
+    }
+
+    if (m_ImGuiConfig.EnableViewports)
+    {
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    }
+    else
+    {
+        io.ConfigFlags &= ~ImGuiConfigFlags_ViewportsEnable;
     }
 }
 

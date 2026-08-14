@@ -22,6 +22,7 @@ public:
         int ToggleMenusVK = VK_F7;
         int ToggleOverlaysVK = VK_F8;
         StyleColors StyleColors = StyleColors::Classic;
+        float FontScale = 1.0f;
         bool EnableDocking = true;
         bool EnableViewports = false;
     };
