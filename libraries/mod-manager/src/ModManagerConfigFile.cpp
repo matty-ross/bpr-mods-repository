@@ -9,9 +9,9 @@
 #include "mod-manager/ModManagerConfigFile.hpp"
 
 
-ModManagerConfigFile::ModManagerConfigFile(Core::Path configDirectory, const Core::Logger& logger)
+ModManagerConfigFile::ModManagerConfigFile(Core::Path configDirectoryPath, const Core::Logger& logger)
     :
-    m_FilePath(configDirectory.Append("mod-manager-config.yaml")),
+    m_FilePath(configDirectoryPath.Append("mod-manager-config.yaml")),
     m_Logger(logger)
 {
 }

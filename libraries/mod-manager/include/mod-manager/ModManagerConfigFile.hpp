@@ -28,7 +28,7 @@ public:
     };
 
 public:
-    ModManagerConfigFile(Core::Path configDirectory, const Core::Logger& logger);
+    ModManagerConfigFile(Core::Path configDirectoryPath, const Core::Logger& logger);
 
 public:
     ImGuiConfig& GetImGuiConfig();

@@ -19,10 +19,10 @@
 IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-ImGuiManager::ImGuiManager(ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger)
+ImGuiManager::ImGuiManager(ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectoryPath, const Core::Logger& logger)
     :
     m_ImGuiConfig(imguiConfig),
-    m_IniFilePath(configDirectory.Append("imgui.ini")),
+    m_IniFilePath(configDirectoryPath.Append("imgui.ini")),
     m_Logger(logger)
 {
     InitializeCriticalSection(&m_CriticalSection);

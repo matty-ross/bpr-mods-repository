@@ -19,10 +19,10 @@ ModManager ModManager::s_Instance;
 ModManager::ModManager()
     :
     m_Logger(k_Name),
-    m_ConfigDirectory("%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\"),
-    m_ModManagerConfigFile(m_ConfigDirectory, m_Logger),
+    m_ConfigDirectoryPath(k_ConfigDirectoryPath),
+    m_ModManagerConfigFile(m_ConfigDirectoryPath, m_Logger),
     m_HookManager(m_Logger),
-    m_ImGuiManager(m_ModManagerConfigFile.GetImGuiConfig(), m_ConfigDirectory, m_Logger)
+    m_ImGuiManager(m_ModManagerConfigFile.GetImGuiConfig(), m_ConfigDirectoryPath, m_Logger)
 {
 }
 
@@ -31,9 +31,9 @@ ModManager& ModManager::Get()
     return s_Instance;
 }
 
-Core::Path ModManager::GetConfigDirectory() const
+Core::Path ModManager::GetConfigDirectoryPath() const
 {
-    return m_ConfigDirectory;
+    return m_ConfigDirectoryPath;
 }
 
 HookManager& ModManager::GetHookManager()
@@ -46,9 +46,9 @@ ImGuiManager& ModManager::GetImGuiManager()
     return m_ImGuiManager;
 }
 
-bool ModManager::CheckModVersion(const char* modVersion) const
+bool ModManager::CheckVersion(const char* version) const
 {
-    return strcmp(modVersion, k_Version) == 0;
+    return strcmp(version, k_Version) == 0;
 }
 
 void ModManager::Load()
@@ -57,10 +57,10 @@ void ModManager::Load()
     {
         Core::Logger::Initialize();
 
-        if (!m_ConfigDirectory.Exists())
+        if (!m_ConfigDirectoryPath.Exists())
         {
-            m_ConfigDirectory.CreateDirectoryTree();
-            m_Logger.Info("Created config directory. path: '%s'", m_ConfigDirectory.GetPath());
+            m_ConfigDirectoryPath.CreateDirectoryTree();
+            m_Logger.Info("Created config directory. path: '%s'", m_ConfigDirectoryPath.GetPath());
         }
 
         m_ModManagerConfigFile.Load();

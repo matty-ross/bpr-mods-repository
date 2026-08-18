@@ -17,7 +17,7 @@ public:
     using RenderImGuiOverlay = void(*)();
 
 public:
-    ImGuiManager(ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectory, const Core::Logger& logger);
+    ImGuiManager(ModManagerConfigFile::ImGuiConfig& imguiConfig, Core::Path configDirectoryPath, const Core::Logger& logger);
     ImGuiManager(const ImGuiManager&) = delete;
     ImGuiManager(ImGuiManager&&) = delete;
     ~ImGuiManager();
