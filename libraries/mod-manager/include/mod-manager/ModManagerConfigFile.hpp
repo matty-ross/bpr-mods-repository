@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include <Windows.h>
+#include "vendor/imgui.hpp"
 
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
@@ -19,8 +19,8 @@ public:
             Light,
         };
 
-        int ToggleMenusVK = VK_F7;
-        int ToggleOverlaysVK = VK_F8;
+        ImGuiKey ToggleMenusHotkey = ImGuiKey_F7;
+        ImGuiKey ToggleOverlaysHotkey = ImGuiKey_F8;
         StyleColors StyleColors = StyleColors::Classic;
         float FontScale = 1.0f;
         bool EnableDocking = true;

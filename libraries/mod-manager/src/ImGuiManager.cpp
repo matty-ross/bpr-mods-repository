@@ -101,6 +101,34 @@ void ImGuiManager::RenderMenu()
 {
     if (ImGui::CollapsingHeader("ImGui Config"))
     {
+        auto renderHotkeyCapture = [](const char* name, ImGuiKey& currentHotkey, bool& captureHotkey)
+        {
+            ImGui::PushID(name);
+
+            ImGui::Checkbox(name, &captureHotkey);
+            ImGui::SameLine(0.0f, 20.0f);
+            ImGui::TextUnformatted(ImGui::GetKeyName(currentHotkey));
+
+            ImGui::PopID();
+
+            for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
+            {
+                // Don't capture these keys.
+                switch (key)
+                {
+                case ImGuiKey_MouseLeft:
+                    continue;
+                }
+
+                if (captureHotkey && ImGui::IsKeyDown(key))
+                {
+                    currentHotkey = key;
+                }
+            }
+        };
+        renderHotkeyCapture("Capture Toggle Menus Hotkey", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
+        renderHotkeyCapture("Capture Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
+
         static constexpr const char* styleColors[] =
         {
             "Classic",
@@ -120,6 +148,7 @@ void ImGuiManager::Render()
 {
     EnterCriticalSection(&m_CriticalSection);
 
+    HandleHotkeys();
     ApplyConfig();
 
     ImGui_ImplDX11_NewFrame();
@@ -153,25 +182,21 @@ void ImGuiManager::Render()
 void ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
+}
 
-    switch (Msg)
+void ImGuiManager::HandleHotkeys()
+{
+    if (!m_CaptureToggleMenusHotkey && ImGui::IsKeyPressed(m_ImGuiConfig.ToggleMenusHotkey, false))
     {
-    case WM_KEYDOWN:
-        if (!(HIWORD(lParam) & KF_REPEAT))
-        {
-            if (wParam == m_ImGuiConfig.ToggleMenusVK)
-            {
-                m_MenusVisible = !m_MenusVisible;
+        m_MenusVisible = !m_MenusVisible;
 
-                Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
-                Core::Pointer(0x0139813E).as<bool>() = true;
-            }
-            if (wParam == m_ImGuiConfig.ToggleOverlaysVK)
-            {
-                m_OverlaysVisible = !m_OverlaysVisible;
-            }
-        }
-        break;
+        Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
+        Core::Pointer(0x0139813E).as<bool>() = true;
+    }
+
+    if (!m_CaptureToggleOverlaysHotkey && ImGui::IsKeyPressed(m_ImGuiConfig.ToggleOverlaysHotkey, false))
+    {
+        m_OverlaysVisible = !m_OverlaysVisible;
     }
 }
 

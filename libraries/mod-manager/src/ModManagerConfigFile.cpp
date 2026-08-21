@@ -1,6 +1,6 @@
 #include <exception>
-#include <Windows.h>
 
+#include "vendor/imgui.hpp"
 #include "vendor/yaml-cpp.hpp"
 
 #include "core/Path.hpp"
@@ -30,8 +30,8 @@ void ModManagerConfigFile::Load()
         );
 
         YAML::Node imguiNode = yaml["ImGui"];
-        m_ImGuiConfig.ToggleMenusVK = imguiNode["ToggleMenusVK"].as<int>(VK_F7);
-        m_ImGuiConfig.ToggleOverlaysVK = imguiNode["ToggleOverlaysVK"].as<int>(VK_F8);
+        m_ImGuiConfig.ToggleMenusHotkey = static_cast<ImGuiKey>(imguiNode["ToggleMenusHotkey"].as<int>(ImGuiKey_F7));
+        m_ImGuiConfig.ToggleOverlaysHotkey = static_cast<ImGuiKey>(imguiNode["ToggleOverlaysHotkey"].as<int>(ImGuiKey_F8));
         m_ImGuiConfig.StyleColors = static_cast<enum class ImGuiConfig::StyleColors>(imguiNode["StyleColors"].as<int>(static_cast<int>(ImGuiConfig::StyleColors::Classic)));
         m_ImGuiConfig.FontScale = imguiNode["FontScale"].as<float>(1.0f);
         m_ImGuiConfig.EnableDocking = imguiNode["EnableDocking"].as<bool>(true);
@@ -52,8 +52,8 @@ void ModManagerConfigFile::Save() const
         YAML::Node yaml;
 
         YAML::Node imguiNode;
-        imguiNode["ToggleMenusVK"] = m_ImGuiConfig.ToggleMenusVK;
-        imguiNode["ToggleOverlaysVK"] = m_ImGuiConfig.ToggleOverlaysVK;
+        imguiNode["ToggleMenusHotkey"] = static_cast<int>(m_ImGuiConfig.ToggleMenusHotkey);
+        imguiNode["ToggleOverlaysHotkey"] = static_cast<int>(m_ImGuiConfig.ToggleOverlaysHotkey);
         imguiNode["StyleColors"] = static_cast<int>(m_ImGuiConfig.StyleColors);
         imguiNode["FontScale"] = m_ImGuiConfig.FontScale;
         imguiNode["EnableDocking"] = m_ImGuiConfig.EnableDocking;
