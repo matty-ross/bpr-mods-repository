@@ -101,33 +101,21 @@ void ImGuiManager::RenderMenu()
 {
     if (ImGui::CollapsingHeader("ImGui Config"))
     {
-        auto renderHotkeyCapture = [](const char* name, ImGuiKey& currentHotkey, bool& captureHotkey)
+        auto renderCaptureHotkey = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
         {
             ImGui::PushID(name);
 
-            ImGui::Checkbox(name, &captureHotkey);
+            ImGui::AlignTextToFramePadding();
+            ImGui::Text("%s", name);
             ImGui::SameLine(0.0f, 20.0f);
-            ImGui::TextUnformatted(ImGui::GetKeyName(currentHotkey));
+            ImGui::Checkbox("Capture##hotkey", &captureHotkey);
+            ImGui::SameLine(0.0f, 20.0f);
+            ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
 
             ImGui::PopID();
-
-            for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
-            {
-                // Don't capture these keys.
-                switch (key)
-                {
-                case ImGuiKey_MouseLeft:
-                    continue;
-                }
-
-                if (captureHotkey && ImGui::IsKeyDown(key))
-                {
-                    currentHotkey = key;
-                }
-            }
         };
-        renderHotkeyCapture("Capture Toggle Menus Hotkey", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
-        renderHotkeyCapture("Capture Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
+        renderCaptureHotkey("Toggle Menus Hotkey   ", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
+        renderCaptureHotkey("Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
 
         static constexpr const char* styleColors[] =
         {
@@ -135,7 +123,7 @@ void ImGuiManager::RenderMenu()
             "Dark",
             "Light",
         };
-        ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_ARRAYSIZE(styleColors));
+        ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_COUNTOF(styleColors));
 
         ImGui::SliderFloat("Font Scale", &m_ImGuiConfig.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
@@ -186,17 +174,49 @@ void ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 
 void ImGuiManager::HandleHotkeys()
 {
-    if (!m_CaptureToggleMenusHotkey && ImGui::IsKeyPressed(m_ImGuiConfig.ToggleMenusHotkey, false))
+    auto processCaptureHotkey = [](ImGuiKey& hotkey)
     {
-        m_MenusVisible = !m_MenusVisible;
+        for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
+        {
+            // Don't capture these keys.
+            switch (key)
+            {
+            case ImGuiKey_MouseLeft:
+                continue;
+            }
 
-        Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
-        Core::Pointer(0x0139813E).as<bool>() = true;
+            if (ImGui::IsKeyDown(key))
+            {
+                hotkey = key;
+            }
+        }
+    };
+
+    if (m_CaptureToggleMenusHotkey)
+    {
+        processCaptureHotkey(m_ImGuiConfig.ToggleMenusHotkey);
+    }
+    else
+    {
+        if (ImGui::IsKeyPressed(m_ImGuiConfig.ToggleMenusHotkey, false))
+        {
+            m_MenusVisible = !m_MenusVisible;
+
+            Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
+            Core::Pointer(0x0139813E).as<bool>() = true;
+        }
     }
 
-    if (!m_CaptureToggleOverlaysHotkey && ImGui::IsKeyPressed(m_ImGuiConfig.ToggleOverlaysHotkey, false))
+    if (m_CaptureToggleOverlaysHotkey)
     {
-        m_OverlaysVisible = !m_OverlaysVisible;
+        processCaptureHotkey(m_ImGuiConfig.ToggleOverlaysHotkey);
+    }
+    else
+    {
+        if (ImGui::IsKeyPressed(m_ImGuiConfig.ToggleOverlaysHotkey, false))
+        {
+            m_OverlaysVisible = !m_OverlaysVisible;
+        }
     }
 }
 
