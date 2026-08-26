@@ -78,6 +78,7 @@ void ImGuiManager::Load()
 
     Core::Patch(0x0817E440, 6, m_Logger).WriteJMP(Hook_Render);
     Core::Patch(0x008FB9D9, 5, m_Logger).WriteJMP(Hook_WindowProc);
+    Core::Patch(0x0664BB29, 8, m_Logger).WriteJMP(Hook_CaptureKeyboard);
 
     m_Logger.Info(
         "Loaded ImGui manager. window handle: 0x%08X, D3D11 device: 0x%p, D3D11 device context: 0x%p",
@@ -310,6 +311,37 @@ __declspec(naked) void ImGuiManager::Hook_WindowProc()
 
         // Jump back.
         push 0x008FB9DE
+        ret
+    }
+}
+
+__declspec(naked) void ImGuiManager::Hook_CaptureKeyboard()
+{
+    __asm
+    {
+        pushfd
+        pushad
+
+        call ImGui::GetIO
+        
+        cmp byte ptr [eax]ImGuiIO.WantCaptureKeyboard, 0
+        je _continue
+
+        // Make all keys down.
+        mov ecx, 256
+        mov al, 0x00
+        lea edi, [ebp - 0x100]
+        rep stosb
+
+    _continue:
+        popad
+        popfd
+
+        // Original code.
+        movss xmm1, ds:[0x00F0A2B4]
+
+        // Jump back.
+        push 0x0664BB31
         ret
     }
 }

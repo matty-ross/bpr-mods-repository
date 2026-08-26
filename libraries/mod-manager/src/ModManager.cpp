@@ -147,30 +147,3 @@ void ModManager::RenderMenu()
     }
     ImGui::End();
 }
-
-////0x0664BB29
-//__declspec(naked) void ModManager::DetourUpdateKeyboardState()
-//{
-//    __asm
-//    {
-//        pushfd
-//        pushad
-//
-//        call ImGui::GetIO
-//        
-//        cmp byte ptr [eax]ImGuiIO.WantCaptureKeyboard, 0
-//        je _continue
-//
-//        // Clear all keys.
-//        mov ecx, 0x100
-//        mov al, 0
-//        lea edi, [ebp - 0x100]
-//        rep stosb
-//
-//    _continue:
-//        popad
-//        popfd
-//        
-//        jmp dword ptr [s_Instance.m_DetourUpdateKeyboardState.Target]
-//    }
-//}

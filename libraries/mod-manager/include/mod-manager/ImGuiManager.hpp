@@ -46,6 +46,7 @@ private:
 private:
     static void Hook_Render();
     static void Hook_WindowProc();
+    static void Hook_CaptureKeyboard();
 
 private:
     ModManagerConfigFile::ImGuiConfig& m_ImGuiConfig;
