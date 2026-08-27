@@ -168,9 +168,40 @@ void ImGuiManager::Render()
     LeaveCriticalSection(&m_CriticalSection);
 }
 
-void ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+bool ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
+
+    const ImGuiIO& io = ImGui::GetIO();
+    
+    if (io.WantCaptureMouse)
+    {
+        // Don't pass these mouse messages to the game.
+        switch (Msg)
+        {
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_MOUSEWHEEL:
+            return false;
+        }
+    }
+    
+    if (io.WantCaptureKeyboard)
+    {
+        // Don't pass these keyboard messages to the game.
+        switch (Msg)
+        {
+        case WM_KEYDOWN:
+        case WM_SYSKEYDOWN:
+        case WM_CHAR:
+        case WM_MENUCHAR:
+        case WM_COMMAND:
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void ImGuiManager::HandleHotkeys()
@@ -301,6 +332,19 @@ __declspec(naked) void ImGuiManager::Hook_WindowProc()
         mov ecx, offset ModManager::s_Instance.m_ImGuiManager
         call ImGuiManager::WindowProc
 
+        test al, al
+        jnz _continue
+
+        popad
+        popfd
+
+        // Return from the function without processing the message.
+        mov eax, 0
+        mov esp, ebp
+        pop ebp
+        ret 0x10
+
+    _continue:
         popad
         popfd
 

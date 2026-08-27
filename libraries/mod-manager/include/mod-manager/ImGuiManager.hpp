@@ -38,7 +38,7 @@ public:
 
 private:
     void Render();
-    void WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+    bool WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
     void HandleHotkeys();
     void ApplyConfig();
