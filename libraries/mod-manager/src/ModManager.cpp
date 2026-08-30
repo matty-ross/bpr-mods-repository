@@ -65,7 +65,9 @@ void ModManager::Load()
 
         m_ModManagerConfigFile.Load();
         m_HookManager.Load();
-        
+
+        m_ImGuiManager.AddMenu([]() { s_Instance.RenderMenu(); });
+
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
             s_Instance.DeferredLoad();
@@ -117,11 +119,6 @@ void ModManager::DeferredLoad()
         }
 
         m_ImGuiManager.Load();
-
-        m_ImGuiManager.AddMenu([]()
-        {
-            s_Instance.RenderMenu();
-        });
     }
     catch (const std::exception& ex)
     {
@@ -141,7 +138,22 @@ void ModManager::RenderMenu()
         ImGui::Text("Author      %s", k_Author);
         ImGui::Text("Framerate   %.1f", io.Framerate);
 
-        m_ImGuiManager.RenderMenu();
+        if (ImGui::CollapsingHeader("Config"))
+        {
+            if (ImGui::Button("Save##mod-manager-config-file"))
+            {
+                m_ModManagerConfigFile.Save();
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Load##mod-manager-config-file"))
+            {
+                m_ModManagerConfigFile.Load();
+            }
+
+            m_ImGuiManager.RenderMenu();
+        }
 
         ImGui::PopItemWidth();
     }

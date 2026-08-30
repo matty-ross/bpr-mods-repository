@@ -100,37 +100,36 @@ void ImGuiManager::Unload()
 
 void ImGuiManager::RenderMenu()
 {
-    if (ImGui::CollapsingHeader("ImGui Config"))
+    ImGui::SeparatorText("ImGui");
+    
+    auto renderCaptureHotkey = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
     {
-        auto renderCaptureHotkey = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
-        {
-            ImGui::PushID(name);
+        ImGui::PushID(name);
 
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("%s", name);
-            ImGui::SameLine(0.0f, 20.0f);
-            ImGui::Checkbox("Capture##hotkey", &captureHotkey);
-            ImGui::SameLine(0.0f, 20.0f);
-            ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
+        ImGui::AlignTextToFramePadding();
+        ImGui::Text("%s", name);
+        ImGui::SameLine(0.0f, 20.0f);
+        ImGui::Checkbox("Capture##hotkey", &captureHotkey);
+        ImGui::SameLine(0.0f, 20.0f);
+        ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
 
-            ImGui::PopID();
-        };
-        renderCaptureHotkey("Toggle Menus Hotkey   ", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
-        renderCaptureHotkey("Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
+        ImGui::PopID();
+    };
+    renderCaptureHotkey("Toggle Menus Hotkey   ", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
+    renderCaptureHotkey("Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
 
-        static constexpr const char* styleColors[] =
-        {
-            "Classic",
-            "Dark",
-            "Light",
-        };
-        ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_COUNTOF(styleColors));
+    static constexpr const char* styleColors[] =
+    {
+        "Classic",
+        "Dark",
+        "Light",
+    };
+    ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_COUNTOF(styleColors));
 
-        ImGui::SliderFloat("Font Scale", &m_ImGuiConfig.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+    ImGui::SliderFloat("Font Scale", &m_ImGuiConfig.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
-        ImGui::Checkbox("Enable Docking", &m_ImGuiConfig.EnableDocking);
-        ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
-    }
+    ImGui::Checkbox("Enable Docking", &m_ImGuiConfig.EnableDocking);
+    ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
 }
 
 void ImGuiManager::Render()
@@ -333,7 +332,7 @@ __declspec(naked) void ImGuiManager::Hook_WindowProc()
         call ImGuiManager::WindowProc
 
         test al, al
-        jnz _continue
+        jnz _end
 
         popad
         popfd
@@ -344,7 +343,7 @@ __declspec(naked) void ImGuiManager::Hook_WindowProc()
         pop ebp
         ret 0x10
 
-    _continue:
+    _end:
         popad
         popfd
 
@@ -367,9 +366,9 @@ __declspec(naked) void ImGuiManager::Hook_CaptureKeyboard()
         pushad
 
         call ImGui::GetIO
-        
+
         cmp byte ptr [eax]ImGuiIO.WantCaptureKeyboard, 0
-        je _continue
+        je _end
 
         // Make all keys down.
         mov ecx, 256
@@ -377,7 +376,7 @@ __declspec(naked) void ImGuiManager::Hook_CaptureKeyboard()
         lea edi, [ebp - 0x100]
         rep stosb
 
-    _continue:
+    _end:
         popad
         popfd
 
