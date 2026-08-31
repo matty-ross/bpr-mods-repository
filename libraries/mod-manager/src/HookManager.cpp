@@ -1,4 +1,3 @@
-#include <vector>
 #include <Windows.h>
 
 #include "core/Pointer.hpp"
@@ -20,6 +19,16 @@ HookManager::~HookManager()
     DeleteCriticalSection(&m_CriticalSection);
 }
 
+void HookManager::AddGameMainHook(GameMainHook gameMainHook)
+{
+    EnterCriticalSection(&m_CriticalSection);
+
+    m_GameMainHooks.push_back(gameMainHook);
+    m_Logger.Info("Added 'game main' hook. address: 0x%p", gameMainHook);
+
+    LeaveCriticalSection(&m_CriticalSection);
+}
+
 void HookManager::AddGameStatePreWorldUpdateHook(GameStatePreWorldUpdateHook gameStatePreWorldUpdateHook)
 {
     EnterCriticalSection(&m_CriticalSection);
@@ -32,9 +41,22 @@ void HookManager::AddGameStatePreWorldUpdateHook(GameStatePreWorldUpdateHook gam
 
 void HookManager::Load()
 {
+    Core::Patch(0x070533C4, 7, m_Logger).WriteJMP(Hook_ExecuteGameMainHooks);
     Core::Patch(0x00A2A509, 9, m_Logger).WriteJMP(Hook_ExecuteGameStatePreWorldUpdateHooks);
 
     m_Logger.Info("Loaded hook manager.");
+}
+
+void HookManager::ExecuteGameMainHooks()
+{
+    EnterCriticalSection(&m_CriticalSection);
+
+    for (GameMainHook gameMainHook : m_GameMainHooks)
+    {
+        gameMainHook();
+    }
+
+    LeaveCriticalSection(&m_CriticalSection);
 }
 
 void HookManager::ExecuteGameStatePreWorldUpdateHooks(
@@ -52,6 +74,32 @@ void HookManager::ExecuteGameStatePreWorldUpdateHooks(
     LeaveCriticalSection(&m_CriticalSection);
 }
 
+__declspec(naked) void HookManager::Hook_ExecuteGameMainHooks()
+{
+    /*
+        bool __thiscall BrnGame::BrnGameModule::GameMain()
+    */
+
+    __asm
+    {
+        pushfd
+        pushad
+
+        mov ecx, offset ModManager::s_Instance.m_HookManager
+        call HookManager::ExecuteGameMainHooks
+
+        popad
+        popfd
+
+        // Original code.
+        cmp byte ptr [esi + 0xB6D9B8], 0
+
+        // Jump back.
+        push 0x070533CB
+        ret
+    }
+}
+
 __declspec(naked) void HookManager::Hook_ExecuteGameStatePreWorldUpdateHooks()
 {
     /*
@@ -61,7 +109,7 @@ __declspec(naked) void HookManager::Hook_ExecuteGameStatePreWorldUpdateHooks()
             const BrnGameState::GameStateModuleIO::PreWorldInputBuffer* lpInput,
             BrnGameState::GameStateModuleIO::OutputBuffer* lpOutput,
             BrnUpdateSet lUpdateSet
-        );
+        )
     */
 
     __asm
