@@ -66,8 +66,6 @@ void ModManager::Load()
         m_ModManagerConfigFile.Load();
         m_HookManager.Load();
 
-        m_ImGuiManager.AddMenu([]() { s_Instance.RenderMenu(); });
-
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
             s_Instance.DeferredLoad();
@@ -119,6 +117,9 @@ void ModManager::DeferredLoad()
         }
 
         m_ImGuiManager.Load();
+
+        m_ImGuiManager.AddMenu([]() { s_Instance.RenderMenu(); });
+        m_HookManager.AddGameMainHook([]() { s_Instance.m_ImGuiManager.HandleHotkeys(); });
     }
     catch (const std::exception& ex)
     {

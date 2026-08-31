@@ -132,11 +132,58 @@ void ImGuiManager::RenderMenu()
     ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
 }
 
+void ImGuiManager::HandleHotkeys()
+{
+    auto processCaptureHotkey = [](ImGuiKey& hotkey)
+    {
+        for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
+        {
+            // Don't capture these keys.
+            switch (key)
+            {
+            case ImGuiKey_MouseLeft:
+                continue;
+            }
+
+            if (ImGui::IsKeyDown(key))
+            {
+                hotkey = key;
+            }
+        }
+    };
+
+    if (m_CaptureToggleMenusHotkey)
+    {
+        processCaptureHotkey(m_ImGuiConfig.ToggleMenusHotkey);
+    }
+    else
+    {
+        if (ImGui::IsKeyPressed(m_ImGuiConfig.ToggleMenusHotkey, false))
+        {
+            m_MenusVisible = !m_MenusVisible;
+
+            Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
+            Core::Pointer(0x0139813E).as<bool>() = true;
+        }
+    }
+
+    if (m_CaptureToggleOverlaysHotkey)
+    {
+        processCaptureHotkey(m_ImGuiConfig.ToggleOverlaysHotkey);
+    }
+    else
+    {
+        if (ImGui::IsKeyPressed(m_ImGuiConfig.ToggleOverlaysHotkey, false))
+        {
+            m_OverlaysVisible = !m_OverlaysVisible;
+        }
+    }
+}
+
 void ImGuiManager::Render()
 {
     EnterCriticalSection(&m_CriticalSection);
 
-    HandleHotkeys();
     ApplyConfig();
 
     ImGui_ImplDX11_NewFrame();
@@ -185,7 +232,6 @@ bool ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
             return false;
         }
     }
-    
     if (io.WantCaptureKeyboard)
     {
         // Don't pass these keyboard messages to the game.
@@ -201,54 +247,6 @@ bool ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     return true;
-}
-
-void ImGuiManager::HandleHotkeys()
-{
-    auto processCaptureHotkey = [](ImGuiKey& hotkey)
-    {
-        for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
-        {
-            // Don't capture these keys.
-            switch (key)
-            {
-            case ImGuiKey_MouseLeft:
-                continue;
-            }
-
-            if (ImGui::IsKeyDown(key))
-            {
-                hotkey = key;
-            }
-        }
-    };
-
-    if (m_CaptureToggleMenusHotkey)
-    {
-        processCaptureHotkey(m_ImGuiConfig.ToggleMenusHotkey);
-    }
-    else
-    {
-        if (ImGui::IsKeyPressed(m_ImGuiConfig.ToggleMenusHotkey, false))
-        {
-            m_MenusVisible = !m_MenusVisible;
-
-            Core::Pointer(0x01398242).as<bool>() = m_MenusVisible;
-            Core::Pointer(0x0139813E).as<bool>() = true;
-        }
-    }
-
-    if (m_CaptureToggleOverlaysHotkey)
-    {
-        processCaptureHotkey(m_ImGuiConfig.ToggleOverlaysHotkey);
-    }
-    else
-    {
-        if (ImGui::IsKeyPressed(m_ImGuiConfig.ToggleOverlaysHotkey, false))
-        {
-            m_OverlaysVisible = !m_OverlaysVisible;
-        }
-    }
 }
 
 void ImGuiManager::ApplyConfig()

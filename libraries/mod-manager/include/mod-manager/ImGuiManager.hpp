@@ -35,12 +35,12 @@ public:
     void Unload();
 
     void RenderMenu();
+    void HandleHotkeys();
 
 private:
     void Render();
     bool WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
-    void HandleHotkeys();
     void ApplyConfig();
 
 private:
