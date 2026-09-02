@@ -8,7 +8,9 @@
     <Project Path="libraries/core-utils/core-utils.vcxproj" Id="fdfa5ac5-a8e2-4d83-a900-5f30e4dfdb69" />
     <Project Path="libraries/mod-manager/mod-manager.vcxproj" Id="1c27c1fc-950b-453c-8596-69f0fbdc1b11" />
   </Folder>
-  <Folder Name="/mods/" />
+  <Folder Name="/mods/">
+    <Project Path="mods/exception-reporter/exception-reporter.vcxproj" Id="9245f051-3444-443e-a1ba-60bccceb884f" />
+  </Folder>
   <Folder Name="/vendor/">
     <Project Path="vendor/imgui/imgui.vcxproj" Id="7dc3e603-4726-4242-8afd-1dabaf9dfea7" />
     <Project Path="vendor/yaml-cpp/yaml-cpp.vcxproj" Id="072109b8-5077-45d6-b04e-018f284fb3e1" />
