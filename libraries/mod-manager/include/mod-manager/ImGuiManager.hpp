@@ -58,7 +58,7 @@ private:
     bool m_CaptureToggleMenusHotkey = false;
     bool m_MenusVisible = false;
     std::vector<RenderImGuiMenu> m_Menus;
-    
+
     bool m_CaptureToggleOverlaysHotkey = false;
     bool m_OverlaysVisible = true;
     std::vector<RenderImGuiOverlay> m_Overlays;

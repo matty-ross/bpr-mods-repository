@@ -7,7 +7,6 @@
 #include "core/Pointer.hpp"
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
-#include "core/Patch.hpp"
 #include "mod-manager/ModManager.hpp"
 #include "mod-manager/HookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
@@ -145,9 +144,7 @@ void ModManager::RenderMenu()
             {
                 m_ModManagerConfigFile.Save();
             }
-
             ImGui::SameLine();
-
             if (ImGui::Button("Load##mod-manager-config-file"))
             {
                 m_ModManagerConfigFile.Load();

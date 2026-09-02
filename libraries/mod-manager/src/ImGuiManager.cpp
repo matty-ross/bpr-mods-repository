@@ -1,4 +1,3 @@
-#include <vector>
 #include <Windows.h>
 #include <d3d11.h>
 
@@ -101,13 +100,13 @@ void ImGuiManager::Unload()
 void ImGuiManager::RenderMenu()
 {
     ImGui::SeparatorText("ImGui");
-    
+
     auto renderCaptureHotkey = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
     {
         ImGui::PushID(name);
 
         ImGui::AlignTextToFramePadding();
-        ImGui::Text("%s", name);
+        ImGui::TextUnformatted(name);
         ImGui::SameLine(0.0f, 20.0f);
         ImGui::Checkbox("Capture##hotkey", &captureHotkey);
         ImGui::SameLine(0.0f, 20.0f);
@@ -219,7 +218,7 @@ bool ImGuiManager::WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
     ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
 
     const ImGuiIO& io = ImGui::GetIO();
-    
+
     if (io.WantCaptureMouse)
     {
         // Don't pass these mouse messages to the game.
@@ -317,8 +316,22 @@ __declspec(naked) void ImGuiManager::Hook_Render()
 
 __declspec(naked) void ImGuiManager::Hook_WindowProc()
 {
+    /*
+        LRESULT __stdcall WindowProc(
+            HWND hWnd,
+            UINT Msg,
+            WPARAM wParam,
+            LPARAM lParam
+        )
+    */
+
     __asm
     {
+        // ebp + 0x8: HWND hWnd
+        // ebp + 0xC: UINT Msg
+        // ebp + 0x10: WPARAM wParam
+        // ebp + 0x14: LPARAM lParam
+
         pushfd
         pushad
 
