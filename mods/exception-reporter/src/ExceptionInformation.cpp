@@ -1,8 +1,12 @@
-#include "ExceptionInformation.hpp"
-
+#include <cstddef>
+#include <cstdint>
 #include <cstdio>
+#include <string>
+#include <Windows.h>
 #include <Shlwapi.h>
 #include <DbgHelp.h>
+
+#include "ExceptionInformation.hpp"
 
 
 ExceptionInformation::ExceptionInformation(const EXCEPTION_RECORD* exceptionRecord, const CONTEXT* contextRecord)
@@ -41,26 +45,18 @@ std::string ExceptionInformation::GetCode() const
         case EXCEPTION_GUARD_PAGE:               return "EXCEPTION_GUARD_PAGE";
         case EXCEPTION_INVALID_HANDLE:           return "EXCEPTION_INVALID_HANDLE";
         }
-        
+
         return "???";
     };
 
     char codeBuffer[64] = {};
     sprintf_s(codeBuffer, "0x%08X  [%s]", m_ExceptionRecord->ExceptionCode, getCodeName(m_ExceptionRecord->ExceptionCode));
-    
+
     return codeBuffer;
 }
 
 std::string ExceptionInformation::GetAddress() const
 {
-    auto getModuleName = [](HMODULE moduleHandle) -> std::string
-    {
-        char fileName[MAX_PATH] = {};
-        GetModuleFileNameA(moduleHandle, fileName, sizeof(fileName));
-
-        return PathFindFileNameA(fileName);
-    };
-
     HMODULE moduleHandle = NULL;
     GetModuleHandleExA(
         GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT | GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
@@ -71,15 +67,19 @@ std::string ExceptionInformation::GetAddress() const
     char addressBuffer[128] = {};
     if (moduleHandle != NULL)
     {
+        char fileName[MAX_PATH] = {};
+        GetModuleFileNameA(moduleHandle, fileName, sizeof(fileName));
+
         const void* baseAddress = moduleHandle;
-        ptrdiff_t rva = static_cast<const uint8_t*>(m_ExceptionRecord->ExceptionAddress) - static_cast<const uint8_t*>(baseAddress);
-        sprintf_s(addressBuffer, "0x%p  [%s + 0x%X]", m_ExceptionRecord->ExceptionAddress, getModuleName(moduleHandle).c_str(), rva);
+        ptrdiff_t rva = static_cast<const std::byte*>(m_ExceptionRecord->ExceptionAddress) - static_cast<const std::byte*>(baseAddress);
+
+        sprintf_s(addressBuffer, "0x%p  [%s + 0x%X]", m_ExceptionRecord->ExceptionAddress, PathFindFileNameA(fileName), rva);
     }
     else
     {
         sprintf_s(addressBuffer, "0x%p", m_ExceptionRecord->ExceptionAddress);
     }
-    
+
     return addressBuffer;
 }
 
@@ -98,7 +98,7 @@ std::string ExceptionInformation::GetFlags() const
         case EXCEPTION_COLLIDED_UNWIND:    return "EXCEPTION_COLLIDED_UNWIND";
         case EXCEPTION_SOFTWARE_ORIGINATE: return "EXCEPTION_SOFTWARE_ORIGINATE";
         }
-        
+
         return "???";
     };
 
@@ -116,7 +116,7 @@ std::string ExceptionInformation::GetFlags() const
             flags += flagBuffer;
         }
     }
-    
+
     return flags;
 }
 
@@ -129,7 +129,7 @@ std::string ExceptionInformation::GetParameters() const
         sprintf_s(parameterBuffer, "0x%08X\n", m_ExceptionRecord->ExceptionInformation[i]);
         parameters += parameterBuffer;
     }
-    
+
     return parameters;
 }
 
@@ -159,7 +159,7 @@ std::string ExceptionInformation::GetRegisters() const
         m_ContextRecord->Eip,
         m_ContextRecord->EFlags
     );
-    
+
     return registersBuffer;
 }
 
