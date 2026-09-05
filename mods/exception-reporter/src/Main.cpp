@@ -12,11 +12,11 @@ BOOL WINAPI DllMain(
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        ExceptionReporter::Get().OnProcessAttach(hinstDLL);
+        ExceptionReporter::Get().Load(hinstDLL);
         break;
 
     case DLL_PROCESS_DETACH:
-        ExceptionReporter::Get().OnProcessDetach();
+        ExceptionReporter::Get().Unload();
         break;
     }
 

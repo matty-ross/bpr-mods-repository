@@ -15,22 +15,24 @@ public:
     static ExceptionReporter& Get();
 
 public:
-    void OnProcessAttach(HINSTANCE instanceHandle);
-    void OnProcessDetach();
-
-private:
-    void Load();
+    void Load(HINSTANCE instanceHandle);
     void Unload();
-    
-    LONG OnException(EXCEPTION_POINTERS* ExceptionInfo) const;
 
 private:
+    void DeferredLoad();
+
+    LONG TopLevelExceptionFilter(EXCEPTION_POINTERS* ExceptionInfo) const;
+
+private:
+    static constexpr char k_Name[] = "Exception Reporter";
+    static constexpr char k_Version[] = "2.0.0";
+
     static ExceptionReporter s_Instance;
 
 private:
     Core::Logger m_Logger;
 
-    HANDLE m_LoadThreadHandle = NULL;
     HINSTANCE m_InstanceHandle = NULL;
+    HANDLE m_DeferredLoadThreadHandle = NULL;
     PTOP_LEVEL_EXCEPTION_FILTER m_PreviousTopLevelExceptionFilter = nullptr;
 };

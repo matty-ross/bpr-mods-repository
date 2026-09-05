@@ -1,13 +1,11 @@
-#include "ExceptionReporter.hpp"
+#include <exception>
+#include <Windows.h>
 
 #include "mod-manager/ModManager.hpp"
 
 #include "../resource.h"
+#include "ExceptionReporter.hpp"
 #include "ExceptionInformation.hpp"
-
-
-static constexpr char k_ModName[]    = "Exception Reporter";
-static constexpr char k_ModVersion[] = "1.4.0";
 
 
 ExceptionReporter ExceptionReporter::s_Instance;
@@ -15,7 +13,7 @@ ExceptionReporter ExceptionReporter::s_Instance;
 
 ExceptionReporter::ExceptionReporter()
     :
-    m_Logger(k_ModName)
+    m_Logger(k_Name)
 {
 }
 
@@ -24,79 +22,29 @@ ExceptionReporter& ExceptionReporter::Get()
     return s_Instance;
 }
 
-void ExceptionReporter::OnProcessAttach(HINSTANCE instanceHandle)
-{
-    m_InstanceHandle = instanceHandle;
-
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        s_Instance.Load();
-        return 0;
-    };
-    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
-}
-
-void ExceptionReporter::OnProcessDetach()
-{
-    Unload();
-    CloseHandle(m_LoadThreadHandle);
-}
-
-void ExceptionReporter::Load()
+void ExceptionReporter::Load(HINSTANCE instanceHandle)
 {
     try
     {
-        m_Logger.Info("Loading...");
+        m_InstanceHandle = instanceHandle;
 
-        // Check mod version.
+        if (!ModManager::Get().CheckVersion(k_Version))
         {
-            m_Logger.Info("Checking mod version...");
-
-            if (!ModManager::Get().CheckModVersion(k_ModVersion))
-            {
-                throw std::exception("Mod Manager and Mod versions mismatch.");
-            }
-
-            m_Logger.Info("Checked mod version.");
+            throw std::exception("Mod Manager and Mod versions mismatch.");
         }
 
-        // Wait to enter WinMain.
+        auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
-            m_Logger.Info("Waiting to enter WinMain...");
-            
-            while (true)
-            {
-                HANDLE exeMutexHandle = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
-                if (exeMutexHandle != NULL)
-                {
-                    break;
-                }
+            s_Instance.DeferredLoad();
 
-                Sleep(100);
-            }
-
-            m_Logger.Info("Entered WinMain.");
-        }
-
-        // Set top level exception filter.
-        {
-            m_Logger.Info("Setting top level exception filter...");
-            
-            PTOP_LEVEL_EXCEPTION_FILTER topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
-            {
-                return s_Instance.OnException(ExceptionInfo);
-            };
-            m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
-            
-            m_Logger.Info("Set top level exception filter. Previous filter: 0x%p.", m_PreviousTopLevelExceptionFilter);
-        }
-
-        m_Logger.Info("Loaded.");
+            return 0;
+        };
+        m_DeferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
@@ -104,29 +52,49 @@ void ExceptionReporter::Unload()
 {
     try
     {
-        m_Logger.Info("Unloading...");
-
-        // Set previous top level exception filter.
-        {
-            m_Logger.Info("Setting previous top level exception filter...");
-            
-            SetUnhandledExceptionFilter(m_PreviousTopLevelExceptionFilter);
-            
-            m_Logger.Info("Set previous top level exception filter.");
-        }
-
-        m_Logger.Info("Unloaded.");
+        CloseHandle(m_DeferredLoadThreadHandle);
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
-LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
+void ExceptionReporter::DeferredLoad()
 {
-    DLGPROC dialogProc = [](HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) -> INT_PTR
+    try
+    {
+        while (true)
+        {
+            HANDLE exeMutexHandle = OpenMutexA(MUTEX_ALL_ACCESS, FALSE, "BurnoutParadiseexe");
+            if (exeMutexHandle != NULL)
+            {
+                break;
+            }
+
+            Sleep(100);
+        }
+
+        auto topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG
+        {
+            return s_Instance.TopLevelExceptionFilter(ExceptionInfo);
+        };
+        m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
+        m_Logger.Info("Set top level exception filter. previous top level exception filter: 0x%p.", m_PreviousTopLevelExceptionFilter);
+    }
+    catch (const std::exception& ex)
+    {
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
+    }
+}
+
+LONG ExceptionReporter::TopLevelExceptionFilter(EXCEPTION_POINTERS* ExceptionInfo) const
+{
+    ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
+
+    auto dialogProc = [](HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) -> INT_PTR
     {
         switch (Msg)
         {
@@ -149,9 +117,6 @@ LONG ExceptionReporter::OnException(EXCEPTION_POINTERS* ExceptionInfo) const
 
         return FALSE;
     };
-
-    ExceptionInformation exceptionInformation(ExceptionInfo->ExceptionRecord, ExceptionInfo->ContextRecord);
-
     DialogBoxParamA(
         m_InstanceHandle,
         MAKEINTRESOURCEA(IDD_DIALOG_EXCEPTION_REPORT),
