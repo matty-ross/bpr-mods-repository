@@ -16,7 +16,6 @@ public:
 
 public:
     void Load(HINSTANCE instanceHandle);
-    void Unload();
 
 private:
     void DeferredLoad();
@@ -33,6 +32,5 @@ private:
     Core::Logger m_Logger;
 
     HINSTANCE m_InstanceHandle = NULL;
-    HANDLE m_DeferredLoadThreadHandle = NULL;
     PTOP_LEVEL_EXCEPTION_FILTER m_PreviousTopLevelExceptionFilter = nullptr;
 };

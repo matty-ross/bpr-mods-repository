@@ -14,10 +14,6 @@ BOOL WINAPI DllMain(
     case DLL_PROCESS_ATTACH:
         ExceptionReporter::Get().Load(hinstDLL);
         break;
-
-    case DLL_PROCESS_DETACH:
-        ExceptionReporter::Get().Unload();
-        break;
     }
 
     return TRUE;

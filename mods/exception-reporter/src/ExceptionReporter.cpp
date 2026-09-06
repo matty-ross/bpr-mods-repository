@@ -39,20 +39,11 @@ void ExceptionReporter::Load(HINSTANCE instanceHandle)
 
             return 0;
         };
-        m_DeferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
-    }
-    catch (const std::exception& ex)
-    {
-        m_Logger.Error("%s", ex.what());
-        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
-    }
-}
-
-void ExceptionReporter::Unload()
-{
-    try
-    {
-        CloseHandle(m_DeferredLoadThreadHandle);
+        HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+        if (deferredLoadThreadHandle != NULL)
+        {
+            CloseHandle(deferredLoadThreadHandle);
+        }
     }
     catch (const std::exception& ex)
     {
