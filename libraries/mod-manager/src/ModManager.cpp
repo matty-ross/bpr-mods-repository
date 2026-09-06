@@ -71,7 +71,11 @@ void ModManager::Load()
 
             return 0;
         };
-        m_DeferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+        HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+        if (deferredLoadThreadHandle != NULL)
+        {
+            CloseHandle(deferredLoadThreadHandle);
+        }
     }
     catch (const std::exception& ex)
     {
@@ -86,8 +90,6 @@ void ModManager::Unload()
     {
         m_ModManagerConfigFile.Save();
         m_ImGuiManager.Unload();
-
-        CloseHandle(m_DeferredLoadThreadHandle);
     }
     catch (const std::exception& ex)
     {

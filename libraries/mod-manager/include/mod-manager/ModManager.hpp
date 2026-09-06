@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <Windows.h>
-
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
 #include "mod-manager/ModManagerApi.hpp"
@@ -59,6 +57,4 @@ private:
 
     HookManager m_HookManager;
     ImGuiManager m_ImGuiManager;
-
-    HANDLE m_DeferredLoadThreadHandle = NULL;
 };
