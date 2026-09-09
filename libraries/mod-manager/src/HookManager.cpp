@@ -39,6 +39,16 @@ void HookManager::AddGameStatePreWorldUpdateHook(GameStatePreWorldUpdateHook gam
     LeaveCriticalSection(&m_CriticalSection);
 }
 
+void HookManager::AddGuiEventInterpreterUpdateHook(GuiEventInterpreterUpdateHook guiEventInterpreterUpdateHook)
+{
+    EnterCriticalSection(&m_CriticalSection);
+
+    m_GuiEventInterpreterUpdateHooks.push_back(guiEventInterpreterUpdateHook);
+    m_Logger.Info("Added 'GUI event interpreter update' hook. address: 0x%p", guiEventInterpreterUpdateHook);
+
+    LeaveCriticalSection(&m_CriticalSection);
+}
+
 void HookManager::Load()
 {
     Core::Patch(0x070533C4, 7, m_Logger).WriteJMP(Hook_ExecuteGameMainHooks);
@@ -69,6 +79,20 @@ void HookManager::ExecuteGameStatePreWorldUpdateHooks(
     for (GameStatePreWorldUpdateHook gameStatePreWorldUpdateHook : m_GameStatePreWorldUpdateHooks)
     {
         gameStatePreWorldUpdateHook(gameEventQueue, gameActionQueue);
+    }
+
+    LeaveCriticalSection(&m_CriticalSection);
+}
+
+void HookManager::ExecuteGuiEventInterpreterUpdateHooks(
+    Core::Pointer guiOutEventQueue // CgsGui::GuiResourceModuleIO::InputBuffer::GuiEventQueue*
+)
+{
+    EnterCriticalSection(&m_CriticalSection);
+
+    for (GuiEventInterpreterUpdateHook guiEventInterpreterUpdateHook : m_GuiEventInterpreterUpdateHooks)
+    {
+        guiEventInterpreterUpdateHook(guiOutEventQueue);
     }
 
     LeaveCriticalSection(&m_CriticalSection);
@@ -137,6 +161,43 @@ __declspec(naked) void HookManager::Hook_ExecuteGameStatePreWorldUpdateHooks()
 
         // Jump back.
         push 0x00A2A512
+        ret
+    }
+}
+
+__declspec(naked) void HookManager::Hook_ExecuteGuiEventInterpreterUpdateHooks()
+{
+    /*
+        void __thiscall CgsGui::EventInterpreterModule::Update(
+            CgsGui::EventInterpreterModuleIO::InputBuffer* lpInput,
+            CgsGui::EventInterpreterModuleIO::OutputBuffer* lpOutput
+        );
+    */
+
+    __asm
+    {
+        // ebx: lpOutput
+        
+        pushfd
+        pushad
+
+        // CgsGui::GuiResourceModuleIO::InputBuffer::GuiEventQueue* lpOutput->GetOutEventQueue()
+        lea eax, [ebx + 0x4]
+
+        push eax
+        mov ecx, offset ModManager::s_Instance.m_HookManager
+        call HookManager::ExecuteGuiEventInterpreterUpdateHooks
+
+        popad
+        popfd
+
+        // Original code.
+        mov ecx, esi
+        push 0
+        push ebx
+
+        // Jump back.
+        push 0x061E2D0E
         ret
     }
 }
