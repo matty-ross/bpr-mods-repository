@@ -9,6 +9,7 @@
     <Project Path="libraries/mod-manager/mod-manager.vcxproj" Id="1c27c1fc-950b-453c-8596-69f0fbdc1b11" />
   </Folder>
   <Folder Name="/mods/">
+    <Project Path="mods/bully-repellent/bully-repellent.vcxproj" Id="d7d7740b-d605-4cd3-a3d4-e4fc923e4f23" />
     <Project Path="mods/exception-reporter/exception-reporter.vcxproj" Id="9245f051-3444-443e-a1ba-60bccceb884f" />
   </Folder>
   <Folder Name="/vendor/">
