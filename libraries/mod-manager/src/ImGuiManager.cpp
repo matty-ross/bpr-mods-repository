@@ -101,21 +101,37 @@ void ImGuiManager::RenderMenu()
 {
     ImGui::SeparatorText("ImGui");
 
-    auto renderCaptureHotkey = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
+    if (ImGui::BeginTable("##imgui-hotkeys", 3))
     {
-        ImGui::PushID(name);
+        ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+        ImGui::TableSetupColumn("Hotkey", ImGuiTableColumnFlags_WidthStretch, 0.3f);
+        ImGui::TableSetupColumn("Capture", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+        ImGui::TableHeadersRow();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted(name);
-        ImGui::SameLine(0.0f, 20.0f);
-        ImGui::Checkbox("Capture##hotkey", &captureHotkey);
-        ImGui::SameLine(0.0f, 20.0f);
-        ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
+        auto renderHotkeyRow = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
+        {
+            ImGui::PushID(name);
 
-        ImGui::PopID();
-    };
-    renderCaptureHotkey("Toggle Menus Hotkey   ", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
-    renderCaptureHotkey("Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
+            ImGui::TableNextRow();
+
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted(name);
+            
+            ImGui::TableNextColumn();
+            ImGui::AlignTextToFramePadding();
+            ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
+            
+            ImGui::TableNextColumn();
+            ImGui::Checkbox("##capture-hotkey", &captureHotkey);
+
+            ImGui::PopID();
+        };
+        renderHotkeyRow("Toggle Menus Hotkey", m_ImGuiConfig.ToggleMenusHotkey, m_CaptureToggleMenusHotkey);
+        renderHotkeyRow("Toggle Overlays Hotkey", m_ImGuiConfig.ToggleOverlaysHotkey, m_CaptureToggleOverlaysHotkey);
+
+        ImGui::EndTable();
+    }
 
     static constexpr const char* styleColors[] =
     {
@@ -133,7 +149,7 @@ void ImGuiManager::RenderMenu()
 
 void ImGuiManager::HandleHotkeys()
 {
-    auto processCaptureHotkey = [](ImGuiKey& hotkey)
+    auto captureHotkey = [](ImGuiKey& hotkey)
     {
         for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
         {
@@ -153,7 +169,7 @@ void ImGuiManager::HandleHotkeys()
 
     if (m_CaptureToggleMenusHotkey)
     {
-        processCaptureHotkey(m_ImGuiConfig.ToggleMenusHotkey);
+        captureHotkey(m_ImGuiConfig.ToggleMenusHotkey);
     }
     else
     {
@@ -168,7 +184,7 @@ void ImGuiManager::HandleHotkeys()
 
     if (m_CaptureToggleOverlaysHotkey)
     {
-        processCaptureHotkey(m_ImGuiConfig.ToggleOverlaysHotkey);
+        captureHotkey(m_ImGuiConfig.ToggleOverlaysHotkey);
     }
     else
     {

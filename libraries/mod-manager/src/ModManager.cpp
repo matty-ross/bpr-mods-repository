@@ -146,7 +146,9 @@ void ModManager::RenderMenu()
             {
                 m_ModManagerConfigFile.Save();
             }
+
             ImGui::SameLine();
+
             if (ImGui::Button("Load##mod-manager-config-file"))
             {
                 m_ModManagerConfigFile.Load();
