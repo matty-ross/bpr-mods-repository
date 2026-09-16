@@ -125,15 +125,15 @@ void OnlinePlayers::RenderMenu()
     {
         Core::Pointer guiCache = Core::Pointer(0x013FC8E0).deref().at(0x8E8430); // BrnGui::GuiCache*
 
-        bool isOnline = guiCache.at(0x7B00).as<bool>();
-        if (isOnline)
+        if (ImGui::BeginTable("##current-players", 2))
         {
-            if (ImGui::BeginTable("##current-players", 2))
-            {
-                ImGui::TableSetupColumn("Name");
-                ImGui::TableSetupColumn("Blacklist");
-                ImGui::TableHeadersRow();
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.8f);
+            ImGui::TableSetupColumn("Blacklist", ImGuiTableColumnFlags_WidthStretch, 0.2f);
+            ImGui::TableHeadersRow();
 
+            bool isOnline = guiCache.at(0x7B00).as<bool>();
+            if (isOnline)
+            {
                 int32_t playersCount = guiCache.at(0xDE2C).as<int32_t>();
                 for (int32_t i = 0; i < playersCount; ++i)
                 {
@@ -160,7 +160,7 @@ void OnlinePlayers::RenderMenu()
                     {
                         ImGui::BeginDisabled();
                     }
-                    if (ImGui::Button("Add"))
+                    if (ImGui::Button("Add##blacklisted-player"))
                     {
                         m_BlacklistedPlayersFile.AddBlacklistedPlayer(
                             BlacklistedPlayersFile::BlacklistedPlayer
@@ -170,7 +170,7 @@ void OnlinePlayers::RenderMenu()
                                 .Autokick = false,
                                 .Automute = false,
                             }
-                            );
+                        );
                     }
                     if (alreadyOnBlacklist)
                     {
@@ -179,13 +179,9 @@ void OnlinePlayers::RenderMenu()
 
                     ImGui::PopID();
                 }
-
-                ImGui::EndTable();
             }
-        }
-        else
-        {
-            ImGui::TextUnformatted("Currently Offline");
+
+            ImGui::EndTable();
         }
     }
 
@@ -210,13 +206,17 @@ void OnlinePlayers::RenderMenu()
         static ImGuiTextFilter blacklistedPlayerFilter;
         blacklistedPlayerFilter.Draw("Filter##blacklisted-player");
 
-        if (ImGui::BeginTable("##blacklisted-players", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
+        ImVec2 availableSize = ImGui::GetContentRegionAvail();
+        if (ImGui::BeginTable("##blacklisted-players", 4, ImGuiTableFlags_ScrollY, ImVec2(0.0f, max(availableSize.y, 40.0f))))
         {
             ImGui::TableSetupScrollFreeze(0, 1);
-            ImGui::TableSetupColumn("Name");
-            ImGui::TableSetupColumn("Autokick");
-            ImGui::TableSetupColumn("Automute");
+            ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+            ImGui::TableSetupColumn("Autokick", ImGuiTableColumnFlags_WidthStretch, 0.15f);
+            ImGui::TableSetupColumn("Automute", ImGuiTableColumnFlags_WidthStretch, 0.15f);
+            ImGui::TableSetupColumn("Blacklist", ImGuiTableColumnFlags_WidthStretch, 0.2f);
             ImGui::TableHeadersRow();
+
+            uint64_t blacklistedPlayerIdToRemove = -1;
 
             for (BlacklistedPlayersFile::BlacklistedPlayer& blacklistedPlayer : m_BlacklistedPlayersFile.GetBlacklistedPlayers())
             {
@@ -236,8 +236,19 @@ void OnlinePlayers::RenderMenu()
                     ImGui::TableNextColumn();
                     ImGui::Checkbox("##automute", &blacklistedPlayer.Automute);
 
+                    ImGui::TableNextColumn();
+                    if (ImGui::Button("Remove##blacklisted-player"))
+                    {
+                        blacklistedPlayerIdToRemove = blacklistedPlayer.ID;
+                    }
+
                     ImGui::PopID();
                 }
+            }
+
+            if (blacklistedPlayerIdToRemove != -1)
+            {
+                m_BlacklistedPlayersFile.RemoveBlacklistedPlayerByID(blacklistedPlayerIdToRemove);
             }
 
             ImGui::EndTable();

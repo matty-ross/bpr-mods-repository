@@ -15,7 +15,7 @@ class BlacklistedPlayersFile
 public:
     struct BlacklistedPlayer
     {
-        uint64_t ID = 0;
+        uint64_t ID = -1;
         std::string Name;
         bool Autokick = false;
         bool Automute = false;

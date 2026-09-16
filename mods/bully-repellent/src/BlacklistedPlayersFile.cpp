@@ -64,7 +64,7 @@ void BlacklistedPlayersFile::Load()
         {
             BlacklistedPlayer blacklistedPlayer =
             {
-                .ID = blacklistedPlayerNode["ID"].as<uint64_t>(0),
+                .ID = blacklistedPlayerNode["ID"].as<uint64_t>(-1),
                 .Name = blacklistedPlayerNode["Name"].as<std::string>(""),
                 .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(false),
                 .Automute = blacklistedPlayerNode["Automute"].as<bool>(false),
