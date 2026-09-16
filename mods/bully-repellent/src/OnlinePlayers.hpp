@@ -12,10 +12,9 @@ public:
     OnlinePlayers(BlacklistedPlayersFile& blacklistedPlayersFile);
 
 public:
-    void OnGuiEventNetworkPlayerStatus(Core::Pointer guiEventNetworkPlayerStatus, Core::Pointer guiCache);
-    
-    void OnRenderMenu();
-    
+    void CheckPlayers(Core::Pointer guiOutEventQueue);
+    void RenderMenu();
+
 private:
     BlacklistedPlayersFile& m_BlacklistedPlayersFile;
     bool m_BlacklistEnabled = true;

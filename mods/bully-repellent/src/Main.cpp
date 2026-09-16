@@ -12,11 +12,11 @@ BOOL WINAPI DllMain(
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        BullyRepellent::Get().OnProcessAttach();
+        BullyRepellent::Get().Load();
         break;
 
     case DLL_PROCESS_DETACH:
-        BullyRepellent::Get().OnProcessDetach();
+        BullyRepellent::Get().Unload();
         break;
     }
 

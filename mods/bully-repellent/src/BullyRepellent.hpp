@@ -1,12 +1,8 @@
 #pragma once
 
 
-#include <Windows.h>
-
 #include "core/Path.hpp"
 #include "core/Logger.hpp"
-#include "mod-manager/DetourHookManager.hpp"
-#include "mod-manager/ImGuiManager.hpp"
 
 #include "BlacklistedPlayersFile.hpp"
 #include "OnlinePlayers.hpp"
@@ -21,34 +17,26 @@ public:
     static BullyRepellent& Get();
 
 public:
-    void OnProcessAttach();
-    void OnProcessDetach();
-
-private:
     void Load();
     void Unload();
 
-    void OnGuiEventNetworkPlayerStatus(void* guiEventNetworkPlayerStatus, void* guiCache);
-
-    void OnRenderMenu();
+private:
+    void RenderMenu();
 
 private:
-    static void DetourOnGuiEventNetworkPlayerStatus();
+    static constexpr char k_Name[] = "Bully Repellent";
+    static constexpr char k_Version[] = "2.0.0";
+    static constexpr char k_Author[] = "PISros0724 (Matty)";
+    static constexpr char k_ConfigDirectoryPath[] = "bully-repellent\\";
 
-private:
     static BullyRepellent s_Instance;
 
 private:
-    Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
-    
-    BlacklistedPlayersFile m_BlacklistedPlayersFile;
-    
-    OnlinePlayers m_OnlinePlayers;
-    
-    DetourHook m_DetourOnGuiEventNetworkPlayerStatus;
 
-    ImGuiMenu m_Menu;
-    
-    HANDLE m_LoadThreadHandle = NULL;
+    Core::Path m_ConfigDirectoryPath;
+
+    BlacklistedPlayersFile m_BlacklistedPlayersFile;
+
+    OnlinePlayers m_OnlinePlayers;
 };

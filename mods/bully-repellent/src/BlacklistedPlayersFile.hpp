@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <cstdint>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -8,30 +10,36 @@
 #include "core/Logger.hpp"
 
 
-struct BlacklistedPlayer
-{
-    uint64_t ID = 0;
-    std::string Name;
-    bool Autokick = false;
-    bool Automute = false;
-};
-
-
 class BlacklistedPlayersFile
 {
 public:
-    BlacklistedPlayersFile(Core::Path directory, const Core::Logger& logger);
+    struct BlacklistedPlayer
+    {
+        uint64_t ID = 0;
+        std::string Name;
+        bool Autokick = false;
+        bool Automute = false;
+    };
 
 public:
+    BlacklistedPlayersFile(Core::Path configDirectoryPath, const Core::Logger& logger);
+
+public:
+    std::span<BlacklistedPlayer> GetBlacklistedPlayers();
+    BlacklistedPlayer* FindBlacklistedPlayerByID(uint64_t blacklistedPlayerID);
+    void AddBlacklistedPlayer(const BlacklistedPlayer& blacklistedPlayer);
+    void RemoveBlacklistedPlayerByID(uint64_t blacklistedPlayerID);
+
     void Load();
     void Save() const;
-    
-    std::vector<BlacklistedPlayer>& GetBlacklistedPlayers();
-    BlacklistedPlayer* GetBlacklistedPlayer(uint64_t blacklistedPlayerID);
+
+private:
+    static constexpr char k_Name[] = "blacklisted players";
 
 private:
     Core::Path m_FilePath;
-    const Core::Logger& m_Logger;
-    
+
     std::vector<BlacklistedPlayer> m_BlacklistedPlayers;
+
+    const Core::Logger& m_Logger;
 };
