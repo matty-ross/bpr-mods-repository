@@ -515,7 +515,7 @@ inline constexpr VanillaVehicle k_VanillaVehicles[] =
 inline constexpr const VanillaVehicle* k_LastResortFallbackVehicle = &k_VanillaVehicles[0]; // PUSMC01  - CAVALRY
 
 
-inline const VanillaVehicle* GetVanillaVehicle(uint64_t vehicleID)
+inline const VanillaVehicle* FindVanillaVehicleByID(uint64_t vehicleID)
 {
     for (const VanillaVehicle& vanillaVehicle : k_VanillaVehicles)
     {

@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <cstdint>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -10,32 +12,38 @@
 #include "Challenges.hpp"
 
 
-struct Challenge
-{
-    uint64_t ID = 0;
-    std::string Title;
-    const VanillaChallenge* Replacement = nullptr;
-};
-
-
 class ChallengesFile
 {
 public:
-    ChallengesFile(Core::Path directory, const Core::Logger& logger);
+    struct Challenge
+    {
+        uint64_t ID = 0;
+        std::string Title;
+        const VanillaChallenge* Replacement = nullptr;
+    };
 
 public:
-    void Load();
-    void Save() const;
+    ChallengesFile(Core::Path configDirectoryPath, const Core::Logger& logger);
 
-    std::vector<Challenge>& GetChallenges();
-    Challenge* GetChallenge(uint64_t challengeID);
+public:
+    std::span<Challenge> GetChallenges();
+    Challenge* FindChallengeByID(uint64_t challengeID);
+    void AddChallenge(const Challenge& challenge);
+
     const VanillaChallenge* GetFallbackChallenge() const;
     void SetFallbackChallenge(const VanillaChallenge* fallbackChallenge);
 
+    void Load();
+    void Save() const;
+
+private:
+    static constexpr char k_Name[] = "challenges";
+
 private:
     Core::Path m_FilePath;
-    const Core::Logger& m_Logger;
 
     std::vector<Challenge> m_Challenges;
     const VanillaChallenge* m_FallbackChallenge = k_LastResortFallbackChallenge;
+
+    const Core::Logger& m_Logger;
 };

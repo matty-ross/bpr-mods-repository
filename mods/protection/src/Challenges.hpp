@@ -519,7 +519,7 @@ inline constexpr VanillaChallenge k_VanillaChallenges[] =
 inline constexpr const VanillaChallenge* k_LastResortFallbackChallenge = &k_VanillaChallenges[419]; // 813448 - Crane in the Neck
 
 
-inline const VanillaChallenge* GetVanillaChallenge(uint64_t challengeID)
+inline const VanillaChallenge* FindVanillaChallengeByID(uint64_t challengeID)
 {
     for (const VanillaChallenge& vanillaChallenge : k_VanillaChallenges)
     {
