@@ -11,6 +11,7 @@
   <Folder Name="/mods/">
     <Project Path="mods/bully-repellent/bully-repellent.vcxproj" Id="d7d7740b-d605-4cd3-a3d4-e4fc923e4f23" />
     <Project Path="mods/exception-reporter/exception-reporter.vcxproj" Id="9245f051-3444-443e-a1ba-60bccceb884f" />
+    <Project Path="mods/protection/protection.vcxproj" Id="0b9b6e57-8f0e-4f5b-b8e3-c121d29fa4cf" />
   </Folder>
   <Folder Name="/vendor/">
     <Project Path="vendor/imgui/imgui.vcxproj" Id="7dc3e603-4726-4242-8afd-1dabaf9dfea7" />
