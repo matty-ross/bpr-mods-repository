@@ -1,8 +1,12 @@
-#include "ChallengeProtection.hpp"
+#include <cstdint>
+
+#include "core/Pointer.hpp"
 
 #include "vendor/imgui.hpp"
 
-#include "bpr-sdk/CgsResource.hpp"
+#include "Challenges.hpp"
+#include "ChallengesFile.hpp"
+#include "ChallengeProtection.hpp"
 
 
 ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
@@ -39,7 +43,7 @@ void ChallengeProtection::OnFreeburnChallengeMessageUnpack(
     freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
 }
 
-void ChallengeProtection::OnRenderMenu()
+void ChallengeProtection::RenderMenu()
 {
     if (ImGui::CollapsingHeader("Challenge Protection"))
     {
@@ -48,7 +52,7 @@ void ChallengeProtection::OnRenderMenu()
         auto renderVanillaChallengesPopup = []<typename Fn>(const char* title, uint64_t selectedChallengeID, Fn onSelected) -> void
         {
             ImGui::SetNextWindowSize(ImVec2(0.0f, 500.0f));
-            
+
             if (ImGui::BeginPopup(vanillaChallengesPopupID))
             {
                 ImGui::SeparatorText(title);
@@ -86,17 +90,17 @@ void ChallengeProtection::OnRenderMenu()
                 ImGui::EndPopup();
             }
         };
-        
+
         {
             ImGui::Checkbox("Challenge Protection Enabled", &m_ChallengeProtectionEnabled);
-            
+
             if (ImGui::Button("Save##challenges-file"))
             {
                 m_ChallengesFile.Save();
             }
-            
+
             ImGui::SameLine();
-            
+
             if (ImGui::Button("Load##challenges-file"))
             {
                 m_ChallengesFile.Load();
@@ -108,14 +112,14 @@ void ChallengeProtection::OnRenderMenu()
         {
             ImGui::AlignTextToFramePadding();
             ImGui::Text("Fallback Challenge   %s", m_ChallengesFile.GetFallbackChallenge()->Title);
-            
+
             ImGui::SameLine(0.0f, 20.0f);
-            
-            if (ImGui::Button("Change...##fallback-challenge"))
+
+            if (ImGui::Button("Change##fallback-challenge"))
             {
                 ImGui::OpenPopup(vanillaChallengesPopupID);
             }
-            
+
             renderVanillaChallengesPopup(
                 "Fallback Challenge",
                 m_ChallengesFile.GetFallbackChallenge()->ID,
@@ -139,49 +143,48 @@ void ChallengeProtection::OnRenderMenu()
                 ImGui::TableSetupColumn("Replacement Challenge", ImGuiTableColumnFlags_WidthStretch, 0.5f);
                 ImGui::TableSetupColumn("##change-challenge", ImGuiTableColumnFlags_WidthStretch, 0.2f);
                 ImGui::TableHeadersRow();
-            
-                for (Challenge& challenge : m_ChallengesFile.GetChallenges())
+
+                for (ChallengesFile::Challenge& challenge : m_ChallengesFile.GetChallenges())
                 {
                     if (challengeFilter.PassFilter(challenge.Title.c_str()))
                     {
                         ImGui::PushID(&challenge);
-                        
+
                         ImGui::TableNextRow();
                         {
                             ImGui::TableNextColumn();
-                            {
-                                ImGui::AlignTextToFramePadding();
-                                ImGui::TextUnformatted(challenge.Title.c_str());
-                            }
-                
-                            ImGui::TableNextColumn();
-                            {
-                                ImGui::AlignTextToFramePadding();
-                                ImGui::TextUnformatted(challenge.Replacement->Title);
-                            }
-                    
-                            ImGui::TableNextColumn();
-                            {
-                                if (ImGui::Button("Change..."))
-                                {
-                                    ImGui::OpenPopup(vanillaChallengesPopupID);
-                                }
-                                
-                                renderVanillaChallengesPopup(
-                                    "Replacement Challenge",
-                                    challenge.Replacement->ID,
-                                    [&](const VanillaChallenge& vanillaChallenge) -> void
-                                    {
-                                        challenge.Replacement = &vanillaChallenge;
-                                    }
-                                );
-                            }
+
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TextUnformatted(challenge.Title.c_str());
                         }
-                        
+                        {
+                            ImGui::TableNextColumn();
+
+                            ImGui::AlignTextToFramePadding();
+                            ImGui::TextUnformatted(challenge.Replacement->Title);
+                        }
+                        {
+                            ImGui::TableNextColumn();
+
+                            if (ImGui::Button("Change##replacement-challenge"))
+                            {
+                                ImGui::OpenPopup(vanillaChallengesPopupID);
+                            }
+
+                            renderVanillaChallengesPopup(
+                                "Replacement Challenge",
+                                challenge.Replacement->ID,
+                                [&](const VanillaChallenge& vanillaChallenge) -> void
+                                {
+                                    challenge.Replacement = &vanillaChallenge;
+                                }
+                            );
+                        }
+
                         ImGui::PopID();
                     }
                 }
-            
+
                 ImGui::EndTable();
             }
         }
@@ -190,24 +193,24 @@ void ChallengeProtection::OnRenderMenu()
 
 void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
 {
-    Core::Pointer challengeList = BPR::PoolModule_FindResource("B5ChallengeList")->Memory[0]; // BrnResource::ChallengeListResource*
+    Core::Pointer challengeListResource = Core::Pointer(0x013FC8E0).deref().at(0x690B70).as<void*>(); // BrnResource::ChallengeListResource*
 
-    uint32_t challengesCount = challengeList.at(0x0).as<uint32_t>();
+    uint32_t challengesCount = challengeListResource.at(0x0).as<uint32_t>();
     for (uint32_t i = 0; i < challengesCount; ++i)
     {
-        Core::Pointer entry = challengeList.at(0x4).deref().at(i * 0xD8); // BrnResource::ChallengeListEntry*
+        Core::Pointer challengeListEntry = challengeListResource.at(0x4).deref().at(i * 0xD8); // BrnResource::ChallengeListEntry*
 
-        uint64_t challengeID = entry.at(0xC0).as<uint64_t>();
-        bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;
-        bool isInFile = m_ChallengesFile.GetChallenge(challengeID) != nullptr;
-        
+        uint64_t challengeID = challengeListEntry.at(0xC0).as<uint64_t>();
+        bool isVanilla = FindVanillaChallengeByID(challengeID) != nullptr;
+        bool isInFile = m_ChallengesFile.FindChallengeByID(challengeID) != nullptr;
+
         if (!isVanilla && !isInFile)
         {
-            m_ChallengesFile.GetChallenges().push_back(
-                Challenge
+            m_ChallengesFile.AddChallenge(
+                ChallengesFile::Challenge
                 {
-                    .ID          = challengeID,
-                    .Title       = entry.at(0xB0).as<char[16]>(),
+                    .ID = challengeID,
+                    .Title = challengeListEntry.at(0xB0).as<char[16]>(),
                     .Replacement = m_ChallengesFile.GetFallbackChallenge(),
                 }
             );
@@ -217,13 +220,13 @@ void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
 
 uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID) const
 {
-    bool isVanilla = GetVanillaChallenge(challengeID) != nullptr;
+    bool isVanilla = FindVanillaChallengeByID(challengeID) != nullptr;
     if (isVanilla)
     {
         return challengeID;
     }
 
-    Challenge* challenge = m_ChallengesFile.GetChallenge(challengeID);
+    ChallengesFile::Challenge* challenge = m_ChallengesFile.FindChallengeByID(challengeID);
     if (challenge != nullptr)
     {
         return challenge->Replacement->ID;

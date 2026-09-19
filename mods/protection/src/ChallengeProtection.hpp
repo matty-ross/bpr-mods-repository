@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <cstdint>
+
 #include "core/Pointer.hpp"
 
 #include "ChallengesFile.hpp"
@@ -14,8 +16,8 @@ public:
 public:
     void OnFreeburnChallengeMessagePack(Core::Pointer freeburnChallengeMessage);
     void OnFreeburnChallengeMessageUnpack(Core::Pointer freeburnChallengeMessage);
-    
-    void OnRenderMenu();
+
+    void RenderMenu();
 
     void AddNonVanillaChallengesToChallengesFile();
 
