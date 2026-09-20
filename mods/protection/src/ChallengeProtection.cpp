@@ -1,46 +1,28 @@
 #include <cstdint>
 
-#include "core/Pointer.hpp"
-
 #include "vendor/imgui.hpp"
 
+#include "core/Pointer.hpp"
+#include "core/Logger.hpp"
+#include "core/Patch.hpp"
+
+#include "Protection.hpp"
 #include "Challenges.hpp"
 #include "ChallengesFile.hpp"
 #include "ChallengeProtection.hpp"
 
 
-ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile)
+ChallengeProtection::ChallengeProtection(ChallengesFile& challengesFile, const Core::Logger& logger)
     :
-    m_ChallengesFile(challengesFile)
+    m_ChallengesFile(challengesFile),
+    m_Logger(logger)
 {
 }
 
-void ChallengeProtection::OnFreeburnChallengeMessagePack(
-    Core::Pointer freeburnChallengeMessage // BrnNetwork::FreeburnChallengeMessage*
-)
+void ChallengeProtection::Load()
 {
-    if (!m_ChallengeProtectionEnabled)
-    {
-        return;
-    }
-
-    uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
-    challengeID = HandleChallengeID(challengeID);
-    freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
-}
-
-void ChallengeProtection::OnFreeburnChallengeMessageUnpack(
-    Core::Pointer freeburnChallengeMessage // BrnNetwork::FreeburnChallengeMessage*
-)
-{
-    if (!m_ChallengeProtectionEnabled)
-    {
-        return;
-    }
-
-    uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
-    challengeID = HandleChallengeID(challengeID);
-    freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
+    Core::Patch(0x0790A490, 5, m_Logger).WriteJMP(Hook_CheckFreeburnChallengeMessageBeforePacking);
+    Core::Patch(0x0790A49A, 7, m_Logger).WriteJMP(Hook_CheckFreeburnChallengeMessageAfterUnpacking);
 }
 
 void ChallengeProtection::RenderMenu()
@@ -233,4 +215,102 @@ uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID) const
     }
 
     return m_ChallengesFile.GetFallbackChallenge()->ID;
+}
+
+void ChallengeProtection::CheckFreeburnChallengeMessageBeforePacking(
+    Core::Pointer freeburnChallengeMessage // BrnNetwork::FreeburnChallengeMessage*
+)
+{
+    if (!m_ChallengeProtectionEnabled)
+    {
+        return;
+    }
+
+    uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
+    challengeID = HandleChallengeID(challengeID);
+    freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
+}
+
+void ChallengeProtection::CheckFreeburnChallengeMessageAfterUnpacking(
+    Core::Pointer freeburnChallengeMessage // BrnNetwork::FreeburnChallengeMessage*
+)
+{
+    if (!m_ChallengeProtectionEnabled)
+    {
+        return;
+    }
+
+    uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
+    challengeID = HandleChallengeID(challengeID);
+    freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
+}
+
+__declspec(naked) void ChallengeProtection::Hook_CheckFreeburnChallengeMessageBeforePacking()
+{
+    /*
+        BrnNetwork::BrnNetworkManager::PackOrUnpackResult __thiscall BrnNetwork::FreeburnChallengeMessage::PackOrUnpack()
+    */
+
+    __asm
+    {
+        // esi: BrnNetwork::FreeburnChallengeMessage* this
+
+        pushfd
+        pushad
+
+        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::EPackOrUnpack::E_PACK_INTO_BITSTREAM
+        jne _end
+
+        push esi
+        mov ecx, offset Protection::s_Instance.m_ChallengeProtection
+        call ChallengeProtection::CheckFreeburnChallengeMessageBeforePacking
+
+    _end:
+        popad
+        popfd
+
+        // Original code.
+        mov ecx, esi
+        push edx
+        mov bl, al
+
+        // Jump back.
+        push 0x0790A495
+        ret
+    }
+}
+
+__declspec(naked) void ChallengeProtection::Hook_CheckFreeburnChallengeMessageAfterUnpacking()
+{
+    /*
+        BrnNetwork::BrnNetworkManager::PackOrUnpackResult __thiscall BrnNetwork::FreeburnChallengeMessage::PackOrUnpack()
+    */
+
+    __asm
+    {
+        // BrnNetwork::FreeburnChallengeMessage* this
+
+        pushfd
+        pushad
+
+        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::EPackOrUnpack::E_UNPACK_FROM_BITSTREAM
+        jne _end
+
+        push esi
+        mov ecx, offset Protection::s_Instance.m_ChallengeProtection
+        call ChallengeProtection::CheckFreeburnChallengeMessageAfterUnpacking
+
+    _end:
+        popad
+        popfd
+
+        // Original code.
+        push 2
+        push 0
+        lea ecx, [esi + 48]
+
+        // Jump back.
+        push 0x0790A4A1
+        ret
+    }
 }
