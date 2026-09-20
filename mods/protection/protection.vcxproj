@@ -93,7 +93,7 @@
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;WIN32;_DEBUG;PROTECTION_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\bpr-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -115,7 +115,7 @@
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;WIN32;NDEBUG;PROTECTION_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\bpr-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -135,7 +135,7 @@
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;_DEBUG;PROTECTION_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\bpr-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -157,7 +157,7 @@
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NDEBUG;PROTECTION_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)libraries\core-utils\include\;$(SolutionDir)libraries\bpr-utils\include\;$(SolutionDir)libraries\mod-manager\include\;$(SolutionDir)vendor\imgui\include\;$(SolutionDir)vendor\imgui\modules\imgui\;$(SolutionDir)vendor\yaml-cpp\include\;$(SolutionDir)vendor\yaml-cpp\modules\yaml-cpp\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>

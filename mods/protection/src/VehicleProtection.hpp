@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <cstdint>
+
 #include "core/Pointer.hpp"
 
 #include "VehiclesFile.hpp"
@@ -16,11 +18,11 @@ public:
     void OnPlayerParamsDeserialize(Core::Pointer playerParams);
     void OnVehicleSelectMessagePack(Core::Pointer vehicleSelectMessage);
     void OnVehicleSelectMessageUnpack(Core::Pointer vehicleSelectMessage);
-    
-    void OnRenderMenu();
+
+    void RenderMenu();
 
     void AddNonVanillaVehiclesToVehiclesFile();
-    
+
 private:
     uint64_t HandleVehicleID(uint64_t vehicleID) const;
 
