@@ -307,7 +307,7 @@ __declspec(naked) void ChallengeProtection::Hook_CheckFreeburnChallengeMessageAf
         // Original code.
         push 2
         push 0
-        lea ecx, [esi + 48]
+        lea ecx, [esi + 0x48]
 
         // Jump back.
         push 0x0790A4A1
