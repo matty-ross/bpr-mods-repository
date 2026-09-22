@@ -12,11 +12,11 @@ BOOL WINAPI DllMain(
     switch (fdwReason)
     {
     case DLL_PROCESS_ATTACH:
-        Protection::Get().OnProcessAttach();
+        Protection::Get().Load();
         break;
 
     case DLL_PROCESS_DETACH:
-        Protection::Get().OnProcessDetach();
+        Protection::Get().Unload();
         break;
     }
 

@@ -6,57 +6,17 @@
 #include "mod-manager/ModManager.hpp"
 
 
-static constexpr char k_ModName[]      = "Protection";
-static constexpr char k_ModVersion[]   = "1.4.0";
-static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
-static constexpr char k_ModDirectory[] = "protection\\";
-
-
 Protection Protection::s_Instance;
 
 
 Protection::Protection()
     :
-    m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
-    m_Logger(k_ModName),
-    m_VehiclesFile(m_ConfigDirectory, m_Logger),
-    m_ChallengesFile(m_ConfigDirectory, m_Logger),
-    m_VehicleProtection(m_VehiclesFile),
-    m_ChallengeProtection(m_ChallengesFile),
-    m_DetourPlayerParamsSerialize
-    {
-        .Target = Core::Pointer(0x00B7218A).GetAddress(),
-        .Detour = &Protection::DetourPlayerParamsSerialize,
-    },
-    m_DetourPlayerParamsDeserialize
-    {
-        .Target = Core::Pointer(0x00B72958).GetAddress(),
-        .Detour = &Protection::DetourPlayerParamsDeserialize,
-    },
-    m_DetourVehicleSelectMessagePack
-    {
-        .Target = Core::Pointer(0x00B62095).GetAddress(),
-        .Detour = &Protection::DetourVehicleSelectMessagePack,
-    },
-    m_DetourVehicleSelectMessageUnpack
-    {
-        .Target = Core::Pointer(0x00B6209F).GetAddress(),
-        .Detour = &Protection::DetourVehicleSelectMessageUnpack,
-    },
-    m_DetourFreeburnChallengeMessagePack
-    {
-        .Target = Core::Pointer(0x0790A490).GetAddress(),
-        .Detour = &Protection::DetourFreeburnChallengeMessagePack,
-    },
-    m_DetourFreeburnChallengeMessageUnpack
-    {
-        .Target = Core::Pointer(0x0790A49A).GetAddress(),
-        .Detour = &Protection::DetourFreeburnChallengeMessageUnpack,
-    },
-    m_Menu
-    {
-        .OnRenderFunction = [&]() { OnRenderMenu(); },
-    }
+    m_Logger(k_Name),
+    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_ConfigDirectoryPath)),
+    m_VehiclesFile(m_ConfigDirectoryPath, m_Logger),
+    m_ChallengesFile(m_ConfigDirectoryPath, m_Logger),
+    m_VehicleProtection(m_VehiclesFile, m_Logger),
+    m_ChallengeProtection(m_ChallengesFile, m_Logger)
 {
 }
 
@@ -65,168 +25,45 @@ Protection& Protection::Get()
     return s_Instance;
 }
 
-void Protection::OnProcessAttach()
-{
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        s_Instance.Load();
-        return 0;
-    };
-    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
-}
-
-void Protection::OnProcessDetach()
-{
-    Unload();
-    CloseHandle(m_LoadThreadHandle);
-}
-
 void Protection::Load()
 {
     try
     {
-        m_Logger.Info("Loading...");
-
-        // Check mod version.
+        if (!ModManager::Get().CheckVersion(k_Version))
         {
-            m_Logger.Info("Checking mod version...");
-
-            if (!ModManager::Get().CheckModVersion(k_ModVersion))
-            {
-                throw std::exception("Mod Manager and Mod versions mismatch.");
-            }
-
-            m_Logger.Info("Checked mod version.");
+            throw std::exception("Mod Manager and Mod versions mismatch.");
         }
 
-        // Create mod config directory.
+        if (!m_ConfigDirectoryPath.Exists())
         {
-            m_Logger.Info("Creating mod config directory '%s' ...", m_ConfigDirectory.GetPath());
-
-            m_ConfigDirectory.Create();
-
-            m_Logger.Info("Created mod config directory.");
+            m_ConfigDirectoryPath.CreateDirectoryTree();
+            m_Logger.Info("Created config directory. path: '%s'", m_ConfigDirectoryPath.GetPath());
         }
 
-        // Load vehicles.
+        m_VehiclesFile.Load();
+        m_ChallengesFile.Load();
+
+        m_VehicleProtection.Load();
+        m_ChallengeProtection.Load();
+
+        ModManager::Get().GetImGuiManager().AddMenu([]() { s_Instance.RenderMenu(); });
+
+        auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
-            m_VehiclesFile.Load();
-        }
+            s_Instance.DeferredLoad();
 
-        // Load challenges.
+            return 0;
+        };
+        HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+        if (deferredLoadThreadHandle != NULL)
         {
-            m_ChallengesFile.Load();
+            CloseHandle(deferredLoadThreadHandle);
         }
-
-        // Wait to be in game.
-        {
-            m_Logger.Info("Waiting to be in game...");
-
-            while (true)
-            {
-                // BrnGameMainFlowController::GameMainFlowController::meCurrentState
-                Core::Pointer gameModule = 0x013FC8E0;
-                if (
-                    gameModule.as<void*>() != nullptr &&
-                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6 // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
-                )
-                {
-                    break;
-                }
-
-                Sleep(1000);
-            }
-
-            m_Logger.Info("In game.");
-        }
-
-        // Add non-vanilla vehicles.
-        {
-            m_Logger.Info("Adding non-vanilla vehicles...");
-
-            m_VehicleProtection.AddNonVanillaVehiclesToVehiclesFile();
-
-            m_Logger.Info("Added non-vanilla vehicles.");
-        }
-
-        // Add non-vanilla challenges.
-        {
-            m_Logger.Info("Adding non-vanilla challenges...");
-
-            m_ChallengeProtection.AddNonVanillaChallengesToChallengesFile();
-
-            m_Logger.Info("Added non-vanilla challenges.");
-        }
-
-        // Attach PlayerParamsSerialize detour.
-        {
-            m_Logger.Info("Attaching PlayerParamsSerialize detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourPlayerParamsSerialize);
-
-            m_Logger.Info("Attached PlayerParamsSerialize detour.");
-        }
-
-        // Attach PlayerParamsDeserialize detour.
-        {
-            m_Logger.Info("Attaching PlayerParamsDeserialize detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourPlayerParamsDeserialize);
-
-            m_Logger.Info("Attached PlayerParamsDeserialize detour.");
-        }
-
-        // Attach VehicleSelectMessagePack detour.
-        {
-            m_Logger.Info("Attaching VehicleSelectMessagePack detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourVehicleSelectMessagePack);
-
-            m_Logger.Info("Attached VehicleSelectMessagePack detour.");
-        }
-
-        // Attach VehicleSelectMessageUnpack detour.
-        {
-            m_Logger.Info("Attaching VehicleSelectMessageUnpack detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourVehicleSelectMessageUnpack);
-
-            m_Logger.Info("Attached VehicleSelectMessageUnpack detour.");
-        }
-
-        // Attach FreeburnChallengeMessagePack detour.
-        {
-            m_Logger.Info("Attaching FreeburnChallengeMessagePack detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourFreeburnChallengeMessagePack);
-
-            m_Logger.Info("Attached FreeburnChallengeMessagePack detour.");
-        }
-
-        // Attach FreeburnChallengeMessageUnpack detour.
-        {
-            m_Logger.Info("Attaching FreeburnChallengeMessageUnpack detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourFreeburnChallengeMessageUnpack);
-
-            m_Logger.Info("Attached FreeburnChallengeMessageUnpack detour.");
-        }
-
-        // Add menu.
-        {
-            m_Logger.Info("Adding menu...");
-
-            ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
-
-            m_Logger.Info("Added menu.");
-        }
-
-        m_Logger.Info("Loaded.");
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
@@ -234,259 +71,60 @@ void Protection::Unload()
 {
     try
     {
-        m_Logger.Info("Unloading...");
-
-        // Save vehicles.
-        {
-            m_VehiclesFile.Save();
-        }
-
-        // Save challenges.
-        {
-            m_ChallengesFile.Save();
-        }
-
-        // Remove menu.
-        {
-            m_Logger.Info("Removing menu...");
-
-            ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
-
-            m_Logger.Info("Removed menu.");
-        }
-
-        // Detach FreeburnChallengeMessageUnpack detour.
-        {
-            m_Logger.Info("Detaching FreeburnChallengeMessageUnpack detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourFreeburnChallengeMessageUnpack);
-
-            m_Logger.Info("Detached FreeburnChallengeMessageUnpack detour.");
-        }
-
-        // Detach FreeburnChallengeMessagePack detour.
-        {
-            m_Logger.Info("Detaching FreeburnChallengeMessagePack detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourFreeburnChallengeMessagePack);
-
-            m_Logger.Info("Detached FreeburnChallengeMessagePack detour.");
-        }
-
-        // Detach VehicleSelectMessageUnpack detour.
-        {
-            m_Logger.Info("Detaching VehicleSelectMessageUnpack detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourVehicleSelectMessageUnpack);
-
-            m_Logger.Info("Detached VehicleSelectMessageUnpack detour.");
-        }
-
-        // Detach VehicleSelectMessagePack detour.
-        {
-            m_Logger.Info("Detaching VehicleSelectMessagePack detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourVehicleSelectMessagePack);
-
-            m_Logger.Info("Detached VehicleSelectMessagePack detour.");
-        }
-
-        // Detach PlayerParamsDeserialize detour.
-        {
-            m_Logger.Info("Detaching PlayerParamsDeserialize detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourPlayerParamsDeserialize);
-
-            m_Logger.Info("Detached PlayerParamsDeserialize detour.");
-        }
-
-        // Detach PlayerParamsSerialize detour.
-        {
-            m_Logger.Info("Detaching PlayerParamsSerialize detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourPlayerParamsSerialize);
-
-            m_Logger.Info("Detached PlayerParamsSerialize detour.");
-        }
-
-        m_Logger.Info("Unloaded.");
+        m_VehiclesFile.Save();
+        m_ChallengesFile.Save();
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
-void Protection::OnPlayerParamsSerialize(void* playerParams)
+void Protection::DeferredLoad()
 {
-    m_VehicleProtection.OnPlayerParamsSerialize(playerParams);
+    try
+    {
+        while (true)
+        {
+            Core::Pointer gameModule = 0x013FC8E0;
+            if (gameModule.as<void*>() != nullptr)
+            {
+                int32_t gameUpdateStage = gameModule.deref().at(0xB6D464).as<int32_t>();
+                if (gameUpdateStage == 1) // BrnGame::BrnGameModule::E_GAMEUPDATESTAGE_MAIN
+                {
+                    break;
+                }
+            }
+
+            Sleep(1000);
+        }
+
+        m_VehicleProtection.AddNonVanillaVehiclesToVehiclesFile();
+        m_ChallengeProtection.AddNonVanillaChallengesToChallengesFile();
+    }
+    catch (const std::exception& ex)
+    {
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
+    }
 }
 
-void Protection::OnPlayerParamsDeserialize(void* playerParams)
+void Protection::RenderMenu()
 {
-    m_VehicleProtection.OnPlayerParamsDeserialize(playerParams);
-}
-
-void Protection::OnVehicleSelectMessagePack(void* vehicleSelectMessage)
-{
-    m_VehicleProtection.OnVehicleSelectMessagePack(vehicleSelectMessage);
-}
-
-void Protection::OnVehicleSelectMessageUnpack(void* vehicleSelectMessage)
-{
-    m_VehicleProtection.OnVehicleSelectMessageUnpack(vehicleSelectMessage);
-}
-
-void Protection::OnFreeburnChallengeMessagePack(void* freeburnChallengeMessage)
-{
-    m_ChallengeProtection.OnFreeburnChallengeMessagePack(freeburnChallengeMessage);
-}
-
-void Protection::OnFreeburnChallengeMessageUnpack(void* freeburnChallengeMessage)
-{
-    m_ChallengeProtection.OnFreeburnChallengeMessageUnpack(freeburnChallengeMessage);
-}
-
-void Protection::OnRenderMenu()
-{
-    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+    if (ImGui::Begin(k_Name, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
         ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
 
         ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Version     %s", k_ModVersion);
-        ImGui::Text("Author      %s", k_ModAuthor);
+        ImGui::Text("Version     %s", k_Version);
+        ImGui::Text("Author      %s", k_Author);
         ImGui::Text("Framerate   %.1f", io.Framerate);
 
-        m_VehicleProtection.OnRenderMenu();
-        m_ChallengeProtection.OnRenderMenu();
+        m_VehicleProtection.RenderMenu();
+        m_ChallengeProtection.RenderMenu();
 
         ImGui::PopItemWidth();
     }
     ImGui::End();
-}
-
-__declspec(naked) void Protection::DetourPlayerParamsSerialize()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        push edi // BrnNetwork::PlayerParams*
-        mov ecx, offset s_Instance
-        call Protection::OnPlayerParamsSerialize
-
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourPlayerParamsSerialize.Target]
-    }
-}
-
-__declspec(naked) void Protection::DetourPlayerParamsDeserialize()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        push edi // BrnNetwork::PlayerParams*
-        mov ecx, offset s_Instance
-        call Protection::OnPlayerParamsDeserialize
-
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourPlayerParamsDeserialize.Target]
-    }
-}
-
-__declspec(naked) void Protection::DetourVehicleSelectMessagePack()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::EPackOrUnpack::E_PACK_INTO_BITSTREAM
-        jne _continue
-
-        push esi // BrnNetwork::CarSelectMessage*
-        mov ecx, offset s_Instance
-        call Protection::OnVehicleSelectMessagePack
-
-    _continue:
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessagePack.Target]
-    }
-}
-
-__declspec(naked) void Protection::DetourVehicleSelectMessageUnpack()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::EPackOrUnpack::E_UNPACK_FROM_BITSTREAM
-        jne _continue
-
-        push esi // BrnNetwork::CarSelectMessage*
-        mov ecx, offset s_Instance
-        call Protection::OnVehicleSelectMessageUnpack
-        
-    _continue:
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourVehicleSelectMessageUnpack.Target]
-    }
-}
-
-__declspec(naked) void Protection::DetourFreeburnChallengeMessagePack()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        cmp dword ptr [esi + 0x4], 0 // CgsNetwork::Message::EPackOrUnpack::E_PACK_INTO_BITSTREAM
-        jne _continue
-
-        push esi // BrnNetwork::FreeburnChallengeMessage*
-        mov ecx, offset s_Instance
-        call Protection::OnFreeburnChallengeMessagePack
-
-    _continue:
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessagePack.Target]
-    }
-}
-
-__declspec(naked) void Protection::DetourFreeburnChallengeMessageUnpack()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        cmp dword ptr [esi + 0x4], 1 // CgsNetwork::Message::EPackOrUnpack::E_UNPACK_FROM_BITSTREAM
-        jne _continue
-
-        push esi // BrnNetwork::FreeburnChallengeMessage*
-        mov ecx, offset s_Instance
-        call Protection::OnFreeburnChallengeMessageUnpack
-        
-    _continue:
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourFreeburnChallengeMessageUnpack.Target]
-    }
 }
