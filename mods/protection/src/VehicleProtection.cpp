@@ -287,8 +287,19 @@ void VehicleProtection::CheckPlayerParamsAfterDeserializing(
     }
 
     uint64_t vehicleID = 0;
-    BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetPointer(), &vehicleID);
-    vehicleID = HandleVehicleID(vehicleID);
+
+    uint64_t playerID = playerParams.at(0x208).as<uint64_t>();
+    uint64_t localPlayerID = Core::Pointer(0x013FC8E0).at(0x6DC7D0).as<uint64_t>();
+    if (playerID == localPlayerID)
+    {
+        vehicleID = Core::Pointer(0x013FC8E0).at(0x6E3CF8).as<uint64_t>();
+    }
+    else
+    {
+        BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetPointer(), &vehicleID);
+        vehicleID = HandleVehicleID(vehicleID);
+    }
+
     BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetPointer(), vehicleID);
 }
 
