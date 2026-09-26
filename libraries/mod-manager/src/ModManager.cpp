@@ -2,11 +2,12 @@
 #include <exception>
 #include <Windows.h>
 
-#include "vendor/imgui.hpp"
+#include <vendor/imgui.hpp>
 
-#include "core/Pointer.hpp"
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
+#include <core/Pointer.hpp>
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
+
 #include "mod-manager/ModManager.hpp"
 #include "mod-manager/HookManager.hpp"
 #include "mod-manager/ImGuiManager.hpp"
@@ -142,16 +143,18 @@ void ModManager::RenderMenu()
 
         if (ImGui::CollapsingHeader("Config"))
         {
-            if (ImGui::Button("Save##mod-manager-config-file"))
             {
-                m_ModManagerConfigFile.Save();
-            }
+                if (ImGui::Button("Save##mod-manager-config-file"))
+                {
+                    m_ModManagerConfigFile.Save();
+                }
 
-            ImGui::SameLine();
+                ImGui::SameLine();
 
-            if (ImGui::Button("Load##mod-manager-config-file"))
-            {
-                m_ModManagerConfigFile.Load();
+                if (ImGui::Button("Load##mod-manager-config-file"))
+                {
+                    m_ModManagerConfigFile.Load();
+                }
             }
 
             m_ImGuiManager.RenderMenu();

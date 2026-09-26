@@ -4,8 +4,9 @@
 #include <vector>
 #include <Windows.h>
 
-#include "core/Pointer.hpp"
-#include "core/Logger.hpp"
+#include <core/Pointer.hpp>
+#include <core/Logger.hpp>
+
 #include "mod-manager/ModManagerApi.hpp"
 
 

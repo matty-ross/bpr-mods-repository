@@ -1,8 +1,9 @@
 #include <Windows.h>
 
-#include "core/Pointer.hpp"
-#include "core/Logger.hpp"
-#include "core/Patch.hpp"
+#include <core/Pointer.hpp>
+#include <core/Logger.hpp>
+#include <core/Patch.hpp>
+
 #include "mod-manager/ModManager.hpp"
 #include "mod-manager/HookManager.hpp"
 
@@ -54,8 +55,6 @@ void HookManager::Load()
     Core::Patch(0x070533C4, 7, m_Logger).WriteJMP(Hook_ExecuteGameMainHooks);
     Core::Patch(0x00A2A509, 9, m_Logger).WriteJMP(Hook_ExecuteGameStatePreWorldUpdateHooks);
     Core::Patch(0x061E2D09, 5, m_Logger).WriteJMP(Hook_ExecuteGuiEventInterpreterUpdateHooks);
-
-    m_Logger.Info("Loaded hook manager.");
 }
 
 void HookManager::ExecuteGameMainHooks()
@@ -178,7 +177,7 @@ __declspec(naked) void HookManager::Hook_ExecuteGuiEventInterpreterUpdateHooks()
     __asm
     {
         // ebx: lpOutput
-        
+
         pushfd
         pushad
 

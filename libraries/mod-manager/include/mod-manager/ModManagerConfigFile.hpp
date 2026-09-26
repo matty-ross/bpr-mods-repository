@@ -1,10 +1,10 @@
 #pragma once
 
 
-#include "vendor/imgui.hpp"
+#include <vendor/imgui.hpp>
 
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
 
 
 class ModManagerConfigFile

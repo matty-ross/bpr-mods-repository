@@ -1,11 +1,12 @@
 #include <exception>
 
-#include "vendor/imgui.hpp"
-#include "vendor/yaml-cpp.hpp"
+#include <vendor/imgui.hpp>
+#include <vendor/yaml-cpp.hpp>
 
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
-#include "core/File.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
+#include <core/File.hpp>
+
 #include "mod-manager/ModManagerConfigFile.hpp"
 
 

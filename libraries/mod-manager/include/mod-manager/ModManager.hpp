@@ -1,8 +1,9 @@
 #pragma once
 
 
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
+
 #include "mod-manager/ModManagerApi.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
 #include "mod-manager/HookManager.hpp"

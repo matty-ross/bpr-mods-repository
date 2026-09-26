@@ -1,12 +1,13 @@
 #include <Windows.h>
 #include <d3d11.h>
 
-#include "vendor/imgui.hpp"
+#include <vendor/imgui.hpp>
 
-#include "core/Pointer.hpp"
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
-#include "core/Patch.hpp"
+#include <core/Pointer.hpp>
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
+#include <core/Patch.hpp>
+
 #include "mod-manager/ModManager.hpp"
 #include "mod-manager/ModManagerConfigFile.hpp"
 #include "mod-manager/ImGuiManager.hpp"
@@ -78,13 +79,6 @@ void ImGuiManager::Load()
     Core::Patch(0x0817E440, 6, m_Logger).WriteJMP(Hook_Render);
     Core::Patch(0x008FB9D9, 5, m_Logger).WriteJMP(Hook_WindowProc);
     Core::Patch(0x0664BB29, 8, m_Logger).WriteJMP(Hook_CaptureKeyboard);
-
-    m_Logger.Info(
-        "Loaded ImGui manager. window handle: 0x%08X, D3D11 device: 0x%p, D3D11 device context: 0x%p",
-        windowHandle,
-        d3d11Device,
-        d3d11DeviceContext
-    );
 }
 
 void ImGuiManager::Unload()
@@ -93,8 +87,6 @@ void ImGuiManager::Unload()
     ImGui_ImplWin32_Shutdown();
 
     ImGui::DestroyContext();
-
-    m_Logger.Info("Unloaded ImGui manager.");
 }
 
 void ImGuiManager::RenderMenu()
@@ -113,17 +105,23 @@ void ImGuiManager::RenderMenu()
             ImGui::PushID(name);
 
             ImGui::TableNextRow();
+            {
+                ImGui::TableNextColumn();
 
-            ImGui::TableNextColumn();
-            ImGui::AlignTextToFramePadding();
-            ImGui::TextUnformatted(name);
-            
-            ImGui::TableNextColumn();
-            ImGui::AlignTextToFramePadding();
-            ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
-            
-            ImGui::TableNextColumn();
-            ImGui::Checkbox("##capture-hotkey", &captureHotkey);
+                ImGui::AlignTextToFramePadding();
+                ImGui::TextUnformatted(name);
+            }
+            {
+                ImGui::TableNextColumn();
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::TextUnformatted(ImGui::GetKeyName(hotkey));
+            }
+            {
+                ImGui::TableNextColumn();
+
+                ImGui::Checkbox("##capture-hotkey", &captureHotkey);
+            }
 
             ImGui::PopID();
         };
