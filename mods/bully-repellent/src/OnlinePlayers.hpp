@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "core/Pointer.hpp"
+#include <core/Pointer.hpp>
 
 #include "BlacklistedPlayersFile.hpp"
 
@@ -13,6 +13,7 @@ public:
 
 public:
     void CheckPlayers(Core::Pointer guiOutEventQueue);
+
     void RenderMenu();
 
 private:

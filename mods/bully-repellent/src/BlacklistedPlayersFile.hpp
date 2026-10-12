@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
 
 
 class BlacklistedPlayersFile

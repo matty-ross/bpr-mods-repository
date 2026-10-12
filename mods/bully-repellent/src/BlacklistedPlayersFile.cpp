@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "vendor/yaml-cpp.hpp"
+#include <vendor/yaml-cpp.hpp>
 
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
-#include "core/File.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
+#include <core/File.hpp>
 
 #include "BlacklistedPlayersFile.hpp"
 

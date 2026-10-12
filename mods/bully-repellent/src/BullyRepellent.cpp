@@ -1,10 +1,10 @@
 #include <exception>
 #include <Windows.h>
 
-#include "vendor/imgui.hpp"
+#include <vendor/imgui.hpp>
 
-#include "core/Pointer.hpp"
-#include "mod-manager/ModManager.hpp"
+#include <core/Pointer.hpp>
+#include <mod-manager/ModManager.hpp>
 
 #include "BullyRepellent.hpp"
 

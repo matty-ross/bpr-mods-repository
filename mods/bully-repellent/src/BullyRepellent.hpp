@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
 
 #include "BlacklistedPlayersFile.hpp"
 #include "OnlinePlayers.hpp"
