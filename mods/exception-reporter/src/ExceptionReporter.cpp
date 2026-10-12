@@ -1,7 +1,7 @@
 #include <exception>
 #include <Windows.h>
 
-#include "mod-manager/ModManager.hpp"
+#include <mod-manager/ModManager.hpp>
 
 #include "../resource.h"
 #include "ExceptionReporter.hpp"
@@ -64,7 +64,7 @@ void ExceptionReporter::DeferredLoad()
                 break;
             }
 
-            Sleep(100);
+            Sleep(10);
         }
 
         auto topLevelExceptionFilter = [](EXCEPTION_POINTERS* ExceptionInfo) -> LONG

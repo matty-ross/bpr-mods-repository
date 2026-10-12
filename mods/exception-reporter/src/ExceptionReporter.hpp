@@ -3,7 +3,7 @@
 
 #include <Windows.h>
 
-#include "core/Logger.hpp"
+#include <core/Logger.hpp>
 
 
 class ExceptionReporter
