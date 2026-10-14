@@ -1,13 +1,13 @@
 #include <cstdint>
 
-#include "vendor/imgui.hpp"
+#include <vendor/imgui.hpp>
 
-#include "core/Pointer.hpp"
-#include "core/Logger.hpp"
-#include "core/Patch.hpp"
+#include <core/Pointer.hpp>
+#include <core/Logger.hpp>
+#include <core/Patch.hpp>
 
 #include "Protection.hpp"
-#include "Challenges.hpp"
+#include "VanillaChallenges.hpp"
 #include "ChallengesFile.hpp"
 #include "ChallengeProtection.hpp"
 

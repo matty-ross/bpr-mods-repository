@@ -18,10 +18,10 @@
     <ClInclude Include="src\Protection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Vehicles.hpp">
+    <ClInclude Include="src\VanillaVehicles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Challenges.hpp">
+    <ClInclude Include="src\VanillaChallenges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VehiclesFile.hpp">

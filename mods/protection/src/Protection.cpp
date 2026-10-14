@@ -1,9 +1,12 @@
+#include <exception>
+#include <Windows.h>
+
+#include <vendor/imgui.hpp>
+
+#include <core/Pointer.hpp>
+#include <mod-manager/ModManager.hpp>
+
 #include "Protection.hpp"
-
-#include "vendor/imgui.hpp"
-
-#include "core/Pointer.hpp"
-#include "mod-manager/ModManager.hpp"
 
 
 Protection Protection::s_Instance;
@@ -51,7 +54,6 @@ void Protection::Load()
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
             s_Instance.DeferredLoad();
-
             return 0;
         };
         HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);

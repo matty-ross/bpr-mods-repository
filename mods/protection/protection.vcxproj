@@ -172,8 +172,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="src\Protection.hpp" />
-    <ClInclude Include="src\Vehicles.hpp" />
-    <ClInclude Include="src\Challenges.hpp" />
+    <ClInclude Include="src\VanillaVehicles.hpp" />
+    <ClInclude Include="src\VanillaChallenges.hpp" />
     <ClInclude Include="src\VehiclesFile.hpp" />
     <ClInclude Include="src\ChallengesFile.hpp" />
     <ClInclude Include="src\VehicleProtection.hpp" />
