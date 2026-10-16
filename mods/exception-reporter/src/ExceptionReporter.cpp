@@ -36,7 +36,6 @@ void ExceptionReporter::Load(HINSTANCE instanceHandle)
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
             s_Instance.DeferredLoad();
-
             return 0;
         };
         HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
@@ -72,7 +71,7 @@ void ExceptionReporter::DeferredLoad()
             return s_Instance.TopLevelExceptionFilter(ExceptionInfo);
         };
         m_PreviousTopLevelExceptionFilter = SetUnhandledExceptionFilter(topLevelExceptionFilter);
-        m_Logger.Info("Set top level exception filter. previous top level exception filter: 0x%p.", m_PreviousTopLevelExceptionFilter);
+        m_Logger.Info("Set top level exception filter. previous top level exception filter: 0x%p", m_PreviousTopLevelExceptionFilter);
     }
     catch (const std::exception& ex)
     {
