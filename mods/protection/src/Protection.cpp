@@ -49,8 +49,6 @@ void Protection::Load()
         m_VehicleProtection.Load();
         m_ChallengeProtection.Load();
 
-        ModManager::Get().GetImGuiManager().AddMenu([]() { s_Instance.RenderMenu(); });
-
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
             s_Instance.DeferredLoad();
@@ -92,8 +90,8 @@ void Protection::DeferredLoad()
             Core::Pointer gameModule = 0x013FC8E0;
             if (gameModule.as<void*>() != nullptr)
             {
-                int32_t gameUpdateStage = gameModule.deref().at(0xB6D464).as<int32_t>();
-                if (gameUpdateStage == 1) // BrnGame::BrnGameModule::E_GAMEUPDATESTAGE_MAIN
+                int32_t mainGameFlowState = gameModule.deref().at(0xB6D4C8).as<int32_t>();
+                if (mainGameFlowState == 6) // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
                 {
                     break;
                 }
@@ -104,6 +102,8 @@ void Protection::DeferredLoad()
 
         m_VehicleProtection.AddNonVanillaVehiclesToVehiclesFile();
         m_ChallengeProtection.AddNonVanillaChallengesToChallengesFile();
+
+        ModManager::Get().GetImGuiManager().AddMenu([]() { s_Instance.RenderMenu(); });
     }
     catch (const std::exception& ex)
     {
@@ -123,8 +123,16 @@ void Protection::RenderMenu()
         ImGui::Text("Author      %s", k_Author);
         ImGui::Text("Framerate   %.1f", io.Framerate);
 
-        m_VehicleProtection.RenderMenu();
-        m_ChallengeProtection.RenderMenu();
+        if (ImGui::CollapsingHeader("Protection"))
+        {
+            if (ImGui::BeginTabBar("##protection"))
+            {
+                m_VehicleProtection.RenderMenu();
+                m_ChallengeProtection.RenderMenu();
+
+                ImGui::EndTabBar();
+            }
+        }
 
         ImGui::PopItemWidth();
     }

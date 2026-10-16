@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cmath>
 
 #include <vendor/imgui.hpp>
 
@@ -27,7 +28,7 @@ void ChallengeProtection::Load()
 
 void ChallengeProtection::RenderMenu()
 {
-    if (ImGui::CollapsingHeader("Challenge Protection"))
+    if (ImGui::BeginTabItem("Challenge Protection"))
     {
         static constexpr char vanillaChallengesPopupID[] = "vanilla-challenges-popup";
 
@@ -118,7 +119,8 @@ void ChallengeProtection::RenderMenu()
             static ImGuiTextFilter challengeFilter;
             challengeFilter.Draw("Filter##challenge");
 
-            if (ImGui::BeginTable("##challenges", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
+            ImVec2 availableSize = ImGui::GetContentRegionAvail();
+            if (ImGui::BeginTable("##challenges", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, fmax(availableSize.y, 40.0f))))
             {
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Challenge", ImGuiTableColumnFlags_WidthStretch, 0.3f);
@@ -170,6 +172,8 @@ void ChallengeProtection::RenderMenu()
                 ImGui::EndTable();
             }
         }
+
+        ImGui::EndTabItem();
     }
 }
 

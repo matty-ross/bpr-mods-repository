@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <cmath>
 
 #include <vendor/imgui.hpp>
 
@@ -69,7 +70,7 @@ void VehicleProtection::Load()
 
 void VehicleProtection::RenderMenu()
 {
-    if (ImGui::CollapsingHeader("Vehicle Protection"))
+    if (ImGui::BeginTabItem("Vehicle Protection"))
     {
         static constexpr char vanillaVehiclesPopupID[] = "vanilla-vehicles-popup";
 
@@ -160,7 +161,8 @@ void VehicleProtection::RenderMenu()
             static ImGuiTextFilter vehicleFilter;
             vehicleFilter.Draw("Filter##vehicle");
 
-            if (ImGui::BeginTable("##vehicles", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, 400.0f)))
+            ImVec2 availableSize = ImGui::GetContentRegionAvail();
+            if (ImGui::BeginTable("##vehicles", 3, ImGuiTableFlags_ScrollY, ImVec2(0.0f, fmax(availableSize.y, 40.0f))))
             {
                 ImGui::TableSetupScrollFreeze(0, 1);
                 ImGui::TableSetupColumn("Vehicle", ImGuiTableColumnFlags_WidthStretch, 0.3f);
@@ -212,6 +214,8 @@ void VehicleProtection::RenderMenu()
                 ImGui::EndTable();
             }
         }
+
+        ImGui::EndTabItem();
     }
 }
 
