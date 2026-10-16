@@ -45,10 +45,7 @@ void BlacklistedPlayersFile::AddBlacklistedPlayer(const BlacklistedPlayer& black
 
 void BlacklistedPlayersFile::RemoveBlacklistedPlayerByID(uint64_t blacklistedPlayerID)
 {
-    std::erase_if(m_BlacklistedPlayers, [=](BlacklistedPlayer& blacklistedPlayer)
-    {
-        return blacklistedPlayer.ID == blacklistedPlayerID;
-    });
+    std::erase_if(m_BlacklistedPlayers, [=](BlacklistedPlayer& blacklistedPlayer) { return blacklistedPlayer.ID == blacklistedPlayerID; });
 }
 
 void BlacklistedPlayersFile::Load()

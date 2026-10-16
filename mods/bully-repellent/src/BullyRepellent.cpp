@@ -43,14 +43,16 @@ void BullyRepellent::Load()
 
         m_BlacklistedPlayersFile.Load();
 
-        ModManager::Get().GetHookManager().AddGuiEventInterpreterUpdateHook(
-            [](Core::Pointer guiOutEventQueue)
-            {
-                s_Instance.m_OnlinePlayers.CheckPlayers(guiOutEventQueue);
-            }
-        );
-
-        ModManager::Get().GetImGuiManager().AddMenu([]() { s_Instance.RenderMenu(); });
+        auto deferredLoadThreadProc = [](LPVOID) -> DWORD
+        {
+            s_Instance.DeferredLoad();
+            return 0;
+        };
+        HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+        if (deferredLoadThreadHandle != NULL)
+        {
+            CloseHandle(deferredLoadThreadHandle);
+        }
     }
     catch (const std::exception& ex)
     {
@@ -64,6 +66,35 @@ void BullyRepellent::Unload()
     try
     {
         m_BlacklistedPlayersFile.Save();
+    }
+    catch (const std::exception& ex)
+    {
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
+    }
+}
+
+void BullyRepellent::DeferredLoad()
+{
+    try
+    {
+        while (true)
+        {
+            Core::Pointer gameModule = 0x013FC8E0;
+            if (gameModule.as<void*>() != nullptr)
+            {
+                int32_t mainGameFlowState = gameModule.deref().at(0xB6D4C8).as<int32_t>();
+                if (mainGameFlowState == 6) // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
+                {
+                    break;
+                }
+            }
+
+            Sleep(1000);
+        }
+
+        ModManager::Get().GetHookManager().AddGuiEventInterpreterUpdateHook([](Core::Pointer guiOutEventQueue) { s_Instance.m_OnlinePlayers.CheckPlayers(guiOutEventQueue); });
+        ModManager::Get().GetImGuiManager().AddMenu([]() { s_Instance.RenderMenu(); });
     }
     catch (const std::exception& ex)
     {

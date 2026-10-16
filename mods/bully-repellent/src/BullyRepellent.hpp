@@ -21,6 +21,8 @@ public:
     void Unload();
 
 private:
+    void DeferredLoad();
+
     void RenderMenu();
 
 private:
