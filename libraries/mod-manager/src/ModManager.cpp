@@ -64,12 +64,12 @@ void ModManager::Load()
         }
 
         m_ModManagerConfigFile.Load();
+
         m_HookManager.Load();
 
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
             s_Instance.DeferredLoad();
-
             return 0;
         };
         HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
@@ -103,9 +103,10 @@ void ModManager::DeferredLoad()
 {
     try
     {
+        Core::Pointer gameModule = 0x013FC8E0;
+
         while (true)
         {
-            Core::Pointer gameModule = 0x013FC8E0;
             if (gameModule.as<void*>() != nullptr)
             {
                 int32_t gameUpdateStage = gameModule.deref().at(0xB6D464).as<int32_t>();
@@ -120,8 +121,19 @@ void ModManager::DeferredLoad()
 
         m_ImGuiManager.Load();
 
-        m_ImGuiManager.AddMenu([]() { s_Instance.RenderMenu(); });
+        while (true)
+        {
+            int32_t mainGameFlowState = gameModule.deref().at(0xB6D4C8).as<int32_t>();
+            if (mainGameFlowState == 6) // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
+            {
+                break;
+            }
+
+            Sleep(1000);
+        }
+
         m_HookManager.AddGameMainHook([]() { s_Instance.m_ImGuiManager.HandleHotkeys(); });
+        m_ImGuiManager.AddMenu([]() { s_Instance.RenderMenu(); });
     }
     catch (const std::exception& ex)
     {

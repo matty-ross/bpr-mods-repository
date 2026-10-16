@@ -100,7 +100,7 @@ void ImGuiManager::RenderMenu()
         ImGui::TableSetupColumn("Capture", ImGuiTableColumnFlags_WidthStretch, 0.2f);
         ImGui::TableHeadersRow();
 
-        auto renderHotkeyRow = [](const char* name, ImGuiKey hotkey, bool& captureHotkey)
+        auto renderHotkeyRow = [](const char* name, ImGuiKey hotkey, bool& captureHotkey) -> void
         {
             ImGui::PushID(name);
 
@@ -131,23 +131,27 @@ void ImGuiManager::RenderMenu()
         ImGui::EndTable();
     }
 
-    static constexpr const char* styleColors[] =
+    ImGui::Separator();
+
     {
-        "Classic",
-        "Dark",
-        "Light",
-    };
-    ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_COUNTOF(styleColors));
+        static constexpr const char* styleColors[] =
+        {
+            "Classic",
+            "Dark",
+            "Light",
+        };
+        ImGui::Combo("Style Colors", reinterpret_cast<int*>(&m_ImGuiConfig.StyleColors), styleColors, IM_COUNTOF(styleColors));
 
-    ImGui::SliderFloat("Font Scale", &m_ImGuiConfig.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::SliderFloat("Font Scale", &m_ImGuiConfig.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
-    ImGui::Checkbox("Enable Docking", &m_ImGuiConfig.EnableDocking);
-    ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
+        ImGui::Checkbox("Enable Docking", &m_ImGuiConfig.EnableDocking);
+        ImGui::Checkbox("Enable Viewports", &m_ImGuiConfig.EnableViewports);
+    }
 }
 
 void ImGuiManager::HandleHotkeys()
 {
-    auto captureHotkey = [](ImGuiKey& hotkey)
+    auto captureHotkey = [](ImGuiKey& hotkey) -> void
     {
         for (ImGuiKey key = ImGuiKey_NamedKey_BEGIN; key < ImGuiKey_NamedKey_END; key = static_cast<ImGuiKey>(key + 1))
         {
