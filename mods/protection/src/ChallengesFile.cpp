@@ -61,20 +61,20 @@ void ChallengesFile::Load()
             Core::File(m_FilePath, Core::File::Mode::Read, m_Logger).ReadAsText()
         );
 
-        uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>();
+        uint64_t fallbackChallengeID = yaml["FallbackID"].as<uint64_t>(0);
         const VanillaChallenge* fallbackChallenge = FindVanillaChallengeByID(fallbackChallengeID);
         m_FallbackChallenge = fallbackChallenge != nullptr ? fallbackChallenge : k_LastResortFallbackChallenge;
 
         m_Challenges.clear();
         for (YAML::Node challengeNode : yaml["Challenges"])
         {
-            uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>();
+            uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>(0);
             const VanillaChallenge* replacementChallenge = FindVanillaChallengeByID(replacementChallengeID);
 
             Challenge challenge =
             {
-                .ID = challengeNode["ID"].as<uint64_t>(),
-                .Title = challengeNode["Title"].as<std::string>(),
+                .ID = challengeNode["ID"].as<uint64_t>(0),
+                .Title = challengeNode["Title"].as<std::string>(""),
                 .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
             };
             m_Challenges.push_back(challenge);

@@ -53,6 +53,16 @@ void VehiclesFile::SetFallbackVehicle(const VanillaVehicle* fallbackVehicle)
     m_FallbackVehicle = fallbackVehicle;
 }
 
+bool VehiclesFile::GetReplaceLocalPlayerVehicle() const
+{
+    return m_ReplaceLocalPlayerVehicle;
+}
+
+void VehiclesFile::SetReplaceLocalPlayerVehicle(bool replaceLocalPlayerVehicle)
+{
+    m_ReplaceLocalPlayerVehicle = replaceLocalPlayerVehicle;
+}
+
 void VehiclesFile::Load()
 {
     try
@@ -61,20 +71,22 @@ void VehiclesFile::Load()
             Core::File(m_FilePath, Core::File::Mode::Read, m_Logger).ReadAsText()
         );
 
-        uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>();
+        uint64_t fallbackVehicleID = yaml["FallbackID"].as<uint64_t>(0);
         const VanillaVehicle* fallbackVehicle = FindVanillaVehicleByID(fallbackVehicleID);
         m_FallbackVehicle = fallbackVehicle != nullptr ? fallbackVehicle : k_LastResortFallbackVehicle;
+
+        m_ReplaceLocalPlayerVehicle = yaml["ReplaceLocalPlayerVehicle"].as<bool>(false);
 
         m_Vehicles.clear();
         for (YAML::Node vehicleNode : yaml["Vehicles"])
         {
-            uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>();
+            uint64_t replacementVehicleID = vehicleNode["ReplacementID"].as<uint64_t>(0);
             const VanillaVehicle* replacementVehicle = FindVanillaVehicleByID(replacementVehicleID);
 
             Vehicle vehicle =
             {
-                .ID = vehicleNode["ID"].as<uint64_t>(),
-                .Name = vehicleNode["Name"].as<std::string>(),
+                .ID = vehicleNode["ID"].as<uint64_t>(0),
+                .Name = vehicleNode["Name"].as<std::string>(""),
                 .Replacement = replacementVehicle != nullptr ? replacementVehicle : m_FallbackVehicle,
             };
             m_Vehicles.push_back(vehicle);

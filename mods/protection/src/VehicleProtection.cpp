@@ -153,6 +153,12 @@ void VehicleProtection::RenderMenu()
                     m_VehiclesFile.SetFallbackVehicle(&vanillaVehicle);
                 }
             );
+
+            bool replaceLocalPlayerVehicle = m_VehiclesFile.GetReplaceLocalPlayerVehicle();
+            if (ImGui::Checkbox("Replace Local Player Vehicle", &replaceLocalPlayerVehicle))
+            {
+                m_VehiclesFile.SetReplaceLocalPlayerVehicle(replaceLocalPlayerVehicle);
+            }
         }
 
         ImGui::Separator();
@@ -293,10 +299,10 @@ void VehicleProtection::CheckPlayerParamsAfterDeserializing(
     uint64_t vehicleID = 0;
 
     uint64_t playerID = playerParams.at(0x208).as<uint64_t>();
-    uint64_t localPlayerID = Core::Pointer(0x013FC8E0).at(0x6DC7D0).as<uint64_t>();
-    if (playerID == localPlayerID)
+    uint64_t localPlayerID = Core::Pointer(0x013FC8E0).deref().at(0x6DC7D0).as<uint64_t>();
+    if (playerID == localPlayerID && !m_VehiclesFile.GetReplaceLocalPlayerVehicle())
     {
-        vehicleID = Core::Pointer(0x013FC8E0).at(0x6E3CF8).as<uint64_t>();
+        vehicleID = Core::Pointer(0x013FC8E0).deref().at(0x6E3CF8).as<uint64_t>();
     }
     else
     {

@@ -33,6 +33,9 @@ public:
     const VanillaVehicle* GetFallbackVehicle() const;
     void SetFallbackVehicle(const VanillaVehicle* fallbackVehicle);
 
+    bool GetReplaceLocalPlayerVehicle() const;
+    void SetReplaceLocalPlayerVehicle(bool replaceLocalPlayerVehicle);
+
     void Load();
     void Save() const;
 
@@ -44,6 +47,7 @@ private:
 
     std::vector<Vehicle> m_Vehicles;
     const VanillaVehicle* m_FallbackVehicle = k_LastResortFallbackVehicle;
+    bool m_ReplaceLocalPlayerVehicle = false;
 
     const Core::Logger& m_Logger;
 };
