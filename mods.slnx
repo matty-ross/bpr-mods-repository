@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/mods/">
     <Project Path="mods/bully-repellent/bully-repellent.vcxproj" Id="d7d7740b-d605-4cd3-a3d4-e4fc923e4f23" />
+    <Project Path="mods/dashboard/dashboard.vcxproj" Id="d7f1fa71-ac39-4094-ae76-07b6e751159a" />
     <Project Path="mods/exception-reporter/exception-reporter.vcxproj" Id="9245f051-3444-443e-a1ba-60bccceb884f" />
     <Project Path="mods/protection/protection.vcxproj" Id="0b9b6e57-8f0e-4f5b-b8e3-c121d29fa4cf" />
   </Folder>
