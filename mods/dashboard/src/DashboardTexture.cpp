@@ -1,6 +1,14 @@
-#include "DashboardTexture.hpp"
-
+#include <cstdint>
 #include <exception>
+#include <Windows.h>
+#include <d3d11.h>
+#include <ddraw.h>
+#include <wrl.h>
+
+#include <core/Pointer.hpp>
+#include <core/WindowsException.hpp>
+
+#include "DashboardTexture.hpp"
 
 
 static constexpr DashboardTexture::TextureSegmentUVs k_TextureSegmentUVs[] =
@@ -8,36 +16,36 @@ static constexpr DashboardTexture::TextureSegmentUVs k_TextureSegmentUVs[] =
     // Background
     DashboardTexture::TextureSegmentUVs
     {
-        .Left   = 0.0f,
-        .Top    = 0.0f,
-        .Right  = 0.5f,
+        .Left = 0.0f,
+        .Top = 0.0f,
+        .Right = 0.5f,
         .Bottom = 0.5f,
     },
-    
+
     // RPM
     DashboardTexture::TextureSegmentUVs
     {
-        .Left   = 0.5f,
-        .Top    = 0.0f,
-        .Right  = 1.0f,
+        .Left = 0.5f,
+        .Top = 0.0f,
+        .Right = 1.0f,
         .Bottom = 0.5f,
     },
 
     // KMH
     DashboardTexture::TextureSegmentUVs
     {
-        .Left   = 0.0f,
-        .Top    = 0.5f,
-        .Right  = 0.5f,
+        .Left = 0.0f,
+        .Top = 0.5f,
+        .Right = 0.5f,
         .Bottom = 1.0f,
     },
 
     // MPH
     DashboardTexture::TextureSegmentUVs
     {
-        .Left   = 0.5f,
-        .Top    = 0.5f,
-        .Right  = 1.0f,
+        .Left = 0.5f,
+        .Top = 0.5f,
+        .Right = 1.0f,
         .Bottom = 1.0f,
     },
 };
@@ -53,15 +61,15 @@ const DashboardTexture::TextureSegmentUVs& DashboardTexture::GetTextureSegmentUV
     return k_TextureSegmentUVs[static_cast<int>(textureSegment)];
 }
 
-void DashboardTexture::CreateTexture(Core::Pointer dds)
+void DashboardTexture::CreateTextureFromDDS(Core::Pointer dds)
 {
     // https://learn.microsoft.com/en-us/windows/win32/direct3ddds/dx-graphics-dds-pguide
     // https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-textures-how-to
 
     /*
-    * DDS texture
-    * no compression
-    * no mipmaps
+        - DDS texture
+        - no compression
+        - no mipmaps
     */
 
     uint32_t magic = dds.at(0x0).as<uint32_t>();
@@ -72,47 +80,50 @@ void DashboardTexture::CreateTexture(Core::Pointer dds)
 
     D3D11_TEXTURE2D_DESC textureDesc =
     {
-        .Width      = dds.at(0x10).as<uint32_t>(),
-        .Height     = dds.at(0xC).as<uint32_t>(),
-        .MipLevels  = 1,
-        .ArraySize  = 1,
-        .Format     = DXGI_FORMAT_B8G8R8A8_UNORM,
+        .Width = dds.at(0x10).as<uint32_t>(),
+        .Height = dds.at(0xC).as<uint32_t>(),
+        .MipLevels = 1,
+        .ArraySize = 1,
+        .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
         .SampleDesc =
         {
-            .Count   = 1,
+            .Count = 1,
             .Quality = 0,
         },
-        .Usage      = D3D11_USAGE_DEFAULT,
-        .BindFlags  = D3D11_BIND_SHADER_RESOURCE,
+        .Usage = D3D11_USAGE_DEFAULT,
+        .BindFlags = D3D11_BIND_SHADER_RESOURCE,
     };
 
-    D3D11_SUBRESOURCE_DATA initialData =
+    D3D11_SUBRESOURCE_DATA subresourceData =
     {
-        .pSysMem     = dds.at(0x80).GetAddress(),
+        .pSysMem = dds.at(0x80).GetPointer(),
         .SysMemPitch = dds.at(0x14).as<uint32_t>(),
     };
 
     D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc =
     {
-        .Format        = DXGI_FORMAT_B8G8R8A8_UNORM,
+        .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
         .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-        .Texture2D     =
+        .Texture2D =
         {
             .MostDetailedMip = 0,
-            .MipLevels       = 1,
+            .MipLevels = 1,
         },
     };
 
+    HRESULT hr = S_OK;
     ID3D11Device* d3d11Device = Core::Pointer(0x01485BF8).as<ID3D11Device*>();
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-    if (FAILED(d3d11Device->CreateTexture2D(&textureDesc, &initialData, &texture)))
+    hr = d3d11Device->CreateTexture2D(&textureDesc, &subresourceData, &texture);
+    if (FAILED(hr))
     {
-        throw std::exception("Failed to create D3D11 texture.");
+        throw Core::WindowsException(hr, "Failed to create a D3D11 texture.");
     }
 
-    if (FAILED(d3d11Device->CreateShaderResourceView(texture.Get(), &shaderResourceViewDesc, &m_TextureView)))
+    hr = d3d11Device->CreateShaderResourceView(texture.Get(), &shaderResourceViewDesc, &m_TextureView);
+    if (FAILED(hr))
     {
-        throw std::exception("Failed to create D3D11 shader resource view.");
+        throw Core::WindowsException(hr, "Failed to create a D3D11 shader resource view.");
     }
 }
