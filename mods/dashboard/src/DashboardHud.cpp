@@ -1,10 +1,25 @@
-#include "DashboardHud.hpp"
-
-#include <vector>
+#include <cstddef>
+#include <cstdint>
+#include <cmath>
+#include <cstdio>
 #include <algorithm>
+#include <vector>
+#include <Windows.h>
 #include <DirectXMath.h>
 
-#include "core/File.hpp"
+#include <vendor/imgui.hpp>
+
+#include <core/Pointer.hpp>
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
+#include <core/File.hpp>
+#include <core/Patch.hpp>
+#include <bpr/Types.hpp>
+
+#include "Dashboard.hpp"
+#include "DashboardConfigFile.hpp"
+#include "DashboardHud.hpp"
+#include "DashboardTexture.hpp"
 
 
 static ImVec2 GetAbsolutePosition(const ImVec2& position, float scale)
@@ -24,67 +39,20 @@ static ImColor ApplyOpacityToColor(ImColor color, float opacity)
 }
 
 
-DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Path& assetsDirectory, const Core::Logger& logger)
+DashboardHud::DashboardHud(DashboardConfigFile& dashboardConfigFile, const Core::Path& assetsDirectoryPath, const Core::Logger& logger)
     :
     m_DashboardConfigFile(dashboardConfigFile),
-    m_AssetsDirectory(assetsDirectory),
+    m_AssetsDirectoryPath(assetsDirectoryPath),
     m_Logger(logger)
 {
 }
 
-void DashboardHud::LoadTexture()
+void DashboardHud::Load()
 {
-    Core::Path filePath = Core::Path(m_AssetsDirectory).Append("texture.dds");
-
-    m_Logger.Info("Loading texture from file '%s' ...", filePath.GetPath());
-    
-    Core::File file(filePath.GetPath(), Core::File::Mode::Read);
-    std::vector<BYTE> textureData = file.Read<std::vector<BYTE>>();
-    m_DashboardTexture.CreateTexture(textureData.data());
-
-    m_Logger.Info("Loaded texture.");
+    Core::Patch(0x06E6B397, 6, m_Logger).WriteJMP(Hook_AddDistanceDriven);
 }
 
-void DashboardHud::LoadFont()
-{
-    Core::Path filePath = Core::Path(m_AssetsDirectory).Append("font.ttf");
-    
-    m_Logger.Info("Loading font from file '%s' ...", filePath.GetPath());
-    
-    ImGuiIO& io = ImGui::GetIO();
-    m_Font = io.Fonts->AddFontFromFileTTF(filePath.GetPath());
-
-    m_Logger.Info("Loaded font.");
-}
-
-void DashboardHud::OnProgressionAddDistanceDriven(
-    Core::Pointer progressionManager, // BrnProgression::ProgressionManager*
-    float distance, // In meters.
-    int32_t vehicleType
-)
-{
-    static constexpr ptrdiff_t offsets[] =
-    {
-        0x1EC,   // Distance driven online.
-        0x1F8,   // Distance driven offline.
-        0x29314, // Distance driven offline on BSI.
-        0x29320, // Distance driven online on BSI.
-    };
-    
-    float odometer = 0.0f;
-    for (ptrdiff_t offset : offsets)
-    {
-        for (int i = 0; i < 3; ++i)
-        {
-            odometer += progressionManager.at(offset).as<float[3]>()[i];
-        }
-    }
-
-    m_TripMeter += distance;
-    m_Odometer = odometer + distance;
-}
-
-void DashboardHud::OnRenderMenu()
+void DashboardHud::RenderMenu()
 {
     if (ImGui::CollapsingHeader("Config"))
     {
@@ -105,8 +73,8 @@ void DashboardHud::OnRenderMenu()
         ImGui::Separator();
 
         {
-            DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-            
+            DashboardConfigFile::DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+
             ImGui::Checkbox("Always Visible", &config.AlwaysVisible);
             ImGui::Checkbox("Metric Units", &config.MetricUnits);
             ImGui::SliderFloat("Opacity", &config.Opacity, 0.0f, 100.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
@@ -122,7 +90,7 @@ void DashboardHud::OnRenderMenu()
                         configColor = color;
                     }
                 };
-                
+
                 ImGui::SeparatorText("Colors");
 
                 renderColorEdit("Dial", config.Colors.Dial);
@@ -133,13 +101,13 @@ void DashboardHud::OnRenderMenu()
     }
 }
 
-void DashboardHud::OnRenderOverlay()
+void DashboardHud::RenderOverlay()
 {
-    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    
+    const DashboardConfigFile::DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+
     Core::Pointer guiPlayerInfo = Core::Pointer(0x013FC8E0).deref().at(0x8EFEC0); // BrnGui::GuiPlayerInfo*
     Core::Pointer raceMainHudState = Core::Pointer(0x013FC8E0).deref().at(0x7FABBC).as<void*>(); // BrnGui::RaceMainHudState*
-    
+
     if (!config.AlwaysVisible)
     {
         bool inRaceHud = raceMainHudState.at(0x14C).as<bool>();
@@ -157,7 +125,7 @@ void DashboardHud::OnRenderOverlay()
         {
             speed = static_cast<int32_t>(roundf(speed * 1.609f));
         }
-        
+
         char speedText[8] = {};
         sprintf_s(speedText, "%d", speed);
 
@@ -221,10 +189,31 @@ void DashboardHud::OnRenderOverlay()
     }
 }
 
+void DashboardHud::LoadTexture()
+{
+    Core::Path filePath = Core::Path(m_AssetsDirectoryPath).Append("texture.dds");
+
+    Core::File file(filePath, Core::File::Mode::Read, m_Logger);
+    std::vector<std::byte> textureData = file.ReadAsBinary();
+    m_DashboardTexture.CreateTextureFromDDS(textureData.data());
+
+    m_Logger.Info("Loaded texture.");
+}
+
+void DashboardHud::LoadFont()
+{
+    Core::Path filePath = Core::Path(m_AssetsDirectoryPath).Append("font.ttf");
+
+    ImGuiIO& io = ImGui::GetIO();
+    m_Font = io.Fonts->AddFontFromFileTTF(filePath.GetPath());
+
+    m_Logger.Info("Loaded font.");
+}
+
 void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture::TextureSegment textureSegment, bool useColor) const
 {
-    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    
+    const DashboardConfigFile::DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+
     ImVec2 segmentSize = ImVec2(256.0f * config.Scale, 256.0f * config.Scale);
     ImColor color = ApplyOpacityToColor(useColor ? config.Colors.Dial : IM_COL32_WHITE, config.Opacity);
 
@@ -235,20 +224,20 @@ void DashboardHud::RenderTextureSegment(const ImVec2& position, DashboardTexture
     float r = absolutePosition.x + segmentSize.x / 2.0f;
     float t = absolutePosition.y - segmentSize.y / 2.0f;
     float b = absolutePosition.y + segmentSize.y / 2.0f;
-    
+
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddImage(reinterpret_cast<ImTextureID>(m_DashboardTexture.GetTextureView()), ImVec2(l, t), ImVec2(r, b), ImVec2(uv.Left, uv.Top), ImVec2(uv.Right, uv.Bottom), color);
 }
 
 void DashboardHud::RenderText(const ImVec2& position, const char* text, float size) const
 {
-    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    
+    const DashboardConfigFile::DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+
     float fontSize = size * config.FontScale * config.Scale;
     ImColor color = ApplyOpacityToColor(config.Colors.Text, config.Opacity);
 
     ImVec2 textSize = m_Font->CalcTextSizeA(fontSize, FLT_MAX, 0.0f, text);
-    
+
     ImVec2 absolutePosition = GetAbsolutePosition(position, config.Scale);
     float x = absolutePosition.x - textSize.x / 2.0f;
     float y = absolutePosition.y - textSize.y / 2.0f;
@@ -259,8 +248,8 @@ void DashboardHud::RenderText(const ImVec2& position, const char* text, float si
 
 void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const
 {
-    const DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
-    
+    const DashboardConfigFile::DashboardConfig& config = m_DashboardConfigFile.GetDashboardConfig();
+
     constexpr float minAngle = DirectX::XMConvertToRadians(-225.0f);
     constexpr float maxAngle = DirectX::XMConvertToRadians(45.0f);
     float thickness = 3.0f * config.Scale;
@@ -281,4 +270,73 @@ void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minVa
 
     ImDrawList* foregroundDrawList = ImGui::GetForegroundDrawList();
     foregroundDrawList->AddLine(ImVec2(x1, y1), ImVec2(x2, y2), color, thickness);
+}
+
+void DashboardHud::AddDistanceDriven(
+    Core::Pointer progressionManager, // BrnProgression::ProgressionManager*
+    float distance, // In meters.
+    BPR::VehicleType vehicleType
+)
+{
+    static constexpr ptrdiff_t offsets[] =
+    {
+        0x1EC,   // Distance driven online.
+        0x1F8,   // Distance driven offline.
+        0x29314, // Distance driven offline on BSI.
+        0x29320, // Distance driven online on BSI.
+    };
+
+    // TODO: Check the calculation, there may be a bug.
+    float odometer = 0.0f;
+    for (ptrdiff_t offset : offsets)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            odometer += progressionManager.at(offset).as<float[3]>()[i];
+        }
+    }
+
+    m_TripMeter += distance;
+    m_Odometer = odometer + distance;
+}
+
+__declspec(naked) void DashboardHud::Hook_AddDistanceDriven()
+{
+    /*
+        void __thiscall BrnProgression::ProgressionManager::AddDistanceDriven(
+            float lfDistance,
+            bool lbOnline
+        )
+    */
+
+    __asm
+    {
+        // edi: BrnProgression::ProgressionManager* this
+        // xmm1: float lfDistance
+
+        pushfd
+        pushad
+
+        sub esp, 4
+        movss [esp], xmm1
+
+        push esi
+        push dword ptr [esp + 0x4]
+        push edi
+        mov ecx, offset Dashboard::s_Instance.m_DashboardHud
+        call DashboardHud::AddDistanceDriven
+
+        movss xmm1, [esp]
+        add esp, 4
+
+        popad
+        popfd
+
+        // Original code.
+        mov ecx, dword ptr [edi + 0x2C478]
+
+        // Jump back.
+        push 0x06E6B39D
+        ret
+    }
 }
