@@ -1,15 +1,13 @@
+#include <cstdint>
+#include <exception>
+#include <Windows.h>
+
+#include <vendor/imgui.hpp>
+
+#include <core/Pointer.hpp>
+#include <mod-manager/ModManager.hpp>
+
 #include "Dashboard.hpp"
-
-#include "vendor/imgui.hpp"
-
-#include "core/Pointer.hpp"
-#include "mod-manager/ModManager.hpp"
-
-
-static constexpr char k_ModName[]      = "Dashboard";
-static constexpr char k_ModVersion[]   = "1.4.0";
-static constexpr char k_ModAuthor[]    = "PISros0724 (Matty)";
-static constexpr char k_ModDirectory[] = "dashboard\\";
 
 
 Dashboard Dashboard::s_Instance;
@@ -17,24 +15,11 @@ Dashboard Dashboard::s_Instance;
 
 Dashboard::Dashboard()
     :
-    m_AssetsDirectory(ModManager::Get().GetAssetsDirectory().Append(k_ModDirectory)),
-    m_ConfigDirectory(ModManager::Get().GetConfigDirectory().Append(k_ModDirectory)),
-    m_Logger(k_ModName),
-    m_DashboardConfigFile(m_ConfigDirectory, m_Logger),
-    m_DashboardHud(m_DashboardConfigFile, m_AssetsDirectory, m_Logger),
-    m_DetourProgressionAddDistanceDriven
-    {
-        .Target = Core::Pointer(0x06E6B397).GetAddress(),
-        .Detour = &Dashboard::DetourProgressionAddDistanceDriven,
-    },
-    m_Menu
-    {
-        .OnRenderFunction = [&]() { OnRenderMenu(); },
-    },
-    m_Overlay
-    {
-        .OnRenderFunction = [&]() { OnRenderOverlay(); },
-    }
+    m_Logger(k_Name),
+    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_ConfigDirectoryPath)),
+    m_AssetsDirectoryPath(".\\mods\\dashboard\\"),
+    m_DashboardConfigFile(m_ConfigDirectoryPath, m_Logger),
+    m_DashboardHud(m_DashboardConfigFile, m_AssetsDirectoryPath, m_Logger)
 {
 }
 
@@ -43,119 +28,40 @@ Dashboard& Dashboard::Get()
     return s_Instance;
 }
 
-void Dashboard::OnProcessAttach()
-{
-    PTHREAD_START_ROUTINE loadThreadProc = [](LPVOID lpThreadParameter) -> DWORD
-    {
-        s_Instance.Load();
-        return 0;
-    };
-    m_LoadThreadHandle = CreateThread(nullptr, 0, loadThreadProc, nullptr, 0, nullptr);
-}
-
-void Dashboard::OnProcessDetach()
-{
-    Unload();
-    CloseHandle(m_LoadThreadHandle);
-}
-
 void Dashboard::Load()
 {
     try
     {
-        m_Logger.Info("Loading...");
-
-        // Check mod version.
+        if (!ModManager::Get().CheckVersion(k_Version))
         {
-            m_Logger.Info("Checking mod version...");
-
-            if (!ModManager::Get().CheckModVersion(k_ModVersion))
-            {
-                throw std::exception("Mod Manager and Mod versions mismatch.");
-            }
-
-            m_Logger.Info("Checked mod version.");
+            throw std::exception("Mod Manager and Mod versions mismatch.");
         }
 
-        // Create mod config directory.
+        if (!m_ConfigDirectoryPath.Exists())
         {
-            m_Logger.Info("Creating mod config directory '%s' ...", m_ConfigDirectory.GetPath());
-
-            m_ConfigDirectory.Create();
-
-            m_Logger.Info("Created mod config directory.");
+            m_ConfigDirectoryPath.CreateDirectoryTree();
+            m_Logger.Info("Created config directory. path: '%s'", m_ConfigDirectoryPath.GetPath());
         }
+        
+        m_DashboardConfigFile.Load();
+        
+        m_DashboardHud.Load();
 
-        // Load dashboard config.
+        auto deferredLoadThreadProc = [](LPVOID) -> DWORD
         {
-            m_DashboardConfigFile.Load();
-        }
-
-        // Wait to be in game.
+            s_Instance.DeferredLoad();
+            return 0;
+        };
+        HANDLE deferredLoadThreadHandle = CreateThread(nullptr, 0, deferredLoadThreadProc, nullptr, 0, nullptr);
+        if (deferredLoadThreadHandle != NULL)
         {
-            m_Logger.Info("Waiting to be in game...");
-
-            while (true)
-            {
-                // BrnGameMainFlowController::GameMainFlowController::meCurrentState
-                Core::Pointer gameModule = 0x013FC8E0;
-                if (
-                    gameModule.as<void*>() != nullptr &&
-                    gameModule.deref().at(0xB6D4C8).as<int32_t>() == 6 // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
-                )
-                {
-                    break;
-                }
-
-                Sleep(1000);
-            }
-
-            m_Logger.Info("In game.");
+            CloseHandle(deferredLoadThreadHandle);
         }
-
-        // Load dashboard assets.
-        {
-            EnterCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
-            
-            m_DashboardHud.LoadTexture();
-            m_DashboardHud.LoadFont();
-            
-            LeaveCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
-        }
-
-        // Attach ProgressionAddDistanceDriven detour.
-        {
-            m_Logger.Info("Attaching ProgressionAddDistanceDriven detour...");
-
-            ModManager::Get().GetDetourHookManager().Attach(m_DetourProgressionAddDistanceDriven);
-
-            m_Logger.Info("Attached ProgressionAddDistanceDriven detour.");
-        }
-
-        // Add menu.
-        {
-            m_Logger.Info("Adding menu...");
-
-            ModManager::Get().GetImGuiManager().AddMenu(&m_Menu);
-
-            m_Logger.Info("Added menu.");
-        }
-
-        // Add overlay.
-        {
-            m_Logger.Info("Adding overlay...");
-
-            ModManager::Get().GetImGuiManager().AddOverlay(&m_Overlay);
-
-            m_Logger.Info("Added overlay.");
-        }
-
-        m_Logger.Info("Loaded.");
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
@@ -163,99 +69,63 @@ void Dashboard::Unload()
 {
     try
     {
-        m_Logger.Info("Unloading...");
-
-        // Save dashboard config.
-        {
-            m_DashboardConfigFile.Save();
-        }
-
-        // Remove overlay.
-        {
-            m_Logger.Info("Removing overlay...");
-
-            ModManager::Get().GetImGuiManager().RemoveOverlay(&m_Overlay);
-
-            m_Logger.Info("Removed overlay.");
-        }
-
-        // Remove menu.
-        {
-            m_Logger.Info("Removing menu...");
-
-            ModManager::Get().GetImGuiManager().RemoveMenu(&m_Menu);
-
-            m_Logger.Info("Removed menu.");
-        }
-
-        // Detach ProgressionAddDistanceDriven detour.
-        {
-            m_Logger.Info("Detaching ProgressionAddDistanceDriven detour...");
-
-            ModManager::Get().GetDetourHookManager().Detach(m_DetourProgressionAddDistanceDriven);
-
-            m_Logger.Info("Detached ProgressionAddDistanceDriven detour.");
-        }
-
-        m_Logger.Info("Unloaded.");
+        m_DashboardConfigFile.Save();
     }
-    catch (const std::exception& e)
+    catch (const std::exception& ex)
     {
-        m_Logger.Error("%s", e.what());
-        MessageBoxA(NULL, e.what(), k_ModName, MB_ICONERROR);
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
     }
 }
 
-void Dashboard::OnProgressionAddDistanceDriven(void* progressionManager, float distance, int32_t vehicleType)
+void Dashboard::DeferredLoad()
 {
-    m_DashboardHud.OnProgressionAddDistanceDriven(progressionManager, distance, vehicleType);
+    try
+    {
+        while (true)
+        {
+            Core::Pointer gameModule = 0x013FC8E0;
+            if (gameModule.as<void*>() != nullptr)
+            {
+                int32_t mainGameFlowState = gameModule.deref().at(0xB6D4C8).as<int32_t>();
+                if (mainGameFlowState == 6) // BrnGameMainFlowController::EMainGameFlowState::E_MGS_IN_GAME
+                {
+                    break;
+                }
+            }
+
+            Sleep(1000);
+        }
+
+        EnterCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
+        m_DashboardHud.LoadTexture();
+        m_DashboardHud.LoadFont();
+        LeaveCriticalSection(ModManager::Get().GetImGuiManager().GetCriticalSection());
+
+        ModManager::Get().GetImGuiManager().AddMenu([]() { s_Instance.RenderMenu(); });
+        ModManager::Get().GetImGuiManager().AddOverlay([]() { s_Instance.m_DashboardHud.RenderOverlay(); });
+    }
+    catch (const std::exception& ex)
+    {
+        m_Logger.Error("%s", ex.what());
+        MessageBoxA(NULL, ex.what(), k_Name, MB_ICONERROR);
+    }
 }
 
-void Dashboard::OnRenderMenu()
+void Dashboard::RenderMenu()
 {
-    if (ImGui::Begin(k_ModName, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
+    if (ImGui::Begin(k_Name, nullptr, ImGuiWindowFlags_NoFocusOnAppearing))
     {
         ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.0f);
 
         ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Version     %s", k_ModVersion);
-        ImGui::Text("Author      %s", k_ModAuthor);
+        ImGui::Text("Version     %s", k_Version);
+        ImGui::Text("Author      %s", k_Author);
         ImGui::Text("Framerate   %.1f", io.Framerate);
 
-        m_DashboardHud.OnRenderMenu();
+        m_DashboardHud.RenderMenu();
 
         ImGui::PopItemWidth();
     }
     ImGui::End();
-}
-
-void Dashboard::OnRenderOverlay()
-{
-    m_DashboardHud.OnRenderOverlay();
-}
-
-__declspec(naked) void Dashboard::DetourProgressionAddDistanceDriven()
-{
-    __asm
-    {
-        pushfd
-        pushad
-
-        sub esp, 4
-        movss [esp], xmm1
-
-        push esi // vehicle type
-        push dword ptr [esp + 0x4] // distance
-        push edi // BrnProgression::ProgressionManager*
-        mov ecx, offset s_Instance
-        call Dashboard::OnProgressionAddDistanceDriven
-
-        movss xmm1, [esp]
-        add esp, 4
-
-        popad
-        popfd
-        
-        jmp dword ptr [s_Instance.m_DetourProgressionAddDistanceDriven.Target]
-    }
 }

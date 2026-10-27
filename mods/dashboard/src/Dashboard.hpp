@@ -1,12 +1,8 @@
 #pragma once
 
 
-#include <Windows.h>
-
-#include "core/Path.hpp"
-#include "core/Logger.hpp"
-#include "mod-manager/DetourHookManager.hpp"
-#include "mod-manager/ImGuiManager.hpp"
+#include <core/Path.hpp>
+#include <core/Logger.hpp>
 
 #include "DashboardConfigFile.hpp"
 #include "DashboardHud.hpp"
@@ -21,37 +17,29 @@ public:
     static Dashboard& Get();
 
 public:
-    void OnProcessAttach();
-    void OnProcessDetach();
-
-private:
     void Load();
     void Unload();
 
-    void OnProgressionAddDistanceDriven(void* progressionManager, float distance, int32_t vehicleType);
+private:
+    void DeferredLoad();
 
-    void OnRenderMenu();
-    void OnRenderOverlay();
+    void RenderMenu();
 
 private:
-    static void DetourProgressionAddDistanceDriven();
+    static constexpr char k_Name[] = "Dashboard";
+    static constexpr char k_Version[] = "2.0.0";
+    static constexpr char k_Author[] = "PISros0724 (Matty)";
+    static constexpr char k_ConfigDirectoryPath[] = "dashboard\\";
 
-private:
     static Dashboard s_Instance;
 
 private:
-    Core::Path m_AssetsDirectory;
-    Core::Path m_ConfigDirectory;
     Core::Logger m_Logger;
+    
+    Core::Path m_ConfigDirectoryPath;
+    Core::Path m_AssetsDirectoryPath;
 
     DashboardConfigFile m_DashboardConfigFile;
 
     DashboardHud m_DashboardHud;
-
-    DetourHook m_DetourProgressionAddDistanceDriven;
-
-    ImGuiMenu m_Menu;
-    ImGuiOverlay m_Overlay;
-
-    HANDLE m_LoadThreadHandle = NULL;
 };
