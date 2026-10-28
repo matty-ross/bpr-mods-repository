@@ -171,7 +171,7 @@ __declspec(naked) void HookManager::Hook_ExecuteGuiEventInterpreterUpdateHooks()
         void __thiscall CgsGui::EventInterpreterModule::Update(
             CgsGui::EventInterpreterModuleIO::InputBuffer* lpInput,
             CgsGui::EventInterpreterModuleIO::OutputBuffer* lpOutput
-        );
+        )
     */
 
     __asm

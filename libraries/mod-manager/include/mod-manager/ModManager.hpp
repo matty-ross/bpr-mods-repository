@@ -27,6 +27,7 @@ public:
 
 public:
     MOD_MANAGER_API Core::Path GetConfigDirectoryPath() const;
+    MOD_MANAGER_API Core::Path GetAssetsDirectoryPath() const;
 
     MOD_MANAGER_API HookManager& GetHookManager();
     MOD_MANAGER_API ImGuiManager& GetImGuiManager();
@@ -45,7 +46,6 @@ private:
     static constexpr char k_Name[] = "Mod Manager";
     static constexpr char k_Version[] = "2.0.0";
     static constexpr char k_Author[] = "PISros0724 (Matty)";
-    static constexpr char k_ConfigDirectoryPath[] = "%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\";
 
     static ModManager s_Instance;
 
@@ -53,6 +53,7 @@ private:
     Core::Logger m_Logger;
 
     Core::Path m_ConfigDirectoryPath;
+    Core::Path m_AssetsDirectoryPath;
 
     ModManagerConfigFile m_ModManagerConfigFile;
 

@@ -31,12 +31,12 @@ void ModManagerConfigFile::Load()
         );
 
         YAML::Node imguiNode = yaml["ImGui"];
-        m_ImGuiConfig.ToggleMenusHotkey = static_cast<ImGuiKey>(imguiNode["ToggleMenusHotkey"].as<int>(ImGuiKey_F7));
-        m_ImGuiConfig.ToggleOverlaysHotkey = static_cast<ImGuiKey>(imguiNode["ToggleOverlaysHotkey"].as<int>(ImGuiKey_F8));
-        m_ImGuiConfig.StyleColors = static_cast<enum class ImGuiConfig::StyleColors>(imguiNode["StyleColors"].as<int>(static_cast<int>(ImGuiConfig::StyleColors::Classic)));
-        m_ImGuiConfig.FontScale = imguiNode["FontScale"].as<float>(1.0f);
-        m_ImGuiConfig.EnableDocking = imguiNode["EnableDocking"].as<bool>(true);
-        m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>(false);
+        m_ImGuiConfig.ToggleMenusHotkey = static_cast<ImGuiKey>(imguiNode["ToggleMenusHotkey"].as<int>(m_ImGuiConfig.ToggleMenusHotkey));
+        m_ImGuiConfig.ToggleOverlaysHotkey = static_cast<ImGuiKey>(imguiNode["ToggleOverlaysHotkey"].as<int>(m_ImGuiConfig.ToggleOverlaysHotkey));
+        m_ImGuiConfig.StyleColors = static_cast<enum class ImGuiConfig::StyleColors>(imguiNode["StyleColors"].as<int>(static_cast<int>(m_ImGuiConfig.StyleColors)));
+        m_ImGuiConfig.FontScale = imguiNode["FontScale"].as<float>(m_ImGuiConfig.FontScale);
+        m_ImGuiConfig.EnableDocking = imguiNode["EnableDocking"].as<bool>(m_ImGuiConfig.EnableDocking);
+        m_ImGuiConfig.EnableViewports = imguiNode["EnableViewports"].as<bool>(m_ImGuiConfig.EnableViewports);
 
         m_Logger.Info("Loaded %s.", k_Name);
     }

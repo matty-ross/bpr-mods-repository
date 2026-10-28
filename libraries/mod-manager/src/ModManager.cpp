@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <cstring>
 #include <exception>
 #include <Windows.h>
@@ -19,7 +20,8 @@ ModManager ModManager::s_Instance;
 ModManager::ModManager()
     :
     m_Logger(k_Name),
-    m_ConfigDirectoryPath(k_ConfigDirectoryPath),
+    m_ConfigDirectoryPath("%LOCALAPPDATA%\\Criterion Games\\Burnout Paradise Remastered\\mods\\"),
+    m_AssetsDirectoryPath("mods\\"),
     m_ModManagerConfigFile(m_ConfigDirectoryPath, m_Logger),
     m_HookManager(m_Logger),
     m_ImGuiManager(m_ModManagerConfigFile.GetImGuiConfig(), m_ConfigDirectoryPath, m_Logger)
@@ -34,6 +36,11 @@ ModManager& ModManager::Get()
 Core::Path ModManager::GetConfigDirectoryPath() const
 {
     return m_ConfigDirectoryPath;
+}
+
+Core::Path ModManager::GetAssetsDirectoryPath() const
+{
+    return m_AssetsDirectoryPath;
 }
 
 HookManager& ModManager::GetHookManager()
@@ -64,7 +71,6 @@ void ModManager::Load()
         }
 
         m_ModManagerConfigFile.Load();
-
         m_HookManager.Load();
 
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD
