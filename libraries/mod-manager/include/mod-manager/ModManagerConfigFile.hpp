@@ -42,7 +42,7 @@ private:
 private:
     Core::Path m_FilePath;
 
-    ImGuiConfig m_ImGuiConfig;
+    ImGuiConfig m_ImGuiConfig = {};
 
     const Core::Logger& m_Logger;
 };
