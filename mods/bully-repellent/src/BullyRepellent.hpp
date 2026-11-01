@@ -29,7 +29,7 @@ private:
     static constexpr char k_Name[] = "Bully Repellent";
     static constexpr char k_Version[] = "2.0.0";
     static constexpr char k_Author[] = "PISros0724 (Matty)";
-    static constexpr char k_ConfigDirectoryPath[] = "bully-repellent\\";
+    static constexpr char k_DirectoryPath[] = "bully-repellent\\";
 
     static BullyRepellent s_Instance;
 

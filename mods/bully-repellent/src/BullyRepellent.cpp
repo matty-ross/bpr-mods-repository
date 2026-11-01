@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <exception>
 #include <Windows.h>
 
@@ -15,7 +16,7 @@ BullyRepellent BullyRepellent::s_Instance;
 BullyRepellent::BullyRepellent()
     :
     m_Logger(k_Name),
-    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_ConfigDirectoryPath)),
+    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_DirectoryPath)),
     m_BlacklistedPlayersFile(m_ConfigDirectoryPath, m_Logger),
     m_OnlinePlayers(m_BlacklistedPlayersFile)
 {

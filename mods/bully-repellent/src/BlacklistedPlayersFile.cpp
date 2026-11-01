@@ -59,13 +59,11 @@ void BlacklistedPlayersFile::Load()
         m_BlacklistedPlayers.clear();
         for (YAML::Node blacklistedPlayerNode : yaml["BlacklistedPlayers"])
         {
-            BlacklistedPlayer blacklistedPlayer =
-            {
-                .ID = blacklistedPlayerNode["ID"].as<uint64_t>(-1),
-                .Name = blacklistedPlayerNode["Name"].as<std::string>(""),
-                .Autokick = blacklistedPlayerNode["Autokick"].as<bool>(false),
-                .Automute = blacklistedPlayerNode["Automute"].as<bool>(false),
-            };
+            BlacklistedPlayer blacklistedPlayer = {};
+            blacklistedPlayer.ID = blacklistedPlayerNode["ID"].as<uint64_t>(blacklistedPlayer.ID);
+            blacklistedPlayer.Name = blacklistedPlayerNode["Name"].as<std::string>(blacklistedPlayer.Name);
+            blacklistedPlayer.Autokick = blacklistedPlayerNode["Autokick"].as<bool>(blacklistedPlayer.Autokick);
+            blacklistedPlayer.Automute = blacklistedPlayerNode["Automute"].as<bool>(blacklistedPlayer.Automute);
             m_BlacklistedPlayers.push_back(blacklistedPlayer);
         }
 
