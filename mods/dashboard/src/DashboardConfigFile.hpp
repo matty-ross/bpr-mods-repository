@@ -40,7 +40,7 @@ private:
 private:
     Core::Path m_FilePath;
 
-    DashboardConfig m_DashboardConfig;
+    DashboardConfig m_DashboardConfig = {};
 
     const Core::Logger& m_Logger;
 };

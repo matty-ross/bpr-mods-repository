@@ -82,7 +82,9 @@ void DashboardHud::RenderMenu()
             ImGui::SliderFloat("Font Scale", &config.FontScale, 0.5f, 2.0f, "%.3f", ImGuiSliderFlags_AlwaysClamp);
 
             {
-                auto renderColorEdit = [](const char* label, uint32_t& configColor)
+                ImGui::SeparatorText("Colors");
+
+                auto renderColorEdit = [](const char* label, uint32_t& configColor) -> void
                 {
                     ImColor color = configColor;
                     if (ImGui::ColorEdit3(label, reinterpret_cast<float*>(&color.Value)))
@@ -90,9 +92,6 @@ void DashboardHud::RenderMenu()
                         configColor = color;
                     }
                 };
-
-                ImGui::SeparatorText("Colors");
-
                 renderColorEdit("Dial", config.Colors.Dial);
                 renderColorEdit("Text", config.Colors.Text);
                 renderColorEdit("Needle", config.Colors.Needle);

@@ -16,8 +16,8 @@ Dashboard Dashboard::s_Instance;
 Dashboard::Dashboard()
     :
     m_Logger(k_Name),
-    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_ConfigDirectoryPath)),
-    m_AssetsDirectoryPath(".\\mods\\dashboard\\"),
+    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_DirectoryPath)),
+    m_AssetsDirectoryPath(ModManager::Get().GetAssetsDirectoryPath().Append(k_DirectoryPath)),
     m_DashboardConfigFile(m_ConfigDirectoryPath, m_Logger),
     m_DashboardHud(m_DashboardConfigFile, m_AssetsDirectoryPath, m_Logger)
 {
@@ -44,7 +44,6 @@ void Dashboard::Load()
         }
         
         m_DashboardConfigFile.Load();
-        
         m_DashboardHud.Load();
 
         auto deferredLoadThreadProc = [](LPVOID) -> DWORD

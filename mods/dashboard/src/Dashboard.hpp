@@ -29,7 +29,7 @@ private:
     static constexpr char k_Name[] = "Dashboard";
     static constexpr char k_Version[] = "2.0.0";
     static constexpr char k_Author[] = "PISros0724 (Matty)";
-    static constexpr char k_ConfigDirectoryPath[] = "dashboard\\";
+    static constexpr char k_DirectoryPath[] = "dashboard\\";
 
     static Dashboard s_Instance;
 

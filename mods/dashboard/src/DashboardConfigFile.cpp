@@ -30,16 +30,16 @@ void DashboardConfigFile::Load()
             Core::File(m_FilePath, Core::File::Mode::Read, m_Logger).ReadAsText()
         );
 
-        m_DashboardConfig.AlwaysVisible = yaml["AlwaysVisible"].as<bool>(false);
-        m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>(true);
-        m_DashboardConfig.Opacity = yaml["Opacity"].as<float>(78.0f);
-        m_DashboardConfig.Scale = yaml["Scale"].as<float>(1.0f);
-        m_DashboardConfig.FontScale = yaml["FontScale"].as<float>(1.0f);
+        m_DashboardConfig.AlwaysVisible = yaml["AlwaysVisible"].as<bool>(m_DashboardConfig.AlwaysVisible);
+        m_DashboardConfig.MetricUnits = yaml["MetricUnits"].as<bool>(m_DashboardConfig.MetricUnits);
+        m_DashboardConfig.Opacity = yaml["Opacity"].as<float>(m_DashboardConfig.Opacity);
+        m_DashboardConfig.Scale = yaml["Scale"].as<float>(m_DashboardConfig.Scale);
+        m_DashboardConfig.FontScale = yaml["FontScale"].as<float>(m_DashboardConfig.FontScale);
 
         YAML::Node colorsNode = yaml["Colors"];
-        m_DashboardConfig.Colors.Dial = colorsNode["Dial"].as<uint32_t>(0xFFFCFF24);
-        m_DashboardConfig.Colors.Text = colorsNode["Text"].as<uint32_t>(0xFFFCFF24);
-        m_DashboardConfig.Colors.Needle = colorsNode["Needle"].as<uint32_t>(0xFF3426FF);
+        m_DashboardConfig.Colors.Dial = colorsNode["Dial"].as<uint32_t>(m_DashboardConfig.Colors.Dial);
+        m_DashboardConfig.Colors.Text = colorsNode["Text"].as<uint32_t>(m_DashboardConfig.Colors.Text);
+        m_DashboardConfig.Colors.Needle = colorsNode["Needle"].as<uint32_t>(m_DashboardConfig.Colors.Needle);
 
         m_Logger.Info("Loaded %s.", k_Name);
     }
