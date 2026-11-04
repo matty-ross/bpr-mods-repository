@@ -6,7 +6,6 @@
 #include <core/Pointer.hpp>
 #include <core/Path.hpp>
 #include <core/Logger.hpp>
-#include <bpr/Types.hpp>
 
 #include "DashboardConfigFile.hpp"
 #include "DashboardTexture.hpp"
@@ -31,7 +30,7 @@ private:
     void RenderText(const ImVec2& position, const char* text, float size) const;
     void RenderNeedle(const ImVec2& position, float value, float minValue, float maxValue) const;
 
-    void AddDistanceDriven(Core::Pointer progressionManager, float distance, BPR::VehicleType vehicleType);
+    void AddDistanceDriven(Core::Pointer progressionManager, float distance);
 
 private:
     static void Hook_AddDistanceDriven();

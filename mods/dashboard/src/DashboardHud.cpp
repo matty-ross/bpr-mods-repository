@@ -14,7 +14,6 @@
 #include <core/Logger.hpp>
 #include <core/File.hpp>
 #include <core/Patch.hpp>
-#include <bpr/Types.hpp>
 
 #include "Dashboard.hpp"
 #include "DashboardConfigFile.hpp"
@@ -136,7 +135,7 @@ void DashboardHud::RenderOverlay()
 
     // Trip meter
     {
-        float tripMeter = config.MetricUnits ? (m_TripMeter / 1000.0f) : (m_TripMeter / 1609.0f);
+        float tripMeter = config.MetricUnits ? (m_TripMeter / 1000.0f) : (m_TripMeter / 1609.34f);
 
         char tripMeterText[16] = {};
         sprintf_s(tripMeterText, "%.1f", tripMeter);
@@ -146,7 +145,7 @@ void DashboardHud::RenderOverlay()
 
     // Odometer
     {
-        int32_t odometer = static_cast<int32_t>(config.MetricUnits ? (m_Odometer / 1000.0f) : (m_Odometer / 1609.0f));
+        int32_t odometer = static_cast<int32_t>(config.MetricUnits ? (m_Odometer / 1000.0f) : (m_Odometer / 1609.34f));
 
         char odometerText[16] = {};
         sprintf_s(odometerText, "%06d", odometer);
@@ -273,8 +272,7 @@ void DashboardHud::RenderNeedle(const ImVec2& position, float value, float minVa
 
 void DashboardHud::AddDistanceDriven(
     Core::Pointer progressionManager, // BrnProgression::ProgressionManager*
-    float distance, // In meters.
-    BPR::VehicleType vehicleType
+    float distance // In meters.
 )
 {
     static constexpr ptrdiff_t offsets[] =
@@ -285,13 +283,12 @@ void DashboardHud::AddDistanceDriven(
         0x29320, // Distance driven online on BSI.
     };
 
-    // TODO: Check the calculation, there may be a bug.
     float odometer = 0.0f;
     for (ptrdiff_t offset : offsets)
     {
         for (int i = 0; i < 3; ++i)
         {
-            odometer += progressionManager.at(offset).as<float[3]>()[i];
+            odometer += progressionManager.at(offset + i * 0x4).as<float>();
         }
     }
 
@@ -319,8 +316,7 @@ __declspec(naked) void DashboardHud::Hook_AddDistanceDriven()
         sub esp, 4
         movss [esp], xmm1
 
-        push esi
-        push dword ptr [esp + 0x4]
+        push dword ptr [esp]
         push edi
         mov ecx, offset Dashboard::s_Instance.m_DashboardHud
         call DashboardHud::AddDistanceDriven
