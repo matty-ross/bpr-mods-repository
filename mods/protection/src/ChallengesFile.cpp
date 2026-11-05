@@ -71,12 +71,10 @@ void ChallengesFile::Load()
             uint64_t replacementChallengeID = challengeNode["ReplacementID"].as<uint64_t>(0);
             const VanillaChallenge* replacementChallenge = FindVanillaChallengeByID(replacementChallengeID);
 
-            Challenge challenge =
-            {
-                .ID = challengeNode["ID"].as<uint64_t>(0),
-                .Title = challengeNode["Title"].as<std::string>(""),
-                .Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge,
-            };
+            Challenge challenge = {};
+            challenge.ID = challengeNode["ID"].as<uint64_t>(challenge.ID);
+            challenge.Title = challengeNode["Title"].as<std::string>(challenge.Title);
+            challenge.Replacement = replacementChallenge != nullptr ? replacementChallenge : m_FallbackChallenge;
             m_Challenges.push_back(challenge);
         }
 

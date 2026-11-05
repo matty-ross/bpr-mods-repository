@@ -18,11 +18,12 @@ public:
     void Load();
 
     void RenderMenu();
+
     void AddNonVanillaChallengesToChallengesFile();
 
 private:
-    uint64_t HandleChallengeID(uint64_t challengeID) const;
-
+    Core::Pointer FindChallengeEntryByID(uint64_t challengeID) const;
+    uint64_t HandleChallengeID(uint64_t challengeID, bool onlyVanilla) const;
     void CheckFreeburnChallengeMessageBeforePacking(Core::Pointer freeburnChallengeMessage);
     void CheckFreeburnChallengeMessageAfterUnpacking(Core::Pointer freeburnChallengeMessage);
 

@@ -31,13 +31,13 @@ private:
     static constexpr char k_Name[] = "Protection";
     static constexpr char k_Version[] = "2.0.0";
     static constexpr char k_Author[] = "PISros0724 (Matty)";
-    static constexpr char k_ConfigDirectoryPath[] = "protection\\";
+    static constexpr char k_DirectoryPath[] = "protection\\";
 
     static Protection s_Instance;
 
 private:
     Core::Logger m_Logger;
-    
+
     Core::Path m_ConfigDirectoryPath;
 
     VehiclesFile m_VehiclesFile;

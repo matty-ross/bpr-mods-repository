@@ -1,3 +1,4 @@
+#include <cstdint>
 #include <exception>
 #include <Windows.h>
 
@@ -15,7 +16,7 @@ Protection Protection::s_Instance;
 Protection::Protection()
     :
     m_Logger(k_Name),
-    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_ConfigDirectoryPath)),
+    m_ConfigDirectoryPath(ModManager::Get().GetConfigDirectoryPath().Append(k_DirectoryPath)),
     m_VehiclesFile(m_ConfigDirectoryPath, m_Logger),
     m_ChallengesFile(m_ConfigDirectoryPath, m_Logger),
     m_VehicleProtection(m_VehiclesFile, m_Logger),
@@ -45,7 +46,6 @@ void Protection::Load()
 
         m_VehiclesFile.Load();
         m_ChallengesFile.Load();
-
         m_VehicleProtection.Load();
         m_ChallengeProtection.Load();
 

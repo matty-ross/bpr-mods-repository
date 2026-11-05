@@ -255,12 +255,50 @@ void VehicleProtection::AddNonVanillaVehiclesToVehiclesFile()
     }
 }
 
-uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID) const
+Core::Pointer VehicleProtection::FindVehicleEntryByID(uint64_t vehicleID) const
 {
-    bool isVanilla = FindVanillaVehicleByID(vehicleID) != nullptr;
-    if (isVanilla)
+    Core::Pointer vehicleListResource = Core::Pointer(0x013FC8E0).deref().at(0x68C350).as<void*>(); // BrnResource::VehicleListResource*
+
+    uint32_t vehiclesCount = vehicleListResource.at(0x0).as<uint32_t>();
+    for (uint32_t i = 0; i < vehiclesCount; ++i)
     {
-        return vehicleID;
+        Core::Pointer vehicleListEntry = vehicleListResource.at(0x4).deref().at(i * 0x108); // BrnResource::VehicleListEntry*
+
+        if (vehicleListEntry.at(0x0).as<uint64_t>() == vehicleID)
+        {
+            return vehicleListEntry;
+        }
+    }
+
+    return nullptr;
+}
+
+uint64_t VehicleProtection::HandleVehicleID(uint64_t vehicleID, bool onlyVanilla) const
+{
+    if (onlyVanilla)
+    {
+        bool isVanilla = FindVanillaVehicleByID(vehicleID) != nullptr;
+        if (isVanilla)
+        {
+            return vehicleID;
+        }
+    }
+    else
+    {
+        static constexpr uint64_t disallowedVehicleIDs[] =
+        {
+            0xA5939AE858360000, // P_EU_AstonMartin_01
+        };
+
+        auto it = std::find(std::begin(disallowedVehicleIDs), std::end(disallowedVehicleIDs), vehicleID);
+        if (it == std::end(disallowedVehicleIDs))
+        {
+            bool isInVehicleList = FindVehicleEntryByID(vehicleID).GetPointer() != nullptr;
+            if (isInVehicleList)
+            {
+                return vehicleID;
+            }
+        }
     }
 
     VehiclesFile::Vehicle* vehicle = m_VehiclesFile.FindVehicleByID(vehicleID);
@@ -283,7 +321,7 @@ void VehicleProtection::CheckPlayerParamsBeforeSerializing(
 
     uint64_t vehicleID = 0;
     BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetPointer(), &vehicleID);
-    vehicleID = HandleVehicleID(vehicleID);
+    vehicleID = HandleVehicleID(vehicleID, true);
     BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetPointer(), vehicleID);
 }
 
@@ -307,7 +345,7 @@ void VehicleProtection::CheckPlayerParamsAfterDeserializing(
     else
     {
         BPR::PlayerParamsBase_GetFreeburnVehicleID(playerParams.GetPointer(), &vehicleID);
-        vehicleID = HandleVehicleID(vehicleID);
+        vehicleID = HandleVehicleID(vehicleID, false);
     }
 
     BPR::PlayerParamsBase_SetFreeburnVehicleID(playerParams.GetPointer(), vehicleID);
@@ -323,7 +361,7 @@ void VehicleProtection::CheckVehicleSelectMessageBeforePacking(
     }
 
     uint64_t vehicleID = vehicleSelectMessage.at(0x38).as<uint64_t>();
-    vehicleID = HandleVehicleID(vehicleID);
+    vehicleID = HandleVehicleID(vehicleID, true);
     vehicleSelectMessage.at(0x38).as<uint64_t>() = vehicleID;
 }
 
@@ -337,7 +375,7 @@ void VehicleProtection::CheckVehicleSelectMessageAfterUnpacking(
     }
 
     uint64_t vehicleID = vehicleSelectMessage.at(0x38).as<uint64_t>();
-    vehicleID = HandleVehicleID(vehicleID);
+    vehicleID = HandleVehicleID(vehicleID, false);
     vehicleSelectMessage.at(0x38).as<uint64_t>() = vehicleID;
 }
 

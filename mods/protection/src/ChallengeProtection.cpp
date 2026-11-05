@@ -204,12 +204,41 @@ void ChallengeProtection::AddNonVanillaChallengesToChallengesFile()
     }
 }
 
-uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID) const
+Core::Pointer ChallengeProtection::FindChallengeEntryByID(uint64_t challengeID) const
 {
-    bool isVanilla = FindVanillaChallengeByID(challengeID) != nullptr;
-    if (isVanilla)
+    Core::Pointer challengeListResource = Core::Pointer(0x013FC8E0).deref().at(0x690B70).as<void*>(); // BrnResource::ChallengeListResource*
+
+    uint32_t challengesCount = challengeListResource.at(0x0).as<uint32_t>();
+    for (uint32_t i = 0; i < challengesCount; ++i)
     {
-        return challengeID;
+        Core::Pointer challengeListEntry = challengeListResource.at(0x4).deref().at(i * 0xD8); // BrnResource::ChallengeListEntry*
+
+        if (challengeListEntry.at(0xC0).as<uint64_t>() == challengeID)
+        {
+            return challengeListEntry;
+        }
+    }
+
+    return nullptr;
+}
+
+uint64_t ChallengeProtection::HandleChallengeID(uint64_t challengeID, bool onlyVanilla) const
+{
+    if (onlyVanilla)
+    {
+        bool isVanilla = FindVanillaChallengeByID(challengeID) != nullptr;
+        if (isVanilla)
+        {
+            return challengeID;
+        }
+    }
+    else
+    {
+        bool isInChallengeList = FindChallengeEntryByID(challengeID).GetPointer() != nullptr;
+        if (isInChallengeList)
+        {
+            return challengeID;
+        }
     }
 
     ChallengesFile::Challenge* challenge = m_ChallengesFile.FindChallengeByID(challengeID);
@@ -231,7 +260,7 @@ void ChallengeProtection::CheckFreeburnChallengeMessageBeforePacking(
     }
 
     uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
-    challengeID = HandleChallengeID(challengeID);
+    challengeID = HandleChallengeID(challengeID, true);
     freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
 }
 
@@ -245,7 +274,7 @@ void ChallengeProtection::CheckFreeburnChallengeMessageAfterUnpacking(
     }
 
     uint64_t challengeID = freeburnChallengeMessage.at(0x38).as<uint64_t>();
-    challengeID = HandleChallengeID(challengeID);
+    challengeID = HandleChallengeID(challengeID, false);
     freeburnChallengeMessage.at(0x38).as<uint64_t>() = challengeID;
 }
 

@@ -18,11 +18,12 @@ public:
     void Load();
 
     void RenderMenu();
+
     void AddNonVanillaVehiclesToVehiclesFile();
 
 private:
-    uint64_t HandleVehicleID(uint64_t vehicleID) const;
-
+    Core::Pointer FindVehicleEntryByID(uint64_t vehicleID) const;
+    uint64_t HandleVehicleID(uint64_t vehicleID, bool onlyVanilla) const;
     void CheckPlayerParamsBeforeSerializing(Core::Pointer playerParams);
     void CheckPlayerParamsAfterDeserializing(Core::Pointer playerParams);
     void CheckVehicleSelectMessageBeforePacking(Core::Pointer vehicleSelectMessage);
